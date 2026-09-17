@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Review — Parla</title>
+
+  <style>
+    :root {
+      --bg: #f7f7f4;
+      --surface: #ffffff;
+      --surface-soft: #f1f1ec;
+      --text: #171717;
+      --muted: #777773;
+      --border: #e5e5df;
+
+      --blue: #536dff;
+      --blue-soft: #edf0ff;
+      --coral: #ed927c;
+      --green: #78a58d;
+      --purple: #9b8dd1;
+
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+        "SF Pro Text", Inter, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    /* NAV */
+
+    .nav {
+      width: min(100% - 48px, 1180px);
+      height: 76px;
+      margin: 0 auto;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+    }
+
+    .logo span {
+      color: var(--blue);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .streak {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      padding: 9px 13px;
+
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .streak-mark {
+      color: var(--coral);
+      font-size: 13px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+      background: #deded8;
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* PAGE */
+
+    .page {
+      width: min(100% - 48px, 900px);
+      margin: 0 auto;
+      padding: 52px 0 85px;
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+
+      margin-bottom: 38px;
+
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .back:hover {
+      color: var(--text);
+    }
+
+    /* HEADER */
+
+    .header {
+      max-width: 690px;
+      margin-bottom: 43px;
+    }
+
+    .eyebrow {
+      margin-bottom: 14px;
+
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .header h1 {
+      margin-bottom: 17px;
+
+      font-size: clamp(46px, 7vw, 70px);
+      line-height: .98;
+      letter-spacing: -4px;
+      font-weight: 700;
+    }
+
+    .header p {
+      max-width: 600px;
+
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    /* SUMMARY */
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+
+      margin-bottom: 44px;
+    }
+
+    .summary-card {
+      padding: 23px;
+
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .summary-number {
+      margin-bottom: 7px;
+
+      font-size: 31px;
+      line-height: 1;
+      letter-spacing: -1.5px;
+      font-weight: 700;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* REVIEW */
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+
+      margin-bottom: 17px;
+    }
+
+    .section-title {
+      font-size: 23px;
+      letter-spacing: -.7px;
+      font-weight: 650;
+    }
+
+    .section-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .review-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    /* WORD */
+
+    .word-section {
+      padding: 34px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .word-label {
+      margin-bottom: 15px;
+
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .word {
+      margin-bottom: 8px;
+
+      font-size: 44px;
+      line-height: 1;
+      letter-spacing: -2px;
+      font-weight: 700;
+    }
+
+    .word-type {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ANSWER */
+
+    .answer-section {
+      padding: 27px 34px 30px;
+    }
+
+    .question {
+      margin-bottom: 20px;
+
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .answers {
+      display: grid;
+      gap: 10px;
+    }
+
+    .answer {
+      width: 100%;
+
+      display: flex;
+      align-items: center;
+      gap: 13px;
+
+      padding: 15px 17px;
+
+      text-align: left;
+
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+
+      color: var(--text);
+      font-size: 14px;
+
+      transition:
+        border-color .2s ease,
+        background .2s ease,
+        transform .2s ease;
+    }
+
+    .answer:hover {
+      border-color: #cfcfc8;
+      transform: translateY(-1px);
+    }
+
+    .answer-letter {
+      width: 27px;
+      height: 27px;
+      flex: 0 0 27px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+
+      background: var(--surface-soft);
+      color: var(--muted);
+
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .answer.correct {
+      background: #f0f6f2;
+      border-color: #b8d1c1;
+    }
+
+    .answer.correct .answer-letter {
+      background: var(--green);
+      color: white;
+    }
+
+    .answer.wrong {
+      background: #faf0ed;
+      border-color: #e7c0b7;
+    }
+
+    .answer.wrong .answer-letter {
+      background: var(--coral);
+      color: white;
+    }
+
+    /* EXPLANATION */
+
+    .explanation {
+      display: none;
+
+      margin-top: 19px;
+      padding: 18px;
+
+      background: var(--surface-soft);
+      border-radius: var(--radius-md);
+    }
+
+    .explanation.show {
+      display: block;
+    }
+
+    .explanation-label {
+      margin-bottom: 6px;
+
+      color: var(--green);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+    }
+
+    .explanation p {
+      color: #5d5d58;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    /* PROGRESS */
+
+    .review-progress {
+      margin-top: 13px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 5px;
+
+      margin-top: 9px;
+
+      background: var(--surface-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 20%;
+      height: 100%;
+
+      background: var(--blue);
+      border-radius: inherit;
+
+      transition: width .3s ease;
+    }
+
+    /* WHY */
+
+    .why-section {
+      margin-top: 44px;
+    }
+
+    .why-card {
+      padding: 29px;
+
+      background: var(--blue-soft);
+      border: 1px solid #dce1ff;
+      border-radius: var(--radius-xl);
+    }
+
+    .why-label {
+      margin-bottom: 10px;
+
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .why-card h2 {
+      max-width: 650px;
+
+      margin-bottom: 8px;
+
+      font-size: 23px;
+      letter-spacing: -.7px;
+    }
+
+    .why-card p {
+      max-width: 650px;
+
+      color: #626772;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* COMPLETE */
+
+    .complete {
+      margin-top: 18px;
+
+      background: var(--text);
+      color: white;
+
+      border-radius: var(--radius-xl);
+      padding: 31px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 25px;
+    }
+
+    .complete-label {
+      margin-bottom: 7px;
+
+      color: #aeb7ff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .complete h2 {
+      margin-bottom: 7px;
+
+      font-size: 23px;
+      letter-spacing: -.7px;
+    }
+
+    .complete p {
+      max-width: 520px;
+
+      color: #b8b8b3;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .continue-button {
+      flex-shrink: 0;
+
+      padding: 13px 19px;
+
+      border: 0;
+      border-radius: 999px;
+
+      background: white;
+      color: var(--text);
+
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .continue-button:hover {
+      transform: translateY(-1px);
+    }
+
+    /* FOOTER */
+
+    footer {
+      width: min(100% - 48px, 900px);
+      margin: 0 auto;
+
+      padding: 20px 0 40px;
+
+      display: flex;
+      justify-content: space-between;
+
+      color: #999992;
+      font-size: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 800px) {
+
+      .nav {
+        width: min(100% - 32px, 600px);
+        height: 68px;
+      }
+
+      .page {
+        width: min(100% - 32px, 600px);
+        padding: 36px 0 60px;
+      }
+
+      .header h1 {
+        font-size: 48px;
+        letter-spacing: -2px;
+      }
+
+      .header p {
+        font-size: 15px;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 38px;
+      }
+
+      .summary-card {
+        padding: 19px;
+      }
+
+      .word-section {
+        padding: 27px 22px;
+      }
+
+      .answer-section {
+        padding: 24px 22px 27px;
+      }
+
+      .word {
+        font-size: 38px;
+      }
+
+      .complete {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 25px;
+      }
+
+      .continue-button {
+        width: 100%;
+      }
+
+      footer {
+        width: min(100% - 32px, 600px);
+        flex-direction: column;
+        gap: 14px;
+      }
+    }
+
+    @media (max-width: 450px) {
+
+      .streak {
+        display: none;
+      }
+
+      .header h1 {
+        font-size: 43px;
+      }
+
+      .section-title {
+        font-size: 21px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+
+  <nav class="nav">
+
+    <a href="dashboard.html" class="logo">
+      parla<span>•</span>
+    </a>
+
+    <div class="nav-right">
+
+      <div class="streak">
+        <span class="streak-mark">●</span>
+        3 day streak
+      </div>
+
+      <div class="avatar">
+        J
+      </div>
+
+    </div>
+
+  </nav>
+
+
+  <!-- MAIN -->
+
+  <main class="page">
+
+    <a href="dashboard.html" class="back">
+      ← Back to your learning
+    </a>
+
+
+    <!-- HEADER -->
+
+    <section class="header">
+
+      <div class="eyebrow">
+        Smart review
+      </div>
+
+      <h1>
+        Let's bring it back.
+      </h1>
+
+      <p>
+        These are things Parla thinks are worth seeing again.
+        Not because you forgot them completely — because they're
+        close to becoming natural.
+      </p>
+
+    </section>
+
+
+    <!-- SUMMARY -->
+
+    <section class="summary">
+
+      <div class="summary-card">
+
+        <div class="summary-number">
+          6
+        </div>
+
+        <div class="summary-label">
+          Things to review
+        </div>
+
+      </div>
+
+      <div class="summary-card">
+
+        <div class="summary-number">
+          4
+        </div>
+
+        <div class="summary-label">
+          Almost mastered
+        </div>
+
+      </div>
+
+      <div class="summary-card">
+
+        <div class="summary-number">
+          2
+        </div>
+
+        <div class="summary-label">
+          Need more practice
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- REVIEW -->
+
+    <section>
+
+      <div class="section-header">
+
+        <h2 class="section-title">
+          Today's review
+        </h2>
+
+        <div class="section-note" id="countLabel">
+          1 of 6
+        </div>
+
+      </div>
+
+
+      <div class="review-card">
+
+
+        <!-- WORD -->
+
+        <div class="word-section">
+
+          <div class="word-label">
+            Expression
+          </div>
+
+          <div class="word">
+            quedar
+          </div>
+
+          <div class="word-type">
+            verb · to meet / arrange
+          </div>
+
+        </div>
+
+
+        <!-- ANSWER -->
+
+        <div class="answer-section">
+
+          <div class="question">
+            Your friend says:
+            <strong>¿Qué hacemos el sábado?</strong>
+            <br />
+            You want to suggest meeting at 7. Which sounds natural?
+          </div>
+
+
+          <div class="answers">
+
+            <button class="answer" data-correct="false">
+
+              <span class="answer-letter">
+                A
+              </span>
+
+              <span>
+                Nosotros encontramos a las siete.
+              </span>
+
+            </button>
+
+
+            <button class="answer" data-correct="true">
+
+              <span class="answer-letter">
+                B
+              </span>
+
+              <span>
+                Podemos quedar a las siete.
+              </span>
+
+            </button>
+
+
+            <button class="answer" data-correct="false">
+
+              <span class="answer-letter">
+                C
+              </span>
+
+              <span>
+                Podemos conocer a las siete.
+              </span>
+
+            </button>
+
+          </div>
+
+
+          <div class="explanation" id="explanation">
+
+            <div class="explanation-label">
+              Why
+            </div>
+
+            <p>
+              <strong>Quedar</strong> is commonly used when talking
+              about arranging to meet someone. It's one of those
+              everyday words that becomes much more useful once you
+              start hearing it in real conversations.
+            </p>
+
+          </div>
+
+
+          <div class="review-progress">
+
+            <span>
+              Review progress
+            </span>
+
+            <span id="progressText">
+              17%
+            </span>
+
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- WHY -->
+
+    <section class="why-section">
+
+      <div class="why-card">
+
+        <div class="why-label">
+          Why you're seeing this
+        </div>
+
+        <h2>
+          You understood this word before — but didn't use it naturally.
+        </h2>
+
+        <p>
+          Parla noticed that you recognized <strong>quedar</strong>
+          during practice but avoided it when speaking. So we're
+          bringing it back in a different context instead of simply
+          showing you the same flashcard again.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <!-- COMPLETE -->
+
+    <section class="complete">
+
+      <div>
+
+        <div class="complete-label">
+          After review
+        </div>
+
+        <h2>
+          Back to your learning.
+        </h2>
+
+        <p>
+          Parla will remember how you did here and use it when
+          deciding what you should practice next.
+        </p>
+
+      </div>
+
+      <button class="continue-button" id="continueButton">
+        Continue →
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <div>
+      © 2026 Parla
+    </div>
+
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+
+  </footer>
+
+
+  <script>
+
+    const answers =
+      document.querySelectorAll(".answer");
+
+    const explanation =
+      document.getElementById("explanation");
+
+    const progressFill =
+      document.getElementById("progressFill");
+
+    const progressText =
+      document.getElementById("progressText");
+
+    const countLabel =
+      document.getElementById("countLabel");
+
+    let completed = false;
+
+
+    answers.forEach(answer => {
+
+      answer.addEventListener("click", () => {
+
+        if (completed) return;
+
+        const correct =
+          answer.dataset.correct === "true";
+
+
+        answers.forEach(item => {
+          item.classList.remove("correct", "wrong");
+        });
+
+
+        if (correct) {
+
+          answer.classList.add("correct");
+
+          explanation.classList.add("show");
+
+          completed = true;
+
+          progressFill.style.width = "33%";
+          progressText.textContent = "33%";
+
+          countLabel.textContent = "1 of 6";
+
+        } else {
+
+          answer.classList.add("wrong");
+
+          explanation.classList.remove("show");
+
+        }
+
+      });
+
+    });
+
+
+    document
+      .getElementById("continueButton")
+      .addEventListener("click", () => {
+
+        window.location.href = "dashboard.html";
+
+      });
+
+  </script>
+
+</body>
+</html>
