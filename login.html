@@ -7,6 +7,8 @@
   <title>Log in | Parla</title>
   <meta name="description" content="Log in to your Parla language learning account.">
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     :root {
       --bg: #f7f7f4;
@@ -36,8 +38,6 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* NAV */
 
     nav {
       height: 82px;
@@ -74,8 +74,6 @@
     .nav-right a:hover {
       text-decoration: underline;
     }
-
-    /* MAIN */
 
     main {
       flex: 1;
@@ -132,8 +130,6 @@
       line-height: 1.6;
     }
 
-    /* CARD */
-
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -143,8 +139,6 @@
         0 18px 50px rgba(23, 23, 23, .05),
         0 3px 12px rgba(23, 23, 23, .03);
     }
-
-    /* SOCIAL */
 
     .google-btn {
       width: 100%;
@@ -174,8 +168,6 @@
       font-weight: 700;
     }
 
-    /* DIVIDER */
-
     .divider {
       display: flex;
       align-items: center;
@@ -192,8 +184,6 @@
       background: var(--border);
       flex: 1;
     }
-
-    /* FORM */
 
     .field {
       margin-bottom: 17px;
@@ -268,6 +258,36 @@
       box-shadow: 0 8px 20px rgba(23,23,23,.12);
     }
 
+    .submit-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .message {
+      display: none;
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .message.error {
+      display: block;
+      background: #fff1ef;
+      color: #a4493b;
+      border: 1px solid #f1d0ca;
+    }
+
+    .message.success {
+      display: block;
+      background: #eef8f1;
+      color: #39704d;
+      border: 1px solid #cfe6d6;
+    }
+
     .terms {
       text-align: center;
       margin-top: 21px;
@@ -281,8 +301,6 @@
       text-decoration: underline;
     }
 
-    /* FOOTER */
-
     footer {
       padding: 24px 5vw;
       display: flex;
@@ -291,10 +309,7 @@
       font-size: 11px;
     }
 
-    /* MOBILE */
-
     @media (max-width: 800px) {
-
       nav {
         height: 72px;
         padding: 0 22px;
@@ -358,7 +373,6 @@
     <div class="login-wrap">
 
       <div class="intro">
-
         <div class="eyebrow">
           <span class="eyebrow-dot"></span>
           Welcome back
@@ -369,12 +383,11 @@
         <p>
           Pick up where you left off and keep building a language you can actually use.
         </p>
-
       </div>
 
       <div class="card">
 
-        <button class="google-btn" type="button">
+        <button class="google-btn" type="button" id="googleBtn">
           <span class="google-icon">G</span>
           Continue with Google
         </button>
@@ -383,7 +396,9 @@
           or continue with email
         </div>
 
-        <form>
+        <div id="message" class="message"></div>
+
+        <form id="loginForm">
 
           <div class="field">
             <label for="email">Email</label>
@@ -401,7 +416,9 @@
 
             <div class="password-row">
               <label for="password">Password</label>
-              <a href="#" class="forgot">Forgot password?</a>
+              <a href="#" class="forgot" id="forgotPassword">
+                Forgot password?
+              </a>
             </div>
 
             <input
@@ -415,7 +432,7 @@
 
           </div>
 
-          <button class="submit-btn" type="submit">
+          <button class="submit-btn" id="loginBtn" type="submit">
             Log in
           </button>
 
@@ -435,6 +452,114 @@
   <footer>
     © 2026 Parla
   </footer>
+
+  <script src="supabase-config.js"></script>
+
+  <script>
+    const { createClient } = supabase;
+
+    const supabaseClient = createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+
+    const loginForm = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+    const message = document.getElementById("message");
+    const forgotPassword = document.getElementById("forgotPassword");
+    const googleBtn = document.getElementById("googleBtn");
+
+    function showMessage(text, type = "error") {
+      message.textContent = text;
+      message.className = "message " + type;
+    }
+
+    function clearMessage() {
+      message.textContent = "";
+      message.className = "message";
+    }
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      clearMessage();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        showMessage(error.message);
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Log in";
+        return;
+      }
+
+      window.location.href = "dashboard.html";
+    });
+
+    forgotPassword.addEventListener("click", async (event) => {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+
+      if (!email) {
+        showMessage("Enter your email address first.");
+        return;
+      }
+
+      clearMessage();
+
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo: window.location.origin + "/reset-password.html"
+        }
+      );
+
+      if (error) {
+        showMessage(error.message);
+        return;
+      }
+
+      showMessage(
+        "Check your email for a password reset link.",
+        "success"
+      );
+    });
+
+    googleBtn.addEventListener("click", async () => {
+      clearMessage();
+
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/dashboard.html"
+        }
+      });
+
+      if (error) {
+        showMessage(error.message);
+      }
+    });
+
+    async function checkExistingSession() {
+      const { data } = await supabaseClient.auth.getSession();
+
+      if (data.session) {
+        window.location.href = "dashboard.html";
+      }
+    }
+
+    checkExistingSession();
+  </script>
 
 </body>
 </html>
