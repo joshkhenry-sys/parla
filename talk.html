@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Just Talk — Parla</title>
+
+  <style>
+    :root {
+      --bg: #f7f7f4;
+      --surface: #ffffff;
+      --surface-soft: #f1f1ec;
+      --text: #171717;
+      --muted: #777773;
+      --border: #e5e5df;
+
+      --blue: #536dff;
+      --blue-soft: #edf0ff;
+      --coral: #ed927c;
+      --green: #78a58d;
+
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+        "SF Pro Text", Inter, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* NAV */
+
+    .nav {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: min(100% - 48px, 1180px);
+      margin: 0 auto;
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .language-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .language-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #deded8;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* MAIN */
+
+    .page {
+      width: min(100% - 48px, 940px);
+      margin: 0 auto;
+      padding: 48px 0 80px;
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 38px;
+      transition: color 0.2s ease;
+    }
+
+    .back:hover {
+      color: var(--text);
+    }
+
+    .back-arrow {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .intro {
+      text-align: center;
+      max-width: 650px;
+      margin: 0 auto 42px;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .intro h1 {
+      font-size: clamp(44px, 7vw, 72px);
+      line-height: 0.98;
+      letter-spacing: -4px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .intro p {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* TOPIC */
+
+    .topic-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .topic-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .topic-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--blue-soft);
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      font-size: 19px;
+    }
+
+    .topic-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.3px;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .topic-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .change-topic {
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* CONVERSATION */
+
+    .conversation {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .conversation-top {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .conversation-title {
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .conversation-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+
+    .messages {
+      padding: 34px 34px 22px;
+      min-height: 430px;
+    }
+
+    .message {
+      display: flex;
+      gap: 14px;
+      max-width: 680px;
+      margin-bottom: 30px;
+    }
+
+    .message.user {
+      margin-left: auto;
+      justify-content: flex-end;
+    }
+
+    .message-avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .parla-avatar {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .user-avatar {
+      background: #deded8;
+      color: #55554f;
+      order: 2;
+    }
+
+    .message-content {
+      max-width: 600px;
+    }
+
+    .message-name {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 7px;
+      font-weight: 600;
+    }
+
+    .message-text {
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .message.user .message-text {
+      background: var(--surface-soft);
+      padding: 13px 17px;
+      border-radius: 18px 18px 4px 18px;
+    }
+
+    .message.parla .message-text {
+      padding-top: 1px;
+    }
+
+    /* CORRECTION */
+
+    .correction {
+      margin-top: 12px;
+      background: #fafaf7;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 15px;
+      display: none;
+    }
+
+    .correction.show {
+      display: block;
+    }
+
+    .correction-label {
+      color: var(--green);
+      text-transform: uppercase;
+      font-size: 9px;
+      letter-spacing: 1.1px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .correction p {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #55554f;
+    }
+
+    /* COMPOSER */
+
+    .composer {
+      border-top: 1px solid var(--border);
+      padding: 20px;
+      background: #fcfcfa;
+    }
+
+    .input-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 10px 10px 10px 17px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .input-wrap:focus-within {
+      border-color: #cfd4ff;
+      box-shadow: 0 0 0 4px rgba(83, 109, 255, 0.07);
+    }
+
+    textarea {
+      resize: none;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      width: 100%;
+      min-height: 42px;
+      max-height: 120px;
+      font-size: 15px;
+      line-height: 1.5;
+      padding: 10px 0;
+      color: var(--text);
+    }
+
+    textarea::placeholder {
+      color: #a3a39d;
+    }
+
+    .composer-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .icon-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      transition: all 0.2s ease;
+    }
+
+    .icon-button:hover {
+      color: var(--text);
+      border-color: #cfcfc8;
+    }
+
+    .mic-button.active {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+    }
+
+    .send-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 0;
+      background: var(--text);
+      color: white;
+      display: grid;
+      place-items: center;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .send-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .send-button:disabled {
+      opacity: 0.35;
+      cursor: default;
+      transform: none;
+    }
+
+    .composer-note {
+      text-align: center;
+      font-size: 11px;
+      color: #999992;
+      margin-top: 10px;
+    }
+
+    /* AFTER CONVERSATION */
+
+    .after-card {
+      margin-top: 22px;
+      background: var(--text);
+      color: white;
+      border-radius: var(--radius-xl);
+      padding: 28px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 25px;
+    }
+
+    .after-copy {
+      max-width: 570px;
+    }
+
+    .after-eyebrow {
+      color: #aeb7ff;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .after-card h2 {
+      font-size: 21px;
+      letter-spacing: -0.5px;
+      margin-bottom: 7px;
+    }
+
+    .after-card p {
+      color: #b9b9b4;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .review-button {
+      flex-shrink: 0;
+      border: 0;
+      background: white;
+      color: var(--text);
+      padding: 12px 17px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 650;
+      transition: transform 0.2s ease;
+    }
+
+    .review-button:hover {
+      transform: translateY(-1px);
+    }
+
+    /* FOOTER */
+
+    footer {
+      width: min(100% - 48px, 940px);
+      margin: 0 auto;
+      padding: 20px 0 40px;
+      display: flex;
+      justify-content: space-between;
+      color: #999992;
+      font-size: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 800px) {
+      .nav {
+        width: min(100% - 32px, 600px);
+        height: 68px;
+      }
+
+      .nav-right {
+        gap: 8px;
+      }
+
+      .language-pill {
+        padding: 8px 11px;
+      }
+
+      .avatar {
+        width: 34px;
+        height: 34px;
+      }
+
+      .page {
+        width: min(100% - 32px, 600px);
+        padding: 32px 0 55px;
+      }
+
+      .back {
+        margin-bottom: 30px;
+      }
+
+      .intro {
+        margin-bottom: 30px;
+      }
+
+      .intro h1 {
+        font-size: 48px;
+        letter-spacing: -2px;
+      }
+
+      .intro p {
+        font-size: 15px;
+      }
+
+      .topic-card {
+        padding: 18px;
+        border-radius: 22px;
+      }
+
+      .conversation {
+        border-radius: 24px;
+      }
+
+      .conversation-top {
+        padding: 18px 20px;
+      }
+
+      .messages {
+        padding: 27px 20px 16px;
+        min-height: 390px;
+      }
+
+      .message {
+        gap: 10px;
+        margin-bottom: 25px;
+      }
+
+      .message-avatar {
+        width: 30px;
+        height: 30px;
+        flex-basis: 30px;
+        font-size: 9px;
+      }
+
+      .message-text {
+        font-size: 15px;
+      }
+
+      .message.user .message-text {
+        padding: 11px 14px;
+      }
+
+      .composer {
+        padding: 13px;
+      }
+
+      .input-wrap {
+        padding-left: 13px;
+        gap: 7px;
+      }
+
+      .icon-button,
+      .send-button {
+        width: 38px;
+        height: 38px;
+      }
+
+      .after-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 24px;
+        border-radius: 24px;
+      }
+
+      .review-button {
+        width: 100%;
+      }
+
+      footer {
+        width: min(100% - 32px, 600px);
+        flex-direction: column;
+        gap: 14px;
+      }
+    }
+
+    @media (max-width: 450px) {
+      .language-pill span {
+        display: none;
+      }
+
+      .topic-name {
+        font-size: 14px;
+      }
+
+      .change-topic {
+        font-size: 12px;
+      }
+
+      .intro h1 {
+        font-size: 43px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+
+  <nav class="nav">
+    <a href="dashboard.html" class="logo">parla<span>•</span></a>
+
+    <div class="nav-right">
+      <div class="language-pill">
+        <div class="language-dot"></div>
+        <span>Spanish</span>
+      </div>
+
+      <div class="avatar">J</div>
+    </div>
+  </nav>
+
+
+  <!-- PAGE -->
+
+  <main class="page">
+
+    <a href="dashboard.html" class="back">
+      <span class="back-arrow">←</span>
+      Back to your learning
+    </a>
+
+
+    <!-- INTRO -->
+
+    <section class="intro">
+
+      <div class="eyebrow">
+        Just Talk
+      </div>
+
+      <h1>
+        Say what you want.
+      </h1>
+
+      <p>
+        No script. No lesson plan. Just a real conversation.
+        Parla will pay attention to what you say and quietly learn
+        where you can improve.
+      </p>
+
+    </section>
+
+
+    <!-- TOPIC -->
+
+    <section class="topic-card">
+
+      <div class="topic-left">
+
+        <div class="topic-icon">
+          ◌
+        </div>
+
+        <div>
+          <div class="topic-label">
+            Starting point
+          </div>
+
+          <div class="topic-name">
+            Your weekend
+          </div>
+        </div>
+
+      </div>
+
+      <button class="change-topic" id="changeTopic">
+        Change topic
+      </button>
+
+    </section>
+
+
+    <!-- CONVERSATION -->
+
+    <section class="conversation">
+
+      <div class="conversation-top">
+
+        <div class="conversation-title">
+          Spanish conversation
+        </div>
+
+        <div class="conversation-status">
+          <span class="status-dot"></span>
+          Listening
+        </div>
+
+      </div>
+
+
+      <div class="messages" id="messages">
+
+        <!-- PARLA -->
+
+        <div class="message parla">
+
+          <div class="message-avatar parla-avatar">
+            P
+          </div>
+
+          <div class="message-content">
+
+            <div class="message-name">
+              Parla
+            </div>
+
+            <div class="message-text">
+              Cuéntame, ¿qué hiciste este fin de semana?
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- USER -->
+
+        <div class="message user">
+
+          <div class="message-avatar user-avatar">
+            J
+          </div>
+
+          <div class="message-content">
+
+            <div class="message-name">
+              You
+            </div>
+
+            <div class="message-text">
+              Fui a caminar con unos amigos y después comimos en un restaurante nuevo.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PARLA -->
+
+        <div class="message parla">
+
+          <div class="message-avatar parla-avatar">
+            P
+          </div>
+
+          <div class="message-content">
+
+            <div class="message-name">
+              Parla
+            </div>
+
+            <div class="message-text">
+              Suena bien. ¿Qué tipo de comida probaron?
+            </div>
+
+            <div class="correction" id="correction">
+
+              <div class="correction-label">
+                Something to notice
+              </div>
+
+              <p>
+                Your Spanish was clear. Later, we might practice
+                a more natural way to talk about what happened
+                after your hike.
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- COMPOSER -->
+
+      <div class="composer">
+
+        <div class="input-wrap">
+
+          <textarea
+            id="messageInput"
+            rows="1"
+            placeholder="Write something in Spanish..."
+          ></textarea>
+
+          <div class="composer-actions">
+
+            <button
+              class="icon-button mic-button"
+              id="micButton"
+              aria-label="Use microphone"
+            >
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="9" y="3" width="6" height="11" rx="3"></rect>
+                <path d="M5 11a7 7 0 0 0 14 0"></path>
+                <path d="M12 18v3"></path>
+                <path d="M8 21h8"></path>
+              </svg>
+            </button>
+
+            <button
+              class="send-button"
+              id="sendButton"
+              disabled
+              aria-label="Send"
+            >
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M22 2 11 13"></path>
+                <path d="m22 2-7 20-4-9-9-4Z"></path>
+              </svg>
+            </button>
+
+          </div>
+
+        </div>
+
+        <div class="composer-note">
+          Parla won't interrupt you to correct every mistake.
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ADAPTIVE FOLLOW-UP -->
+
+    <section class="after-card">
+
+      <div class="after-copy">
+
+        <div class="after-eyebrow">
+          After you talk
+        </div>
+
+        <h2>
+          Your conversation becomes part of your learning.
+        </h2>
+
+        <p>
+          Parla can identify patterns in what you said and turn
+          them into practice later — without making you stop
+          the conversation every few seconds.
+        </p>
+
+      </div>
+
+      <button class="review-button" id="reviewButton">
+        See what Parla noticed
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <div>
+      © 2026 Parla
+    </div>
+
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+
+  </footer>
+
+
+  <script>
+
+    const input = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const micButton = document.getElementById("micButton");
+    const messages = document.getElementById("messages");
+    const correction = document.getElementById("correction");
+    const changeTopic = document.getElementById("changeTopic");
+    const reviewButton = document.getElementById("reviewButton");
+
+
+    /* ENABLE SEND BUTTON */
+
+    input.addEventListener("input", () => {
+
+      sendButton.disabled = input.value.trim() === "";
+
+      input.style.height = "auto";
+      input.style.height =
+        Math.min(input.scrollHeight, 120) + "px";
+
+    });
+
+
+    /* SEND MESSAGE */
+
+    sendButton.addEventListener("click", sendMessage);
+
+
+    input.addEventListener("keydown", (event) => {
+
+      if (event.key === "Enter" && !event.shiftKey) {
+
+        event.preventDefault();
+
+        if (!sendButton.disabled) {
+          sendMessage();
+        }
+
+      }
+
+    });
+
+
+    function sendMessage() {
+
+      const text = input.value.trim();
+
+      if (!text) return;
+
+
+      const userMessage = document.createElement("div");
+
+      userMessage.className = "message user";
+
+      userMessage.innerHTML = `
+        <div class="message-avatar user-avatar">
+          J
+        </div>
+
+        <div class="message-content">
+
+          <div class="message-name">
+            You
+          </div>
+
+          <div class="message-text">
+            ${escapeHtml(text)}
+          </div>
+
+        </div>
+      `;
+
+      messages.appendChild(userMessage);
+
+
+      input.value = "";
+      input.style.height = "auto";
+      sendButton.disabled = true;
+
+
+      setTimeout(() => {
+
+        const parlaMessage = document.createElement("div");
+
+        parlaMessage.className = "message parla";
+
+        parlaMessage.innerHTML = `
+          <div class="message-avatar parla-avatar">
+            P
+          </div>
+
+          <div class="message-content">
+
+            <div class="message-name">
+              Parla
+            </div>
+
+            <div class="message-text">
+              ¡Qué bien! Cuéntame un poco más.
+            </div>
+
+          </div>
+        `;
+
+        messages.appendChild(parlaMessage);
+
+        messages.scrollTop = messages.scrollHeight;
+
+      }, 700);
+
+
+      messages.scrollTop = messages.scrollHeight;
+
+    }
+
+
+    /* MICROPHONE */
+
+    let listening = false;
+
+    micButton.addEventListener("click", () => {
+
+      listening = !listening;
+
+      micButton.classList.toggle("active", listening);
+
+      if (listening) {
+        input.placeholder = "Listening...";
+      } else {
+        input.placeholder = "Write something in Spanish...";
+      }
+
+    });
+
+
+    /* CHANGE TOPIC */
+
+    changeTopic.addEventListener("click", () => {
+
+      const topics = [
+        "Your weekend",
+        "Food you actually like",
+        "Plans for next month",
+        "A place you'd like to visit",
+        "Something you've been watching",
+        "Your morning routine"
+      ];
+
+      const current =
+        document.querySelector(".topic-name").textContent.trim();
+
+      const available =
+        topics.filter(topic => topic !== current);
+
+      const next =
+        available[Math.floor(Math.random() * available.length)];
+
+      document.querySelector(".topic-name").textContent = next;
+
+    });
+
+
+    /* ADAPTIVE REVIEW */
+
+    reviewButton.addEventListener("click", () => {
+
+      correction.classList.add("show");
+
+      reviewButton.textContent = "Parla noticed something";
+
+      correction.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+    });
+
+
+    /* SECURITY */
+
+    function escapeHtml(value) {
+
+      return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+  </script>
+
+</body>
+</html>
