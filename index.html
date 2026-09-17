@@ -8,7 +8,7 @@
 
   <meta
     name="description"
-    content="Parla is a language learning experience that adapts to you."
+    content="Parla is an adaptive language learning experience built around real conversation, useful language, and your individual goals."
   >
 
   <style>
@@ -25,6 +25,8 @@
       --coral: #ed927c;
       --green: #78a58d;
       --purple: #9b8dd1;
+      --gold: #d8ad61;
+      --teal: #69a7a4;
 
       --radius-xl: 34px;
       --radius-lg: 24px;
@@ -57,17 +59,18 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
     button {
       font: inherit;
     }
 
-    a {
-      color: inherit;
-    }
-
-    /* ------------------------------
+    /* ==============================
        PAGE
-    ------------------------------ */
+    ============================== */
 
     .page {
       width: 100%;
@@ -79,9 +82,14 @@
       margin: 0 auto;
     }
 
-    /* ------------------------------
-       NAV
-    ------------------------------ */
+    /* ==============================
+       NAVIGATION
+    ============================== */
+
+    header {
+      position: relative;
+      z-index: 10;
+    }
 
     nav {
       height: 84px;
@@ -95,6 +103,7 @@
       font-size: 25px;
       font-weight: 700;
       letter-spacing: -1.5px;
+      cursor: pointer;
     }
 
     .logo-dot {
@@ -111,7 +120,6 @@
     }
 
     .nav-center a {
-      text-decoration: none;
       transition: color .2s ease;
     }
 
@@ -135,6 +143,12 @@
       font-size: 14px;
 
       cursor: pointer;
+
+      transition: color .2s ease;
+    }
+
+    .login:hover {
+      color: var(--blue);
     }
 
     .nav-cta {
@@ -162,9 +176,9 @@
         0 7px 20px rgba(0,0,0,.06);
     }
 
-    /* ------------------------------
+    /* ==============================
        HERO
-    ------------------------------ */
+    ============================== */
 
     .hero {
       padding: 112px 0 0;
@@ -220,9 +234,9 @@
       line-height: 1.65;
     }
 
-    /* ------------------------------
+    /* ==============================
        HERO ACTIONS
-    ------------------------------ */
+    ============================== */
 
     .hero-actions {
       margin-top: 39px;
@@ -234,6 +248,10 @@
     }
 
     .primary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
       border: 0;
 
       background: var(--text);
@@ -269,6 +287,10 @@
     }
 
     .secondary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
       border: 1px solid var(--border);
 
       background: rgba(255,255,255,.6);
@@ -282,11 +304,20 @@
       font-size: 15px;
 
       cursor: pointer;
+
+      transition:
+        background .2s ease,
+        transform .2s ease;
     }
 
-    /* ------------------------------
-       LANGUAGE STRIP
-    ------------------------------ */
+    .secondary-button:hover {
+      background: white;
+      transform: translateY(-1px);
+    }
+
+    /* ==============================
+       LANGUAGE AREA
+    ============================== */
 
     .language-area {
       margin-top: 72px;
@@ -374,16 +405,16 @@
     }
 
     .dot-gold {
-      background: #d8ad61;
+      background: var(--gold);
     }
 
     .dot-teal {
-      background: #69a7a4;
+      background: var(--teal);
     }
 
-    /* ------------------------------
-       INTRO SECTION
-    ------------------------------ */
+    /* ==============================
+       INTRO
+    ============================== */
 
     .intro {
       background: #ffffff;
@@ -440,9 +471,9 @@
       line-height: 1.65;
     }
 
-    /* ------------------------------
+    /* ==============================
        EXPERIENCE CARD
-    ------------------------------ */
+    ============================== */
 
     .experience-card {
       background: #f7f7f4;
@@ -569,9 +600,9 @@
       background: var(--blue);
     }
 
-    /* ------------------------------
+    /* ==============================
        FEATURES
-    ------------------------------ */
+    ============================== */
 
     .features {
       padding: 125px 0;
@@ -681,9 +712,9 @@
       background: var(--green);
     }
 
-    /* ------------------------------
+    /* ==============================
        FINAL CTA
-    ------------------------------ */
+    ============================== */
 
     .final {
       padding: 0 0 100px;
@@ -720,6 +751,10 @@
     }
 
     .final-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
       border: 0;
 
       background: white;
@@ -733,11 +768,22 @@
       font-weight: 600;
 
       cursor: pointer;
+
+      transition:
+        transform .2s ease,
+        box-shadow .2s ease;
     }
 
-    /* ------------------------------
+    .final-button:hover {
+      transform: translateY(-2px);
+
+      box-shadow:
+        0 10px 25px rgba(255,255,255,.12);
+    }
+
+    /* ==============================
        FOOTER
-    ------------------------------ */
+    ============================== */
 
     footer {
       padding: 30px 0 45px;
@@ -765,13 +811,13 @@
       font-size: 12px;
     }
 
-    .footer-links a {
-      text-decoration: none;
+    .footer-links a:hover {
+      color: var(--text);
     }
 
-    /* ------------------------------
+    /* ==============================
        MOBILE
-    ------------------------------ */
+    ============================== */
 
     @media (max-width: 800px) {
 
@@ -797,6 +843,12 @@
 
       .hero-actions {
         flex-direction: column;
+      }
+
+      .primary-button,
+      .secondary-button {
+        width: 100%;
+        max-width: 300px;
       }
 
       .language-area {
@@ -856,36 +908,47 @@
   </style>
 </head>
 
-
 <body>
 
 <div class="page">
 
-  <!-- NAVIGATION -->
+  <!-- ==============================
+       NAVIGATION
+  ============================== -->
 
   <header class="container">
 
     <nav>
 
-      <div class="logo">
+      <a href="index.html" class="logo">
         parla<span class="logo-dot">•</span>
-      </div>
+      </a>
 
       <div class="nav-center">
-        <a href="#why">Why Parla</a>
-        <a href="#experience">Experience</a>
-        <a href="#languages">Languages</a>
+
+        <a href="#why">
+          Why Parla
+        </a>
+
+        <a href="#experience">
+          Experience
+        </a>
+
+        <a href="#languages">
+          Languages
+        </a>
+
       </div>
 
       <div class="nav-right">
 
-        <button class="login">
+        <a href="login.html" class="login">
           Log in
-        </button>
+        </a>
 
-        <button class="nav-cta">
+        <a href="signup.html" class="nav-cta">
           Get started
-        </button>
+        </a>
 
       </div>
 
@@ -894,36 +957,55 @@
   </header>
 
 
-  <!-- HERO -->
+  <!-- ==============================
+       HERO
+  ============================== -->
 
   <section class="hero container">
 
     <div class="eyebrow">
+
       <span class="eyebrow-mark"></span>
+
       A new kind of language learning
+
     </div>
 
     <h1>
+
       Learn a language.<br>
-      <span class="blue">Actually use it.</span>
+
+      <span class="blue">
+        Actually use it.
+      </span>
+
     </h1>
 
     <p class="hero-copy">
+
       Parla adapts to the way you learn, what you care about,
       and the language you actually want to use in the real world.
+
     </p>
 
 
     <div class="hero-actions">
 
-      <button class="primary-button">
-        Start learning
-        <span class="arrow">→</span>
-      </button>
+      <a href="signup.html" class="primary-button">
 
-      <button class="secondary-button">
+        Start learning
+
+        <span class="arrow">
+          →
+        </span>
+
+      </a>
+
+      <a href="#experience" class="secondary-button">
+
         See how it works
-      </button>
+
+      </a>
 
     </div>
 
@@ -936,37 +1018,57 @@
     >
 
       <div class="language-label">
+
         Choose your language
+
       </div>
 
       <div class="language-list">
 
-        <button class="language active">
+        <button
+          type="button"
+          class="language active"
+        >
           <span class="language-dot"></span>
           Spanish
         </button>
 
-        <button class="language">
+        <button
+          type="button"
+          class="language"
+        >
           <span class="language-dot dot-coral"></span>
           English
         </button>
 
-        <button class="language">
+        <button
+          type="button"
+          class="language"
+        >
           <span class="language-dot dot-green"></span>
           French
         </button>
 
-        <button class="language">
+        <button
+          type="button"
+          class="language"
+        >
           <span class="language-dot dot-purple"></span>
           Japanese
         </button>
 
-        <button class="language">
+        <button
+          type="button"
+          class="language"
+        >
           <span class="language-dot dot-gold"></span>
           Italian
         </button>
 
-        <button class="language">
+        <button
+          type="button"
+          class="language"
+        >
           <span class="language-dot dot-teal"></span>
           Portuguese
         </button>
@@ -978,7 +1080,9 @@
   </section>
 
 
-  <!-- INTRO -->
+  <!-- ==============================
+       INTRO
+  ============================== -->
 
   <section
     class="intro"
@@ -998,8 +1102,10 @@
         </h2>
 
         <p class="intro-description">
+
           Parla pays attention to what you know, what you struggle with,
           and what you want to be able to say. Then it changes what comes next.
+
         </p>
 
       </div>
@@ -1014,8 +1120,11 @@
           </span>
 
           <div class="status">
+
             <span class="status-dot"></span>
+
             Adapting
+
           </div>
 
         </div>
@@ -1040,12 +1149,16 @@
           </h3>
 
           <p>
+
             Useful expressions for making plans,
             changing them, and sounding natural.
+
           </p>
 
           <div class="lesson-progress">
+
             <span></span>
+
           </div>
 
         </div>
@@ -1057,7 +1170,9 @@
   </section>
 
 
-  <!-- WHY PARLA -->
+  <!-- ==============================
+       WHY PARLA
+  ============================== -->
 
   <section
     class="features"
@@ -1073,13 +1188,18 @@
         </div>
 
         <h2>
+
           Less studying.<br>
+
           More becoming fluent.
+
         </h2>
 
         <p>
+
           Parla isn't built around finishing lessons.
           It's built around becoming someone who can actually use another language.
+
         </p>
 
       </div>
@@ -1090,10 +1210,8 @@
 
         <article class="feature">
 
-          <div>
-            <div class="feature-number">
-              01
-            </div>
+          <div class="feature-number">
+            01
           </div>
 
           <div>
@@ -1105,8 +1223,10 @@
             </h3>
 
             <p>
+
               Start with language that fits your life,
               interests, goals, and current level.
+
             </p>
 
           </div>
@@ -1116,10 +1236,8 @@
 
         <article class="feature">
 
-          <div>
-            <div class="feature-number">
-              02
-            </div>
+          <div class="feature-number">
+            02
           </div>
 
           <div>
@@ -1131,8 +1249,10 @@
             </h3>
 
             <p>
+
               Build the words and patterns you need
               before you're expected to use them.
+
             </p>
 
           </div>
@@ -1142,10 +1262,8 @@
 
         <article class="feature">
 
-          <div>
-            <div class="feature-number">
-              03
-            </div>
+          <div class="feature-number">
+            03
           </div>
 
           <div>
@@ -1157,8 +1275,10 @@
             </h3>
 
             <p>
+
               Have real conversations, get useful feedback,
               and let Parla remember what you need next.
+
             </p>
 
           </div>
@@ -1173,32 +1293,44 @@
   </section>
 
 
-  <!-- FINAL CTA -->
+  <!-- ==============================
+       FINAL CTA
+  ============================== -->
 
   <section class="final container">
 
     <div class="final-card">
 
       <h2>
+
         Your language.<br>
+
         Your way.
+
       </h2>
 
       <p>
+
         Start with a language. Parla will figure out
         how to help you move forward.
+
       </p>
 
-      <button class="final-button">
+      <a
+        href="signup.html"
+        class="final-button"
+      >
         Start learning →
-      </button>
+      </a>
 
     </div>
 
   </section>
 
 
-  <!-- FOOTER -->
+  <!-- ==============================
+       FOOTER
+  ============================== -->
 
   <footer>
 
@@ -1209,8 +1341,15 @@
       </div>
 
       <div class="footer-links">
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
+
+        <a href="#">
+          Privacy
+        </a>
+
+        <a href="#">
+          Terms
+        </a>
+
       </div>
 
     </div>
@@ -1220,7 +1359,9 @@
 </div>
 
 
-<!-- LANGUAGE INTERACTION -->
+<!-- ==============================
+     LANGUAGE INTERACTION
+============================== -->
 
 <script>
 
@@ -1232,7 +1373,9 @@
     button.addEventListener("click", () => {
 
       languageButtons.forEach(item => {
+
         item.classList.remove("active");
+
       });
 
       button.classList.add("active");
