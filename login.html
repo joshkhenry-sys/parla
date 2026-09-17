@@ -7,6 +7,7 @@
   <title>Log in | Parla</title>
   <meta name="description" content="Log in to your Parla language learning account.">
 
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -18,8 +19,6 @@
       --border: #e5e5df;
       --blue: #536dff;
       --blue-soft: #edf0ff;
-      --coral: #ed927c;
-      --green: #78a58d;
       --radius-lg: 24px;
       --radius-md: 16px;
     }
@@ -34,7 +33,13 @@
       min-height: 100vh;
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Inter",
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
       display: flex;
       flex-direction: column;
     }
@@ -140,12 +145,17 @@
         0 3px 12px rgba(23, 23, 23, .03);
     }
 
+    button,
+    input {
+      font-family: inherit;
+    }
+
     .google-btn {
       width: 100%;
       height: 52px;
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      background: white;
+      background: #fff;
       color: var(--text);
       font-size: 15px;
       font-weight: 600;
@@ -163,8 +173,18 @@
       box-shadow: 0 5px 15px rgba(0,0,0,.05);
     }
 
+    .google-btn:disabled {
+      opacity: .6;
+      cursor: wait;
+      transform: none;
+    }
+
     .google-icon {
-      font-size: 18px;
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      font-size: 17px;
       font-weight: 700;
     }
 
@@ -204,7 +224,6 @@
       background: #fcfcfa;
       padding: 0 15px;
       color: var(--text);
-      font-family: inherit;
       font-size: 15px;
       outline: none;
       transition: .2s ease;
@@ -216,7 +235,7 @@
 
     input:focus {
       border-color: var(--blue);
-      background: white;
+      background: #fff;
       box-shadow: 0 0 0 4px rgba(83,109,255,.08);
     }
 
@@ -244,8 +263,7 @@
       border: 0;
       border-radius: var(--radius-md);
       background: var(--text);
-      color: white;
-      font-family: inherit;
+      color: #fff;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
@@ -260,7 +278,7 @@
 
     .submit-btn:disabled {
       opacity: .55;
-      cursor: not-allowed;
+      cursor: wait;
       transform: none;
       box-shadow: none;
     }
@@ -361,7 +379,9 @@
 <body>
 
   <nav>
-    <a href="index.html" class="logo">parla<span>•</span></a>
+    <a href="index.html" class="logo">
+      parla<span>•</span>
+    </a>
 
     <div class="nav-right">
       New to Parla?
@@ -387,21 +407,31 @@
 
       <div class="card">
 
-        <button class="google-btn" type="button" id="googleBtn">
+        <button
+          class="google-btn"
+          id="googleBtn"
+          type="button"
+        >
           <span class="google-icon">G</span>
-          Continue with Google
+          <span id="googleText">Continue with Google</span>
         </button>
 
         <div class="divider">
           or continue with email
         </div>
 
-        <div id="message" class="message"></div>
+        <div
+          id="message"
+          class="message"
+          role="alert"
+          aria-live="polite"
+        ></div>
 
         <form id="loginForm">
 
           <div class="field">
             <label for="email">Email</label>
+
             <input
               type="email"
               id="email"
@@ -416,7 +446,12 @@
 
             <div class="password-row">
               <label for="password">Password</label>
-              <a href="#" class="forgot" id="forgotPassword">
+
+              <a
+                href="#"
+                class="forgot"
+                id="forgotPassword"
+              >
                 Forgot password?
               </a>
             </div>
@@ -432,7 +467,11 @@
 
           </div>
 
-          <button class="submit-btn" id="loginBtn" type="submit">
+          <button
+            class="submit-btn"
+            id="loginBtn"
+            type="submit"
+          >
             Log in
           </button>
 
@@ -453,112 +492,354 @@
     © 2026 Parla
   </footer>
 
+
+  <!-- Supabase project configuration -->
   <script src="supabase-config.js"></script>
 
   <script>
-    const { createClient } = supabase;
+    (function () {
 
-    const supabaseClient = createClient(
-      SUPABASE_URL,
-      SUPABASE_ANON_KEY
-    );
+      "use strict";
 
-    const loginForm = document.getElementById("loginForm");
-    const loginBtn = document.getElementById("loginBtn");
-    const message = document.getElementById("message");
-    const forgotPassword = document.getElementById("forgotPassword");
-    const googleBtn = document.getElementById("googleBtn");
+      /* --------------------------------
+         BASIC CHECKS
+      -------------------------------- */
 
-    function showMessage(text, type = "error") {
-      message.textContent = text;
-      message.className = "message " + type;
-    }
+      if (!window.supabase) {
+        console.error("Supabase library failed to load.");
+        return;
+      }
 
-    function clearMessage() {
-      message.textContent = "";
-      message.className = "message";
-    }
+      if (
+        typeof window.SUPABASE_URL === "undefined" ||
+        typeof window.SUPABASE_ANON_KEY === "undefined"
+      ) {
+        console.error("supabase-config.js is missing.");
+        return;
+      }
 
-    loginForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
 
-      clearMessage();
+      /* --------------------------------
+         CREATE SUPABASE CLIENT
+      -------------------------------- */
 
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+      const supabaseClient = window.supabase.createClient(
+        window.SUPABASE_URL,
+        window.SUPABASE_ANON_KEY
+      );
 
-      loginBtn.disabled = true;
-      loginBtn.textContent = "Logging in...";
 
-      const { error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password
+      /* --------------------------------
+         ELEMENTS
+      -------------------------------- */
+
+      const loginForm =
+        document.getElementById("loginForm");
+
+      const loginBtn =
+        document.getElementById("loginBtn");
+
+      const googleBtn =
+        document.getElementById("googleBtn");
+
+      const googleText =
+        document.getElementById("googleText");
+
+      const forgotPassword =
+        document.getElementById("forgotPassword");
+
+      const message =
+        document.getElementById("message");
+
+
+      /* --------------------------------
+         MESSAGE
+      -------------------------------- */
+
+      function showMessage(text, type) {
+
+        message.textContent = text;
+        message.className = "message " + type;
+
+      }
+
+
+      function clearMessage() {
+
+        message.textContent = "";
+        message.className = "message";
+
+      }
+
+
+      /* --------------------------------
+         GOOGLE LOGIN
+      -------------------------------- */
+
+      googleBtn.addEventListener("click", async function () {
+
+        clearMessage();
+
+        googleBtn.disabled = true;
+        googleText.textContent = "Connecting...";
+
+        try {
+
+          const redirectUrl =
+            window.location.origin + "/dashboard.html";
+
+          console.log(
+            "Starting Google OAuth:",
+            redirectUrl
+          );
+
+          const { error } =
+            await supabaseClient.auth.signInWithOAuth({
+
+              provider: "google",
+
+              options: {
+                redirectTo: redirectUrl
+              }
+
+            });
+
+
+          if (error) {
+
+            console.error(
+              "Google OAuth error:",
+              error
+            );
+
+            showMessage(
+              error.message ||
+              "Google login could not be started.",
+              "error"
+            );
+
+            googleBtn.disabled = false;
+            googleText.textContent =
+              "Continue with Google";
+
+            return;
+          }
+
+          /*
+            Supabase normally redirects the browser
+            automatically here.
+          */
+
+        } catch (error) {
+
+          console.error(
+            "Google OAuth exception:",
+            error
+          );
+
+          showMessage(
+            error.message ||
+            "Something went wrong starting Google login.",
+            "error"
+          );
+
+          googleBtn.disabled = false;
+          googleText.textContent =
+            "Continue with Google";
+        }
+
       });
 
-      if (error) {
-        showMessage(error.message);
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Log in";
-        return;
-      }
 
-      window.location.href = "dashboard.html";
-    });
+      /* --------------------------------
+         EMAIL LOGIN
+      -------------------------------- */
 
-    forgotPassword.addEventListener("click", async (event) => {
-      event.preventDefault();
+      loginForm.addEventListener(
+        "submit",
+        async function (event) {
 
-      const email = document.getElementById("email").value.trim();
+          event.preventDefault();
 
-      if (!email) {
-        showMessage("Enter your email address first.");
-        return;
-      }
+          clearMessage();
 
-      clearMessage();
+          const email =
+            document
+              .getElementById("email")
+              .value
+              .trim();
 
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(
-        email,
-        {
-          redirectTo: window.location.origin + "/reset-password.html"
+          const password =
+            document
+              .getElementById("password")
+              .value;
+
+
+          loginBtn.disabled = true;
+          loginBtn.textContent = "Logging in...";
+
+
+          try {
+
+            const { data, error } =
+              await supabaseClient.auth.signInWithPassword({
+
+                email: email,
+                password: password
+
+              });
+
+
+            if (error) {
+
+              showMessage(
+                error.message,
+                "error"
+              );
+
+              loginBtn.disabled = false;
+              loginBtn.textContent = "Log in";
+
+              return;
+            }
+
+
+            if (data.session) {
+
+              window.location.href =
+                "dashboard.html";
+
+            }
+
+          } catch (error) {
+
+            showMessage(
+              error.message ||
+              "Unable to log in.",
+              "error"
+            );
+
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Log in";
+
+          }
+
         }
       );
 
-      if (error) {
-        showMessage(error.message);
-        return;
-      }
 
-      showMessage(
-        "Check your email for a password reset link.",
-        "success"
-      );
-    });
+      /* --------------------------------
+         PASSWORD RESET
+      -------------------------------- */
 
-    googleBtn.addEventListener("click", async () => {
-      clearMessage();
+      forgotPassword.addEventListener(
+        "click",
+        async function (event) {
 
-      const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin + "/dashboard.html"
+          event.preventDefault();
+
+          clearMessage();
+
+          const email =
+            document
+              .getElementById("email")
+              .value
+              .trim();
+
+
+          if (!email) {
+
+            showMessage(
+              "Enter your email address first.",
+              "error"
+            );
+
+            return;
+          }
+
+
+          try {
+
+            const { error } =
+              await supabaseClient.auth
+                .resetPasswordForEmail(
+
+                  email,
+
+                  {
+                    redirectTo:
+                      window.location.origin +
+                      "/reset-password.html"
+                  }
+
+                );
+
+
+            if (error) {
+
+              showMessage(
+                error.message,
+                "error"
+              );
+
+              return;
+            }
+
+
+            showMessage(
+              "Check your email for a password reset link.",
+              "success"
+            );
+
+          } catch (error) {
+
+            showMessage(
+              error.message ||
+              "Unable to send reset email.",
+              "error"
+            );
+
+          }
+
         }
-      });
+      );
 
-      if (error) {
-        showMessage(error.message);
+
+      /* --------------------------------
+         EXISTING SESSION
+      -------------------------------- */
+
+      async function checkSession() {
+
+        try {
+
+          const { data } =
+            await supabaseClient.auth.getSession();
+
+
+          if (data && data.session) {
+
+            window.location.href =
+              "dashboard.html";
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            "Session check failed:",
+            error
+          );
+
+        }
+
       }
-    });
 
-    async function checkExistingSession() {
-      const { data } = await supabaseClient.auth.getSession();
 
-      if (data.session) {
-        window.location.href = "dashboard.html";
-      }
-    }
+      checkSession();
 
-    checkExistingSession();
+
+    })();
   </script>
 
 </body>
