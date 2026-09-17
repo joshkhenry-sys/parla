@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Parla — Your Learning</title>
+
+  <style>
+    :root {
+      --bg: #f7f7f4;
+      --surface: #ffffff;
+      --text: #171717;
+      --muted: #777773;
+      --border: #e5e5df;
+
+      --blue: #536dff;
+      --blue-soft: #edf0ff;
+
+      --coral: #ed927c;
+      --green: #78a58d;
+      --purple: #9b8dd1;
+
+      --radius-xl: 34px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+        "SF Pro Text", Inter, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: min(1120px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    /* NAVIGATION */
+
+    nav {
+      height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+    }
+
+    .logo span {
+      color: var(--blue);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .streak {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .streak-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--coral);
+      border-radius: 50%;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--text);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* HERO */
+
+    .dashboard-hero {
+      padding: 58px 0 34px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 15px;
+    }
+
+    .dashboard-hero h1 {
+      font-size: clamp(42px, 6vw, 68px);
+      line-height: 0.98;
+      letter-spacing: -3.5px;
+      font-weight: 700;
+      max-width: 700px;
+    }
+
+    .dashboard-hero p {
+      margin-top: 20px;
+      max-width: 590px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    /* MAIN GRID */
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 0.75fr;
+      gap: 20px;
+      padding-bottom: 90px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+    }
+
+    /* RECOMMENDED */
+
+    .recommended {
+      min-height: 390px;
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .recommended-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .recommended-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+    }
+
+    .recommended-time {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .recommended h2 {
+      margin-top: 45px;
+      font-size: 38px;
+      line-height: 1.05;
+      letter-spacing: -1.8px;
+      max-width: 500px;
+    }
+
+    .recommended-copy {
+      margin-top: 15px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+      max-width: 500px;
+    }
+
+    .lesson-meta {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .meta-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+
+    .primary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+
+      border: none;
+      background: var(--text);
+      color: white;
+
+      padding: 15px 21px;
+      border-radius: 999px;
+
+      font-size: 14px;
+      font-weight: 650;
+
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .primary-button:hover {
+      transform: translateY(-2px);
+      background: #2b2b2b;
+    }
+
+    .recommended .primary-button {
+      margin-top: 28px;
+    }
+
+    .lesson-orb {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      right: -35px;
+      bottom: -55px;
+      background: var(--blue-soft);
+    }
+
+    .lesson-orb::after {
+      content: "";
+      position: absolute;
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      background: var(--blue);
+      right: 48px;
+      top: 28px;
+      opacity: 0.9;
+    }
+
+    /* PROGRESS */
+
+    .progress-card {
+      padding: 30px;
+      min-height: 390px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .language-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 28px;
+    }
+
+    .language-name {
+      font-size: 25px;
+      font-weight: 650;
+      letter-spacing: -0.8px;
+    }
+
+    .level {
+      padding: 7px 11px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .progress-number {
+      margin-top: 40px;
+      font-size: 56px;
+      line-height: 1;
+      letter-spacing: -3px;
+      font-weight: 700;
+    }
+
+    .progress-description {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      width: 100%;
+      background: #eeeeea;
+      border-radius: 999px;
+      margin-top: 28px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 24%;
+      background: var(--blue);
+      border-radius: 999px;
+    }
+
+    .progress-footer {
+      margin-top: auto;
+      padding-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* QUICK ACTIONS */
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      letter-spacing: -0.2px;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .quick-card {
+      padding: 27px;
+      min-height: 180px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease;
+    }
+
+    .quick-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .quick-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .quick-card h3 {
+      margin-top: 35px;
+      font-size: 25px;
+      letter-spacing: -1px;
+    }
+
+    .quick-card p {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+      max-width: 240px;
+    }
+
+    .quick-arrow {
+      position: absolute;
+      right: 24px;
+      bottom: 22px;
+      font-size: 20px;
+    }
+
+    .talk-card {
+      background: #f0f3ff;
+    }
+
+    .review-card {
+      background: #f5eee9;
+    }
+
+    /* RECENT ACTIVITY */
+
+    .activity-section {
+      margin-top: 20px;
+    }
+
+    .activity-card {
+      padding: 30px;
+    }
+
+    .activity-list {
+      margin-top: 12px;
+    }
+
+    .activity-item {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      align-items: center;
+      gap: 15px;
+      padding: 17px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .activity-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .activity-icon.blue {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    .activity-icon.green {
+      background: #edf5ef;
+      color: var(--green);
+    }
+
+    .activity-icon.coral {
+      background: #faeee9;
+      color: var(--coral);
+    }
+
+    .activity-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .activity-subtitle {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .activity-score {
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    /* FOOTER */
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 30px 0 45px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 22px;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 800px) {
+
+      .container {
+        width: min(100% - 32px, 600px);
+      }
+
+      nav {
+        height: 72px;
+      }
+
+      .nav-right {
+        gap: 8px;
+      }
+
+      .streak {
+        padding: 8px 11px;
+        font-size: 12px;
+      }
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+      }
+
+      .dashboard-hero {
+        padding: 45px 0 28px;
+      }
+
+      .dashboard-hero h1 {
+        font-size: 47px;
+        letter-spacing: -2px;
+      }
+
+      .dashboard-hero p {
+        font-size: 16px;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding-bottom: 60px;
+      }
+
+      .recommended {
+        min-height: 420px;
+        padding: 27px;
+      }
+
+      .recommended h2 {
+        font-size: 33px;
+        letter-spacing: -1.4px;
+        margin-top: 40px;
+      }
+
+      .lesson-orb {
+        right: -55px;
+      }
+
+      .progress-card {
+        min-height: 330px;
+        padding: 27px;
+      }
+
+      .progress-number {
+        font-size: 50px;
+      }
+
+      .quick-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .quick-card {
+        min-height: 155px;
+      }
+
+      .activity-card {
+        padding: 25px;
+      }
+
+      .activity-item {
+        grid-template-columns: 38px 1fr;
+      }
+
+      .activity-score {
+        display: none;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <!-- NAV -->
+    <nav>
+      <a href="index.html" class="logo">parla<span>•</span></a>
+
+      <div class="nav-right">
+        <div class="streak">
+          <span class="streak-dot"></span>
+          <span>3 day streak</span>
+        </div>
+
+        <div class="avatar">J</div>
+      </div>
+    </nav>
+
+
+    <!-- HERO -->
+    <section class="dashboard-hero">
+
+      <div class="eyebrow">Your learning</div>
+
+      <h1>
+        Keep going.
+        You're getting there.
+      </h1>
+
+      <p>
+        Parla is learning how you learn. Here's what we think
+        will help you move forward today.
+      </p>
+
+    </section>
+
+
+    <!-- MAIN DASHBOARD -->
+    <main>
+
+      <div class="dashboard-grid">
+
+        <!-- RECOMMENDED LESSON -->
+        <section class="card recommended">
+
+          <div class="recommended-top">
+            <div class="recommended-label">
+              Recommended for you
+            </div>
+
+            <div class="recommended-time">
+              ~8 min
+            </div>
+          </div>
+
+          <h2>
+            Making plans
+            without sounding textbook.
+          </h2>
+
+          <p class="recommended-copy">
+            Learn the expressions people actually use when
+            making plans, changing them, or deciding what
+            to do next.
+          </p>
+
+          <div class="lesson-meta">
+            <span>Spanish</span>
+            <span class="meta-dot"></span>
+            <span>Everyday conversation</span>
+          </div>
+
+          <button class="primary-button" onclick="startLesson()">
+            Start lesson <span>→</span>
+          </button>
+
+          <div class="lesson-orb"></div>
+
+        </section>
+
+
+        <!-- PROGRESS -->
+        <section class="card progress-card">
+
+          <div class="card-label">
+            Your progress
+          </div>
+
+          <div class="language-row">
+            <div class="language-name">
+              Spanish
+            </div>
+
+            <div class="level">
+              A2
+            </div>
+          </div>
+
+          <div class="progress-number">
+            24%
+          </div>
+
+          <div class="progress-description">
+            toward your current level
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+
+          <div class="progress-footer">
+            <span>Keep building</span>
+            <span>24 / 100</span>
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- QUICK ACTIONS -->
+
+      <div class="section-title">
+        What do you want to do?
+      </div>
+
+      <div class="quick-grid">
+
+        <a href="lesson.html" class="card quick-card">
+
+          <div class="quick-number">
+            01
+          </div>
+
+          <h3>
+            Learn something
+          </h3>
+
+          <p>
+            Start a focused lesson built around
+            something useful.
+          </p>
+
+          <div class="quick-arrow">
+            →
+          </div>
+
+        </a>
+
+
+        <a href="talk.html" class="card quick-card talk-card">
+
+          <div class="quick-number">
+            02
+          </div>
+
+          <h3>
+            Just talk
+          </h3>
+
+          <p>
+            Have a natural conversation and let
+            Parla learn from it.
+          </p>
+
+          <div class="quick-arrow">
+            →
+          </div>
+
+        </a>
+
+
+        <a href="review.html" class="card quick-card review-card">
+
+          <div class="quick-number">
+            03
+          </div>
+
+          <h3>
+            Review
+          </h3>
+
+          <p>
+            Revisit words and expressions that
+            still need work.
+          </p>
+
+          <div class="quick-arrow">
+            →
+          </div>
+
+        </a>
+
+
+        <a href="progress.html" class="card quick-card">
+
+          <div class="quick-number">
+            04
+          </div>
+
+          <h3>
+            See my progress
+          </h3>
+
+          <p>
+            See what you're improving and what
+            Parla thinks you should work on next.
+          </p>
+
+          <div class="quick-arrow">
+            →
+          </div>
+
+        </a>
+
+      </div>
+
+
+      <!-- RECENT ACTIVITY -->
+
+      <section class="activity-section">
+
+        <div class="section-title">
+          Recent activity
+        </div>
+
+        <div class="card activity-card">
+
+          <div class="activity-list">
+
+            <div class="activity-item">
+
+              <div class="activity-icon blue">
+                A
+              </div>
+
+              <div>
+                <div class="activity-title">
+                  Talking about your weekend
+                </div>
+
+                <div class="activity-subtitle">
+                  Lesson · Yesterday
+                </div>
+              </div>
+
+              <div class="activity-score">
+                Completed
+              </div>
+
+            </div>
+
+
+            <div class="activity-item">
+
+              <div class="activity-icon green">
+                T
+              </div>
+
+              <div>
+                <div class="activity-title">
+                  Free conversation
+                </div>
+
+                <div class="activity-subtitle">
+                  Just Talk · 2 days ago
+                </div>
+              </div>
+
+              <div class="activity-score">
+                8 min
+              </div>
+
+            </div>
+
+
+            <div class="activity-item">
+
+              <div class="activity-icon coral">
+                R
+              </div>
+
+              <div>
+                <div class="activity-title">
+                  Everyday expressions
+                </div>
+
+                <div class="activity-subtitle">
+                  Review · 3 days ago
+                </div>
+              </div>
+
+              <div class="activity-score">
+                12 / 15
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <div class="container">
+
+      <div class="footer-inner">
+
+        <div>
+          © 2026 Parla
+        </div>
+
+        <div class="footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="index.html">Home</a>
+        </div>
+
+      </div>
+
+    </div>
+
+  </footer>
+
+
+  <script>
+    function startLesson() {
+      window.location.href = "lesson.html";
+    }
+  </script>
+
+</body>
+</html>
