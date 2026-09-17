@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Your Progress — Parla</title>
+
+  <style>
+    :root {
+      --bg: #f7f7f4;
+      --surface: #ffffff;
+      --surface-soft: #f1f1ec;
+      --text: #171717;
+      --muted: #777773;
+      --border: #e5e5df;
+
+      --blue: #536dff;
+      --blue-soft: #edf0ff;
+      --coral: #ed927c;
+      --green: #78a58d;
+      --purple: #9b8dd1;
+
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+        "SF Pro Text", Inter, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    /* NAV */
+
+    .nav {
+      width: min(100% - 48px, 1180px);
+      height: 76px;
+      margin: 0 auto;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 25px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+    }
+
+    .logo span {
+      color: var(--blue);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .streak {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      padding: 9px 13px;
+
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .streak-mark {
+      color: var(--coral);
+      font-size: 14px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+      background: #deded8;
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* PAGE */
+
+    .page {
+      width: min(100% - 48px, 1080px);
+      margin: 0 auto;
+      padding: 55px 0 85px;
+    }
+
+    .back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+
+      margin-bottom: 38px;
+
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .back:hover {
+      color: var(--text);
+    }
+
+    /* HEADER */
+
+    .header {
+      margin-bottom: 44px;
+    }
+
+    .eyebrow {
+      margin-bottom: 14px;
+
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .header h1 {
+      max-width: 700px;
+
+      margin-bottom: 17px;
+
+      font-size: clamp(45px, 6vw, 68px);
+      line-height: 1;
+      letter-spacing: -4px;
+      font-weight: 700;
+    }
+
+    .header p {
+      max-width: 610px;
+
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    /* OVERVIEW */
+
+    .overview {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .level-card,
+    .streak-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+    }
+
+    .level-card {
+      padding: 31px;
+    }
+
+    .card-label {
+      margin-bottom: 18px;
+
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+    }
+
+    .level-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+
+      margin-bottom: 23px;
+    }
+
+    .level {
+      font-size: 42px;
+      line-height: 1;
+      letter-spacing: -2px;
+      font-weight: 700;
+    }
+
+    .level-description {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 7px;
+    }
+
+    .level-percent {
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 7px;
+
+      background: var(--surface-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 24%;
+
+      background: var(--blue);
+      border-radius: inherit;
+    }
+
+    .level-foot {
+      display: flex;
+      justify-content: space-between;
+
+      margin-top: 11px;
+
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .streak-card {
+      padding: 31px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .streak-number {
+      font-size: 58px;
+      line-height: 1;
+      letter-spacing: -4px;
+      font-weight: 700;
+    }
+
+    .streak-text {
+      margin-top: 8px;
+
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .week {
+      display: flex;
+      gap: 7px;
+      margin-top: 28px;
+    }
+
+    .day {
+      flex: 1;
+      text-align: center;
+    }
+
+    .day-name {
+      color: var(--muted);
+      font-size: 9px;
+      margin-bottom: 7px;
+      text-transform: uppercase;
+    }
+
+    .day-dot {
+      width: 100%;
+      max-width: 28px;
+      aspect-ratio: 1;
+      margin: 0 auto;
+
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .day.active .day-dot {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .day.today .day-dot {
+      border: 2px solid var(--blue);
+      background: var(--blue-soft);
+    }
+
+    /* SKILLS */
+
+    .section {
+      margin-top: 48px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 23px;
+      letter-spacing: -0.7px;
+      font-weight: 650;
+    }
+
+    .section-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .skills {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 10px 28px;
+    }
+
+    .skill {
+      display: grid;
+      grid-template-columns: 170px 1fr 45px;
+      align-items: center;
+      gap: 20px;
+
+      padding: 20px 0;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .skill:last-child {
+      border-bottom: 0;
+    }
+
+    .skill-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .skill-bar {
+      height: 7px;
+      background: var(--surface-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .skill-fill {
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .vocabulary {
+      width: 72%;
+      background: var(--blue);
+    }
+
+    .understanding {
+      width: 64%;
+      background: var(--green);
+    }
+
+    .conversation {
+      width: 51%;
+      background: var(--coral);
+    }
+
+    .grammar {
+      width: 44%;
+      background: var(--purple);
+    }
+
+    .confidence {
+      width: 39%;
+      background: #999992;
+    }
+
+    .skill-score {
+      text-align: right;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* TWO COLUMNS */
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .insight-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+    }
+
+    .insight-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .insight {
+      display: flex;
+      gap: 14px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .insight:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .insight:first-child {
+      padding-top: 4px;
+    }
+
+    .insight-number {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 50%;
+      background: var(--blue-soft);
+      color: var(--blue);
+
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .insight h3 {
+      margin-bottom: 5px;
+
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .insight p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .worth .insight-number {
+      background: #f8eae6;
+      color: var(--coral);
+    }
+
+    /* VOCAB */
+
+    .vocab-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+
+      padding: 29px;
+    }
+
+    .vocab-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+
+      margin-bottom: 25px;
+    }
+
+    .vocab-count {
+      font-size: 42px;
+      line-height: 1;
+      letter-spacing: -2px;
+      font-weight: 700;
+    }
+
+    .vocab-description {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 7px;
+    }
+
+    .vocab-badge {
+      padding: 8px 12px;
+
+      background: var(--blue-soft);
+      color: var(--blue);
+
+      border-radius: 999px;
+
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .words {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .word {
+      padding: 15px;
+
+      background: var(--surface-soft);
+      border-radius: var(--radius-md);
+    }
+
+    .word-main {
+      margin-bottom: 5px;
+
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .word-meaning {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    /* ADAPTIVE */
+
+    .adaptive {
+      margin-top: 18px;
+
+      background: var(--text);
+      color: white;
+
+      border-radius: var(--radius-xl);
+
+      padding: 32px;
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .adaptive-copy {
+      max-width: 650px;
+    }
+
+    .adaptive-label {
+      margin-bottom: 9px;
+
+      color: #aeb7ff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .adaptive h2 {
+      margin-bottom: 8px;
+
+      font-size: 23px;
+      letter-spacing: -0.7px;
+    }
+
+    .adaptive p {
+      color: #b8b8b3;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .adaptive-button {
+      flex-shrink: 0;
+
+      border: 0;
+      border-radius: 999px;
+
+      background: white;
+      color: var(--text);
+
+      padding: 13px 18px;
+
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .adaptive-button:hover {
+      transform: translateY(-1px);
+    }
+
+    /* FOOTER */
+
+    footer {
+      width: min(100% - 48px, 1080px);
+      margin: 0 auto;
+
+      padding: 20px 0 40px;
+
+      display: flex;
+      justify-content: space-between;
+
+      color: #999992;
+      font-size: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 800px) {
+
+      .nav {
+        width: min(100% - 32px, 600px);
+        height: 68px;
+      }
+
+      .page {
+        width: min(100% - 32px, 600px);
+        padding: 36px 0 60px;
+      }
+
+      .header h1 {
+        font-size: 48px;
+        letter-spacing: -2px;
+      }
+
+      .header p {
+        font-size: 15px;
+      }
+
+      .overview {
+        grid-template-columns: 1fr;
+      }
+
+      .two-column {
+        grid-template-columns: 1fr;
+      }
+
+      .skills {
+        padding: 8px 20px;
+      }
+
+      .skill {
+        grid-template-columns: 125px 1fr 38px;
+        gap: 12px;
+      }
+
+      .words {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .adaptive {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 25px;
+      }
+
+      .adaptive-button {
+        width: 100%;
+      }
+
+      footer {
+        width: min(100% - 32px, 600px);
+        flex-direction: column;
+        gap: 14px;
+      }
+    }
+
+    @media (max-width: 450px) {
+
+      .streak {
+        display: none;
+      }
+
+      .header h1 {
+        font-size: 43px;
+      }
+
+      .skill {
+        grid-template-columns: 105px 1fr 34px;
+        gap: 10px;
+      }
+
+      .skill-name {
+        font-size: 12px;
+      }
+
+      .words {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+
+  <nav class="nav">
+
+    <a href="dashboard.html" class="logo">
+      parla<span>•</span>
+    </a>
+
+    <div class="nav-right">
+
+      <div class="streak">
+        <span class="streak-mark">●</span>
+        3 day streak
+      </div>
+
+      <div class="avatar">
+        J
+      </div>
+
+    </div>
+
+  </nav>
+
+
+  <!-- MAIN -->
+
+  <main class="page">
+
+    <a href="dashboard.html" class="back">
+      ← Back to your learning
+    </a>
+
+
+    <!-- HEADER -->
+
+    <section class="header">
+
+      <div class="eyebrow">
+        Your progress
+      </div>
+
+      <h1>
+        You're building something real.
+      </h1>
+
+      <p>
+        Parla tracks more than completed lessons. It watches what
+        you understand, what you use naturally, and where you still
+        get stuck — then uses that information to shape what comes next.
+      </p>
+
+    </section>
+
+
+    <!-- OVERVIEW -->
+
+    <section class="overview">
+
+      <!-- LEVEL -->
+
+      <div class="level-card">
+
+        <div class="card-label">
+          Current level
+        </div>
+
+        <div class="level-row">
+
+          <div>
+            <div class="level">
+              A2
+            </div>
+
+            <div class="level-description">
+              Elementary
+            </div>
+          </div>
+
+          <div class="level-percent">
+            24%
+          </div>
+
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+
+        <div class="level-foot">
+          <span>A1</span>
+          <span>Building toward B1</span>
+          <span>B1</span>
+        </div>
+
+      </div>
+
+
+      <!-- STREAK -->
+
+      <div class="streak-card">
+
+        <div>
+
+          <div class="card-label">
+            Learning streak
+          </div>
+
+          <div class="streak-number">
+            3
+          </div>
+
+          <div class="streak-text">
+            days in a row. Keep the rhythm going.
+          </div>
+
+        </div>
+
+        <div class="week">
+
+          <div class="day active">
+            <div class="day-name">M</div>
+            <div class="day-dot"></div>
+          </div>
+
+          <div class="day active">
+            <div class="day-name">T</div>
+            <div class="day-dot"></div>
+          </div>
+
+          <div class="day active">
+            <div class="day-name">W</div>
+            <div class="day-dot"></div>
+          </div>
+
+          <div class="day today">
+            <div class="day-name">T</div>
+            <div class="day-dot"></div>
+          </div>
+
+          <div class="day">
+            <div class="day-name">F</div>
+            <div class="day-dot"></div>
+          </div>
+
+          <div class="day">
+            <div class="day-name">S</div>
+            <div class="day-dot"></div>
+          </div>
+
+          <div class="day">
+            <div class="day-name">S</div>
+            <div class="day-dot"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SKILLS -->
+
+    <section class="section">
+
+      <div class="section-header">
+
+        <h2 class="section-title">
+          Your skills
+        </h2>
+
+        <div class="section-note">
+          Based on recent practice
+        </div>
+
+      </div>
+
+
+      <div class="skills">
+
+        <div class="skill">
+
+          <div class="skill-name">
+            Vocabulary
+          </div>
+
+          <div class="skill-bar">
+            <div class="skill-fill vocabulary"></div>
+          </div>
+
+          <div class="skill-score">
+            72%
+          </div>
+
+        </div>
+
+
+        <div class="skill">
+
+          <div class="skill-name">
+            Understanding
+          </div>
+
+          <div class="skill-bar">
+            <div class="skill-fill understanding"></div>
+          </div>
+
+          <div class="skill-score">
+            64%
+          </div>
+
+        </div>
+
+
+        <div class="skill">
+
+          <div class="skill-name">
+            Conversation
+          </div>
+
+          <div class="skill-bar">
+            <div class="skill-fill conversation"></div>
+          </div>
+
+          <div class="skill-score">
+            51%
+          </div>
+
+        </div>
+
+
+        <div class="skill">
+
+          <div class="skill-name">
+            Grammar
+          </div>
+
+          <div class="skill-bar">
+            <div class="skill-fill grammar"></div>
+          </div>
+
+          <div class="skill-score">
+            44%
+          </div>
+
+        </div>
+
+
+        <div class="skill">
+
+          <div class="skill-name">
+            Confidence
+          </div>
+
+          <div class="skill-bar">
+            <div class="skill-fill confidence"></div>
+          </div>
+
+          <div class="skill-score">
+            39%
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- INSIGHTS -->
+
+    <section class="section">
+
+      <div class="section-header">
+
+        <h2 class="section-title">
+          What Parla sees
+        </h2>
+
+        <div class="section-note">
+          From your recent activity
+        </div>
+
+      </div>
+
+
+      <div class="two-column">
+
+
+        <!-- GETTING STRONGER -->
+
+        <div class="insight-card">
+
+          <div class="card-label">
+            Getting stronger
+          </div>
+
+          <div class="insight-list">
+
+            <div class="insight">
+
+              <div class="insight-number">
+                01
+              </div>
+
+              <div>
+                <h3>
+                  Everyday vocabulary
+                </h3>
+
+                <p>
+                  You're recognizing and using more words
+                  without translating first.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="insight">
+
+              <div class="insight-number">
+                02
+              </div>
+
+              <div>
+                <h3>
+                  Understanding context
+                </h3>
+
+                <p>
+                  You're getting better at understanding
+                  meaning from the whole sentence.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="insight">
+
+              <div class="insight-number">
+                03
+              </div>
+
+              <div>
+                <h3>
+                  Short responses
+                </h3>
+
+                <p>
+                  You can respond quickly when the conversation
+                  stays familiar.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- WORTH WORKING ON -->
+
+        <div class="insight-card worth">
+
+          <div class="card-label">
+            Worth working on
+          </div>
+
+          <div class="insight-list">
+
+            <div class="insight">
+
+              <div class="insight-number">
+                01
+              </div>
+
+              <div>
+                <h3>
+                  Longer sentences
+                </h3>
+
+                <p>
+                  Your ideas are good. Connecting them into
+                  longer thoughts is the next step.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="insight">
+
+              <div class="insight-number">
+                02
+              </div>
+
+              <div>
+                <h3>
+                  Past tense
+                </h3>
+
+                <p>
+                  You sometimes switch back to the present
+                  when describing something that happened.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="insight">
+
+              <div class="insight-number">
+                03
+              </div>
+
+              <div>
+                <h3>
+                  Speaking confidence
+                </h3>
+
+                <p>
+                  You know more than you're currently comfortable
+                  using out loud.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- VOCABULARY -->
+
+    <section class="section">
+
+      <div class="section-header">
+
+        <h2 class="section-title">
+          Your language
+        </h2>
+
+        <div class="section-note">
+          Spanish
+        </div>
+
+      </div>
+
+
+      <div class="vocab-card">
+
+        <div class="vocab-top">
+
+          <div>
+
+            <div class="vocab-count">
+              147
+            </div>
+
+            <div class="vocab-description">
+              active words & expressions
+            </div>
+
+          </div>
+
+          <div class="vocab-badge">
+            +12 this week
+          </div>
+
+        </div>
+
+
+        <div class="words">
+
+          <div class="word">
+            <div class="word-main">quedar</div>
+            <div class="word-meaning">to meet / arrange</div>
+          </div>
+
+          <div class="word">
+            <div class="word-main">al final</div>
+            <div class="word-meaning">in the end</div>
+          </div>
+
+          <div class="word">
+            <div class="word-main">todavía</div>
+            <div class="word-meaning">still / yet</div>
+          </div>
+
+          <div class="word">
+            <div class="word-main">darse cuenta</div>
+            <div class="word-meaning">to realize</div>
+          </div>
+
+          <div class="word">
+            <div class="word-main">aprovechar</div>
+            <div class="word-meaning">to take advantage</div>
+          </div>
+
+          <div class="word">
+            <div class="word-main">ya vemos</div>
+            <div class="word-meaning">we'll see</div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ADAPTIVE MESSAGE -->
+
+    <section class="adaptive">
+
+      <div class="adaptive-copy">
+
+        <div class="adaptive-label">
+          Parla is adapting
+        </div>
+
+        <h2>
+          Your next lessons won't be the same as anyone else's.
+        </h2>
+
+        <p>
+          Parla is using your conversations, practice, vocabulary,
+          and mistakes to decide what deserves your attention next.
+        </p>
+
+      </div>
+
+      <button class="adaptive-button" id="continueButton">
+        Continue learning →
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <div>
+      © 2026 Parla
+    </div>
+
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+
+  </footer>
+
+
+  <script>
+
+    const continueButton =
+      document.getElementById("continueButton");
+
+    continueButton.addEventListener("click", () => {
+      window.location.href = "dashboard.html";
+    });
+
+  </script>
+
+</body>
+</html>
