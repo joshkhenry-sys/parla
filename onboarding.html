@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Set up your learning | Parla</title>
-  <meta name="description" content="Personalize your Parla language learning experience.">
+  <meta name="description" content="Build your personalized language learning path with Parla.">
 
   <style>
     :root {
@@ -14,11 +14,14 @@
       --text: #171717;
       --muted: #777773;
       --border: #e5e5df;
+
       --blue: #536dff;
       --blue-soft: #edf0ff;
+
       --coral: #ed927c;
       --green: #78a58d;
       --purple: #9b8dd1;
+
       --radius-xl: 30px;
       --radius-lg: 22px;
       --radius-md: 16px;
@@ -41,18 +44,13 @@
         "Helvetica Neue",
         Arial,
         sans-serif;
-    }
-
-    button,
-    input {
-      font: inherit;
+      -webkit-font-smoothing: antialiased;
     }
 
     button {
+      font: inherit;
       cursor: pointer;
     }
-
-    /* NAV */
 
     nav {
       height: 82px;
@@ -78,8 +76,6 @@
       color: var(--muted);
       font-size: 13px;
     }
-
-    /* PROGRESS */
 
     .progress-wrap {
       width: min(100% - 40px, 760px);
@@ -111,8 +107,6 @@
       border-radius: 999px;
       transition: width .35s ease;
     }
-
-    /* MAIN */
 
     main {
       min-height: calc(100vh - 130px);
@@ -181,24 +175,24 @@
     }
 
     .step-header p {
-      max-width: 500px;
+      max-width: 530px;
       margin: 0 auto;
       color: var(--muted);
       font-size: 16px;
       line-height: 1.6;
     }
 
-    /* OPTIONS */
+    /* LANGUAGE CARDS */
 
-    .options {
+    .language-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
     }
 
-    .option {
+    .language-card {
       position: relative;
-      min-height: 105px;
+      min-height: 118px;
       padding: 20px;
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
@@ -208,18 +202,36 @@
       transition: .2s ease;
     }
 
-    .option:hover {
+    .language-card:hover {
       border-color: #c9c9c2;
       transform: translateY(-2px);
     }
 
-    .option.selected {
+    .language-card.selected {
       border-color: var(--blue);
       background: var(--blue-soft);
       box-shadow: 0 0 0 2px rgba(83,109,255,.08);
     }
 
-    .option-check {
+    .language-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .language-name {
+      display: block;
+      font-size: 15px;
+      font-weight: 650;
+      margin-bottom: 4px;
+    }
+
+    .language-native {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .language-check {
       position: absolute;
       top: 14px;
       right: 14px;
@@ -234,23 +246,44 @@
       color: white;
     }
 
-    .option.selected .option-check {
+    .language-card.selected .language-check {
       border-color: var(--blue);
       background: var(--blue);
     }
 
-    .option-title {
-      display: block;
-      font-size: 15px;
-      font-weight: 650;
-      margin-bottom: 5px;
+    /* SELECTED LANGUAGE SUMMARY */
+
+    .selected-summary {
+      margin-top: 18px;
+      padding: 16px 18px;
+      background: #f1f1ec;
+      border-radius: var(--radius-md);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
     }
 
-    .option-sub {
-      display: block;
+    .selected-summary.visible {
+      display: flex;
+    }
+
+    .selected-summary-copy {
+      font-size: 13px;
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
+    }
+
+    .selected-summary-copy strong {
+      color: var(--text);
+    }
+
+    .add-language-btn {
+      border: 0;
+      background: transparent;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     /* BIG OPTIONS */
@@ -296,6 +329,7 @@
       align-items: center;
       justify-content: center;
       font-size: 19px;
+      font-weight: 700;
     }
 
     .big-option.selected .big-icon {
@@ -341,7 +375,69 @@
       border-radius: 50%;
     }
 
-    /* MULTI SELECT */
+    /* INTERESTS */
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .option {
+      position: relative;
+      min-height: 105px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      color: var(--text);
+      text-align: left;
+      transition: .2s ease;
+    }
+
+    .option:hover {
+      border-color: #c9c9c2;
+      transform: translateY(-2px);
+    }
+
+    .option.selected {
+      border-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .option-check {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      border: 1px solid #d8d8d1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: white;
+    }
+
+    .option.selected .option-check {
+      border-color: var(--blue);
+      background: var(--blue);
+    }
+
+    .option-title {
+      display: block;
+      font-size: 15px;
+      font-weight: 650;
+      margin-bottom: 5px;
+    }
+
+    .option-sub {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
 
     .multi-note {
       text-align: center;
@@ -350,7 +446,7 @@
       font-size: 11px;
     }
 
-    /* FOOTER CONTROLS */
+    /* CONTROLS */
 
     .controls {
       max-width: 620px;
@@ -373,7 +469,8 @@
       color: var(--text);
     }
 
-    .continue-btn {
+    .continue-btn,
+    .start-btn {
       min-width: 145px;
       height: 52px;
       padding: 0 24px;
@@ -386,7 +483,8 @@
       transition: .2s ease;
     }
 
-    .continue-btn:hover {
+    .continue-btn:hover,
+    .start-btn:hover {
       background: #292929;
       transform: translateY(-1px);
       box-shadow: 0 8px 20px rgba(23,23,23,.12);
@@ -399,7 +497,7 @@
       box-shadow: none;
     }
 
-    /* FINAL */
+    /* FINISH */
 
     .finish {
       text-align: center;
@@ -420,34 +518,33 @@
       font-weight: 700;
     }
 
-    .finish h1 {
-      margin-bottom: 16px;
-    }
-
     .finish p {
-      max-width: 480px;
+      max-width: 500px;
       margin: 0 auto;
       color: var(--muted);
       font-size: 16px;
       line-height: 1.6;
     }
 
-    .start-btn {
-      margin-top: 32px;
-      height: 54px;
-      padding: 0 30px;
-      border: 0;
-      border-radius: var(--radius-md);
-      background: var(--text);
-      color: white;
-      font-size: 15px;
-      font-weight: 700;
-      transition: .2s ease;
+    .language-preview {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 25px auto 0;
     }
 
-    .start-btn:hover {
-      transform: translateY(-1px);
-      background: #292929;
+    .preview-pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .start-btn {
+      margin-top: 32px;
     }
 
     /* MOBILE */
@@ -489,9 +586,15 @@
         font-size: 14px;
       }
 
+      .language-grid,
       .options {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
+      }
+
+      .language-card {
+        min-height: 105px;
+        padding: 17px;
       }
 
       .option {
@@ -499,11 +602,13 @@
         padding: 17px;
       }
 
-      .option-title {
+      .option-title,
+      .language-name {
         font-size: 14px;
       }
 
-      .option-sub {
+      .option-sub,
+      .language-native {
         font-size: 11px;
       }
 
@@ -530,15 +635,21 @@
 
     @media (max-width: 430px) {
 
+      .language-grid,
       .options {
         grid-template-columns: 1fr 1fr;
+      }
+
+      .language-card {
+        min-height: 98px;
       }
 
       .option {
         min-height: 88px;
       }
 
-      .option-check {
+      .option-check,
+      .language-check {
         top: 10px;
         right: 10px;
       }
@@ -554,12 +665,12 @@
 
   <nav>
     <a href="index.html" class="logo">parla<span>•</span></a>
-    <div class="save-text">Your progress saves automatically</div>
+    <div class="save-text">Build your learning path</div>
   </nav>
 
   <div class="progress-wrap">
     <div class="progress-top">
-      <span id="progressLabel">Getting started</span>
+      <span id="progressLabel">Choose a language</span>
       <span id="progressNumber">1 of 5</span>
     </div>
 
@@ -580,78 +691,132 @@
 
           <div class="eyebrow">
             <span class="eyebrow-dot"></span>
-            Your language
+            Your languages
           </div>
 
-          <h1>What do you want to learn?</h1>
+          <h1>What do you want to learn first?</h1>
 
           <p>
-            Choose the language you want to actually use in your everyday life.
+            Start with one language. You can add as many others as you want later.
           </p>
 
         </div>
 
-        <div class="options">
+        <div class="language-grid">
 
-          <button class="option" data-group="targetLanguage" data-value="Spanish">
-            <span class="option-check">✓</span>
-            <span class="option-title">Spanish</span>
-            <span class="option-sub">Español</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Spanish">
+            <span class="language-check">✓</span>
+            <span class="language-icon">ES</span>
+            <span class="language-name">Spanish</span>
+            <span class="language-native">Español</span>
           </button>
 
-          <button class="option" data-group="targetLanguage" data-value="English">
-            <span class="option-check">✓</span>
-            <span class="option-title">English</span>
-            <span class="option-sub">English</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="English">
+            <span class="language-check">✓</span>
+            <span class="language-icon">EN</span>
+            <span class="language-name">English</span>
+            <span class="language-native">English</span>
           </button>
 
-          <button class="option" data-group="targetLanguage" data-value="French">
-            <span class="option-check">✓</span>
-            <span class="option-title">French</span>
-            <span class="option-sub">Français</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Portuguese">
+            <span class="language-check">✓</span>
+            <span class="language-icon">PT</span>
+            <span class="language-name">Portuguese</span>
+            <span class="language-native">Português</span>
           </button>
 
-          <button class="option" data-group="targetLanguage" data-value="Portuguese">
-            <span class="option-check">✓</span>
-            <span class="option-title">Portuguese</span>
-            <span class="option-sub">Português</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="French">
+            <span class="language-check">✓</span>
+            <span class="language-icon">FR</span>
+            <span class="language-name">French</span>
+            <span class="language-native">Français</span>
           </button>
 
-          <button class="option" data-group="targetLanguage" data-value="Italian">
-            <span class="option-check">✓</span>
-            <span class="option-title">Italian</span>
-            <span class="option-sub">Italiano</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Italian">
+            <span class="language-check">✓</span>
+            <span class="language-icon">IT</span>
+            <span class="language-name">Italian</span>
+            <span class="language-native">Italiano</span>
           </button>
 
-          <button class="option" data-group="targetLanguage" data-value="German">
-            <span class="option-check">✓</span>
-            <span class="option-title">German</span>
-            <span class="option-sub">Deutsch</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="German">
+            <span class="language-check">✓</span>
+            <span class="language-icon">DE</span>
+            <span class="language-name">German</span>
+            <span class="language-native">Deutsch</span>
           </button>
 
-          <button class="option" data-group="targetLanguage" data-value="Japanese">
-            <span class="option-check">✓</span>
-            <span class="option-title">Japanese</span>
-            <span class="option-sub">日本語</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Japanese">
+            <span class="language-check">✓</span>
+            <span class="language-icon">日</span>
+            <span class="language-name">Japanese</span>
+            <span class="language-native">日本語</span>
           </button>
 
-          <button class="option" data-group="targetLanguage" data-value="Korean">
-            <span class="option-check">✓</span>
-            <span class="option-title">Korean</span>
-            <span class="option-sub">한국어</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Korean">
+            <span class="language-check">✓</span>
+            <span class="language-icon">한</span>
+            <span class="language-name">Korean</span>
+            <span class="language-native">한국어</span>
           </button>
 
-          <button class="option" data-group="targetLanguage" data-value="Mandarin">
-            <span class="option-check">✓</span>
-            <span class="option-title">Mandarin</span>
-            <span class="option-sub">普通话</span>
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Mandarin">
+            <span class="language-check">✓</span>
+            <span class="language-icon">中</span>
+            <span class="language-name">Mandarin</span>
+            <span class="language-native">普通话</span>
+          </button>
+
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Arabic">
+            <span class="language-check">✓</span>
+            <span class="language-icon">ع</span>
+            <span class="language-name">Arabic</span>
+            <span class="language-native">العربية</span>
           </button>
 
         </div>
 
+        <div class="selected-summary" id="selectedSummary">
+          <div class="selected-summary-copy">
+            Learning <strong id="selectedLanguageText"></strong> first
+          </div>
+
+          <button class="add-language-btn" type="button" id="addLanguageBtn">
+            + Add another later
+          </button>
+        </div>
+
         <div class="controls">
-          <button class="back-btn" onclick="goBack()">Back</button>
-          <button class="continue-btn" onclick="nextStep()" disabled>Continue</button>
+          <button class="back-btn" type="button" onclick="goBack()">
+            Back
+          </button>
+
+          <button class="continue-btn"
+            type="button"
+            onclick="nextStep()"
+            disabled>
+            Continue
+          </button>
         </div>
 
       </section>
@@ -676,67 +841,120 @@
 
         </div>
 
-        <div class="options">
+        <div class="language-grid">
 
-          <button class="option" data-group="nativeLanguage" data-value="English">
-            <span class="option-check">✓</span>
-            <span class="option-title">English</span>
-            <span class="option-sub">English</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="English">
+            <span class="language-check">✓</span>
+            <span class="language-icon">EN</span>
+            <span class="language-name">English</span>
+            <span class="language-native">English</span>
           </button>
 
-          <button class="option" data-group="nativeLanguage" data-value="Spanish">
-            <span class="option-check">✓</span>
-            <span class="option-title">Spanish</span>
-            <span class="option-sub">Español</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="Spanish">
+            <span class="language-check">✓</span>
+            <span class="language-icon">ES</span>
+            <span class="language-name">Spanish</span>
+            <span class="language-native">Español</span>
           </button>
 
-          <button class="option" data-group="nativeLanguage" data-value="Portuguese">
-            <span class="option-check">✓</span>
-            <span class="option-title">Portuguese</span>
-            <span class="option-sub">Português</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="Portuguese">
+            <span class="language-check">✓</span>
+            <span class="language-icon">PT</span>
+            <span class="language-name">Portuguese</span>
+            <span class="language-native">Português</span>
           </button>
 
-          <button class="option" data-group="nativeLanguage" data-value="French">
-            <span class="option-check">✓</span>
-            <span class="option-title">French</span>
-            <span class="option-sub">Français</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="French">
+            <span class="language-check">✓</span>
+            <span class="language-icon">FR</span>
+            <span class="language-name">French</span>
+            <span class="language-native">Français</span>
           </button>
 
-          <button class="option" data-group="nativeLanguage" data-value="German">
-            <span class="option-check">✓</span>
-            <span class="option-title">German</span>
-            <span class="option-sub">Deutsch</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="German">
+            <span class="language-check">✓</span>
+            <span class="language-icon">DE</span>
+            <span class="language-name">German</span>
+            <span class="language-native">Deutsch</span>
           </button>
 
-          <button class="option" data-group="nativeLanguage" data-value="Italian">
-            <span class="option-check">✓</span>
-            <span class="option-title">Italian</span>
-            <span class="option-sub">Italiano</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="Italian">
+            <span class="language-check">✓</span>
+            <span class="language-icon">IT</span>
+            <span class="language-name">Italian</span>
+            <span class="language-native">Italiano</span>
           </button>
 
-          <button class="option" data-group="nativeLanguage" data-value="Japanese">
-            <span class="option-check">✓</span>
-            <span class="option-title">Japanese</span>
-            <span class="option-sub">日本語</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="Japanese">
+            <span class="language-check">✓</span>
+            <span class="language-icon">日</span>
+            <span class="language-name">Japanese</span>
+            <span class="language-native">日本語</span>
           </button>
 
-          <button class="option" data-group="nativeLanguage" data-value="Korean">
-            <span class="option-check">✓</span>
-            <span class="option-title">Korean</span>
-            <span class="option-sub">한국어</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="Korean">
+            <span class="language-check">✓</span>
+            <span class="language-icon">한</span>
+            <span class="language-name">Korean</span>
+            <span class="language-native">한국어</span>
           </button>
 
-          <button class="option" data-group="nativeLanguage" data-value="Other">
-            <span class="option-check">✓</span>
-            <span class="option-title">Other</span>
-            <span class="option-sub">Another language</span>
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="Mandarin">
+            <span class="language-check">✓</span>
+            <span class="language-icon">中</span>
+            <span class="language-name">Mandarin</span>
+            <span class="language-native">普通话</span>
+          </button>
+
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="Arabic">
+            <span class="language-check">✓</span>
+            <span class="language-icon">ع</span>
+            <span class="language-name">Arabic</span>
+            <span class="language-native">العربية</span>
+          </button>
+
+          <button class="language-card"
+            data-group="nativeLanguage"
+            data-value="Other">
+            <span class="language-check">✓</span>
+            <span class="language-icon">+</span>
+            <span class="language-name">Other</span>
+            <span class="language-native">Another language</span>
           </button>
 
         </div>
 
         <div class="controls">
-          <button class="back-btn" onclick="goBack()">Back</button>
-          <button class="continue-btn" onclick="nextStep()" disabled>Continue</button>
+          <button class="back-btn" type="button" onclick="goBack()">
+            Back
+          </button>
+
+          <button class="continue-btn"
+            type="button"
+            onclick="nextStep()"
+            disabled>
+            Continue
+          </button>
         </div>
 
       </section>
@@ -763,65 +981,85 @@
 
         <div class="big-options">
 
-          <button class="big-option" data-group="level" data-value="Beginner">
+          <button class="big-option"
+            data-group="level"
+            data-value="A0">
 
-            <div class="big-icon">A</div>
+            <div class="big-icon">A0</div>
 
             <div class="big-copy">
               <span class="big-title">I'm starting from scratch</span>
-              <span class="big-sub">I know little or nothing in this language.</span>
+              <span class="big-sub">
+                I know little or nothing in this language.
+              </span>
             </div>
 
             <div class="radio"></div>
 
           </button>
 
-          <button class="big-option" data-group="level" data-value="Elementary">
+          <button class="big-option"
+            data-group="level"
+            data-value="A1">
 
             <div class="big-icon">A1</div>
 
             <div class="big-copy">
               <span class="big-title">I know the basics</span>
-              <span class="big-sub">I can understand simple words and phrases.</span>
+              <span class="big-sub">
+                I can understand simple words and phrases.
+              </span>
             </div>
 
             <div class="radio"></div>
 
           </button>
 
-          <button class="big-option" data-group="level" data-value="Intermediate">
+          <button class="big-option"
+            data-group="level"
+            data-value="A2">
 
             <div class="big-icon">A2</div>
 
             <div class="big-copy">
               <span class="big-title">I can get by</span>
-              <span class="big-sub">I can have simple conversations but still get stuck.</span>
+              <span class="big-sub">
+                I can have simple conversations but still get stuck.
+              </span>
             </div>
 
             <div class="radio"></div>
 
           </button>
 
-          <button class="big-option" data-group="level" data-value="UpperIntermediate">
+          <button class="big-option"
+            data-group="level"
+            data-value="B1">
 
             <div class="big-icon">B1</div>
 
             <div class="big-copy">
               <span class="big-title">I can hold conversations</span>
-              <span class="big-sub">I understand most things but want to sound more natural.</span>
+              <span class="big-sub">
+                I understand most things but want to sound more natural.
+              </span>
             </div>
 
             <div class="radio"></div>
 
           </button>
 
-          <button class="big-option" data-group="level" data-value="Advanced">
+          <button class="big-option"
+            data-group="level"
+            data-value="B2+">
 
             <div class="big-icon">B2+</div>
 
             <div class="big-copy">
               <span class="big-title">I'm pretty fluent</span>
-              <span class="big-sub">I want precision, nuance, vocabulary and natural expression.</span>
+              <span class="big-sub">
+                I want precision, nuance, vocabulary and natural expression.
+              </span>
             </div>
 
             <div class="radio"></div>
@@ -831,8 +1069,16 @@
         </div>
 
         <div class="controls">
-          <button class="back-btn" onclick="goBack()">Back</button>
-          <button class="continue-btn" onclick="nextStep()" disabled>Continue</button>
+          <button class="back-btn" type="button" onclick="goBack()">
+            Back
+          </button>
+
+          <button class="continue-btn"
+            type="button"
+            onclick="nextStep()"
+            disabled>
+            Continue
+          </button>
         </div>
 
       </section>
@@ -859,65 +1105,85 @@
 
         <div class="big-options">
 
-          <button class="big-option" data-group="goal" data-value="Travel">
+          <button class="big-option"
+            data-group="goal"
+            data-value="Travel">
 
             <div class="big-icon">↗</div>
 
             <div class="big-copy">
               <span class="big-title">Travel</span>
-              <span class="big-sub">Feel comfortable navigating real places and meeting people.</span>
+              <span class="big-sub">
+                Feel comfortable navigating real places and meeting people.
+              </span>
             </div>
 
             <div class="radio"></div>
 
           </button>
 
-          <button class="big-option" data-group="goal" data-value="Conversation">
+          <button class="big-option"
+            data-group="goal"
+            data-value="Conversation">
 
             <div class="big-icon">•••</div>
 
             <div class="big-copy">
               <span class="big-title">Real conversation</span>
-              <span class="big-sub">Talk naturally without constantly translating in my head.</span>
+              <span class="big-sub">
+                Talk naturally without constantly translating in my head.
+              </span>
             </div>
 
             <div class="radio"></div>
 
           </button>
 
-          <button class="big-option" data-group="goal" data-value="Culture">
+          <button class="big-option"
+            data-group="goal"
+            data-value="Culture">
 
             <div class="big-icon">◌</div>
 
             <div class="big-copy">
               <span class="big-title">Culture & connection</span>
-              <span class="big-sub">Understand people, media, humor and everyday culture.</span>
+              <span class="big-sub">
+                Understand people, media, humor and everyday culture.
+              </span>
             </div>
 
             <div class="radio"></div>
 
           </button>
 
-          <button class="big-option" data-group="goal" data-value="Work">
+          <button class="big-option"
+            data-group="goal"
+            data-value="Work">
 
             <div class="big-icon">↗</div>
 
             <div class="big-copy">
               <span class="big-title">Work</span>
-              <span class="big-sub">Communicate confidently in professional situations.</span>
+              <span class="big-sub">
+                Communicate confidently in professional situations.
+              </span>
             </div>
 
             <div class="radio"></div>
 
           </button>
 
-          <button class="big-option" data-group="goal" data-value="Personal">
+          <button class="big-option"
+            data-group="goal"
+            data-value="Personal">
 
             <div class="big-icon">+</div>
 
             <div class="big-copy">
               <span class="big-title">Something personal</span>
-              <span class="big-sub">Family, relationships, moving somewhere new, or something else.</span>
+              <span class="big-sub">
+                Family, relationships, moving somewhere new, or something else.
+              </span>
             </div>
 
             <div class="radio"></div>
@@ -927,8 +1193,16 @@
         </div>
 
         <div class="controls">
-          <button class="back-btn" onclick="goBack()">Back</button>
-          <button class="continue-btn" onclick="nextStep()" disabled>Continue</button>
+          <button class="back-btn" type="button" onclick="goBack()">
+            Back
+          </button>
+
+          <button class="continue-btn"
+            type="button"
+            onclick="nextStep()"
+            disabled>
+            Continue
+          </button>
         </div>
 
       </section>
@@ -948,80 +1222,104 @@
           <h1>What do you want to talk about?</h1>
 
           <p>
-            Choose a few things you're genuinely interested in. Your lessons will use them to make practice more relevant.
+            Choose things you're genuinely interested in. Parla will use them to make practice feel relevant.
           </p>
 
         </div>
 
         <div class="options">
 
-          <button class="option" data-group="interests" data-value="Travel">
+          <button class="option"
+            data-group="interests"
+            data-value="Travel">
             <span class="option-check">✓</span>
             <span class="option-title">Travel</span>
             <span class="option-sub">Places & experiences</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Food">
+          <button class="option"
+            data-group="interests"
+            data-value="Food">
             <span class="option-check">✓</span>
             <span class="option-title">Food</span>
             <span class="option-sub">Restaurants & cooking</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Music">
+          <button class="option"
+            data-group="interests"
+            data-value="Music">
             <span class="option-check">✓</span>
             <span class="option-title">Music</span>
             <span class="option-sub">Artists & culture</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Movies">
+          <button class="option"
+            data-group="interests"
+            data-value="Movies">
             <span class="option-check">✓</span>
             <span class="option-title">Movies</span>
             <span class="option-sub">Film & TV</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Sports">
+          <button class="option"
+            data-group="interests"
+            data-value="Sports">
             <span class="option-check">✓</span>
             <span class="option-title">Sports</span>
             <span class="option-sub">Games & competition</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Fitness">
+          <button class="option"
+            data-group="interests"
+            data-value="Fitness">
             <span class="option-check">✓</span>
             <span class="option-title">Fitness</span>
-            <span class="option-sub">Training & health</span>
+            <span class="option-sub">Training & movement</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Technology">
+          <button class="option"
+            data-group="interests"
+            data-value="Technology">
             <span class="option-check">✓</span>
             <span class="option-title">Technology</span>
             <span class="option-sub">Tech & innovation</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Business">
+          <button class="option"
+            data-group="interests"
+            data-value="Business">
             <span class="option-check">✓</span>
             <span class="option-title">Business</span>
             <span class="option-sub">Work & entrepreneurship</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Nature">
+          <button class="option"
+            data-group="interests"
+            data-value="Nature">
             <span class="option-check">✓</span>
             <span class="option-title">Nature</span>
             <span class="option-sub">Outdoors & adventure</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Gaming">
+          <button class="option"
+            data-group="interests"
+            data-value="Gaming">
             <span class="option-check">✓</span>
             <span class="option-title">Gaming</span>
             <span class="option-sub">Games & communities</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="Books">
+          <button class="option"
+            data-group="interests"
+            data-value="Books">
             <span class="option-check">✓</span>
             <span class="option-title">Books</span>
             <span class="option-sub">Stories & ideas</span>
           </button>
 
-          <button class="option" data-group="interests" data-value="EverydayLife">
+          <button class="option"
+            data-group="interests"
+            data-value="EverydayLife">
             <span class="option-check">✓</span>
             <span class="option-title">Everyday life</span>
             <span class="option-sub">Real-world situations</span>
@@ -1034,8 +1332,16 @@
         </div>
 
         <div class="controls">
-          <button class="back-btn" onclick="goBack()">Back</button>
-          <button class="continue-btn" onclick="nextStep()" disabled>Finish</button>
+          <button class="back-btn" type="button" onclick="goBack()">
+            Back
+          </button>
+
+          <button class="continue-btn"
+            type="button"
+            onclick="nextStep()"
+            disabled>
+            Finish
+          </button>
         </div>
 
       </section>
@@ -1052,11 +1358,14 @@
           <h1>You're ready.</h1>
 
           <p>
-            Parla has what it needs to start building a learning experience around you.
-            Your lessons will evolve as you learn.
+            Your first language is ready to go. And Parla is built so you can keep adding languages as you learn.
           </p>
 
-          <button class="start-btn" onclick="window.location.href='dashboard.html'">
+          <div class="language-preview" id="languagePreview"></div>
+
+          <button class="start-btn"
+            type="button"
+            onclick="finishOnboarding()">
             Meet your learning path →
           </button>
 
@@ -1067,6 +1376,7 @@
     </div>
 
   </main>
+
 
   <script>
     const state = {
@@ -1085,7 +1395,7 @@
     const progressNumber = document.getElementById("progressNumber");
 
     const labels = {
-      1: "Your language",
+      1: "Choose a language",
       2: "Your background",
       3: "Your level",
       4: "Your reason",
@@ -1107,17 +1417,21 @@
 
     function showStep(stepNumber) {
       steps.forEach(step => {
-        step.classList.remove("active");
-
-        if (Number(step.dataset.step) === stepNumber) {
-          step.classList.add("active");
-        }
+        step.classList.toggle(
+          "active",
+          Number(step.dataset.step) === stepNumber
+        );
       });
 
       currentStep = stepNumber;
+
       updateProgress();
       updateContinueButton();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
     }
 
     function updateContinueButton() {
@@ -1160,6 +1474,7 @@
       if (currentStep < 5) {
         showStep(currentStep + 1);
       } else {
+        buildFinishPreview();
         showStep(6);
       }
     }
@@ -1170,16 +1485,24 @@
       }
     }
 
-    document.querySelectorAll(".option").forEach(option => {
+    /* LANGUAGE / STANDARD OPTION SELECTION */
 
-      option.addEventListener("click", () => {
+    document.querySelectorAll(
+      ".language-card, .option, .big-option"
+    ).forEach(element => {
 
-        const group = option.dataset.group;
-        const value = option.dataset.value;
+      element.addEventListener("click", () => {
+
+        const group = element.dataset.group;
+        const value = element.dataset.value;
+
+        if (!group || !value) return;
+
+        /* INTERESTS = MULTI SELECT */
 
         if (group === "interests") {
 
-          option.classList.toggle("selected");
+          element.classList.toggle("selected");
 
           if (state.interests.includes(value)) {
             state.interests = state.interests.filter(
@@ -1191,13 +1514,21 @@
 
         } else {
 
-          document
-            .querySelectorAll(`.option[data-group="${group}"]`)
-            .forEach(item => item.classList.remove("selected"));
+          const selector =
+            `.step[data-step="${currentStep}"] ` +
+            `[data-group="${group}"]`;
 
-          option.classList.add("selected");
+          document.querySelectorAll(selector).forEach(item => {
+            item.classList.remove("selected");
+          });
+
+          element.classList.add("selected");
 
           state[group] = value;
+
+          if (group === "targetLanguage") {
+            updateLanguageSummary();
+          }
         }
 
         updateContinueButton();
@@ -1205,26 +1536,61 @@
 
     });
 
+    function updateLanguageSummary() {
+      const summary = document.getElementById("selectedSummary");
+      const text = document.getElementById("selectedLanguageText");
 
-    document.querySelectorAll(".big-option").forEach(option => {
+      if (!state.targetLanguage) {
+        summary.classList.remove("visible");
+        return;
+      }
 
-      option.addEventListener("click", () => {
+      text.textContent = state.targetLanguage;
+      summary.classList.add("visible");
+    }
 
-        const group = option.dataset.group;
-        const value = option.dataset.value;
+    function buildFinishPreview() {
+      const preview = document.getElementById("languagePreview");
 
-        document
-          .querySelectorAll(`.big-option[data-group="${group}"]`)
-          .forEach(item => item.classList.remove("selected"));
+      preview.innerHTML = "";
 
-        option.classList.add("selected");
+      const pill = document.createElement("div");
+      pill.className = "preview-pill";
+      pill.textContent =
+        `${state.targetLanguage} · ${state.level}`;
 
-        state[group] = value;
+      preview.appendChild(pill);
+    }
 
-        updateContinueButton();
-      });
+    function finishOnboarding() {
 
-    });
+      /*
+        Temporary local state.
+
+        Once Supabase profiles/language_profiles
+        are connected, this is where the real
+        user data will be saved.
+      */
+
+      const learningProfile = {
+        targetLanguage: state.targetLanguage,
+        nativeLanguage: state.nativeLanguage,
+        level: state.level,
+        goal: state.goal,
+        interests: state.interests
+      };
+
+      try {
+        sessionStorage.setItem(
+          "parla_learning_profile",
+          JSON.stringify(learningProfile)
+        );
+      } catch (error) {
+        console.warn("Could not save temporary learning profile.", error);
+      }
+
+      window.location.href = "dashboard.html";
+    }
 
     updateProgress();
     updateContinueButton();
