@@ -3,171 +3,129 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Log in | Parla</title>
-  <meta name="description" content="Log in to your Parla language learning account.">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
 
   <style>
-    :root {
-      --bg: #f7f7f4;
-      --surface: #ffffff;
-      --text: #171717;
-      --muted: #777773;
-      --border: #e5e5df;
-      --blue: #536dff;
-      --blue-soft: #edf0ff;
-      --radius-lg: 24px;
-      --radius-md: 16px;
-    }
-
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
+      margin: 0;
+      background: #f7f6f2;
+      color: #171717;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+        "SF Pro Text", Inter, Helvetica, Arial, sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
       min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Inter",
-        "Helvetica Neue",
-        Arial,
-        sans-serif;
       display: flex;
       flex-direction: column;
     }
 
     nav {
-      height: 82px;
+      height: 78px;
+      padding: 0 5%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 5vw;
     }
 
     .logo {
-      color: var(--text);
-      text-decoration: none;
-      font-size: 27px;
+      font-size: 28px;
       font-weight: 700;
       letter-spacing: -1.5px;
     }
 
     .logo span {
-      color: var(--blue);
+      font-weight: 400;
     }
 
     .nav-right {
       font-size: 14px;
-      color: var(--muted);
+      color: #666;
     }
 
     .nav-right a {
-      color: var(--text);
-      text-decoration: none;
+      color: #111;
       font-weight: 600;
-      margin-left: 6px;
+      margin-left: 8px;
     }
 
     main {
       flex: 1;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 60px 20px 90px;
+      align-items: center;
+      padding: 70px 20px 100px;
     }
 
-    .login-wrap {
+    .login-card {
       width: 100%;
-      max-width: 430px;
-    }
-
-    .intro {
-      text-align: center;
-      margin-bottom: 30px;
+      max-width: 460px;
     }
 
     .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 18px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: var(--blue-soft);
-      color: var(--blue);
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: .3px;
-    }
-
-    .eyebrow-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--blue);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #777;
+      margin-bottom: 18px;
     }
 
     h1 {
-      font-size: clamp(38px, 7vw, 48px);
-      line-height: .98;
-      letter-spacing: -2.5px;
+      font-size: clamp(42px, 6vw, 64px);
+      line-height: .95;
+      letter-spacing: -3px;
+      margin: 0 0 20px;
       font-weight: 700;
-      margin-bottom: 14px;
     }
 
-    .intro p {
-      max-width: 340px;
-      margin: 0 auto;
-      color: var(--muted);
-      font-size: 15px;
+    .intro {
+      font-size: 17px;
       line-height: 1.6;
+      color: #666;
+      margin: 0 0 34px;
     }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 30px;
-      box-shadow:
-        0 18px 50px rgba(23, 23, 23, .05),
-        0 3px 12px rgba(23, 23, 23, .03);
-    }
-
-    .google-btn {
+    .google-btn,
+    .submit-btn {
       width: 100%;
-      height: 52px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      background: #fff;
-      color: var(--text);
+      min-height: 54px;
+      border-radius: 14px;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
+      font-family: inherit;
+    }
+
+    .google-btn {
+      background: #fff;
+      border: 1px solid #deddd8;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 11px;
-      text-decoration: none;
+      gap: 12px;
       transition: .2s ease;
     }
 
     .google-btn:hover {
-      border-color: #cfcfc8;
+      border-color: #bbb;
       transform: translateY(-1px);
-      box-shadow: 0 5px 15px rgba(0,0,0,.05);
     }
 
     .google-icon {
-      width: 20px;
-      height: 20px;
-      display: grid;
-      place-items: center;
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 700;
     }
 
@@ -175,8 +133,8 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      margin: 24px 0;
-      color: #aaa9a3;
+      margin: 28px 0;
+      color: #999;
       font-size: 12px;
     }
 
@@ -184,37 +142,35 @@
     .divider::after {
       content: "";
       height: 1px;
-      background: var(--border);
+      background: #deddd8;
       flex: 1;
-    }
-
-    .field {
-      margin-bottom: 17px;
     }
 
     label {
       display: block;
-      margin-bottom: 8px;
       font-size: 13px;
       font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .field {
+      margin-bottom: 18px;
     }
 
     input {
       width: 100%;
       height: 52px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      background: #fcfcfa;
+      border: 1px solid #d8d7d2;
+      border-radius: 12px;
+      background: #fff;
       padding: 0 15px;
-      color: var(--text);
-      font-size: 15px;
+      font-size: 16px;
+      font-family: inherit;
       outline: none;
     }
 
     input:focus {
-      border-color: var(--blue);
-      background: #fff;
-      box-shadow: 0 0 0 4px rgba(83,109,255,.08);
+      border-color: #222;
     }
 
     .password-row {
@@ -224,197 +180,151 @@
     }
 
     .forgot {
-      color: var(--blue);
       font-size: 12px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .submit-btn {
-      width: 100%;
-      height: 54px;
-      margin-top: 5px;
-      border: 0;
-      border-radius: var(--radius-md);
-      background: var(--text);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 700;
+      color: #666;
       cursor: pointer;
     }
 
+    .submit-btn {
+      margin-top: 8px;
+      border: 0;
+      background: #171717;
+      color: white;
+      transition: .2s ease;
+    }
+
+    .submit-btn:hover {
+      background: #2c2c2c;
+      transform: translateY(-1px);
+    }
+
     .message {
-      display: none;
-      margin-bottom: 18px;
-      padding: 12px 14px;
-      border-radius: 12px;
+      margin-top: 16px;
       font-size: 13px;
       line-height: 1.5;
-    }
-
-    .message.error {
-      display: block;
-      background: #fff1ef;
-      color: #a4493b;
-      border: 1px solid #f1d0ca;
-    }
-
-    .message.success {
-      display: block;
-      background: #eef8f1;
-      color: #39704d;
-      border: 1px solid #cfe6d6;
+      color: #b3261e;
+      min-height: 20px;
     }
 
     .terms {
-      text-align: center;
-      margin-top: 21px;
-      color: #999892;
+      margin-top: 25px;
       font-size: 11px;
       line-height: 1.6;
-    }
-
-    .terms a {
-      color: var(--muted);
-      text-decoration: underline;
+      color: #888;
+      text-align: center;
     }
 
     footer {
-      padding: 24px 5vw;
-      display: flex;
-      justify-content: center;
-      color: #aaa9a3;
-      font-size: 11px;
+      padding: 25px 5%;
+      text-align: center;
+      font-size: 12px;
+      color: #999;
     }
 
-    @media (max-width: 800px) {
+    @media (max-width: 600px) {
       nav {
-        height: 72px;
-        padding: 0 22px;
+        height: 70px;
+      }
+
+      .nav-right {
+        font-size: 13px;
       }
 
       main {
-        padding: 40px 16px 65px;
         align-items: flex-start;
+        padding-top: 65px;
       }
 
-      .card {
-        padding: 22px;
-        border-radius: 20px;
+      h1 {
+        letter-spacing: -2px;
       }
     }
   </style>
 </head>
 
 <body>
+  <div class="page">
 
-  <nav>
-    <a href="index.html" class="logo">
-      parla<span>•</span>
-    </a>
+    <nav>
+      <a href="index.html" class="logo">parla<span>•</span></a>
 
-    <div class="nav-right">
-      New to Parla?
-      <a href="signup.html">Create account</a>
-    </div>
-  </nav>
+      <div class="nav-right">
+        New to Parla?
+        <a href="signup.html">Create account</a>
+      </div>
+    </nav>
 
-  <main>
-    <div class="login-wrap">
+    <main>
+      <section class="login-card">
 
-      <div class="intro">
-        <div class="eyebrow">
-          <span class="eyebrow-dot"></span>
-          Welcome back
-        </div>
+        <div class="eyebrow">Welcome back</div>
 
         <h1>Good to see you.</h1>
 
-        <p>
-          Pick up where you left off and keep building a language you can actually use.
+        <p class="intro">
+          Pick up where you left off. Your learning, progress, and conversations
+          are waiting for you.
         </p>
-      </div>
 
-      <div class="card">
-
-        <!-- GOOGLE LOGIN -->
-        <a
-          class="google-btn"
-          href="https://tobzuasbijyblusnuics.supabase.co/auth/v1/authorize?provider=google&redirect_to=https%3A%2F%2Fparla-speak.netlify.app%2Fdashboard.html"
-        >
+        <button type="button" class="google-btn" id="googleBtn">
           <span class="google-icon">G</span>
           <span>Continue with Google</span>
-        </a>
+        </button>
 
-        <div class="divider">
-          or continue with email
-        </div>
-
-        <div id="message" class="message"></div>
+        <div class="divider">or continue with email</div>
 
         <form id="loginForm">
 
           <div class="field">
             <label for="email">Email</label>
-
             <input
-              type="email"
               id="email"
-              placeholder="you@example.com"
+              type="email"
               autocomplete="email"
               required
             >
           </div>
 
           <div class="field">
-
             <div class="password-row">
               <label for="password">Password</label>
-
-              <a href="#" class="forgot" id="forgotPassword">
+              <button
+                type="button"
+                class="forgot"
+                id="forgotBtn"
+              >
                 Forgot password?
-              </a>
+              </button>
             </div>
 
             <input
-              type="password"
               id="password"
-              placeholder="Enter your password"
+              type="password"
               autocomplete="current-password"
               required
             >
-
           </div>
 
-          <button
-            class="submit-btn"
-            id="loginBtn"
-            type="submit"
-          >
+          <button type="submit" class="submit-btn" id="submitBtn">
             Log in
           </button>
+
+          <div class="message" id="message"></div>
 
         </form>
 
         <div class="terms">
-          By continuing, you agree to Parla's
-          <a href="#">Terms</a> and
-          <a href="#">Privacy Policy</a>.
+          By continuing, you agree to Parla's Terms and Privacy Policy.
         </div>
 
-      </div>
+      </section>
+    </main>
 
-    </div>
-  </main>
+    <footer>
+      © 2026 Parla
+    </footer>
 
-  <footer>
-    © 2026 Parla
-  </footer>
-
-
-  <!-- Supabase is only used for email login now -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
+  </div>
 
   <script>
     const supabaseClient = window.supabase.createClient(
@@ -422,75 +332,92 @@
       window.SUPABASE_ANON_KEY
     );
 
-    const form = document.getElementById("loginForm");
-    const loginBtn = document.getElementById("loginBtn");
+    const googleBtn = document.getElementById("googleBtn");
+    const loginForm = document.getElementById("loginForm");
+    const forgotBtn = document.getElementById("forgotBtn");
     const message = document.getElementById("message");
-    const forgotPassword = document.getElementById("forgotPassword");
+    const submitBtn = document.getElementById("submitBtn");
 
-    function showMessage(text, type) {
+    function showMessage(text) {
       message.textContent = text;
-      message.className = "message " + type;
     }
 
-    form.addEventListener("submit", async function(event) {
-      event.preventDefault();
+    googleBtn.addEventListener("click", async () => {
+      googleBtn.disabled = true;
+      googleBtn.textContent = "Connecting…";
+      showMessage("");
 
-      message.className = "message";
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/dashboard.html"
+        }
+      });
+
+      if (error) {
+        googleBtn.disabled = false;
+        googleBtn.innerHTML = `
+          <span class="google-icon">G</span>
+          <span>Continue with Google</span>
+        `;
+        showMessage(error.message);
+      }
+    });
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
 
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
-      loginBtn.disabled = true;
-      loginBtn.textContent = "Logging in...";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Logging in…";
+      showMessage("");
 
-      const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-          email,
-          password
-        });
+      const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
 
       if (error) {
-        showMessage(error.message, "error");
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Log in";
+        showMessage(error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Log in";
         return;
       }
 
+      window.location.href = "dashboard.html";
+    });
+
+    forgotBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+
+      if (!email) {
+        showMessage("Enter your email address first.");
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo: window.location.origin + "/login.html"
+        }
+      );
+
+      if (error) {
+        showMessage(error.message);
+        return;
+      }
+
+      message.style.color = "#444";
+      showMessage("Password reset instructions have been sent.");
+    });
+
+    supabaseClient.auth.getSession().then(({ data }) => {
       if (data.session) {
         window.location.href = "dashboard.html";
       }
     });
-
-    forgotPassword.addEventListener("click", async function(event) {
-      event.preventDefault();
-
-      const email = document.getElementById("email").value.trim();
-
-      if (!email) {
-        showMessage("Enter your email address first.", "error");
-        return;
-      }
-
-      const { error } =
-        await supabaseClient.auth.resetPasswordForEmail(
-          email,
-          {
-            redirectTo:
-              window.location.origin + "/reset-password.html"
-          }
-        );
-
-      if (error) {
-        showMessage(error.message, "error");
-        return;
-      }
-
-      showMessage(
-        "Check your email for a password reset link.",
-        "success"
-      );
-    });
   </script>
-
 </body>
 </html>
