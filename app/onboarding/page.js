@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const languages = [
@@ -48,7 +48,6 @@ const stepLabels = [
 ];
 
 export default function OnboardingPage() {
-  const supabase = useMemo(() => createClient(), []);
   const [step, setStep] = useState(1);
   const [targetLanguage, setTargetLanguage] = useState("");
   const [nativeLanguage, setNativeLanguage] = useState("");
@@ -87,6 +86,7 @@ export default function OnboardingPage() {
 
   async function finishOnboarding() {
     setSaving(true);
+    const supabase = createClient();
     setError("");
 
     const { data: { user } } = await supabase.auth.getUser();
@@ -142,7 +142,7 @@ export default function OnboardingPage() {
       .upsert({
         user_id: user.id,
         language_id: language.id,
-        level: level === "B2+" ? "B2" : level,
+        level,
         goal,
         interests: selectedInterests,
         is_current: true,
