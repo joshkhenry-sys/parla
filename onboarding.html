@@ -1432,6 +1432,9 @@
   </main>
 
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
   <script>
     const state = {
       targetLanguage: null,
@@ -1616,16 +1619,7 @@
       preview.appendChild(pill);
     }
 
-    function finishOnboarding() {
-
-      /*
-        Temporary local state.
-
-        Once Supabase profiles/language_profiles
-        are connected, this is where the real
-        user data will be saved.
-      */
-
+    async function finishOnboarding() {
       const learningProfile = {
         targetLanguage: state.targetLanguage,
         nativeLanguage: state.nativeLanguage,
@@ -1639,11 +1633,77 @@
           "parla_learning_profile",
           JSON.stringify(learningProfile)
         );
-      } catch (error) {
-        console.warn("Could not save temporary learning profile.", error);
-      }
 
-      window.location.href = "dashboard.html";
+        const client = window.supabase.createClient(
+          window.SUPABASE_URL,
+          window.SUPABASE_ANON_KEY
+        );
+
+        const { data: sessionData } = await client.auth.getSession();
+        const user = sessionData?.session?.user;
+
+        if (!user) {
+          window.location.href = "signup.html?language=" + encodeURIComponent(state.targetLanguage);
+          return;
+        }
+
+        const languageMap = {
+          Spanish: "es", English: "en", Portuguese: "pt", French: "fr",
+          Italian: "it", German: "de", Japanese: "ja", Korean: "ko",
+          Mandarin: "zh", Arabic: "ar", Dutch: "nl", Swedish: "sv",
+          Greek: "el", Turkish: "tr", Hindi: "hi", Polish: "pl"
+        };
+
+        const languageCode = languageMap[state.targetLanguage];
+        if (!languageCode) throw new Error("Unsupported language.");
+
+        const { data: language, error: languageError } = await client
+          .from("languages")
+          .select("id")
+          .eq("code", languageCode)
+          .single();
+
+        if (languageError) throw languageError;
+
+        const { data: learnerLanguage, error: learnerError } = await client
+          .from("learner_languages")
+          .upsert({
+            user_id: user.id,
+            language_id: language.id,
+            level: state.level,
+            goal: state.goal,
+            interests: state.interests,
+            is_current: true
+          }, {
+            onConflict: "user_id,language_id"
+          })
+          .select("id")
+          .single();
+
+        if (learnerError) throw learnerError;
+
+        const skills = ["vocabulary", "grammar", "understanding", "conversation", "confidence"];
+        await client.from("learner_skills").upsert(
+          skills.map(skill => ({
+            learner_language_id: learnerLanguage.id,
+            skill,
+            mastery: 0
+          })),
+          { onConflict: "learner_language_id,skill" }
+        );
+
+        await client.from("profiles").upsert({
+          id: user.id,
+          native_language_code: state.nativeLanguage,
+          goal: state.goal,
+          interests: state.interests
+        });
+
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        console.error("Onboarding save failed:", error);
+        alert("We couldn't save your learning profile yet. Please try again.");
+      }
     }
 
     const initialLanguage = new URLSearchParams(window.location.search).get("language");
