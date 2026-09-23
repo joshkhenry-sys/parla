@@ -32,10 +32,6 @@ export default async function handler(request) {
           }))
       : [];
 
-    if (!messages.length) {
-      return Response.json({ error: "A conversation message is required." }, { status: 400 });
-    }
-
     const instructions = [
       "You are Parla, an adaptive real-world language conversation coach.",
       "Have a natural conversation in the learner's target language.",
@@ -62,7 +58,9 @@ export default async function handler(request) {
       body: JSON.stringify({
         model: "gpt-5.6-luna",
         instructions,
-        input: messages
+        input: messages.length
+          ? messages
+          : "Start the conversation by asking the learner one natural question about " + topic + ". Speak in " + language + ".",
       })
     });
 
