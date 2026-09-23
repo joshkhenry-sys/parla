@@ -20,48 +20,128 @@ export default async function handler(req, res) {
       });
     }
 
-    const level = profile.level || "A1";
-    const goal = profile.goal || "Real conversation";
-    const interests = Array.isArray(profile.interests) && profile.interests.length
-      ? profile.interests.join(", ")
+    const targetLanguage = String(profile.targetLanguage).slice(0, 80);
+    const nativeLanguage = String(profile.nativeLanguage || "English").slice(0, 80);
+    const level = String(profile.level || "A1").slice(0, 20);
+    const goal = String(profile.goal || "Real conversation").slice(0, 120);
+
+    const interests = Array.isArray(profile.interests)
+      ? profile.interests.filter(item => typeof item === "string").slice(0, 8).join(", ")
       : "Everyday life";
 
     const systemPrompt = [
-      "You are Parla, an adaptive language-learning coach.",
-      "Your job is to teach useful language first, then practice it, then prepare the learner to use it in real conversation.",
-      "Never make the lesson feel like a generic textbook or a children's language app.",
-      "Use natural everyday language appropriate to the target language and learner level.",
-      "Teach meanings clearly before testing.",
-      "Prefer a small set of high-value expressions over a giant vocabulary list.",
-      "Use the learner's goal and interests to choose a practical real-world situation.",
-      "Return ONLY valid JSON with this exact shape:",
-      '{"title":"string","scenario":"string","intro":"string","expressions":[{"phrase":"string","meaning":"string","example":"string","note":"string"}],"practice":{"prompt":"string","options":[{"text":"string","correct":true,"explanation":"string"},{"text":"string","correct":false,"explanation":"string"},{"text":"string","correct":false,"explanation":"string"}]},"production":{"prompt":"string","starter":"string"},"speaking":{"prompt":"string","instructions":"string"}}'
+      "You are Parla, an adaptive real-world language-learning coach.",
+      "Build a short, high-value lesson that teaches language before asking the learner to produce it.",
+      "The lesson should feel human, practical, modern, and relevant to an adult learner.",
+      "Do not make it feel like a children's app, textbook worksheet, or generic vocabulary dump.",
+      "Choose one realistic situation based on the learner's goal and interests.",
+      "Teach 3 to 5 high-value expressions, not a large list.",
+      "Each expression must be natural for the target language and appropriate for the learner's level.",
+      "For B2+ learners, prioritize nuance, collocations, register, idiomatic phrasing, and subtle distinctions.",
+      "For lower levels, keep the amount of new material small and useful.",
+      "Practice should test material that was just taught.",
+      "The production task should have multiple valid answers.",
+      "The speaking challenge should ask the learner to respond naturally in the target language.",
+      "Use English for meanings and instructional explanations unless the target language itself is more useful.",
+      "Never assume Spanish. The selected target language controls every target-language example.",
+      "Return ONLY structured JSON matching the supplied schema."
     ].join(" ");
 
     const userPrompt = [
-      `Target language: ${profile.targetLanguage}`,
-      `Learner level: ${level}`,
-      `Goal: ${goal}`,
-      `Interests: ${interests}`,
-      "Create one focused 8–12 minute lesson.",
-      "Choose a real-world situation that fits this learner.",
-      "Do not assume Spanish; all teaching content must be in the selected target language.",
-      "Keep explanations in English unless a brief target-language explanation is more useful.",
-      "For B2+ learners, teach nuance, register, collocations, and natural phrasing instead of beginner material."
+      "Target language: " + targetLanguage,
+      "Native language: " + nativeLanguage,
+      "Learner level: " + level,
+      "Goal: " + goal,
+      "Interests: " + (interests || "Everyday life"),
+      "Create one focused lesson that takes roughly 8–12 minutes."
     ].join("\n");
+
+    const schema = {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        title: { type: "string" },
+        scenario: { type: "string" },
+        intro: { type: "string" },
+        expressions: {
+          type: "array",
+          minItems: 3,
+          maxItems: 5,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              phrase: { type: "string" },
+              meaning: { type: "string" },
+              example: { type: "string" },
+              note: { type: "string" }
+            },
+            required: ["phrase", "meaning", "example", "note"]
+          }
+        },
+        practice: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            prompt: { type: "string" },
+            options: {
+              type: "array",
+              minItems: 3,
+              maxItems: 3,
+              items: {
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  text: { type: "string" },
+                  correct: { type: "boolean" },
+                  explanation: { type: "string" }
+                },
+                required: ["text", "correct", "explanation"]
+              }
+            }
+          },
+          required: ["prompt", "options"]
+        },
+        production: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            prompt: { type: "string" },
+            starter: { type: "string" }
+          },
+          required: ["prompt", "starter"]
+        },
+        speaking: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            prompt: { type: "string" },
+            instructions: { type: "string" }
+          },
+          required: ["prompt", "instructions"]
+        }
+      },
+      required: ["title", "scenario", "intro", "expressions", "practice", "production", "speaking"]
+    };
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        "Authorization": "Bearer " + apiKey
       },
       body: JSON.stringify({
         model: "gpt-5.6-luna",
-        input: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ]
+        instructions: systemPrompt,
+        input: userPrompt,
+        text: {
+          format: {
+            type: "json_schema",
+            name: "parla_lesson",
+            strict: true,
+            schema
+          }
+        }
       })
     });
 
@@ -73,15 +153,9 @@ export default async function handler(req, res) {
       });
     }
 
-    const text = Array.isArray(data?.output)
-      ? data.output
-          .flatMap(item => Array.isArray(item?.content) ? item.content : [])
-          .filter(item => item?.type === "output_text")
-          .map(item => item.text)
-          .join("")
-      : "";
+    const outputText = typeof data?.output_text === "string" ? data.output_text.trim() : "";
 
-    if (!text) {
+    if (!outputText) {
       return res.status(502).json({
         error: "The AI returned no lesson content."
       });
@@ -90,7 +164,7 @@ export default async function handler(req, res) {
     let lesson;
 
     try {
-      lesson = JSON.parse(text);
+      lesson = JSON.parse(outputText);
     } catch {
       return res.status(502).json({
         error: "The AI returned invalid lesson data."
