@@ -667,7 +667,7 @@
     <div class="nav-right">
       <div class="language-pill">
         <div class="language-dot"></div>
-        <span>Spanish</span>
+        <span id="languagePillText">Spanish</span>
       </div>
 
       <div class="avatar">J</div>
@@ -741,7 +741,7 @@
 
       <div class="conversation-top">
 
-        <div class="conversation-title">
+        <div class="conversation-title" id="conversationTitle">
           Spanish conversation
         </div>
 
@@ -753,91 +753,7 @@
       </div>
 
 
-      <div class="messages" id="messages">
-
-        <!-- PARLA -->
-
-        <div class="message parla">
-
-          <div class="message-avatar parla-avatar">
-            P
-          </div>
-
-          <div class="message-content">
-
-            <div class="message-name">
-              Parla
-            </div>
-
-            <div class="message-text">
-              Cuéntame, ¿qué hiciste este fin de semana?
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- USER -->
-
-        <div class="message user">
-
-          <div class="message-avatar user-avatar">
-            J
-          </div>
-
-          <div class="message-content">
-
-            <div class="message-name">
-              You
-            </div>
-
-            <div class="message-text">
-              Fui a caminar con unos amigos y después comimos en un restaurante nuevo.
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- PARLA -->
-
-        <div class="message parla">
-
-          <div class="message-avatar parla-avatar">
-            P
-          </div>
-
-          <div class="message-content">
-
-            <div class="message-name">
-              Parla
-            </div>
-
-            <div class="message-text">
-              Suena bien. ¿Qué tipo de comida probaron?
-            </div>
-
-            <div class="correction" id="correction">
-
-              <div class="correction-label">
-                Something to notice
-              </div>
-
-              <p>
-                Your Spanish was clear. Later, we might practice
-                a more natural way to talk about what happened
-                after your hike.
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
+      <div class="messages" id="messages" aria-live="polite"></div>
 
 
       <!-- COMPOSER -->
@@ -849,7 +765,8 @@
           <textarea
             id="messageInput"
             rows="1"
-            placeholder="Write something in Spanish..."
+            id="messageInput"
+            placeholder="Write something in your target language..."
           ></textarea>
 
           <div class="composer-actions">
@@ -958,145 +875,167 @@
 
 
   <script>
-
     const input = document.getElementById("messageInput");
     const sendButton = document.getElementById("sendButton");
     const micButton = document.getElementById("micButton");
     const messages = document.getElementById("messages");
-    const correction = document.getElementById("correction");
     const changeTopic = document.getElementById("changeTopic");
     const reviewButton = document.getElementById("reviewButton");
+    const languagePillText = document.getElementById("languagePillText");
+    const conversationTitle = document.getElementById("conversationTitle");
+    const composerNote = document.querySelector(".composer-note");
+    const topicName = document.querySelector(".topic-name");
+    const statusText = document.querySelector(".conversation-status");
 
+    const profile = loadProfile();
 
-    /* ENABLE SEND BUTTON */
+    const state = {
+      language: profile?.targetLanguage || "Spanish",
+      level: profile?.level || "A2",
+      goal: profile?.goal || "Real conversation",
+      interests: Array.isArray(profile?.interests) ? profile.interests : [],
+      topic: "Your weekend",
+      history: [],
+      busy: false
+    };
 
-    input.addEventListener("input", () => {
+    function loadProfile() {
+      try {
+        const raw = sessionStorage.getItem("parla_learning_profile");
+        return raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        console.warn("Could not load learning profile.", error);
+        return null;
+      }
+    }
 
-      sendButton.disabled = input.value.trim() === "";
+    function updateLanguageUI() {
+      languagePillText.textContent = state.language;
+      conversationTitle.textContent = state.language + " conversation";
+      input.placeholder = "Write something in " + state.language + "...";
+      topicName.textContent = state.topic;
+    }
 
-      input.style.height = "auto";
-      input.style.height =
-        Math.min(input.scrollHeight, 120) + "px";
+    function addMessage(role, text, options = {}) {
+      const message = document.createElement("div");
+      message.className = "message " + (role === "user" ? "user" : "parla");
 
-    });
+      const avatar = document.createElement("div");
+      avatar.className = "message-avatar " + (role === "user" ? "user-avatar" : "parla-avatar");
+      avatar.textContent = role === "user" ? "J" : "P";
 
+      const content = document.createElement("div");
+      content.className = "message-content";
 
-    /* SEND MESSAGE */
+      const name = document.createElement("div");
+      name.className = "message-name";
+      name.textContent = role === "user" ? "You" : "Parla";
 
-    sendButton.addEventListener("click", sendMessage);
+      const textNode = document.createElement("div");
+      textNode.className = "message-text";
+      textNode.textContent = text;
 
+      content.appendChild(name);
+      content.appendChild(textNode);
+      message.appendChild(avatar);
+      message.appendChild(content);
+      messages.appendChild(message);
 
-    input.addEventListener("keydown", (event) => {
-
-      if (event.key === "Enter" && !event.shiftKey) {
-
-        event.preventDefault();
-
-        if (!sendButton.disabled) {
-          sendMessage();
-        }
-
+      if (!options.skipHistory) {
+        state.history.push({ role, content: text });
       }
 
-    });
+      messages.scrollTop = messages.scrollHeight;
+    }
 
+    function setBusy(value) {
+      state.busy = value;
+      sendButton.disabled = value || input.value.trim() === "";
+      input.disabled = value;
+      statusText.innerHTML = value
+        ? '<span class="status-dot"></span> Thinking'
+        : '<span class="status-dot"></span> Listening';
+      composerNote.textContent = value
+        ? "Parla is thinking..."
+        : "Parla won't interrupt you to correct every mistake.";
+    }
+
+    async function callParla() {
+      setBusy(true);
+
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            language: state.language,
+            level: state.level,
+            goal: state.goal,
+            interests: state.interests,
+            topic: state.topic,
+            messages: state.history
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "The AI request failed.");
+        }
+
+        addMessage("assistant", data.text);
+      } catch (error) {
+        console.error(error);
+        addMessage(
+          "assistant",
+          "I'm having trouble connecting right now. Check the AI setup in Vercel and try again."
+        );
+      } finally {
+        setBusy(false);
+      }
+    }
 
     function sendMessage() {
-
       const text = input.value.trim();
+      if (!text || state.busy) return;
 
-      if (!text) return;
-
-
-      const userMessage = document.createElement("div");
-
-      userMessage.className = "message user";
-
-      userMessage.innerHTML = `
-        <div class="message-avatar user-avatar">
-          J
-        </div>
-
-        <div class="message-content">
-
-          <div class="message-name">
-            You
-          </div>
-
-          <div class="message-text">
-            ${escapeHtml(text)}
-          </div>
-
-        </div>
-      `;
-
-      messages.appendChild(userMessage);
-
-
+      addMessage("user", text);
       input.value = "";
       input.style.height = "auto";
       sendButton.disabled = true;
 
-
-      setTimeout(() => {
-
-        const parlaMessage = document.createElement("div");
-
-        parlaMessage.className = "message parla";
-
-        parlaMessage.innerHTML = `
-          <div class="message-avatar parla-avatar">
-            P
-          </div>
-
-          <div class="message-content">
-
-            <div class="message-name">
-              Parla
-            </div>
-
-            <div class="message-text">
-              ¡Qué bien! Cuéntame un poco más.
-            </div>
-
-          </div>
-        `;
-
-        messages.appendChild(parlaMessage);
-
-        messages.scrollTop = messages.scrollHeight;
-
-      }, 700);
-
-
-      messages.scrollTop = messages.scrollHeight;
-
+      callParla();
     }
 
+    input.addEventListener("input", () => {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, 120) + "px";
+      sendButton.disabled = state.busy || input.value.trim() === "";
+    });
 
-    /* MICROPHONE */
+    sendButton.addEventListener("click", sendMessage);
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
 
     let listening = false;
 
     micButton.addEventListener("click", () => {
-
       listening = !listening;
-
       micButton.classList.toggle("active", listening);
 
       if (listening) {
         input.placeholder = "Listening...";
       } else {
-        input.placeholder = "Write something in Spanish...";
+        input.placeholder = "Write something in " + state.language + "...";
       }
-
     });
 
-
-    /* CHANGE TOPIC */
-
     changeTopic.addEventListener("click", () => {
-
       const topics = [
         "Your weekend",
         "Food you actually like",
@@ -1106,49 +1045,20 @@
         "Your morning routine"
       ];
 
-      const current =
-        document.querySelector(".topic-name").textContent.trim();
-
-      const available =
-        topics.filter(topic => topic !== current);
-
-      const next =
-        available[Math.floor(Math.random() * available.length)];
-
-      document.querySelector(".topic-name").textContent = next;
-
+      const current = topicName.textContent.trim();
+      const available = topics.filter(topic => topic !== current);
+      state.topic = available[Math.floor(Math.random() * available.length)];
+      topicName.textContent = state.topic;
     });
-
-
-    /* ADAPTIVE REVIEW */
 
     reviewButton.addEventListener("click", () => {
-
-      correction.classList.add("show");
-
-      reviewButton.textContent = "Parla noticed something";
-
-      correction.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
-
+      alert(
+        "Parla will turn useful patterns from this conversation into review items as the learning engine is connected."
+      );
     });
 
-
-    /* SECURITY */
-
-    function escapeHtml(value) {
-
-      return value
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-    }
-
+    updateLanguageUI();
+    callParla();
   </script>
 
 </body>
