@@ -208,6 +208,9 @@ nav {
 }
 
 .language {
+  display: inline-flex;
+  align-items: center;
+
   border: 1px solid var(--border);
   background: rgba(255,255,255,.72);
   color: #5d5d58;
@@ -216,6 +219,10 @@ nav {
   cursor: pointer;
   transition: background .2s ease, border .2s ease, transform .2s ease;
 }
+.language-list .language {
+  text-decoration: none;
+}
+
 
 .language:hover {
   transform: translateY(-1px);
