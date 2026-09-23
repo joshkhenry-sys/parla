@@ -794,6 +794,60 @@
             <span class="language-native">العربية</span>
           </button>
 
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Dutch">
+            <span class="language-check">✓</span>
+            <span class="language-icon">NL</span>
+            <span class="language-name">Dutch</span>
+            <span class="language-native">Nederlands</span>
+          </button>
+
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Swedish">
+            <span class="language-check">✓</span>
+            <span class="language-icon">SV</span>
+            <span class="language-name">Swedish</span>
+            <span class="language-native">Svenska</span>
+          </button>
+
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Greek">
+            <span class="language-check">✓</span>
+            <span class="language-icon">GR</span>
+            <span class="language-name">Greek</span>
+            <span class="language-native">Ελληνικά</span>
+          </button>
+
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Turkish">
+            <span class="language-check">✓</span>
+            <span class="language-icon">TR</span>
+            <span class="language-name">Turkish</span>
+            <span class="language-native">Türkçe</span>
+          </button>
+
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Hindi">
+            <span class="language-check">✓</span>
+            <span class="language-icon">हि</span>
+            <span class="language-name">Hindi</span>
+            <span class="language-native">हिन्दी</span>
+          </button>
+
+          <button class="language-card"
+            data-group="targetLanguage"
+            data-value="Polish">
+            <span class="language-check">✓</span>
+            <span class="language-icon">PL</span>
+            <span class="language-name">Polish</span>
+            <span class="language-native">Polski</span>
+          </button>
+
         </div>
 
         <div class="selected-summary" id="selectedSummary">
@@ -1590,6 +1644,18 @@
       }
 
       window.location.href = "dashboard.html";
+    }
+
+    const initialLanguage = new URLSearchParams(window.location.search).get("language");
+
+    if (initialLanguage) {
+      const initialCard = Array.from(
+        document.querySelectorAll('[data-group="targetLanguage"]')
+      ).find(card => card.dataset.value === initialLanguage);
+
+      if (initialCard) {
+        initialCard.click();
+      }
     }
 
     updateProgress();
