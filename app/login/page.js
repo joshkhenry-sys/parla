@@ -9,9 +9,8 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const supabase = createClient();
-
   useEffect(() => {
+    const supabase = createClient();
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         window.location.href = "/dashboard";
@@ -23,6 +22,7 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -41,6 +41,7 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -63,6 +64,7 @@ export default function LoginPage() {
       return;
     }
 
+    const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: window.location.origin + "/login",
     });
