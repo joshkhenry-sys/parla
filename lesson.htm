@@ -602,7 +602,7 @@
 
       <div class="lesson-info">
         <span>Lesson</span>
-        <span class="lesson-language">Spanish</span>
+        <span class="lesson-language" id="lessonLanguage">Spanish</span>
       </div>
 
     </header>
@@ -632,15 +632,13 @@
         Let's start with something useful
       </div>
 
-      <h1>
+      <h1 id="lessonTitle">
         Making plans
         without sounding textbook.
       </h1>
 
-      <p class="step-intro">
-        Today you'll learn the language people actually use
-        when making plans, changing them, and figuring out
-        what to do next.
+      <p class="step-intro" id="lessonIntro">
+        Today you'll learn practical language for a real-world situation.
       </p>
 
       <div class="context-card">
@@ -649,20 +647,17 @@
           Real-world situation
         </div>
 
-        <h2>
+        <h2 id="scenarioTitle">
           You're making plans with a friend.
         </h2>
 
-        <p>
-          You want to suggest something, see if they're free,
-          and change the plan if something comes up.
+        <p id="scenarioDescription">
+          You want to use useful language in a realistic situation.
         </p>
 
-        <div class="scenario">
+        <div class="scenario" id="scenarioText">
           <strong>Imagine this:</strong><br>
-          It's Thursday afternoon. Your friend asks what
-          you're doing this weekend. You have a few ideas,
-          but nothing is completely decided yet.
+          You are in a realistic everyday situation.
         </div>
 
       </div>
@@ -684,17 +679,15 @@
         Useful language
       </div>
 
-      <h1>
-        These are the phrases
-        you actually need.
+      <h1 id="expressionsTitle">
+        These are the phrases you actually need.
       </h1>
 
-      <p class="step-intro">
-        Don't memorize a giant list. Start with a few expressions
-        you can immediately use in conversation.
+      <p class="step-intro" id="expressionsIntro">
+        Start with a few high-value expressions you can immediately use.
       </p>
 
-      <div class="language-grid">
+      <div class="language-grid" id="expressionsGrid">
 
         <div class="language-card">
 
@@ -798,11 +791,11 @@
         Practice
       </div>
 
-      <h1>
+      <h1 id="practiceTitle">
         Now make the choice.
       </h1>
 
-      <p class="step-intro">
+      <p class="step-intro" id="practiceIntro">
         Choose the phrase that sounds natural in this situation.
       </p>
 
@@ -812,12 +805,11 @@
           Question 1 of 3
         </div>
 
-        <h2>
-          You want to suggest going to a restaurant.
-          What would you say?
+        <h2 id="practicePrompt">
+          You want to respond naturally in this situation.
         </h2>
 
-        <div class="answers">
+        <div class="answers" id="practiceAnswers">
 
           <button class="answer"
             onclick="chooseAnswer(this, false)">
@@ -836,11 +828,7 @@
 
         </div>
 
-        <div class="feedback" id="feedback1">
-          <strong>Exactly.</strong>
-          “¿Qué te parece si...?” is a natural way to
-          suggest an idea without sounding overly formal.
-        </div>
+        <div class="feedback" id="feedback1"></div>
 
       </div>
 
@@ -865,13 +853,12 @@
         Make it yours
       </div>
 
-      <h1>
+      <h1 id="productionTitle">
         Finish the thought.
       </h1>
 
-      <p class="step-intro">
-        Don't translate word-for-word. Use what you've learned
-        to create something you might actually say.
+      <p class="step-intro" id="productionIntro">
+        Use what you learned to create something you might actually say.
       </p>
 
       <div class="question-card">
@@ -880,8 +867,8 @@
           Question 2 of 3
         </div>
 
-        <h2>
-          Your friend asks what you want to do Saturday.
+        <h2 id="productionPrompt">
+          Respond naturally using one of the expressions you learned.
         </h2>
 
         <p style="margin-top:12px;color:var(--muted);line-height:1.5;">
@@ -891,7 +878,7 @@
         <input
           class="fill-input"
           id="fillAnswer"
-          placeholder="¿Qué te parece si..."
+          placeholder="Write your response..."
           autocomplete="off"
         />
 
@@ -923,13 +910,12 @@
         Final challenge
       </div>
 
-      <h1>
+      <h1 id="speakingTitle">
         Now use it in real life.
       </h1>
 
-      <p class="step-intro">
-        Imagine you're actually talking to your friend.
-        Say what you'd say naturally.
+      <p class="step-intro" id="speakingIntro">
+        Imagine you're actually in the situation and respond naturally.
       </p>
 
       <div class="speaking-card">
@@ -938,14 +924,12 @@
           Speaking challenge
         </div>
 
-        <h2>
-          Your friend asks:
-          “¿Qué hacemos este fin de semana?”
+        <h2 id="speakingPrompt">
+          Respond naturally to the situation.
         </h2>
 
-        <p>
-          Respond naturally. Suggest something, ask about
-          their availability, or leave the plan open.
+        <p id="speakingInstructions">
+          Speak naturally. Parla will use what you say to understand what to teach you next.
         </p>
 
         <button
@@ -1053,29 +1037,20 @@
 
     let currentStep = 1;
     const totalSteps = 5;
+    let aiLesson = null;
 
     function updateProgress() {
       const progress = document.getElementById("progress");
-
-      const percentage =
-        (currentStep / totalSteps) * 100;
-
-      progress.style.width = percentage + "%";
+      progress.style.width = ((currentStep / totalSteps) * 100) + "%";
     }
 
-
     function showStep(step) {
-
       document.querySelectorAll(".step").forEach(section => {
         section.style.display = "none";
       });
 
-      const selected =
-        document.getElementById("step" + step);
-
-      if (selected) {
-        selected.style.display = "block";
-      }
+      const selected = document.getElementById("step" + step);
+      if (selected) selected.style.display = "block";
 
       updateProgress();
 
@@ -1085,148 +1060,233 @@
       });
     }
 
-
     function nextStep() {
-
       if (currentStep < totalSteps) {
         currentStep++;
         showStep(currentStep);
       }
-
     }
 
-
-    function chooseAnswer(button, correct) {
-
-      const answers =
-        document.querySelectorAll(".answer");
+    function chooseAnswer(button, correct, explanation) {
+      const answers = document.querySelectorAll("#practiceAnswers .answer");
 
       answers.forEach(answer => {
-        answer.classList.remove("selected");
+        answer.classList.remove("selected", "correct", "wrong");
       });
 
-      button.classList.add("selected");
+      button.classList.add(correct ? "correct" : "wrong");
 
-      const feedback =
-        document.getElementById("feedback1");
-
-      const continueButton =
-        document.getElementById("practiceContinue");
+      const feedback = document.getElementById("feedback1");
 
       if (correct) {
-
-        button.classList.remove("selected");
-        button.classList.add("correct");
-
+        feedback.innerHTML = "<strong>Good choice.</strong> " + explanation;
         feedback.classList.add("visible");
-
-        continueButton.disabled = false;
-
+        document.getElementById("practiceContinue").disabled = false;
       } else {
-
-        button.classList.add("wrong");
-
-        setTimeout(() => {
-          button.classList.remove("wrong");
-        }, 700);
-
+        feedback.innerHTML = "<strong>Not quite.</strong> " + explanation;
+        feedback.classList.add("visible");
+        document.getElementById("practiceContinue").disabled = true;
       }
-
     }
 
-
     function finishFill() {
+      const input = document.getElementById("fillAnswer");
+      const feedback = document.getElementById("feedback2");
+      const button = document.getElementById("fillContinue");
 
-      const input =
-        document.getElementById("fillAnswer");
-
-      const feedback =
-        document.getElementById("feedback2");
-
-      if (input.value.trim() === "") {
+      if (!input.value.trim()) {
         input.focus();
         return;
       }
 
+      feedback.innerHTML = "<strong>Good.</strong> Your response is now part of your learning history.";
       feedback.classList.add("visible");
 
-      const button =
-        document.getElementById("fillContinue");
-
       button.innerHTML = "Continue <span>→</span>";
-
       button.onclick = nextStep;
-
     }
-
 
     let recording = false;
 
     function toggleRecording() {
-
-      const mic =
-        document.getElementById("micButton");
-
-      const text =
-        document.getElementById("recordingText");
-
-      const finish =
-        document.getElementById("finishButton");
+      const mic = document.getElementById("micButton");
+      const text = document.getElementById("recordingText");
+      const finish = document.getElementById("finishButton");
 
       recording = !recording;
 
       if (recording) {
-
         mic.classList.add("recording");
         text.textContent = "Listening...";
-
       } else {
-
         mic.classList.remove("recording");
         text.textContent = "Response recorded";
-
         finish.disabled = false;
-
       }
-
     }
 
-
     function showResult() {
-
       document.querySelectorAll(".step").forEach(section => {
         section.style.display = "none";
       });
 
-      document.getElementById("result")
-        .classList.add("visible");
-
-      document.getElementById("progress")
-        .style.width = "100%";
+      document.getElementById("result").classList.add("visible");
+      document.getElementById("progress").style.width = "100%";
 
       window.scrollTo({
         top: 0,
         behavior: "smooth"
       });
-
     }
-
 
     function goDashboard() {
       window.location.href = "dashboard.html";
     }
 
-
     function goBack() {
-
       if (currentStep > 1) {
         currentStep--;
         showStep(currentStep);
       } else {
         window.location.href = "dashboard.html";
       }
-
     }
+
+    function getProfile() {
+      try {
+        const raw = sessionStorage.getItem("parla_learning_profile");
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+
+    function renderAiLesson(lesson, profile) {
+      aiLesson = lesson;
+
+      const language = profile?.targetLanguage || "Spanish";
+      const level = profile?.level || "A1";
+
+      document.getElementById("lessonLanguage").textContent = language;
+      document.getElementById("lessonTitle").textContent = lesson.title;
+      document.getElementById("lessonIntro").textContent = lesson.intro;
+      document.getElementById("scenarioTitle").textContent = lesson.title;
+      document.getElementById("scenarioDescription").textContent = lesson.scenario;
+      document.getElementById("scenarioText").innerHTML =
+        "<strong>Imagine this:</strong><br>" + lesson.scenario;
+
+      const expressionGrid = document.getElementById("expressionsGrid");
+      expressionGrid.innerHTML = "";
+
+      (lesson.expressions || []).forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "language-card";
+        card.innerHTML = `
+          <div class="tag">Useful expression</div>
+          <div class="phrase">${escapeHtml(item.phrase)}</div>
+          <div class="translation">${escapeHtml(item.meaning)}</div>
+          <div class="example">
+            ${escapeHtml(item.example)}
+            <br>
+            <span>${escapeHtml(item.note || "")}</span>
+          </div>
+        `;
+        expressionGrid.appendChild(card);
+      });
+
+      document.getElementById("practiceTitle").textContent =
+        "Now use what you learned.";
+      document.getElementById("practiceIntro").textContent =
+        "Pick the response that fits the situation naturally.";
+
+      document.getElementById("practicePrompt").textContent =
+        lesson.practice?.prompt || "Choose the most natural response.";
+
+      const answers = document.getElementById("practiceAnswers");
+      answers.innerHTML = "";
+
+      (lesson.practice?.options || []).forEach(option => {
+        const button = document.createElement("button");
+        button.className = "answer";
+        button.textContent = option.text;
+        button.addEventListener("click", () =>
+          chooseAnswer(button, !!option.correct, option.explanation || "")
+        );
+        answers.appendChild(button);
+      });
+
+      document.getElementById("practiceContinue").disabled = true;
+      document.getElementById("feedback1").classList.remove("visible");
+
+      document.getElementById("productionTitle").textContent =
+        "Make it yours.";
+      document.getElementById("productionPrompt").textContent =
+        lesson.production?.prompt || "Write a natural response.";
+
+      document.getElementById("fillAnswer").placeholder =
+        lesson.production?.starter || "Write your response...";
+
+      document.getElementById("speakingTitle").textContent =
+        "Now use it in real life.";
+      document.getElementById("speakingPrompt").textContent =
+        lesson.speaking?.prompt || "Respond naturally to the situation.";
+      document.getElementById("speakingInstructions").textContent =
+        lesson.speaking?.instructions ||
+        "Speak naturally. Parla will use your response to understand what to teach you next.";
+
+      document.title = "Parla — " + language + " lesson";
+      document.documentElement.lang = "en";
+      document.body.dataset.language = language;
+      document.body.dataset.level = level;
+    }
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value == null ? "" : String(value);
+      return div.innerHTML;
+    }
+
+    async function loadAiLesson() {
+      const profile = getProfile();
+
+      if (!profile?.targetLanguage) {
+        return;
+      }
+
+      try {
+        document.getElementById("lessonIntro").textContent =
+          "Building a lesson around your goals and interests...";
+
+        const response = await fetch("/api/learn", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ profile })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.error || "AI lesson generation failed.");
+        }
+
+        if (!data.lesson) {
+          throw new Error("No lesson was returned.");
+        }
+
+        renderAiLesson(data.lesson, profile);
+      } catch (error) {
+        console.error(error);
+        const fallback = document.getElementById("lessonIntro");
+        fallback.textContent =
+          "Your saved profile is ready, but the AI lesson service is not connected yet.";
+      }
+    }
+
+    updateProgress();
+    loadAiLesson();
 
   </script>
 
