@@ -7,9 +7,7 @@ export default async function DashboardPage() {
   const { data: userData } = await supabase.auth.getUser();
   const user = userData.user;
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) redirect("/login");
 
   const { data: learner } = await supabase
     .from("learner_languages")
@@ -18,9 +16,7 @@ export default async function DashboardPage() {
     .eq("is_current", true)
     .maybeSingle();
 
-  if (!learner) {
-    redirect("/onboarding");
-  }
+  if (!learner) redirect("/onboarding");
 
   const { data: skills } = await supabase
     .from("learner_skills")
@@ -91,6 +87,16 @@ export default async function DashboardPage() {
           </p>
           <a href="/lesson" className="dynamic-button">Start a lesson →</a>
         </article>
+      </section>
+
+      <section className="dynamic-section">
+        <div className="dynamic-label">What do you want to do?</div>
+        <div className="dashboard-links">
+          <a href="/lesson">Learn something →</a>
+          <a href="/talk">Just talk →</a>
+          <a href="/review">Review →</a>
+          <a href="/progress">See my progress →</a>
+        </div>
       </section>
 
       <section className="dynamic-section">
