@@ -673,7 +673,7 @@
           </p>
 
           <div class="lesson-meta">
-            <span>Spanish</span>
+            <span id="recommendedLanguage">Spanish</span>
             <span class="meta-dot"></span>
             <span>Everyday conversation</span>
           </div>
@@ -695,11 +695,11 @@
           </div>
 
           <div class="language-row">
-            <div class="language-name">
+            <div class="language-name" id="dashboardLanguage">
               Spanish
             </div>
 
-            <div class="level">
+            <div class="level" id="dashboardLevel">
               A2
             </div>
           </div>
@@ -941,9 +941,36 @@
 
 
   <script>
+    function loadLearningProfile() {
+      try {
+        const raw = sessionStorage.getItem("parla_learning_profile");
+
+        if (!raw) return;
+
+        const profile = JSON.parse(raw);
+
+        if (profile.targetLanguage) {
+          const dashboardLanguage = document.getElementById("dashboardLanguage");
+          const recommendedLanguage = document.getElementById("recommendedLanguage");
+
+          if (dashboardLanguage) dashboardLanguage.textContent = profile.targetLanguage;
+          if (recommendedLanguage) recommendedLanguage.textContent = profile.targetLanguage;
+        }
+
+        if (profile.level) {
+          const dashboardLevel = document.getElementById("dashboardLevel");
+          if (dashboardLevel) dashboardLevel.textContent = profile.level;
+        }
+      } catch (error) {
+        console.warn("Could not load learning profile.", error);
+      }
+    }
+
     function startLesson() {
       window.location.href = "lesson.html";
     }
+
+    loadLearningProfile();
   </script>
 
 </body>
