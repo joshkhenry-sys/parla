@@ -7,6 +7,9 @@
   <title>Create your account | Parla</title>
   <meta name="description" content="Create your Parla account and start learning a language your way.">
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
   <style>
     :root {
       --bg: #f7f7f4;
@@ -409,5 +412,104 @@
     © 2026 Parla
   </footer>
 
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_ANON_KEY
+    );
+
+    const googleBtn = document.querySelector(".google-btn");
+    const form = document.querySelector("form");
+    const submitBtn = document.querySelector(".submit-btn");
+
+    function getNextPage() {
+      const params = new URLSearchParams(window.location.search);
+      const language = params.get("language");
+      return language
+        ? "onboarding.html?language=" + encodeURIComponent(language)
+        : "onboarding.html";
+    }
+
+    function showSignupMessage(text, isError) {
+      let message = document.getElementById("signupMessage");
+      if (!message) {
+        message = document.createElement("div");
+        message.id = "signupMessage";
+        message.style.marginTop = "15px";
+        message.style.fontSize = "13px";
+        message.style.lineHeight = "1.5";
+        form.parentNode.insertBefore(message, form.nextSibling);
+      }
+      message.style.color = isError ? "#b3261e" : "#444";
+      message.textContent = text;
+    }
+
+    googleBtn.addEventListener("click", async () => {
+      googleBtn.disabled = true;
+      googleBtn.textContent = "Connecting…";
+      showSignupMessage("", false);
+
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin + "/" + getNextPage()
+        }
+      });
+
+      if (error) {
+        googleBtn.disabled = false;
+        googleBtn.innerHTML = '<span class="google-icon">G</span><span>Continue with Google</span>';
+        showSignupMessage(error.message, true);
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!name || !email || password.length < 8) {
+        showSignupMessage("Please complete all fields and use a password with at least 8 characters.", true);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Creating account…";
+      showSignupMessage("", false);
+
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name },
+          emailRedirectTo: window.location.origin + "/" + getNextPage()
+        }
+      });
+
+      if (error) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Create account";
+        showSignupMessage(error.message, true);
+        return;
+      }
+
+      if (data && data.session) {
+        window.location.href = getNextPage();
+        return;
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Create account";
+      showSignupMessage("Account created. Check your email to confirm your account, then continue.", false);
+    });
+
+    supabaseClient.auth.getSession().then(({ data }) => {
+      if (data && data.session) {
+        window.location.href = getNextPage();
+      }
+    });
+  </script>
 </body>
 </html>
