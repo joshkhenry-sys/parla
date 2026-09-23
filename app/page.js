@@ -1,19 +1,25 @@
 'use client';
 
-import { useState } from "react";
-
 const languages = [
-  ["Spanish", "blue", "blue"],
-  ["English", "coral", "coral"],
-  ["French", "green", "green"],
-  ["Japanese", "purple", "purple"],
-  ["Italian", "gold", "gold"],
-  ["Portuguese", "teal", "teal"],
+  ["Spanish", "blue"],
+  ["English", "coral"],
+  ["Portuguese", "teal"],
+  ["French", "green"],
+  ["Italian", "gold"],
+  ["German", "purple"],
+  ["Japanese", "purple"],
+  ["Korean", "coral"],
+  ["Mandarin", "teal"],
+  ["Arabic", "gold"],
+  ["Dutch", "green"],
+  ["Swedish", "blue"],
+  ["Greek", "coral"],
+  ["Turkish", "green"],
+  ["Hindi", "gold"],
+  ["Polish", "purple"],
 ];
 
 export default function Home() {
-  const [activeLanguage, setActiveLanguage] = useState("Spanish");
-
   return (
     <div className="page">
       <header className="container">
@@ -65,16 +71,14 @@ export default function Home() {
 
           <div className="language-list">
             {languages.map(([name, dotClass]) => (
-              <button
+              <a
                 key={name}
-                type="button"
-                className={`language ${activeLanguage === name ? "active" : ""}`}
-                onClick={() => setActiveLanguage(name)}
-                aria-pressed={activeLanguage === name}
+                href="/login"
+                className="language"
               >
                 <span className={`language-dot dot-${dotClass}`} />
                 {name}
-              </button>
+              </a>
             ))}
           </div>
         </div>
