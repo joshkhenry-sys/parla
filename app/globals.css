@@ -888,3 +888,91 @@ footer {
  .dynamic-card{min-height:280px;padding:25px}.dynamic-dark h2{margin-top:42px;font-size:33px}
  .skill-row{grid-template-columns:110px 1fr 45px;gap:10px}
 }
+
+
+/* Application routes */
+.lesson-page,.talk-page,.progress-page,.review-page{min-height:100vh;background:#f7f7f4;color:#171717;padding-bottom:80px}
+.lesson-nav{height:82px;width:min(1120px,calc(100% - 48px));margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.lesson-back{font-size:13px;color:#777773}
+.lesson-progress-label,.talk-status{font-size:12px;color:#777773}
+.lesson-progress-track{width:min(760px,calc(100% - 48px));height:4px;background:#e8e8e2;border-radius:999px;overflow:hidden;margin:0 auto}
+.lesson-progress-value{height:100%;background:#536dff;border-radius:999px}
+.lesson-shell,.talk-shell,.progress-shell,.review-shell{width:min(760px,calc(100% - 48px));margin:0 auto;padding-top:72px}
+.lesson-shell h1,.talk-shell h1,.progress-shell h1,.review-shell h1{font-size:clamp(46px,7vw,72px);line-height:.96;letter-spacing:-4px;margin:14px 0 18px}
+.lesson-subtitle,.talk-subtitle,.progress-subtitle,.review-subtitle{color:#777773;font-size:17px;line-height:1.6;max-width:620px}
+.lesson-card-stack{display:grid;gap:14px;margin-top:38px}
+.teaching-card,.exercise-card,.conversation-card,.review-card,.progress-skill-card{background:#fff;border:1px solid #e5e5df;border-radius:26px}
+.teaching-card{padding:28px}
+.teaching-label,.exercise-label{display:block;color:#536dff;font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase}
+.teaching-card h2{font-size:34px;letter-spacing:-1.5px;margin:16px 0 10px}
+.teaching-card p{color:#777773;line-height:1.6;margin:0}
+.example{display:grid;gap:5px;margin-top:22px;padding:16px;background:#f4f4ef;border-radius:16px}
+.example span{color:#777773;font-size:13px}
+.exercise-card{padding:28px;margin-top:38px}
+.context{font-size:17px;line-height:1.55;margin-bottom:20px}
+.answer-option{width:100%;display:block;text-align:left;border:1px solid #e5e5df;background:#fff;border-radius:15px;padding:16px 18px;margin-top:10px;cursor:pointer}
+.answer-option:hover,.answer-option.selected{border-color:#536dff;background:#edf0ff}
+.feedback{margin-top:16px;padding:15px;background:#f1f2ee;border-radius:14px;color:#545450;font-size:14px;line-height:1.5}
+.feedback.neutral{background:#f4f4ef}
+.production-input,.composer textarea{width:100%;min-height:150px;border:1px solid #e5e5df;border-radius:16px;padding:16px;font:inherit;resize:vertical;background:#fcfcfa;outline:none}
+.production-input:focus,.composer textarea:focus{border-color:#536dff;box-shadow:0 0 0 4px rgba(83,109,255,.08)}
+.dynamic-button{display:inline-flex;align-items:center;justify-content:center;border:0;background:#171717;color:#fff;border-radius:999px;padding:14px 20px;font-weight:650;text-decoration:none;cursor:pointer}
+.dynamic-button:disabled{opacity:.35;cursor:not-allowed}
+.speak-card{margin-top:38px;background:#191a1d;color:#fff;border-radius:30px;padding:40px;text-align:center}
+.speak-orb{width:76px;height:76px;display:grid;place-items:center;margin:0 auto 22px;background:#edf0ff;color:#536dff;border-radius:50%}
+.speak-card h2{font-size:34px;letter-spacing:-1.5px;margin:0 0 12px}
+.speak-card p{color:#aaa;line-height:1.6;max-width:500px;margin:0 auto 24px}
+.lesson-actions{display:flex;justify-content:space-between;align-items:center;margin-top:28px}
+.lesson-secondary{border:0;background:transparent;color:#777773;padding:12px 0;font-weight:600;cursor:pointer}
+.lesson-secondary:disabled{opacity:.35;cursor:not-allowed}
+
+.talk-shell{max-width:900px}
+.conversation-card{padding:28px;margin-top:38px}
+.message-row{display:flex;flex-direction:column;gap:7px;margin-bottom:22px}
+.message-row.you{align-items:flex-end}
+.message-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#999891}
+.message-bubble{max-width:78%;padding:14px 16px;border-radius:18px;background:#f1f1ec;line-height:1.55}
+.message-row.you .message-bubble{background:#edf0ff}
+.composer{display:flex;gap:10px;align-items:flex-end;margin-top:26px;padding-top:20px;border-top:1px solid #e5e5df}
+.composer textarea{min-height:80px;flex:1}
+.talk-note{display:grid;gap:6px;padding:25px 0;color:#777773;font-size:14px;line-height:1.5}
+.talk-note strong{color:#171717}
+
+.progress-insight{margin-top:22px;background:#191a1d;color:#fff;border-radius:28px;padding:32px}
+.progress-insight h2{font-size:34px;letter-spacing:-1.5px;line-height:1.05;margin:18px 0 12px}
+.progress-insight p{color:#aaa;line-height:1.6;max-width:600px}
+.progress-skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:36px}
+.progress-skill-card{padding:22px}
+.progress-skill-top{display:flex;justify-content:space-between;gap:20px;margin-bottom:14px}
+.progress-skill-top span{text-transform:capitalize;color:#555;font-size:14px}
+.progress-skill-track,.skill-track{height:7px;background:#eeeeea;border-radius:999px;overflow:hidden}
+.progress-skill-track span,.skill-track span{display:block;height:100%;background:#78a58d;border-radius:inherit}
+
+.review-card{padding:36px;margin-top:38px;text-align:center}
+.review-word{font-size:52px;font-weight:700;letter-spacing:-3px}
+.review-meaning{color:#777773;margin:8px 0 28px}
+.review-answer{margin-top:24px;padding-top:24px;border-top:1px solid #e5e5df;display:grid;gap:16px}
+.review-answer p{color:#777773;line-height:1.6;margin:0}
+.review-complete{width:min(700px,calc(100% - 48px));margin:0 auto;padding-top:130px;text-align:center}
+.review-complete h1{font-size:72px;letter-spacing:-4px;margin:16px 0}
+.review-complete p{color:#777773;font-size:17px;line-height:1.6;margin:0 auto 28px;max-width:500px}
+
+.dashboard-links{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.dashboard-links a{padding:18px;background:#fff;border:1px solid #e5e5df;border-radius:16px;font-size:13px;font-weight:650}
+.dashboard-links a:hover{border-color:#536dff;background:#edf0ff}
+
+@media(max-width:800px){
+  .lesson-nav{width:calc(100% - 32px);height:72px}
+  .lesson-shell,.talk-shell,.progress-shell,.review-shell{width:calc(100% - 32px);padding-top:50px}
+  .lesson-shell h1,.talk-shell h1,.progress-shell h1,.review-shell h1{letter-spacing:-2.5px}
+  .lesson-progress-track{width:calc(100% - 32px)}
+  .progress-skill-grid{grid-template-columns:1fr}
+  .dashboard-links{grid-template-columns:1fr 1fr}
+  .message-bubble{max-width:88%}
+}
+@media(max-width:520px){
+  .dashboard-links{grid-template-columns:1fr}
+  .composer{flex-direction:column;align-items:stretch}
+  .composer .dynamic-button{width:100%}
+  .lesson-actions .dynamic-button{padding:12px 16px}
+}
