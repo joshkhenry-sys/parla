@@ -704,21 +704,19 @@
             </div>
           </div>
 
-          <div class="progress-number">
-            24%
-          </div>
+          <div class="progress-number" id="progressPercent">0%</div>
 
           <div class="progress-description">
             toward your current level
           </div>
 
           <div class="progress-bar">
-            <div class="progress-fill"></div>
+            <div class="progress-fill" id="progressFill"></div>
           </div>
 
           <div class="progress-footer">
             <span>Keep building</span>
-            <span>24 / 100</span>
+            <span id="progressFraction">0 / 100</span>
           </div>
 
         </section>
@@ -961,6 +959,16 @@
           const dashboardLevel = document.getElementById("dashboardLevel");
           if (dashboardLevel) dashboardLevel.textContent = profile.level;
         }
+
+        const mastery = Number(profile.mastery || 0);
+        const safeMastery = Math.max(0, Math.min(100, mastery));
+        const progressPercent = document.getElementById("progressPercent");
+        const progressFill = document.getElementById("progressFill");
+        const progressFraction = document.getElementById("progressFraction");
+
+        if (progressPercent) progressPercent.textContent = safeMastery + "%";
+        if (progressFill) progressFill.style.width = safeMastery + "%";
+        if (progressFraction) progressFraction.textContent = safeMastery + " / 100";
       } catch (error) {
         console.warn("Could not load learning profile.", error);
       }
