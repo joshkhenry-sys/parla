@@ -493,11 +493,33 @@
       submitBtn.textContent = "Creating account…";
       showSignupMessage("", false);
 
+      const pendingProfile = {
+        targetLanguage: new URLSearchParams(window.location.search).get("targetLanguage") || new URLSearchParams(window.location.search).get("language") || null,
+        nativeLanguage: new URLSearchParams(window.location.search).get("nativeLanguage") || null,
+        level: new URLSearchParams(window.location.search).get("level") || null,
+        goal: new URLSearchParams(window.location.search).get("goal") || null,
+        interests: []
+      };
+
+      try {
+        const rawInterests = new URLSearchParams(window.location.search).get("interests");
+        if (rawInterests) {
+          const parsed = JSON.parse(rawInterests);
+          if (Array.isArray(parsed)) pendingProfile.interests = parsed;
+        }
+      } catch (_) {
+        pendingProfile.interests = [];
+      }
+
       const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
         options: {
-          data: { full_name: name },
+          data: {
+            full_name: name,
+            parla_onboarding_pending: true,
+            parla_onboarding_profile: pendingProfile
+          },
           emailRedirectTo: window.location.origin + "/" + getNextPage()
         }
       });
