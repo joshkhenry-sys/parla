@@ -15,7 +15,17 @@ export default async function handler(request) {
   try {
     const body = await request.json();
 
-    const language = typeof body.language === "string" ? body.language.slice(0, 80) : "Spanish";
+    const language =
+      typeof body.language === "string" && body.language.trim()
+        ? body.language.slice(0, 80)
+        : "";
+
+    if (!language) {
+      return Response.json(
+        { error: "A target language is required." },
+        { status: 400 }
+      );
+    }
     const level = typeof body.level === "string" ? body.level.slice(0, 20) : "A2";
     const goal = typeof body.goal === "string" ? body.goal.slice(0, 120) : "Real conversation";
     const interests = Array.isArray(body.interests)
