@@ -1728,6 +1728,14 @@
 
         if (profileError) throw profileError;
 
+        const { error: metadataError } = await client.auth.updateUser({
+          data: {
+            parla_onboarding_pending: false
+          }
+        });
+
+        if (metadataError) throw metadataError;
+
         window.location.href = "dashboard.html";
       } catch (error) {
         console.error("Onboarding save failed:", error);
@@ -1752,14 +1760,38 @@
       return page + ".html?" + params.toString();
     }
 
-    function applyPendingProfileFromUrl() {
+    async function applyPendingProfile() {
       const params = new URLSearchParams(window.location.search);
 
-      const pendingTarget = params.get("targetLanguage") || params.get("language");
-      const pendingNative = params.get("nativeLanguage");
-      const pendingLevel = params.get("level");
-      const pendingGoal = params.get("goal");
+      let pendingTarget = params.get("targetLanguage") || params.get("language");
+      let pendingNative = params.get("nativeLanguage");
+      let pendingLevel = params.get("level");
+      let pendingGoal = params.get("goal");
       let pendingInterests = [];
+
+      try {
+        const rawInterests = params.get("interests");
+        if (rawInterests) {
+          const parsed = JSON.parse(rawInterests);
+          if (Array.isArray(parsed)) pendingInterests = parsed;
+        }
+      } catch (_) {
+        pendingInterests = [];
+      }
+
+      if (!(pendingTarget && pendingNative && pendingLevel && pendingGoal && pendingInterests.length)) {
+        const { data } = await supabaseClient.auth.getSession();
+        const pending = data?.session?.user?.user_metadata?.parla_onboarding_pending;
+        const saved = data?.session?.user?.user_metadata?.parla_onboarding_profile;
+
+        if (pending && saved) {
+          pendingTarget = saved.targetLanguage || pendingTarget;
+          pendingNative = saved.nativeLanguage || pendingNative;
+          pendingLevel = saved.level || pendingLevel;
+          pendingGoal = saved.goal || pendingGoal;
+          pendingInterests = Array.isArray(saved.interests) ? saved.interests : pendingInterests;
+        }
+      }
 
       try {
         const rawInterests = params.get("interests");
@@ -1796,7 +1828,7 @@
     }
 
     async function finishPendingProfileAfterAuth() {
-      const hasPendingProfile = applyPendingProfileFromUrl();
+      const hasPendingProfile = await applyPendingProfile();
       if (!hasPendingProfile) {
         updateProgress();
         updateContinueButton();
