@@ -413,11 +413,61 @@
       showMessage("Password reset instructions have been sent.");
     });
 
-    supabaseClient.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        window.location.href = "dashboard.html";
-      }
-    });
+    async function showExistingSession() {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error || !data.session) return;
+
+      const user = data.session.user;
+      const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email || "this account";
+      const notice = document.createElement("div");
+      notice.style.marginTop = "15px";
+      notice.style.padding = "14px 16px";
+      notice.style.border = "1px solid var(--border)";
+      notice.style.borderRadius = "14px";
+      notice.style.background = "#f1f1ec";
+      notice.style.color = "#555";
+      notice.style.fontSize = "13px";
+      notice.style.lineHeight = "1.5";
+      notice.innerHTML = "<strong>Already signed in.</strong><br>Current account: " + escapeHtml(name) + ".";
+
+      const continueLink = document.createElement("a");
+      continueLink.href = "dashboard.html";
+      continueLink.textContent = "Continue to dashboard";
+      continueLink.style.display = "inline-block";
+      continueLink.style.marginTop = "10px";
+      continueLink.style.marginRight = "10px";
+      continueLink.style.color = "var(--text)";
+      continueLink.style.fontWeight = "700";
+      
+      const logout = document.createElement("button");
+      logout.type = "button";
+      logout.textContent = "Log out";
+      logout.style.border = "1px solid var(--border)";
+      logout.style.background = "white";
+      logout.style.borderRadius = "999px";
+      logout.style.padding = "9px 13px";
+      logout.style.cursor = "pointer";
+      logout.addEventListener("click", async () => {
+        const { error: signOutError } = await supabaseClient.auth.signOut();
+        if (signOutError) {
+          showMessage(signOutError.message);
+          return;
+        }
+        notice.remove();
+      });
+
+      notice.appendChild(continueLink);
+      notice.appendChild(logout);
+      document.querySelector(".card").appendChild(notice);
+    }
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value == null ? "" : String(value);
+      return div.innerHTML;
+    }
+
+    showExistingSession();
   </script>
 </body>
 </html>
