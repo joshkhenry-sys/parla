@@ -1476,5 +1476,29 @@
 
 </script>
 
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+  (async () => {
+    try {
+      const client = window.supabase.createClient(
+        window.SUPABASE_URL,
+        window.SUPABASE_ANON_KEY
+      );
+
+      const { data } = await client.auth.getSession();
+      const user = data?.session?.user;
+      const pending = user?.user_metadata?.parla_onboarding_pending;
+
+      if (user && pending) {
+        window.location.replace("onboarding.html?resume=1");
+      }
+    } catch (error) {
+      console.error("Could not resume onboarding:", error);
+    }
+  })();
+</script>
+
 </body>
 </html>
