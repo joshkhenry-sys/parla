@@ -602,7 +602,7 @@
 
       <div class="lesson-info">
         <span>Lesson</span>
-        <span class="lesson-language" id="lessonLanguage">Spanish</span>
+        <span class="lesson-language" id="lessonLanguage">Your language</span>
       </div>
 
     </header>
@@ -1232,7 +1232,7 @@
     function renderAiLesson(lesson, profile) {
       aiLesson = lesson;
 
-      const language = profile?.targetLanguage || "Spanish";
+      const language = profile?.targetLanguage || "Your language";
       const level = profile?.level || "A1";
 
       document.getElementById("lessonLanguage").textContent = language;
