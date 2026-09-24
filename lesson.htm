@@ -687,94 +687,10 @@
         Start with a few high-value expressions you can immediately use.
       </p>
 
-      <div class="language-grid" id="expressionsGrid">
-
-        <div class="language-card">
-
-          <div class="tag">Suggesting</div>
-
-          <div class="phrase">
-            Loading expression…
-          </div>
-
-          <div class="translation">
-            Meaning will appear here.
-          </div>
-
-          <div class="example">
-            Loading example…
-            <br>
-            <span>Example will appear here.</span>
-          </div>
-
-        </div>
-
-
-        <div class="language-card">
-
-          <div class="tag">Checking</div>
-
-          <div class="phrase">
-            Loading expression…?
-          </div>
-
-          <div class="translation">
-            Are you free...?
-          </div>
-
-          <div class="example">
-            Loading example…
-            <br>
-            <span>Example will appear here.</span>
-          </div>
-
-        </div>
-
-
-        <div class="language-card">
-
-          <div class="tag">Changing plans</div>
-
-          <div class="phrase">
-            Loading expression…
-          </div>
-
-          <div class="translation">
-            Meaning will appear here.
-          </div>
-
-          <div class="example">
-            Loading example…
-            <br>
-            <span>Example will appear here.</span>
-          </div>
-
-        </div>
-
-
-        <div class="language-card">
-
-          <div class="tag">Keeping it casual</div>
-
-          <div class="phrase">
-            Loading expression…
-          </div>
-
-          <div class="translation">
-            Meaning will appear here.
-          </div>
-
-          <div class="example">
-            No sé todavía. Loading expression…
-            <br>
-            <span>Example will appear here.</span>
-          </div>
-
-        </div>
-
-      </div>
+      <div class="language-grid" id="expressionsGrid"></div>
 
       <div class="continue-wrap">
+        <button class="continue" onclick="nextStep()">      <div class="continue-wrap">
         <button class="continue" onclick="nextStep()">
           Practice them <span>→</span>
         </button>
@@ -809,26 +725,9 @@
           You want to respond naturally in this situation.
         </h2>
 
-        <div class="answers" id="practiceAnswers">
+        <div class="answers" id="practiceAnswers"></div>
 
-          <button class="answer"
-            onclick="chooseAnswer(this, false)">
-            Loading option…
-          </button>
-
-          <button class="answer"
-            onclick="chooseAnswer(this, true)">
-            Loading option…
-          </button>
-
-          <button class="answer"
-            onclick="chooseAnswer(this, false)">
-            Loading option…
-          </button>
-
-        </div>
-
-        <div class="feedback" id="feedback1"></div>
+        <div class="feedback" id="feedback1">        <div class="feedback" id="feedback1"></div>
 
       </div>
 
@@ -998,27 +897,13 @@
         </div>
 
         <div class="things">
-
-          <h3>
-            3 things to remember
-          </h3>
-
-          <div class="thing">
-            <strong>Loading expression…</strong> — a natural way
-            to suggest something.
-          </div>
-
-          <div class="thing">
-            <strong>Loading expression…</strong> — useful when plans
-            change or you clarify what happened.
-          </div>
-
-          <div class="thing">
-            <strong>Loading expression…</strong> — useful when you want
-            to keep the plan open and casual.
-          </div>
-
+          <h3>What to remember</h3>
+          <div id="thingsList"></div>
         </div>
+
+      </div>
+
+      <div class="continue-wrap" style="justify-content:center;">        </div>
 
       </div>
 
@@ -1305,6 +1190,13 @@
         lesson.speaking?.instructions ||
         "Speak naturally. Parla will use your response to understand what to teach you next.";
 
+      const thingsList = document.getElementById("thingsList");
+      if (thingsList) {
+        thingsList.innerHTML = (lesson.expressions || []).slice(0, 3).map(item =>
+          '<div class="thing"><strong>' + escapeHtml(item.phrase || "") + '</strong> — ' + escapeHtml(item.note || item.meaning || "") + '</div>'
+        ).join("");
+      }
+
       document.title = "Parla — " + language + " lesson";
       document.documentElement.lang = "en";
       document.body.dataset.language = language;
@@ -1350,9 +1242,7 @@
         renderAiLesson(data.lesson, profile);
       } catch (error) {
         console.error("Parla lesson error:", error);
-        const fallback = document.getElementById("lessonIntro");
-        fallback.textContent =
-          "Lesson generation failed: " + (error?.message || "Unknown error");
+        document.getElementById("lessonIntro").textContent = "We couldn't generate this lesson yet.";
       }
     }
 
