@@ -1665,6 +1665,14 @@
 
         if (languageError) throw languageError;
 
+        const { error: clearCurrentError } = await client
+          .from("learner_languages")
+          .update({ is_current: false })
+          .eq("user_id", user.id)
+          .eq("is_current", true);
+
+        if (clearCurrentError) throw clearCurrentError;
+
         const { data: learnerLanguage, error: learnerError } = await client
           .from("learner_languages")
           .upsert({
@@ -1692,12 +1700,28 @@
           { onConflict: "learner_language_id,skill" }
         );
 
-        await client.from("profiles").upsert({
+        const nativeLanguageMap = {
+          English: "en",
+          Spanish: "es",
+          Portuguese: "pt",
+          French: "fr",
+          German: "de",
+          Italian: "it",
+          Japanese: "ja",
+          Korean: "ko",
+          Mandarin: "zh",
+          Arabic: "ar",
+          Other: null
+        };
+
+        const { error: profileError } = await client.from("profiles").upsert({
           id: user.id,
-          native_language_code: state.nativeLanguage,
+          native_language_code: nativeLanguageMap[state.nativeLanguage] || null,
           goal: state.goal,
           interests: state.interests
         });
+
+        if (profileError) throw profileError;
 
         window.location.href = "dashboard.html";
       } catch (error) {
