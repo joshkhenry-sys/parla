@@ -153,7 +153,14 @@ export default async function handler(req, res) {
       });
     }
 
-    const outputText = typeof data?.output_text === "string" ? data.output_text.trim() : "";
+    const outputText =
+      typeof data?.output_text === "string"
+        ? data.output_text.trim()
+        : (data?.output || [])
+            .flatMap(item => item?.content || [])
+            .map(item => item?.text || "")
+            .join("")
+            .trim();
 
     if (!outputText) {
       return res.status(502).json({
@@ -168,6 +175,21 @@ export default async function handler(req, res) {
     } catch {
       return res.status(502).json({
         error: "The AI returned invalid lesson data."
+      });
+    }
+
+    if (
+      !lesson?.title ||
+      !Array.isArray(lesson?.expressions) ||
+      lesson.expressions.length < 3 ||
+      !lesson?.practice?.prompt ||
+      !Array.isArray(lesson?.practice?.options) ||
+      lesson.practice.options.length !== 3 ||
+      !lesson?.production?.prompt ||
+      !lesson?.speaking?.prompt
+    ) {
+      return res.status(502).json({
+        error: "The AI returned an incomplete lesson."
       });
     }
 
