@@ -341,7 +341,7 @@
 
     .progress-fill {
       height: 100%;
-      width: 24%;
+      width: 0;
       background: var(--blue);
       border-radius: 999px;
     }
@@ -353,6 +353,49 @@
       justify-content: space-between;
       font-size: 13px;
       color: var(--muted);
+    }
+
+    .language-switcher-section {
+      margin-top: 20px;
+      margin-bottom: 34px;
+    }
+
+    .language-switcher-card {
+      padding: 24px;
+    }
+
+    .dashboard-language-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .dashboard-language-link {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 10px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      transition: .2s ease;
+    }
+
+    .dashboard-language-link:hover {
+      color: var(--text);
+      border-color: #cfcfc8;
+      transform: translateY(-1px);
+    }
+
+    .dashboard-language-link.current {
+      color: var(--text);
+      border-color: #cbd2ff;
+      background: var(--blue-soft);
     }
 
     /* QUICK ACTIONS */
@@ -576,6 +619,10 @@
         font-size: 50px;
       }
 
+      .dashboard-language-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .quick-grid {
         grid-template-columns: 1fr;
         gap: 16px;
@@ -713,10 +760,10 @@
             </div>
           </div>
 
-          <div class="progress-number" id="progressPercent">0%</div>
+          <div class="progress-number" id="progressPercent">Not started</div>
 
-          <div class="progress-description">
-            toward your current level
+          <div class="progress-description" id="progressDescription">
+            Complete a lesson to start tracking your progress.
           </div>
 
           <div class="progress-bar">
@@ -731,6 +778,33 @@
         </section>
 
       </div>
+
+
+      <!-- LANGUAGE SWITCHER -->
+
+      <section class="language-switcher-section">
+        <div class="section-title">Explore languages</div>
+        <div class="card language-switcher-card">
+          <div class="dashboard-language-grid">
+            <a class="dashboard-language-link" data-language="Spanish" href="onboarding.html?language=Spanish">Spanish</a>
+            <a class="dashboard-language-link" data-language="English" href="onboarding.html?language=English">English</a>
+            <a class="dashboard-language-link" data-language="Portuguese" href="onboarding.html?language=Portuguese">Portuguese</a>
+            <a class="dashboard-language-link" data-language="French" href="onboarding.html?language=French">French</a>
+            <a class="dashboard-language-link" data-language="Italian" href="onboarding.html?language=Italian">Italian</a>
+            <a class="dashboard-language-link" data-language="German" href="onboarding.html?language=German">German</a>
+            <a class="dashboard-language-link" data-language="Japanese" href="onboarding.html?language=Japanese">Japanese</a>
+            <a class="dashboard-language-link" data-language="Korean" href="onboarding.html?language=Korean">Korean</a>
+            <a class="dashboard-language-link" data-language="Mandarin" href="onboarding.html?language=Mandarin">Mandarin</a>
+            <a class="dashboard-language-link" data-language="Arabic" href="onboarding.html?language=Arabic">Arabic</a>
+            <a class="dashboard-language-link" data-language="Dutch" href="onboarding.html?language=Dutch">Dutch</a>
+            <a class="dashboard-language-link" data-language="Swedish" href="onboarding.html?language=Swedish">Swedish</a>
+            <a class="dashboard-language-link" data-language="Greek" href="onboarding.html?language=Greek">Greek</a>
+            <a class="dashboard-language-link" data-language="Turkish" href="onboarding.html?language=Turkish">Turkish</a>
+            <a class="dashboard-language-link" data-language="Hindi" href="onboarding.html?language=Hindi">Hindi</a>
+            <a class="dashboard-language-link" data-language="Polish" href="onboarding.html?language=Polish">Polish</a>
+          </div>
+        </div>
+      </section>
 
 
       <!-- QUICK ACTIONS -->
@@ -1036,9 +1110,18 @@
         if (dashboardLanguage) dashboardLanguage.textContent = languageName;
         if (recommendedLanguage) recommendedLanguage.textContent = languageName;
         if (dashboardLevel) dashboardLevel.textContent = level;
-        if (progressPercent) progressPercent.textContent = mastery + "%";
+        if (progressPercent) {
+          progressPercent.textContent = mastery > 0 ? mastery + "%" : "Not started";
+        }
         if (progressFill) progressFill.style.width = mastery + "%";
-        if (progressFraction) progressFraction.textContent = mastery + " / 100";
+        if (progressFraction) progressFraction.textContent = mastery > 0 ? mastery + " / 100" : "0 / 100";
+
+        document.querySelectorAll(".dashboard-language-link").forEach(link => {
+          const isCurrent = link.dataset.language === languageName;
+          link.classList.toggle("current", isCurrent);
+          if (isCurrent) link.setAttribute("aria-current", "page");
+          else link.removeAttribute("aria-current");
+        });
       } catch (error) {
         console.error("Could not load learner profile:", error);
         window.location.href = "login.html";
