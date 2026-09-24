@@ -1033,6 +1033,9 @@
   </main>
 
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
   <script>
 
     let currentStep = 1;
@@ -1346,10 +1349,10 @@
 
         renderAiLesson(data.lesson, profile);
       } catch (error) {
-        console.error(error);
+        console.error("Parla lesson error:", error);
         const fallback = document.getElementById("lessonIntro");
         fallback.textContent =
-          "Your saved profile is ready, but the AI lesson service is not connected yet.";
+          "Lesson generation failed: " + (error?.message || "Unknown error");
       }
     }
 
@@ -1357,9 +1360,6 @@
     loadAiLesson();
 
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
 
 </body>
 </html>
