@@ -835,6 +835,32 @@
       flex: 0 0 auto;
     }
 
+    .language-area {
+      width: 100%;
+      overflow: visible;
+    }
+
+    .language-list {
+      width: 100%;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .language {
+      width: 100%;
+      min-width: 0;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: normal;
+      text-align: center;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     @media (max-width: 800px) {
       .language-list {
         grid-template-columns: repeat(2, minmax(0, 1fr));
