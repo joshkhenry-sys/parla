@@ -423,11 +423,25 @@
     const submitBtn = document.querySelector(".submit-btn");
 
     function getNextPage() {
-      const params = new URLSearchParams(window.location.search);
-      const language = params.get("language");
-      return language
-        ? "onboarding.html?language=" + encodeURIComponent(language)
-        : "onboarding.html";
+      const source = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams();
+
+      const keys = [
+        "targetLanguage",
+        "nativeLanguage",
+        "level",
+        "goal",
+        "interests",
+        "language"
+      ];
+
+      keys.forEach(key => {
+        const value = source.get(key);
+        if (value) params.set(key, value);
+      });
+
+      const query = params.toString();
+      return "onboarding.html" + (query ? "?" + query : "");
     }
 
     function showSignupMessage(text, isError) {
