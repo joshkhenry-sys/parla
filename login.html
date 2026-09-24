@@ -342,6 +342,28 @@
       message.textContent = text;
     }
 
+    function getNextPage() {
+      const source = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams();
+
+      const keys = [
+        "targetLanguage",
+        "nativeLanguage",
+        "level",
+        "goal",
+        "interests",
+        "language"
+      ];
+
+      keys.forEach(key => {
+        const value = source.get(key);
+        if (value) params.set(key, value);
+      });
+
+      const query = params.toString();
+      return "onboarding.html" + (query ? "?" + query : "");
+    }
+
     googleBtn.addEventListener("click", async () => {
       googleBtn.disabled = true;
       googleBtn.textContent = "Connecting…";
@@ -350,7 +372,7 @@
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/dashboard.html"
+          redirectTo: window.location.origin + "/" + getNextPage()
         }
       });
 
@@ -386,7 +408,7 @@
         return;
       }
 
-      window.location.href = "dashboard.html";
+      window.location.href = getNextPage();
     });
 
     forgotBtn.addEventListener("click", async () => {
