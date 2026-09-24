@@ -620,7 +620,16 @@
           <span>3 day streak</span>
         </div>
 
-        <div class="avatar">J</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button
+            type="button"
+            id="logoutButton"
+            style="border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;"
+          >
+            Log out
+          </button>
+          <div class="avatar" id="avatarInitial">J</div>
+        </div>
       </div>
     </nav>
 
@@ -1007,6 +1016,11 @@
           user.email?.split("@")[0] ||
           "there";
 
+        const avatarInitial = document.getElementById("avatarInitial");
+        if (avatarInitial) {
+          avatarInitial.textContent = displayName.charAt(0).toUpperCase();
+        }
+
         const greeting = document.querySelector(".dashboard-hero h1");
         if (greeting) {
           greeting.innerHTML = "Keep going.<br>" + escapeHtml(displayName) + ", you're getting there.";
@@ -1039,6 +1053,12 @@
     function startLesson() {
       window.location.href = "lesson.htm";
     }
+
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+      await supabaseClient.auth.signOut();
+      sessionStorage.removeItem("parla_learning_profile");
+      window.location.href = "login.html";
+    });
 
     (async () => {
       await loadLearningProfile();
