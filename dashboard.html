@@ -962,52 +962,87 @@
       }
     }
 
-    function loadLearningProfile() {
+    async function loadLearningProfile() {
       try {
-        const raw = sessionStorage.getItem("parla_learning_profile");
-
-        if (!raw) return;
-
-        const profile = JSON.parse(raw);
-
-        if (profile.targetLanguage) {
-          const dashboardLanguage = document.getElementById("dashboardLanguage");
-          const recommendedLanguage = document.getElementById("recommendedLanguage");
-
-          if (dashboardLanguage) dashboardLanguage.textContent = profile.targetLanguage;
-          if (recommendedLanguage) recommendedLanguage.textContent = profile.targetLanguage;
+        const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError || !sessionData.session) {
+          window.location.href = "login.html";
+          return;
         }
 
-        if (profile.level) {
-          const dashboardLevel = document.getElementById("dashboardLevel");
-          if (dashboardLevel) dashboardLevel.textContent = profile.level;
+        const user = sessionData.session.user;
+
+        const { data: learnerLanguage, error: learnerError } = await supabaseClient
+          .from("learner_languages")
+          .select("id, level, goal, interests, is_current, languages(name, code)")
+          .eq("user_id", user.id)
+          .eq("is_current", true)
+          .maybeSingle();
+
+        if (learnerError) throw learnerError;
+
+        if (!learnerLanguage) {
+          window.location.href = "onboarding.html";
+          return;
         }
 
-        const mastery = Number(profile.mastery || 0);
-        const safeMastery = Math.max(0, Math.min(100, mastery));
+        const languageName = learnerLanguage.languages?.name || "English";
+        const level = learnerLanguage.level || "A0";
+
+        const { data: skills, error: skillsError } = await supabaseClient
+          .from("learner_skills")
+          .select("mastery")
+          .eq("learner_language_id", learnerLanguage.id);
+
+        if (skillsError) throw skillsError;
+
+        const masteryValues = (skills || []).map(skill => Number(skill.mastery) || 0);
+        const mastery = masteryValues.length
+          ? Math.round(masteryValues.reduce((sum, value) => sum + value, 0) / masteryValues.length)
+          : 0;
+
+        const displayName =
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          user.email?.split("@")[0] ||
+          "there";
+
+        const greeting = document.querySelector(".dashboard-hero h1");
+        if (greeting) {
+          greeting.innerHTML = "Keep going.<br>" + escapeHtml(displayName) + ", you're getting there.";
+        }
+
+        const dashboardLanguage = document.getElementById("dashboardLanguage");
+        const recommendedLanguage = document.getElementById("recommendedLanguage");
+        const dashboardLevel = document.getElementById("dashboardLevel");
         const progressPercent = document.getElementById("progressPercent");
         const progressFill = document.getElementById("progressFill");
         const progressFraction = document.getElementById("progressFraction");
 
-        if (progressPercent) progressPercent.textContent = safeMastery + "%";
-        if (progressFill) progressFill.style.width = safeMastery + "%";
-        if (progressFraction) progressFraction.textContent = safeMastery + " / 100";
+        if (dashboardLanguage) dashboardLanguage.textContent = languageName;
+        if (recommendedLanguage) recommendedLanguage.textContent = languageName;
+        if (dashboardLevel) dashboardLevel.textContent = level;
+        if (progressPercent) progressPercent.textContent = mastery + "%";
+        if (progressFill) progressFill.style.width = mastery + "%";
+        if (progressFraction) progressFraction.textContent = mastery + " / 100";
       } catch (error) {
-        console.warn("Could not load learning profile.", error);
+        console.error("Could not load learner profile:", error);
+        window.location.href = "login.html";
       }
     }
 
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value == null ? "" : String(value);
+      return div.innerHTML;
+    }
     function startLesson() {
       window.location.href = "lesson.htm";
     }
 
     (async () => {
-      const authenticated = await requireSession();
-      if (authenticated) {
-        loadLearningProfile();
-      }
-    })();
-  </script>
+      await loadLearningProfile();
+    })();  </script>
 
 </body>
 </html>
