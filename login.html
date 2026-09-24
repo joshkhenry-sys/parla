@@ -420,7 +420,10 @@
         return;
       }
 
-      window.location.href = getNextPage();
+      const { data: signedInData } = await supabaseClient.auth.getSession();
+      const pending = signedInData?.session?.user?.user_metadata?.parla_onboarding_pending;
+
+      window.location.href = pending ? "onboarding.html?resume=1" : getNextPage();
     });
 
     forgotBtn.addEventListener("click", async () => {
