@@ -938,7 +938,30 @@
   </footer>
 
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
   <script>
+    const supabaseClient = window.supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_ANON_KEY
+    );
+
+    async function requireSession() {
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error || !data.session) {
+          window.location.href = "login.html";
+          return false;
+        }
+        return true;
+      } catch (error) {
+        console.error("Session check failed:", error);
+        window.location.href = "login.html";
+        return false;
+      }
+    }
+
     function loadLearningProfile() {
       try {
         const raw = sessionStorage.getItem("parla_learning_profile");
@@ -978,7 +1001,12 @@
       window.location.href = "lesson.htm";
     }
 
-    loadLearningProfile();
+    (async () => {
+      const authenticated = await requireSession();
+      if (authenticated) {
+        loadLearningProfile();
+      }
+    })();
   </script>
 
 </body>
