@@ -886,26 +886,57 @@
     const topicName = document.querySelector(".topic-name");
     const statusText = document.querySelector(".conversation-status");
 
-    const profile = loadProfile();
-
     const state = {
-      language: profile?.targetLanguage || "Spanish",
-      level: profile?.level || "A2",
-      goal: profile?.goal || "Real conversation",
-      interests: Array.isArray(profile?.interests) ? profile.interests : [],
+      language: "",
+      level: "A0",
+      goal: "Real conversation",
+      interests: [],
       topic: "Your weekend",
       history: [],
       busy: false
     };
 
-    function loadProfile() {
-      try {
-        const raw = sessionStorage.getItem("parla_learning_profile");
-        return raw ? JSON.parse(raw) : null;
-      } catch (error) {
-        console.warn("Could not load learning profile.", error);
+    async function loadProfile() {
+      const client = window.supabase.createClient(
+        window.SUPABASE_URL,
+        window.SUPABASE_ANON_KEY
+      );
+
+      const { data: sessionData, error: sessionError } =
+        await client.auth.getSession();
+
+      if (sessionError || !sessionData?.session) {
         return null;
       }
+
+      const user = sessionData.session.user;
+
+      const { data: learnerLanguage, error: learnerError } = await client
+        .from("learner_languages")
+        .select("id, level, goal, interests, languages(name, code)")
+        .eq("user_id", user.id)
+        .eq("is_current", true)
+        .maybeSingle();
+
+      if (learnerError || !learnerLanguage) {
+        return null;
+      }
+
+      const profile = {
+        targetLanguage: learnerLanguage.languages?.name || "",
+        level: learnerLanguage.level || "A0",
+        goal: learnerLanguage.goal || "Real conversation",
+        interests: Array.isArray(learnerLanguage.interests)
+          ? learnerLanguage.interests
+          : []
+      };
+
+      sessionStorage.setItem(
+        "parla_learning_profile",
+        JSON.stringify(profile)
+      );
+
+      return profile;
     }
 
     function updateLanguageUI() {
@@ -1056,8 +1087,24 @@
       );
     });
 
-    updateLanguageUI();
-    callParla();
+    async function initializeTalk() {
+      const profile = await loadProfile();
+
+      if (!profile?.targetLanguage) {
+        window.location.href = "dashboard.html";
+        return;
+      }
+
+      state.language = profile.targetLanguage;
+      state.level = profile.level || "A0";
+      state.goal = profile.goal || "Real conversation";
+      state.interests = Array.isArray(profile.interests) ? profile.interests : [];
+
+      updateLanguageUI();
+      callParla();
+    }
+
+    initializeTalk();
   </script>
 
 </body>
