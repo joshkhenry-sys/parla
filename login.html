@@ -360,6 +360,18 @@
         if (value) params.set(key, value);
       });
 
+      const hasPendingOnboarding =
+        params.has("targetLanguage") ||
+        params.has("language") ||
+        params.has("nativeLanguage") ||
+        params.has("level") ||
+        params.has("goal") ||
+        params.has("interests");
+
+      if (!hasPendingOnboarding) {
+        return "dashboard.html";
+      }
+
       const query = params.toString();
       return "onboarding.html" + (query ? "?" + query : "");
     }
@@ -453,7 +465,7 @@
       notice.innerHTML = "<strong>Already signed in.</strong><br>Current account: " + escapeHtml(name) + ".";
 
       const continueLink = document.createElement("a");
-      continueLink.href = "dashboard.html";
+      continueLink.href = getNextPage();
       continueLink.textContent = "Continue to dashboard";
       continueLink.style.display = "inline-block";
       continueLink.style.marginTop = "10px";
