@@ -1643,7 +1643,7 @@
         const user = sessionData?.session?.user;
 
         if (!user) {
-          window.location.href = "signup.html?language=" + encodeURIComponent(state.targetLanguage);
+          window.location.href = buildAuthUrl("signup");
           return;
         }
 
@@ -1730,20 +1730,88 @@
       }
     }
 
-    const initialLanguage = new URLSearchParams(window.location.search).get("language");
+    function buildAuthParams() {
+      const params = new URLSearchParams();
 
-    if (initialLanguage) {
-      const initialCard = Array.from(
-        document.querySelectorAll('[data-group="targetLanguage"]')
-      ).find(card => card.dataset.value === initialLanguage);
+      if (state.targetLanguage) params.set("targetLanguage", state.targetLanguage);
+      if (state.nativeLanguage) params.set("nativeLanguage", state.nativeLanguage);
+      if (state.level) params.set("level", state.level);
+      if (state.goal) params.set("goal", state.goal);
+      if (state.interests.length) params.set("interests", JSON.stringify(state.interests));
 
-      if (initialCard) {
-        initialCard.click();
-      }
+      return params;
     }
 
-    updateProgress();
-    updateContinueButton();
+    function buildAuthUrl(page) {
+      const params = buildAuthParams();
+      return page + ".html?" + params.toString();
+    }
+
+    function applyPendingProfileFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+
+      const pendingTarget = params.get("targetLanguage") || params.get("language");
+      const pendingNative = params.get("nativeLanguage");
+      const pendingLevel = params.get("level");
+      const pendingGoal = params.get("goal");
+      let pendingInterests = [];
+
+      try {
+        const rawInterests = params.get("interests");
+        if (rawInterests) {
+          const parsed = JSON.parse(rawInterests);
+          if (Array.isArray(parsed)) pendingInterests = parsed;
+        }
+      } catch (_) {
+        pendingInterests = [];
+      }
+
+      const clickValue = (group, value) => {
+        if (!value) return;
+        const card = Array.from(
+          document.querySelectorAll('[data-group="' + group + '"]')
+        ).find(item => item.dataset.value === value);
+        if (card) card.click();
+      };
+
+      clickValue("targetLanguage", pendingTarget);
+      clickValue("nativeLanguage", pendingNative);
+      clickValue("level", pendingLevel);
+      clickValue("goal", pendingGoal);
+
+      pendingInterests.forEach(value => clickValue("interests", value));
+
+      return Boolean(
+        pendingTarget &&
+        pendingNative &&
+        pendingLevel &&
+        pendingGoal &&
+        pendingInterests.length > 0
+      );
+    }
+
+    async function finishPendingProfileAfterAuth() {
+      const hasPendingProfile = applyPendingProfileFromUrl();
+      if (!hasPendingProfile) {
+        updateProgress();
+        updateContinueButton();
+        return;
+      }
+
+      const { data } = await supabaseClient.auth.getSession();
+
+      if (data?.session) {
+        currentStep = 6;
+        buildFinishPreview();
+        await finishOnboarding();
+        return;
+      }
+
+      updateProgress();
+      updateContinueButton();
+    }
+
+    finishPendingProfileAfterAuth();
   </script>
 
 </body>
