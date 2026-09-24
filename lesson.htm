@@ -602,7 +602,7 @@
 
       <div class="lesson-info">
         <span>Lesson</span>
-        <span class="lesson-language" id="lessonLanguage">Your language</span>
+        <span class="lesson-language" id="lessonLanguage">Loading…</span>
       </div>
 
     </header>
@@ -694,17 +694,17 @@
           <div class="tag">Suggesting</div>
 
           <div class="phrase">
-            ¿Qué te parece si...?
+            Loading expression…
           </div>
 
           <div class="translation">
-            What do you think about...?
+            Meaning will appear here.
           </div>
 
           <div class="example">
-            ¿Qué te parece si vamos el sábado?
+            Loading example…
             <br>
-            <span>What do you think about going Saturday?</span>
+            <span>Example will appear here.</span>
           </div>
 
         </div>
@@ -715,7 +715,7 @@
           <div class="tag">Checking</div>
 
           <div class="phrase">
-            ¿Estás libre...?
+            Loading expression…?
           </div>
 
           <div class="translation">
@@ -723,9 +723,9 @@
           </div>
 
           <div class="example">
-            ¿Estás libre el viernes?
+            Loading example…
             <br>
-            <span>Are you free Friday?</span>
+            <span>Example will appear here.</span>
           </div>
 
         </div>
@@ -736,17 +736,17 @@
           <div class="tag">Changing plans</div>
 
           <div class="phrase">
-            Al final...
+            Loading expression…
           </div>
 
           <div class="translation">
-            In the end / Actually...
+            Meaning will appear here.
           </div>
 
           <div class="example">
-            Al final no puedo ir.
+            Loading example…
             <br>
-            <span>Actually, I can't go.</span>
+            <span>Example will appear here.</span>
           </div>
 
         </div>
@@ -757,17 +757,17 @@
           <div class="tag">Keeping it casual</div>
 
           <div class="phrase">
-            Ya vemos.
+            Loading expression…
           </div>
 
           <div class="translation">
-            We'll see / We'll figure it out.
+            Meaning will appear here.
           </div>
 
           <div class="example">
-            No sé todavía. Ya vemos.
+            No sé todavía. Loading expression…
             <br>
-            <span>I don't know yet. We'll see.</span>
+            <span>Example will appear here.</span>
           </div>
 
         </div>
@@ -813,17 +813,17 @@
 
           <button class="answer"
             onclick="chooseAnswer(this, false)">
-            ¿Estás libre si vamos?
+            Loading option…
           </button>
 
           <button class="answer"
             onclick="chooseAnswer(this, true)">
-            ¿Qué te parece si vamos a cenar?
+            Loading option…
           </button>
 
           <button class="answer"
             onclick="chooseAnswer(this, false)">
-            Ya vemos si vamos a cenar.
+            Loading option…
           </button>
 
         </div>
@@ -1004,17 +1004,17 @@
           </h3>
 
           <div class="thing">
-            <strong>¿Qué te parece si...?</strong> — a natural way
+            <strong>Loading expression…</strong> — a natural way
             to suggest something.
           </div>
 
           <div class="thing">
-            <strong>Al final...</strong> — useful when plans
+            <strong>Loading expression…</strong> — useful when plans
             change or you clarify what happened.
           </div>
 
           <div class="thing">
-            <strong>Ya vemos.</strong> — useful when you want
+            <strong>Loading expression…</strong> — useful when you want
             to keep the plan open and casual.
           </div>
 
@@ -1235,7 +1235,7 @@
     function renderAiLesson(lesson, profile) {
       aiLesson = lesson;
 
-      const language = profile?.targetLanguage || "Your language";
+      const language = profile?.targetLanguage || "Loading…";
       const level = profile?.level || "A1";
 
       document.getElementById("lessonLanguage").textContent = language;
