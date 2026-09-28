@@ -76,22 +76,9 @@ const requestedLanguageId=params.get("language_id");
 const returnTo=params.get("return")==="lesson"?"lesson":"dashboard";
 let user=null,language=null,index=0,selected=null,scoreByLevel={A0:0,A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
 
-const spanishQuestions=[
-{level:"A0",q:"You want to ask where the bathroom is. Which sounds right?",o:["¿Dónde está el baño?","¿Cuánto cuesta el baño?","¿Qué hora tiene el baño?"],a:0},
-{level:"A0",q:"Someone asks “¿Quieres café?” and you do. What do you say?",o:["Sí, quiero.","Sí, fui.","Sí, tengo."],a:0},
-{level:"A1",q:"What does “Ayer fui al supermercado” mean?",o:["Yesterday I went to the supermarket.","Tomorrow I am going to the supermarket.","I usually work at the supermarket."],a:0},
-{level:"A1",q:"Which is the most natural way to say “I have two brothers”?",o:["Tengo dos hermanos.","Soy dos hermanos.","Estoy dos hermanos."],a:0},
-{level:"A2",q:"“Cuando tengo tiempo, salgo a caminar.” What does “cuando” mean here?",o:["when","although","because"],a:0},
-{level:"A2",q:"You need someone to repeat something. Which is natural?",o:["¿Puedes repetirlo?","¿Puedes recordarlo ayer?","¿Puedes conocerlo?"],a:0},
-{level:"B1",q:"“Llevo tres años viviendo en Denver.” What does “llevo” express here?",o:["How long something has been happening.","That something happened once.","That something will happen tomorrow."],a:0},
-{level:"B1",q:"“Al final no fui porque se me hizo tarde.” What happened?",o:["The person didn't go because it got late.","The person arrived early and stayed.","The person went because it was late."],a:0},
-{level:"B2",q:"“No es que no quiera ir; es que ya hice planes.” What is the speaker really communicating?",o:["They don't want to go at all.","They would go, but they already have plans.","They haven't decided whether they like the person."],a:1},
-{level:"B2",q:"“Si me hubieras avisado antes, habría ido.” What does this imply?",o:["They were invited and went.","They would have gone if they had been told earlier.","They are planning to go later."],a:1},
-{level:"C1",q:"“Por mucho que lo intento, no consigo entenderlo.” What is the closest meaning?",o:["No matter how much I try, I can't understand it.","I understand it easily when I try.","I only try when someone explains it."],a:0},
-{level:"C1",q:"“A estas alturas, ya deberías saber cómo funciona.” What does the phrase suggest?",o:["Given how much time has passed, you should know by now.","You should learn it tomorrow.","You have never had a chance to learn it."],a:0},
-{level:"C2",q:"“No deja de ser una buena opción, aunque no sea mi primera elección.” What is the nuance?",o:["It is still a good option despite not being the speaker's first choice.","It is definitely the worst option.","The speaker refuses to consider it."],a:0},
-{level:"C2",q:"“Lo que pasa es que…” is often used conversationally to…",o:["soften or introduce an explanation for a situation.","announce a formal legal decision.","say that something happened in the distant past."],a:0}
-];
+let questions=[];
+let scoreByLevel={A0:0,A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
+
 
 function escapeHtml(v){const d=document.createElement("div");d.textContent=v==null?"":String(v);return d.innerHTML}
 async function init(){
@@ -105,17 +92,33 @@ async function init(){
   language=rows[0];
   document.getElementById("languageLabel").textContent=(language.languages?.name||"Language")+" placement";
 }
-function begin(){document.getElementById("intro").classList.add("hidden");document.getElementById("test").classList.remove("hidden");render()}
+async function begin(){
+  const button=document.querySelector("#intro .next"); button.disabled=true; button.textContent="Building your placement check…";
+  try{
+    const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),12000);
+    const response=await fetch("/api/assess",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({targetLanguage:language.languages?.name||"Language",targetCode:language.languages?.code||""}),signal:controller.signal});
+    clearTimeout(timer);
+    if(!response.ok) throw new Error("Assessment unavailable");
+    const data=await response.json();
+    if(!Array.isArray(data.questions)||data.questions.length!==14) throw new Error("Incomplete assessment");
+    questions=data.questions;
+    document.getElementById("intro").classList.add("hidden");document.getElementById("test").classList.remove("hidden");render();
+  }catch(error){
+    console.error(error);
+    button.disabled=false;button.textContent="Try again";
+    const note=document.querySelector("#intro .note"); if(note) note.textContent="We couldn't build the language-specific test yet. Try again in a moment.";
+  }
+}
 function render(){
-  const item=spanishQuestions[index];
-  document.getElementById("questionNo").textContent="Question "+(index+1)+" of "+spanishQuestions.length;
+  const item=questions[index];
+  document.getElementById("questionNo").textContent="Question "+(index+1)+" of "+questions.length;
   document.getElementById("question").textContent=item.q;
   document.getElementById("feedback").textContent="";
-  document.getElementById("bar").style.width=((index)/spanishQuestions.length*100)+"%";
+  document.getElementById("bar").style.width=((index)/questions.length*100)+"%";
   const options=document.getElementById("options");
   options.innerHTML=item.o.map((x,i)=>'<button class="option" data-index="'+i+'">'+escapeHtml(x)+'</button>').join("");
   selected=null;
-  const next=document.getElementById("next");next.disabled=true;next.textContent=index===spanishQuestions.length-1?"See my level":"Next question";
+  const next=document.getElementById("next");next.disabled=true;next.textContent=index===questions.length-1?"See my level":"Next question";
   options.querySelectorAll(".option").forEach(btn=>btn.addEventListener("click",()=>choose(Number(btn.dataset.index))));
 }
 function choose(i){
@@ -123,7 +126,7 @@ function choose(i){
   document.querySelectorAll(".option").forEach((b,n)=>{b.classList.toggle("selected",n===i)});
   const next=document.getElementById("next");next.disabled=false;next.textContent=index===spanishQuestions.length-1?"See my level":"Next question";
 }
-document.getElementById("next").addEventListener("click",()=>{if(selected===null)return;const item=spanishQuestions[index];if(selected===item.a)scoreByLevel[item.level]++;if(index<spanishQuestions.length-1){index++;render()}else{finish()}});
+document.getElementById("next").addEventListener("click",()=>{if(selected===null)return;const item=questions[index];if(selected===item.answer)scoreByLevel[item.level]++;if(index<questions.length-1){index++;render()}else{finish()}});
 function calculateLevel(){
   const order=["A0","A1","A2","B1","B2","C1","C2"];
   let level="A0";
@@ -144,7 +147,7 @@ async function finish(){
   };
   const {error:updateError}=await client.from("learner_languages").update({level:result}).eq("id",language.id).eq("user_id",user.id);
   if(updateError){alert("We couldn't save your placement. Please try again.");return}
-  const {error:eventError}=await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:result,scores:scoreByLevel,question_count:spanishQuestions.length,version:1}});
+  const {error:eventError}=await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:result,scores:scoreByLevel,question_count:questions.length,version:2}});
   if(eventError){console.error(eventError)}
   document.getElementById("test").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
   document.getElementById("resultLevel").textContent=result;
