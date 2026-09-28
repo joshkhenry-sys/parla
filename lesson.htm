@@ -793,7 +793,7 @@
       progress.style.width = Math.min(100, ((currentCard + 1) / total) * 100) + "%";
     }
 
-    async function rememberTaughtPhrases(client, userId) {
+    async function rememberTaughtPhrases(client) {
       const taught = cards
         .filter(card => card.type === "teach" && card.phrase)
         .map(card => ({
@@ -1247,7 +1247,7 @@
             }
           }
 
-          await rememberTaughtPhrases(client, user.id);
+          await rememberTaughtPhrases(client);
         }
 
         logEvent("lesson_completed", {
