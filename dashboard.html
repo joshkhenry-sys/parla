@@ -250,9 +250,12 @@ footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-co
           .eq("learner_language_id", learnerLanguage.id)
           .eq("event_type", "placement_completed")
           .limit(1);
-        const startButton = document.getElementById("startLessonButton");
-        if (startButton && !placement?.length) startButton.innerHTML = "Check my level <span>→</span>";
         await loadSavedLessons(learnerLanguage.id, languageName);
+        const startButton = document.getElementById("startLessonButton");
+        if (startButton && !placement?.length) {
+          startButton.innerHTML = "Check my level <span>→</span>";
+          startButton.onclick = startLesson;
+        }
 
         const myLanguagesGrid = document.getElementById("myLanguagesGrid");
         if (myLanguagesGrid) {
