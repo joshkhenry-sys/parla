@@ -934,25 +934,8 @@
         lesson = data.lesson;
         cards = lesson.cards;
 
-        const { data: savedLesson, error: saveLessonError } = await window.supabase
-          .createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
-          .from("lessons")
-          .insert({
-            learner_language_id: learnerLanguageId,
-            title: lesson.title,
-            topic: lesson.intro || "Everyday conversation",
-            level: profile.level,
-            content: lesson
-          })
-          .select("id")
-          .single();
-
-        if (saveLessonError) {
-          console.error("Could not save lesson:", saveLessonError);
-          throw new Error("The lesson was generated but could not be saved to your learning history.");
-        }
-
-        lessonId = savedLesson.id;
+        // Display the generated lesson immediately. Saving history must never
+        // prevent the learner from starting a lesson.
         document.getElementById("cardTitle").textContent = lesson.title;
         document.getElementById("cardIntro").textContent = lesson.intro;
         document.title = "Parla — " + profile.targetLanguage + " lesson";
@@ -970,22 +953,41 @@
       }
     }
 
-    document.getElementById("nextButton").addEventListener("click", () => {
+    document.getElementById("nextButton").addEventListener("click", async () => {
       if (currentCard < cards.length - 1) {
         currentCard++;
         renderCard();
         updateProgress();
         window.scrollTo({top:0, behavior:"smooth"});
       } else {
-        if (lessonId && profile) {
+        if (profile) {
           const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+          if (!lessonId) {
+            const { data: savedLesson, error: saveLessonError } = await client
+              .from("lessons")
+              .insert({
+                learner_language_id: learnerLanguageId,
+                title: lesson.title,
+                topic: lesson.intro || "Everyday conversation",
+                level: profile.level,
+                content: lesson
+              })
+              .select("id")
+              .single();
+
+            if (!saveLessonError && savedLesson?.id) lessonId = savedLesson.id;
+          }
           const quizCount = quizResponses.length;
           const correctCount = quizResponses.filter(item => item.correct).length;
           const score = quizCount ? Math.round((correctCount / quizCount) * 100) : 100;
 
-          const { error: attemptError } = await client
-            .from("lesson_attempts")
-            .insert({
+          if (!lessonId) {
+            console.error("Lesson history could not be saved; completing locally.");
+          } else {
+            const { error: attemptError } = await client
+              .from("lesson_attempts")
+              .insert({
               lesson_id: lessonId,
               score,
               responses: {
@@ -995,9 +997,9 @@
               }
             });
 
-          if (attemptError) {
-            console.error("Could not save lesson attempt:", attemptError);
-            throw new Error("Your lesson finished, but Parla could not save your completion.");
+            if (attemptError) {
+              console.error("Could not save lesson attempt:", attemptError);
+            }
           }
         }
 
