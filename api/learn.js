@@ -60,7 +60,10 @@ export default async function handler(req, res) {
       "Every teach card must include the target phrase, a simple pronunciation guide, IPA, English meaning, when to use it, and one short example.",
       "Speech is part of every lesson at every level. Always provide pronunciation data for every taught phrase, including A0/A1 and higher levels.",
       "Every lesson must make it easy for the learner to hear the target phrase and hear the example spoken aloud before or while practicing it.",
-      "For A0/A1, pronunciation should be especially clear and beginner-friendly: simple readable sound guide, accurate IPA, short phrases, and no assumption that the learner can infer pronunciation from spelling."
+      "For A0/A1, pronunciation should be especially clear and beginner-friendly: simple readable sound guide, accurate IPA, short phrases, and no assumption that the learner can infer pronunciation from spelling.",
+      "Make the scenario feel like a real moment an adult would actually experience, not a textbook exercise.",
+      "Avoid unnatural example sentences, invented dialogue, or sentences that exist only to demonstrate grammar.",
+      "Use the learner's interests when they naturally fit the scenario, but keep the language practical.",
       "After each teach card, include a tiny multiple-choice quiz about that phrase.",
       "Include one final speaking card using language already taught.",
       "Meanings and instructions should be in English unless the learner's level makes another language clearly useful.",
@@ -78,7 +81,8 @@ export default async function handler(req, res) {
       "Goal: " + goal,
       "Interests: " + (interests || "Everyday life"),
       "Lesson scenario: " + focus,
-      "Create a focused lesson that takes roughly 5–8 minutes for a beginner and 8–12 minutes for higher levels."
+      "Create a focused lesson that takes roughly 5–8 minutes for a beginner and 8–12 minutes for higher levels.",
+      "Return a scene object describing the real-world setting, what is happening right now, the learner's role, and what they are trying to accomplish."
     ].join("\n");
 
     const schema = {
@@ -87,6 +91,17 @@ export default async function handler(req, res) {
       properties: {
         title: { type: "string" },
         intro: { type: "string" },
+        scene: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            setting: { type: "string" },
+            moment: { type: "string" },
+            learnerRole: { type: "string" },
+            goal: { type: "string" }
+          },
+          required: ["setting","moment","learnerRole","goal"]
+        },
         cards: {
           type: "array",
           minItems: 7,
@@ -112,7 +127,7 @@ export default async function handler(req, res) {
           }
         }
       },
-      required: ["title","intro","cards"]
+      required: ["title","intro","scene","cards"]
     };
 
     const response = await fetch("https://api.openai.com/v1/responses", {
@@ -173,7 +188,7 @@ export default async function handler(req, res) {
       && lesson.cards.length === 7
       && lesson.cards.every(card => ["teach", "quiz", "speak"].includes(card?.type));
 
-    if (!lesson?.title || !lesson?.intro || !validCards) {
+    if (!lesson?.title || !lesson?.intro || !lesson?.scene?.setting || !lesson?.scene?.moment || !lesson?.scene?.learnerRole || !lesson?.scene?.goal || !validCards) {
       return res.status(502).json({ error: "The AI returned an incomplete lesson." });
     }
 
