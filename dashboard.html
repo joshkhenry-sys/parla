@@ -1,413 +1,128 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Nahtive — Your Learning</title>
-
-  <style>
-:root{--bg:#f7f5ef;--surface:#fcfbf7;--surface2:#efeee7;--text:#3f4542;--muted:#7b817c;--border:#deded5;--accent:#9caf78;--radius-xl:14px;--radius-lg:10px;--radius-md:8px}
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Nahtive — Your Learning</title><style>
+:root{
+  --ink:#18211f;--muted:#6c7773;--cream:#f4f1e8;--paper:#fffdf8;--line:#d9ddd6;
+  --blue:#b8dff0;--blue-deep:#285a6b;--violet:#c9bdf0;--violet-deep:#51477b;
+  --coral:#f2a28c;--yellow:#f4d76b;--green:#c8dfb9;--green-deep:#48653c;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
 button,input{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
-.container{width:min(1240px,calc(100% - 64px));margin:0 auto}
-nav{height:92px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-.logo{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:28px;font-weight:400;letter-spacing:-1.5px}.logo span{color:var(--accent)}
-.nav-right{display:flex;align-items:center;gap:22px}.streak{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1.2px}.streak-dot{width:7px;height:7px;background:var(--accent);border-radius:50%}.avatar{width:38px;height:38px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-.dashboard-hero{padding:105px 0 78px;display:grid;grid-template-columns:1.15fr .85fr;gap:80px;align-items:end;border-bottom:1px solid var(--border)}
-.eyebrow,.card-label,.recommended-label,.quick-number,.section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-.eyebrow{color:var(--accent);margin-bottom:25px}.dashboard-hero h1{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:clamp(40px,5.2vw,68px);line-height:1.02;letter-spacing:-2.5px;font-weight:400;max-width:850px}.dashboard-hero p{margin:0 0 7px;color:var(--muted);font-size:15px;line-height:1.65;max-width:370px}
-.dashboard-grid{display:grid;grid-template-columns:1.7fr .7fr;gap:1px;background:var(--border);margin-top:1px;border-bottom:1px solid var(--border)}
-.card{background:var(--surface);border:0;border-radius:0}
-.recommended{min-height:480px;padding:42px;position:relative;overflow:hidden;background:var(--surface)}
-.recommended-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.recommended-label{color:var(--accent)}.recommended-time{font-size:12px;color:var(--muted)}
-.recommended h2{margin-top:125px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:clamp(30px,3.5vw,46px);line-height:1.08;letter-spacing:-1.5px;max-width:700px;font-weight:400}.recommended-copy{margin-top:20px;color:var(--muted);font-size:15px;line-height:1.6;max-width:560px}.lesson-meta{display:flex;align-items:center;gap:10px;margin-top:28px;font-size:11px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}.meta-dot{width:4px;height:4px;background:var(--accent)}
-.primary-button{display:inline-flex;align-items:center;gap:24px;border:1px solid var(--accent);background:var(--accent);color:#0b0b0a;padding:15px 18px;margin-top:30px;border-radius:0;font-size:11px;text-transform:uppercase;letter-spacing:1.4px;font-weight:800}.primary-button:hover{transform:none;background:#e4ff86}
-.lesson-orb{position:absolute;width:310px;height:310px;border-radius:50%;right:-95px;bottom:-150px;background:var(--accent);opacity:.9}.lesson-orb:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:var(--bg);right:85px;top:35px}
-.progress-card{padding:42px;min-height:480px;display:flex;flex-direction:column;background:var(--surface)}.language-row{display:flex;align-items:end;justify-content:space-between;margin-top:36px}.language-name{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:32px;font-weight:400;letter-spacing:-1px}.level{padding:7px 9px;border:1px solid var(--border);color:var(--accent);font-size:10px;letter-spacing:1.2px;text-transform:uppercase}.progress-number{margin-top:75px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:40px;line-height:1.05;letter-spacing:-1.5px;font-weight:400}.progress-description{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5}.progress-bar{height:2px;width:100%;background:var(--border);margin-top:28px;overflow:hidden}.progress-fill{height:100%;width:0;background:var(--accent)}.progress-footer{margin-top:auto;padding-top:28px;display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}
-.language-switcher-section{margin-top:64px;margin-bottom:64px}.language-switcher-card{padding:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.dashboard-language-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}.dashboard-language-link{min-height:64px;display:flex;align-items:center;justify-content:flex-start;padding:12px 18px;border:0;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;letter-spacing:.3px}.dashboard-language-link:hover{color:var(--text);transform:none}.dashboard-language-link.current{color:var(--accent);background:var(--surface2)}
-.section-title{margin-bottom:18px;color:var(--muted)}
-.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.quick-card{padding:25px;min-height:240px;position:relative;overflow:hidden;transition:background .2s ease}.quick-card:hover{transform:none;background:var(--surface2)}.quick-number{color:var(--accent)}.quick-card h3{margin-top:85px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:28px;letter-spacing:-1.2px;font-weight:400}.quick-card p{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.5;max-width:190px}.quick-arrow{position:absolute;right:23px;bottom:22px;font-size:20px;color:var(--accent)}.talk-card,.review-card{background:var(--surface)}
-.activity-section{margin-top:64px}.activity-card{padding:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.activity-list{margin-top:0}.activity-item{display:grid;grid-template-columns:50px 1fr auto;align-items:center;gap:15px;padding:22px 0;border-bottom:1px solid var(--border)}.activity-item:last-child{border-bottom:none}.activity-icon{width:34px;height:34px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}.activity-icon.blue,.activity-icon.green,.activity-icon.coral{background:transparent;color:var(--accent)}.activity-title{font-size:14px;font-weight:600}.activity-subtitle{margin-top:4px;color:var(--muted);font-size:11px}.activity-score{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.footer-inner{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1.2px}.footer-links{display:flex;gap:25px}
-@media(max-width:800px){.container{width:min(100% - 32px,600px)}nav{height:72px}.streak{display:none}.dashboard-hero{padding:65px 0 48px;display:block}.dashboard-hero h1{font-size:60px;letter-spacing:-3px}.dashboard-hero p{margin-top:28px}.dashboard-grid{grid-template-columns:1fr}.recommended,.progress-card{min-height:420px;padding:28px}.recommended h2{margin-top:90px;font-size:47px}.dashboard-language-grid{grid-template-columns:repeat(2,1fr)}.quick-grid{grid-template-columns:1fr 1fr}.quick-card{min-height:190px}.quick-card h3{margin-top:55px;font-size:24px}.activity-score{display:none}.footer-inner{align-items:flex-start;gap:18px;flex-direction:column}}
-@media(max-width:520px){.quick-grid{grid-template-columns:1fr}.dashboard-hero h1{font-size:51px}}
-</style>
-</head>
-
+.container{width:min(1320px,calc(100% - 48px));margin:auto}
+nav{height:78px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:25px;font-weight:800;letter-spacing:-1.3px}.logo span{color:#e07d63}
+.nav-right{display:flex;align-items:center;gap:18px}.streak{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--muted)}
+.streak-dot{width:9px;height:9px;background:var(--coral);border-radius:50%;box-shadow:0 0 0 5px #f8ddd5}
+.avatar{width:38px;height:38px;border-radius:12px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+#logoutButton{border:0!important;background:transparent!important;color:var(--muted)!important;padding:8px!important;font-size:12px!important}
+.dashboard-hero{display:grid;grid-template-columns:1.3fr .7fr;gap:28px;align-items:stretch;padding:26px 0 24px}
+.dashboard-hero .eyebrow{grid-column:1/-1;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.6px;color:var(--violet-deep)}
+.dashboard-hero h1{font-size:clamp(38px,5vw,64px);line-height:1.02;letter-spacing:-3px;font-weight:800;max-width:720px}
+.dashboard-hero p{align-self:end;max-width:390px;padding:18px 20px;background:var(--yellow);border-radius:20px;font-size:14px;line-height:1.55;font-weight:600}
+.dashboard-grid{display:grid;grid-template-columns:1.45fr .55fr;gap:18px;margin-top:4px}
+.card{border-radius:26px;border:1px solid rgba(24,33,31,.08);box-shadow:0 12px 35px rgba(24,33,31,.06)}
+.recommended{min-height:430px;padding:32px;background:var(--violet);position:relative;overflow:hidden}
+.recommended:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-55px;top:-65px;background:var(--yellow);opacity:.9}
+.recommended-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center}
+.recommended-label,.card-label,.section-title{font-size:10px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase}
+.recommended-label{color:var(--violet-deep)}.recommended-time{font-size:11px;font-weight:800;background:rgba(255,255,255,.42);padding:7px 10px;border-radius:999px}
+.recommended h2{position:relative;z-index:2;margin-top:105px;max-width:700px;font-size:clamp(30px,4vw,50px);line-height:1.02;letter-spacing:-2px;font-weight:800}
+.recommended-copy{position:relative;z-index:2;margin-top:15px;max-width:560px;font-size:14px;line-height:1.55;color:#403b59}
+.lesson-meta{position:relative;z-index:2;display:flex;align-items:center;gap:9px;margin-top:22px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:#51477b}
+.meta-dot{width:5px;height:5px;background:var(--coral);border-radius:50%}
+.primary-button{position:relative;z-index:2;display:inline-flex;align-items:center;gap:25px;border:0;background:var(--ink);color:#fff;padding:14px 17px;margin-top:24px;border-radius:13px;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1px;transition:transform .18s ease,box-shadow .18s ease}
+.primary-button:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(24,33,31,.18)}
+.progress-card{min-height:430px;padding:28px;background:var(--paper);display:flex;flex-direction:column}
+.card-label{color:var(--muted)}.language-row{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
+.language-name{font-size:28px;font-weight:800;letter-spacing:-1.2px}.level{padding:7px 10px;border-radius:999px;background:var(--blue);color:var(--blue-deep);font-size:10px;font-weight:900;letter-spacing:1px;text-transform:uppercase}
+.progress-number{margin-top:58px;font-size:34px;font-weight:800;letter-spacing:-1.3px}
+.progress-description{margin-top:8px;color:var(--muted);font-size:12px;line-height:1.5}
+.progress-bar{height:9px;border-radius:99px;background:#e6e8e1;margin-top:22px;overflow:hidden}.progress-fill{height:100%;width:0;background:var(--coral);border-radius:99px}
+.progress-footer{margin-top:auto;padding-top:24px;display:flex;justify-content:space-between;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.language-switcher-section{margin-top:48px}.section-title{margin-bottom:13px;color:var(--muted)}
+.language-switcher-card{padding:8px;background:var(--paper);border-radius:20px}
+.dashboard-language-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.dashboard-language-link{min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:13px;background:#f0eee7;color:var(--muted);font-size:12px;font-weight:750;transition:background .18s,transform .18s,color .18s}
+.dashboard-language-link:hover{background:var(--blue);color:var(--blue-deep);transform:translateY(-1px)}
+.dashboard-language-link.current{background:var(--ink);color:#fff}
+.dashboard-language-link.current span+span{color:#bfc8c4!important}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.quick-card{min-height:210px;padding:23px;position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s}
+.quick-card:nth-child(1){background:var(--blue)}.quick-card:nth-child(2){background:var(--coral)}.quick-card:nth-child(3){background:var(--green)}.quick-card:nth-child(4){background:var(--yellow)}
+.quick-card:hover{transform:translateY(-4px);box-shadow:0 16px 30px rgba(24,33,31,.1)}
+.quick-number{font-size:10px;font-weight:900;letter-spacing:1px;opacity:.65}.quick-card h3{margin-top:68px;font-size:24px;line-height:1.05;letter-spacing:-1px;font-weight:850}.quick-card p{margin-top:9px;color:rgba(24,33,31,.68);font-size:11px;line-height:1.45;max-width:205px}.quick-arrow{position:absolute;right:20px;bottom:18px;width:31px;height:31px;border-radius:50%;background:rgba(255,255,255,.52);display:flex;align-items:center;justify-content:center;font-size:17px}
+.activity-section{margin-top:48px}.activity-card{padding:8px;background:var(--paper);border-radius:20px}.activity-item{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:13px;padding:15px 12px;border-radius:14px}.activity-item:hover{background:#f0eee7}.activity-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900}.activity-icon.blue{background:var(--blue);color:var(--blue-deep)}.activity-icon.green{background:var(--green);color:var(--green-deep)}.activity-icon.coral{background:var(--coral);color:#713c2e}.activity-title{font-size:13px;font-weight:800}.activity-subtitle{margin-top:3px;color:var(--muted);font-size:10px}.activity-score{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;font-weight:700}.footer-links{display:flex;gap:20px}
+@media(max-width:900px){.container{width:min(100% - 28px,650px)}.dashboard-hero{display:block;padding-top:25px}.dashboard-hero .eyebrow{margin-bottom:16px}.dashboard-hero p{margin-top:20px}.dashboard-grid{grid-template-columns:1fr}.dashboard-language-grid{grid-template-columns:repeat(2,1fr)}.quick-grid{grid-template-columns:1fr 1fr}.recommended,.progress-card{min-height:390px}}
+@media(max-width:520px){.nav-right .streak{display:none}.dashboard-hero h1{font-size:42px;letter-spacing:-2px}.recommended{padding:24px}.recommended h2{margin-top:82px;font-size:34px}.quick-grid{grid-template-columns:1fr}.quick-card{min-height:180px}.quick-card h3{margin-top:50px}.dashboard-language-grid{grid-template-columns:1fr 1fr}}
+</style></head>
 <body>
-
-  <div class="container">
-
-    <!-- NAV -->
-    <nav>
-      <a href="index.html" class="logo">Nahtive<span>•</span></a>
-
-      <div class="nav-right">
-        <div class="streak" id="streak"><span class="streak-dot"></span><span id="streakText">Start today</span><span style="margin-left:8px;color:var(--accent);font-weight:700" id="xpText">0 XP</span></div>
-
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button
-            type="button"
-            id="logoutButton"
-            style="border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;"
-          >
-            Log out
-          </button>
-          <div class="avatar" id="avatarInitial">J</div>
-        </div>
-      </div>
-    </nav>
-
-
-    <!-- HERO -->
-    <section class="dashboard-hero">
-
-      <div class="eyebrow">Your learning</div>
-
-      <h1>
-        Keep going.
-        You're getting there.
-      </h1>
-
-      <p>
-        Nahtive is learning how you learn. Here's what we think
-        will help you move forward today.
-      </p>
-
-    </section>
-
-
-    <!-- MAIN DASHBOARD -->
-    <main>
-
-      <div class="dashboard-grid">
-
-        <!-- RECOMMENDED LESSON -->
-        <section class="card recommended">
-
-          <div class="recommended-top">
-            <div class="recommended-label" id="recommendedLabel">
-              Recommended for you
-            </div>
-
-            <div class="recommended-time">
-              ~7 min
-            </div>
-          </div>
-
-          <h2 id="recommendedTitle" data-Nahtive="true">
-            Coffee, but make it natural.
-          </h2>
-
-          <p class="recommended-copy" id="recommendedCopy">
-            You walk into a busy café. Listen first, pick up the phrases, then use them in a real conversation.
-          </p>
-
-          <div class="lesson-meta">
-            <span id="recommendedLanguage">Spanish</span>
-            <span class="meta-dot"></span>
-            <span>Scene · Café</span>
-          </div>
-
-          <button class="primary-button" id="startLessonButton" onclick="startLesson()">
-            Resume scene <span>→</span>
-          </button>
-
-          
-
-        </section>
-
-
-        <!-- PROGRESS -->
-        <section class="card progress-card">
-
-          <div class="card-label">
-            Your progress
-          </div>
-
-          <div class="language-row">
-            <div class="language-name" id="dashboardLanguage">
-              Spanish
-            </div>
-
-            <div class="level" id="dashboardLevel">
-              A2
-            </div>
-          </div>
-
-          <div class="progress-number" id="progressPercent">Not started</div>
-
-          <div class="progress-description" id="progressDescription">
-            Complete a lesson to start tracking your progress.
-          </div>
-
-          <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-
-          <div class="progress-footer">
-            <span>Keep building</span>
-            <span id="progressFraction">0 / 100</span>
-          </div>
-
-        </section>
-
-      </div>
-
-
-      <!-- MY LANGUAGES -->
-
-      <section class="language-switcher-section">
-        <div class="section-title">My languages</div>
-        <div class="card language-switcher-card">
-          <div class="dashboard-language-grid" id="myLanguagesGrid">
-            <div style="grid-column:1/-1;color:var(--muted);font-size:14px;">Loading your languages…</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="language-switcher-section" style="margin-top:0;">
-        <div class="section-title">Add another language</div>
-        <div class="card language-switcher-card">
-          <div class="dashboard-language-grid">
-            <a class="dashboard-language-link" href="onboarding.html?language=Spanish">Spanish</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=English">English</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Portuguese">Portuguese</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=French">French</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Italian">Italian</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=German">German</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Japanese">Japanese</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Korean">Korean</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Mandarin">Mandarin</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Arabic">Arabic</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Dutch">Dutch</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Swedish">Swedish</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Greek">Greek</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Turkish">Turkish</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Hindi">Hindi</a>
-            <a class="dashboard-language-link" href="onboarding.html?language=Polish">Polish</a>
-          </div>
-        </div>
-      </section>
-
-
-      <!-- QUICK ACTIONS -->
-
-      <div class="section-title">
-        What do you want to do?
-      </div>
-
-      <div class="quick-grid">
-
-        <a href="lesson.html" class="card quick-card">
-
-          <div class="quick-number">
-            01
-          </div>
-
-          <h3>
-            Learn in a scene
-          </h3>
-
-          <p>
-            Step into a real situation and speak from there.
-          </p>
-
-          <div class="quick-arrow">
-            →
-          </div>
-
-        </a>
-
-
-        <a href="talk.html" class="card quick-card talk-card">
-
-          <div class="quick-number">
-            02
-          </div>
-
-          <h3>
-            Just talk
-          </h3>
-
-          <p>
-            Have a natural conversation and let
-            Parla learn from it.
-          </p>
-
-          <div class="quick-arrow">
-            →
-          </div>
-
-        </a>
-
-
-        <a href="review.html" class="card quick-card review-card">
-
-          <div class="quick-number">
-            03
-          </div>
-
-          <h3>
-            Review
-          </h3>
-
-          <p>
-            Revisit words and expressions that
-            still need work.
-          </p>
-
-          <div class="quick-arrow">
-            →
-          </div>
-
-        </a>
-
-
-        <a href="progress.html" class="card quick-card">
-
-          <div class="quick-number">
-            04
-          </div>
-
-          <h3>
-            See my progress
-          </h3>
-
-          <p>
-            See what you're improving and what
-            Parla thinks you should work on next.
-          </p>
-
-          <div class="quick-arrow">
-            →
-          </div>
-
-        </a>
-
-      </div>
-
-
-      <!-- RECENT ACTIVITY -->
-
-      <section class="activity-section">
-
-        <div class="section-title">
-          Recent activity
-        </div>
-
-        <div class="card activity-card">
-
-          <div class="activity-list">
-
-            <div class="activity-item">
-
-              <div class="activity-icon blue">
-                A
-              </div>
-
-              <div>
-                <div class="activity-title">
-                  Talking about your weekend
-                </div>
-
-                <div class="activity-subtitle">
-                  Lesson · Yesterday
-                </div>
-              </div>
-
-              <div class="activity-score">
-                Completed
-              </div>
-
-            </div>
-
-
-            <div class="activity-item">
-
-              <div class="activity-icon green">
-                T
-              </div>
-
-              <div>
-                <div class="activity-title">
-                  Free conversation
-                </div>
-
-                <div class="activity-subtitle">
-                  Just Talk · 2 days ago
-                </div>
-              </div>
-
-              <div class="activity-score">
-                8 min
-              </div>
-
-            </div>
-
-
-            <div class="activity-item">
-
-              <div class="activity-icon coral">
-                R
-              </div>
-
-              <div>
-                <div class="activity-title">
-                  Everyday expressions
-                </div>
-
-                <div class="activity-subtitle">
-                  Review · 3 days ago
-                </div>
-              </div>
-
-              <div class="activity-score">
-                12 / 15
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-    </main>
-
+<div class="container">
+<nav>
+  <a href="index.html" class="logo">Nahtive<span>•</span></a>
+  <div class="nav-right">
+    <div class="streak" id="streak"><span class="streak-dot"></span><span id="streakText">Start today</span><span style="margin-left:6px;font-weight:800" id="xpText">0 XP</span></div>
+    <button type="button" id="logoutButton">Log out</button>
+    <div class="avatar" id="avatarInitial">J</div>
   </div>
+</nav>
 
+<section class="dashboard-hero">
+  <div class="eyebrow">Your learning space</div>
+  <h1>Speak more.<br>Think less.</h1>
+  <p>Real situations. Real conversation. A learning path that remembers what you're working on.</p>
+</section>
 
-  <!-- FOOTER -->
+<main>
+<div class="dashboard-grid">
+<section class="card recommended">
+  <div class="recommended-top"><div class="recommended-label" id="recommendedLabel">Recommended for you</div><div class="recommended-time">~7 min</div></div>
+  <h2 id="recommendedTitle" data-Nahtive="true">Your next conversation is ready.</h2>
+  <p class="recommended-copy" id="recommendedCopy">Step into a real situation, hear the language naturally, then use it yourself.</p>
+  <div class="lesson-meta"><span id="recommendedLanguage">Spanish</span><span class="meta-dot"></span><span>Scene</span></div>
+  <button class="primary-button" id="startLessonButton" onclick="startLesson()">Start speaking <span>→</span></button>
+</section>
+<section class="card progress-card">
+  <div class="card-label">Current language</div>
+  <div class="language-row"><div class="language-name" id="dashboardLanguage">Spanish</div><div class="level" id="dashboardLevel">A2</div></div>
+  <div class="progress-number" id="progressPercent">Not started</div>
+  <div class="progress-description" id="progressDescription">Complete a lesson to start tracking your progress.</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-footer"><span>Progress</span><span id="progressFraction">0 completed</span></div>
+</section>
+</div>
 
-  <footer>
+<section class="language-switcher-section">
+  <div class="section-title">My languages</div>
+  <div class="card language-switcher-card"><div class="dashboard-language-grid" id="myLanguagesGrid"><div style="grid-column:1/-1;padding:14px;color:var(--muted);font-size:13px;">Loading your languages…</div></div></div>
+</section>
 
-    <div class="container">
+<section class="language-switcher-section" style="margin-top:36px">
+  <div class="section-title">Add another language</div>
+  <div class="card language-switcher-card"><div class="dashboard-language-grid">
+    <a class="dashboard-language-link" href="onboarding.html?language=Spanish">Spanish</a><a class="dashboard-language-link" href="onboarding.html?language=English">English</a><a class="dashboard-language-link" href="onboarding.html?language=Portuguese">Portuguese</a><a class="dashboard-language-link" href="onboarding.html?language=French">French</a><a class="dashboard-language-link" href="onboarding.html?language=Italian">Italian</a><a class="dashboard-language-link" href="onboarding.html?language=German">German</a><a class="dashboard-language-link" href="onboarding.html?language=Japanese">Japanese</a><a class="dashboard-language-link" href="onboarding.html?language=Korean">Korean</a><a class="dashboard-language-link" href="onboarding.html?language=Mandarin">Mandarin</a><a class="dashboard-language-link" href="onboarding.html?language=Arabic">Arabic</a><a class="dashboard-language-link" href="onboarding.html?language=Dutch">Dutch</a><a class="dashboard-language-link" href="onboarding.html?language=Swedish">Swedish</a><a class="dashboard-language-link" href="onboarding.html?language=Greek">Greek</a><a class="dashboard-language-link" href="onboarding.html?language=Turkish">Turkish</a><a class="dashboard-language-link" href="onboarding.html?language=Hindi">Hindi</a><a class="dashboard-language-link" href="onboarding.html?language=Polish">Polish</a>
+  </div></div>
+</section>
 
-      <div class="footer-inner">
+<section class="language-switcher-section" style="margin-top:48px">
+  <div class="section-title">Jump in</div>
+  <div class="quick-grid">
+    <a href="lesson.html" class="card quick-card"><div class="quick-number">01 · SCENE</div><h3>Learn in context</h3><p>Step into a real situation and speak from there.</p><div class="quick-arrow">→</div></a>
+    <a href="talk.html" class="card quick-card"><div class="quick-number">02 · VOICE</div><h3>Just talk</h3><p>Have a natural conversation without a worksheet.</p><div class="quick-arrow">→</div></a>
+    <a href="review.html" class="card quick-card"><div class="quick-number">03 · MEMORY</div><h3>Review</h3><p>Bring back expressions that still need work.</p><div class="quick-arrow">→</div></a>
+    <a href="progress.html" class="card quick-card"><div class="quick-number">04 · GROWTH</div><h3>See progress</h3><p>See what you're improving and what to work on next.</p><div class="quick-arrow">→</div></a>
+  </div>
+</section>
 
-        <div>
-          © 2026 Nahtive
-        </div>
-
-        <div class="footer-links">
-          <a href="#">Privacy</a>
-          <a href="#">Terms</a>
-          <a href="index.html">Home</a>
-        </div>
-
-      </div>
-
-    </div>
-
-  </footer>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<section class="activity-section"><div class="section-title">Recent activity</div><div class="card activity-card"><div class="activity-list">
+  <div class="activity-item"><div class="activity-icon blue">A</div><div><div class="activity-title">Talking about your weekend</div><div class="activity-subtitle">Lesson · Yesterday</div></div><div class="activity-score">Completed</div></div>
+  <div class="activity-item"><div class="activity-icon green">T</div><div><div class="activity-title">Free conversation</div><div class="activity-subtitle">Just Talk · 2 days ago</div></div><div class="activity-score">8 min</div></div>
+  <div class="activity-item"><div class="activity-icon coral">R</div><div><div class="activity-title">Everyday expressions</div><div class="activity-subtitle">Review · 3 days ago</div></div><div class="activity-score">12 / 15</div></div>
+</div></div></section>
+</main>
+</div>
+<footer><div class="container"><div class="footer-inner"><div>© 2026 Nahtive</div><div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="index.html">Home</a></div></div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
 
   <script>
@@ -648,8 +363,8 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
       if (title) title.textContent = "Ready for another lesson?";
       if (copy) {
         copy.textContent = lastTitle
-          ? "You just completed " + lastTitle + ". Parla can build you another short lesson when you're ready."
-          : "You just completed a lesson. Parla can build you another short lesson when you're ready.";
+          ? "You just completed " + lastTitle + ". Nahtive can build you another short lesson when you're ready."
+          : "You just completed a lesson. Nahtive can build you another short lesson when you're ready.";
       }
       if (button) button.innerHTML = "Start another lesson <span>→</span>";
     }
