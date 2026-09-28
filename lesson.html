@@ -3,248 +3,50 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nahtive — Lesson</title>
-<style>:root{--bg:#f7f5ef;--surface:#fffdf8;--text:#46504b;--muted:#7d847f;--line:#dddcd3;--accent:#9caf78;--accent-soft:#e8eedf;--good:#6f946f}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}.shell{width:min(1080px,calc(100% - 40px));margin:auto}nav{height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.logo{font-size:21px;font-weight:650;letter-spacing:-.7px;text-decoration:none;color:var(--text)}.logo i{display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;margin-left:3px}.exit{font-size:13px;color:var(--muted);text-decoration:none}.lesson{display:grid;grid-template-columns:290px 1fr;gap:64px;padding:48px 0 80px}.context{padding-top:6px}.label,.step,.response-title{font-size:11px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted)}.context h1{font-size:38px;line-height:1.08;letter-spacing:-1.5px;font-weight:650;margin:14px 0 16px}.context p{font-size:14px;color:var(--muted);line-height:1.6;max-width:290px}.scene-info{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}.main{max-width:650px}.step{margin-bottom:12px;color:var(--text)}.progress{height:6px;background:#e7e5dc;border-radius:999px;overflow:hidden;margin-bottom:34px}.progress-fill{height:100%;width:20%;background:var(--accent);transition:width .3s}.prompt{font-size:24px;line-height:1.35;letter-spacing:-.3px;font-weight:600;margin-bottom:25px}.phrase-row{border:1px solid var(--line);background:var(--surface);padding:22px 20px;display:flex;align-items:center;justify-content:space-between;gap:20px}.phrase{font-size:25px;line-height:1.3;font-weight:550}.meaning{font-size:14px;color:var(--muted);margin-top:5px}.listen{width:44px;height:44px;border:1px solid var(--line);border-radius:50%;background:var(--accent-soft);color:var(--text);font-size:16px;flex:none}.hint{font-size:13px;color:var(--muted);margin:12px 0 34px}.response{border-top:1px solid var(--line);padding-top:28px}.response-head{display:flex;justify-content:space-between;align-items:center}.voice{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 12px;color:var(--text);font-size:12px}.reply{width:100%;min-height:90px;margin-top:15px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);outline:none;resize:vertical;font:inherit;color:var(--text)}.reply:focus{border-color:var(--accent)}.actions{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:12px}.status{font-size:13px;color:var(--muted)}.continue{border:0;background:var(--text);color:#fff;padding:11px 17px;border-radius:9px;font-size:13px;font-weight:650}.confidence{display:none;margin-top:18px;padding:17px;border:1px solid var(--line);background:var(--surface);border-radius:10px}.confidence strong{font-size:15px}.confidence p{margin:5px 0 0;font-size:13px;color:var(--muted)}.back{display:inline-block;margin-top:15px;color:var(--text);font-size:13px;font-weight:650;text-decoration:none}@media(max-width:760px){.lesson{grid-template-columns:1fr;gap:30px;padding-top:34px}.context{padding-bottom:25px;border-bottom:1px solid var(--line)}.context h1{font-size:32px}.main{max-width:none}.prompt{font-size:21px}.phrase{font-size:21px}.shell{width:min(100% - 28px,620px)}}</style></head>
+<style>
+:root{--bg:#f5f3ed;--surface:#fffefa;--ink:#26312e;--muted:#737b76;--line:#deddd5;--accent:#d86f52;--accent-soft:#f7e3dc;--violet:#7667a8;--violet-soft:#eeeaf8;--blue:#dcecf0;--green:#e4efdf;--green-ink:#50704d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.shell{width:min(1120px,calc(100% - 40px));margin:auto}nav{height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.logo{font-size:21px;font-weight:700;letter-spacing:-.7px;text-decoration:none;color:var(--ink)}.logo i{display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:50%;margin-left:3px}.exit{font-size:13px;color:var(--muted);text-decoration:none}
+.lesson{display:grid;grid-template-columns:300px 1fr;gap:70px;padding:46px 0 90px}.context{padding-top:5px}.label,.step,.response-title{font-size:11px;font-weight:750;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}.context h1{font-size:34px;line-height:1.12;letter-spacing:-1.1px;font-weight:700;margin:13px 0 15px}.context p{font-size:14px;color:var(--muted);line-height:1.65;max-width:290px}.scene-info{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+.main{max-width:690px}.step{margin-bottom:10px;color:var(--violet)}.progress{height:7px;background:#e5e3db;border-radius:999px;overflow:hidden;margin-bottom:30px}.progress-fill{height:100%;width:20%;background:var(--accent);transition:width .35s ease}
+.prompt{font-size:21px;line-height:1.4;letter-spacing:-.2px;font-weight:650;margin-bottom:18px}
+.conversation{background:var(--violet-soft);border:1px solid #ddd7ee;border-radius:18px;padding:18px;margin-bottom:15px}.bubble{display:flex;gap:10px;align-items:flex-start;margin:9px 0}.bubble.you{justify-content:flex-end}.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:800;flex:none;background:#fff;border:1px solid #ddd7ee}.bubble.you .avatar{order:2;background:var(--accent-soft);border-color:#edc9bd}.bubble-text{max-width:78%;padding:11px 14px;border-radius:15px;background:#fff;border:1px solid #e2ddef;font-size:14px}.bubble.you .bubble-text{background:#fff4ef;border-color:#efd0c6}.bubble small{display:block;color:var(--muted);font-size:10px;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.7px}
+.phrase-row{border:1px solid var(--line);background:var(--surface);padding:19px 18px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-radius:14px;box-shadow:0 3px 12px rgba(38,49,46,.035)}.phrase{font-size:23px;line-height:1.3;font-weight:650}.meaning{font-size:13px;color:var(--muted);margin-top:5px}.listen{width:44px;height:44px;border:1px solid #d7d4cc;border-radius:50%;background:var(--blue);color:var(--ink);font-size:16px;flex:none;cursor:pointer}.listen:hover{transform:translateY(-1px)}
+.hint{font-size:13px;color:var(--muted);margin:11px 0 27px}.response{border-top:1px solid var(--line);padding-top:24px}.response-head{display:flex;justify-content:space-between;align-items:center}.voice{border:1px solid #d7d4cc;background:var(--surface);border-radius:999px;padding:8px 13px;color:var(--ink);font-size:12px;font-weight:650;cursor:pointer}.reply{width:100%;min-height:78px;margin-top:13px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);outline:none;resize:vertical;font:inherit;color:var(--ink)}.reply:focus{border-color:var(--violet)}.actions{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:11px}.status{font-size:13px;color:var(--muted)}.continue{border:0;background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}.continue:hover{background:#394742}.confidence{display:none;margin-top:15px;padding:15px 17px;border:1px solid #d4e1cf;background:var(--green);border-radius:12px}.confidence strong{font-size:14px}.confidence p{margin:4px 0 0;font-size:13px;color:var(--green-ink)}.complete-card{display:none;margin-top:20px;padding:26px;border-radius:18px;background:var(--green);border:1px solid #d4e1cf}.complete-card strong{font-size:19px}.complete-card p{font-size:13px;color:var(--green-ink)}.back{display:inline-block;margin-top:9px;color:var(--ink);font-size:13px;font-weight:700;text-decoration:none}
+@media(max-width:760px){.lesson{grid-template-columns:1fr;gap:30px;padding-top:34px}.context{padding-bottom:25px;border-bottom:1px solid var(--line)}.context h1{font-size:30px}.main{max-width:none}.prompt{font-size:20px}.phrase{font-size:20px}.shell{width:min(calc(100% - 28px),620px)}.bubble-text{max-width:84%}}
+</style></head>
 <body><div class="shell"><nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
-<div class="lesson"><aside class="context"><div class="label" id="languageLabel">Loading language</div><h1 id="lessonTitle">Loading lesson…</h1><p id="sceneCopy">Loading your saved lesson.</p><div class="scene-info"><span>01 / 03</span><span>~ 7 min</span></div></aside>
+<div class="lesson"><aside class="context"><div class="label" id="languageLabel">Loading language</div><h1 id="lessonTitle">Loading lesson…</h1><p id="sceneCopy">Loading your saved lesson.</p><div class="scene-info"><span id="sceneStep">Scene 01</span><span id="sceneTime">~ 7 min</span></div></aside>
 <main class="main"><div class="step" id="step">1 — Hear</div><div class="progress"><div class="progress-fill" id="progressFill"></div></div><div class="prompt" id="prompt">Loading the situation…</div>
-<div class="phrase-row"><div><div class="phrase" id="phrase">Loading phrase…</div><div class="meaning" id="meaning">Loading meaning…</div></div><button class="listen" id="listen" aria-label="Listen">▶</button></div>
+<div class="conversation" id="conversation"></div><div class="phrase-row"><div><div class="phrase" id="phrase">Loading phrase…</div><div class="meaning" id="meaning">Loading meaning…</div></div><button class="listen" id="listen" aria-label="Listen">▶</button></div>
 <div class="hint" id="hint">Listen once normally, then again for the rhythm.</div><div id="stepCount" style="display:none">1 of 5</div>
 <div class="response" id="response"><div class="response-head"><div class="response-title">02 — Your turn</div><button class="voice" id="mic">Use voice</button></div><textarea class="reply" id="reply" placeholder="What would you say?" rows="1"></textarea><div class="actions"><div class="status" id="status">You don't need the perfect sentence. Get the meaning across.</div><button class="continue" id="respond">Say it →</button></div></div>
-<div class="confidence" id="confidence"><strong>Response recognized</strong><p>Your speech result was evaluated before XP was awarded.</p></div><div class="confidence" id="complete" style="display:none"><strong>Lesson complete</strong><p id="completeCopy">Your progress is saved.</p><a class="back" href="dashboard.html">Continue learning →</a></div>
+<div class="confidence" id="confidence"><strong>Response recognized</strong><p>Your speech result was evaluated before XP was awarded.</p></div><div class="complete-card" id="complete" style="display:none"><strong>Lesson complete</strong><p id="completeCopy">Your progress is saved.</p><a class="back" href="dashboard.html">Continue learning →</a></div>
 </main></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
 const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
 let lesson=null, profile=null, step=0, xp=0, answers=[], lastVoice=null;
 
-const fallbackSteps=[
-  {label:"Hear",prompt:"Listen to the phrase and notice the rhythm."},
-  {label:"Understand",prompt:"Connect the phrase to the situation."},
-  {label:"Repeat",prompt:"Repeat the phrase out loud."},
-  {label:"Respond",prompt:"Respond naturally in the target language."},
-  {label:"Conversation",prompt:"Keep the interaction moving."}
-];
-
-function showError(message){
-  $("languageLabel").textContent="Nahtive";
-  $("lessonTitle").textContent="We couldn't load this lesson";
-  $("sceneCopy").textContent=message;
-  $("phrase").textContent="—";
-  $("meaning").textContent="";
-  $("prompt").textContent="Please return to your dashboard and try again.";
-  $("status").textContent=message;
-  $("respond").disabled=true;
-  $("listen").disabled=true;
-  $("mic").disabled=true;
-}
-
-function speak(text,lang){
-  if(!text||!("speechSynthesis" in window)) return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang=lang||profile?.code||"en-US";
-  u.rate=.9;
-  speechSynthesis.speak(u);
-}
-
-function normalize(v){
-  return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();
-}
-
-function similarity(a,b){
-  a=normalize(a); b=normalize(b);
-  if(!a||!b)return 0;
-  if(a===b)return 1;
-  const A=[...a],B=[...b],d=Array.from({length:A.length+1},(_,i)=>i);
-  for(let j=1;j<=B.length;j++){
-    let prev=d[0]; d[0]=j;
-    for(let i=1;i<=A.length;i++){
-      const old=d[i],cost=A[i-1]===B[j-1]?0:1;
-      d[i]=Math.min(d[i]+1,d[i-1]+1,prev+cost); prev=old;
-    }
-  }
-  return Math.max(0,1-d[A.length]/Math.max(A.length,B.length));
-}
-
-function languageDetected(text){
-  const code=(profile?.code||"").toLowerCase().split("-")[0];
-  const ranges={ar:/[\u0600-\u06ff]/,pl:/[ąćęłńóśźż]/i,nl:/\b(ik|je|het|een|van|voor|wat|wil|kan|niet|goed|de)\b/i,es:/\b(que|como|quiero|puedo|para|por|una|uno|el|la|me|te|donde|bien)\b/i,en:/\b(i|you|the|a|what|can|get|for|me|is|want)\b/i};
-  if(code==="ar")return ranges.ar.test(text);
-  return ranges[code]?ranges[code].test(text):true;
-}
-
-function speechCheck(spoken,target,mode){
-  const pron=similarity(spoken,target);
-  const detected=languageDetected(spoken);
-  const words=normalize(spoken).split(" ").filter(Boolean).length;
-  const targetWords=normalize(target).split(" ").filter(Boolean);
-  const topical=targetWords.length?targetWords.filter(w=>normalize(spoken).includes(w)).length/targetWords.length:0;
-  const ok=mode==="Repeat"?pron>=.55&&detected:words>=1&&detected&&(topical>=.2||pron>=.3);
-  return {ok,pron,detected};
-}
-
-function setStep(){
-  const steps=lesson?.content?.steps?.length?lesson.content.steps:fallbackSteps;
-  const s=steps[Math.min(step,steps.length-1)]||fallbackSteps[0];
-  $("step").textContent=(step+1)+" — "+(s.label||"Practice");
-  $("stepCount").textContent=(step+1)+" of "+steps.length;
-  $("progressFill").style.width=((step+1)/steps.length*100)+"%";
-  $("prompt").textContent=s.prompt||"Use the phrase in context.";
-  $("hint").textContent=step===0?"Listen once normally, then again for the rhythm.":step===1?"Connect the phrase to the situation.":"Speak it out loud or type what you would naturally say.";
-  if(step<2){
-    $("reply").style.display="none"; $("mic").style.display="none"; $("respond").textContent="Continue →";
-  }else{
-    $("reply").style.display="block"; $("mic").style.display="inline-block";
-    $("respond").textContent=step===steps.length-1?"Finish lesson":"Check response";
-  }
-}
-
-function render(){
-  const scene=lesson.content?.scene||{};
-  const lang=lesson.content?.language||{};
-  $("languageLabel").textContent=profile.name+" · "+profile.level;
-  $("lessonTitle").textContent=lesson.title||"Your next scene";
-  const context=[scene.place,scene.time].filter(Boolean).join(" · ");
-  $("sceneCopy").textContent=(context?context+" — ":"")+(scene.situation||"Use this language in a real situation.");
-  $("phrase").textContent=lang.phrase||"—";
-  $("meaning").textContent=lang.meaning||"";
-  setStep();
-}
-
-async function load(){
-  try{
-    const {data:sessionData,error:sessionError}=await client.auth.getSession();
-    if(sessionError)throw sessionError;
-    if(!sessionData?.session){location.href="login.html";return;}
-
-    const uid=sessionData.session.user.id;
-    const params=new URLSearchParams(location.search);
-    const requestedId=params.get("id");
-    const saved=localStorage.getItem("Nahtive_current_learner_language")||localStorage.getItem("native_current_learner_language");
-
-    if(requestedId){
-      const {data,error}=await client.from("lessons")
-        .select("id,title,topic,level,content,learner_language_id,learner_languages(id,level,languages(name,code))")
-        .eq("id",requestedId).eq("learner_languages.user_id",uid).maybeSingle();
-      if(error)throw error;
-      if(!data)throw new Error("That saved lesson could not be found.");
-      lesson=data;
-    }else{
-      const {data:langs,error}=await client.from("learner_languages")
-        .select("id,level,is_current,languages(name,code)")
-        .eq("user_id",uid);
-      if(error)throw error;
-      if(!langs?.length){location.href="onboarding.html";return;}
-
-      const ll=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];
-      const {data:lessons,error:lessonError}=await client.from("lessons")
-        .select("id,title,topic,level,content,learner_language_id,learner_languages(id,level,languages(name,code))")
-        .eq("learner_language_id",ll.id)
-        .order("created_at",{ascending:false}).limit(1);
-      if(lessonError)throw lessonError;
-      if(!lessons?.length)throw new Error("There is no saved lesson for "+(ll.languages?.name||"this language")+" yet.");
-      lesson=lessons[0];
-    }
-
-    const linked=lesson.learner_languages;
-    if(!linked?.id) throw new Error("This lesson is not linked to a saved learning path.");
-    if(linked.user_id && linked.user_id!==uid) throw new Error("This lesson does not belong to your learning path.");
-    if(linked.level && lesson.level && linked.level!==lesson.level) throw new Error("This lesson is not at your current level.");
-    profile={
-      id:lesson.learner_language_id,
-      name:linked?.languages?.name||lesson.content?.language?.name||"Language",
-      code:linked?.languages?.code||lesson.content?.language?.code||"en-US",
-      level:linked?.level||lesson.level||"A0"
-    };
-
-    localStorage.setItem("Nahtive_current_learner_language",profile.id);
-    localStorage.setItem("native_current_learner_language",profile.id);
-    render();
-  }catch(error){
-    console.error("Nahtive lesson load failed:",error);
-    showError("The lesson data did not load. Nothing was changed or guessed.");
-  }
-}
-
-$("listen").onclick=()=>speak(lesson?.content?.language?.phrase,lesson?.content?.language?.code||profile?.code);
-
-$("mic").onclick=()=>{
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){$("status").textContent="Voice input isn't available in this browser. Type your response instead.";return;}
-  const mode=lesson?.content?.steps?.[step]?.label||"Respond";
-  const target=lesson?.content?.language?.phrase||"";
-  const r=new SR();
-  r.lang=profile?.code||"en-US";
-  r.interimResults=false; r.maxAlternatives=3; r.continuous=false;
-  r.onstart=()=>{$("status").textContent="Listening in "+profile.name+"…";$("mic").disabled=true;};
-  r.onresult=e=>{
-    const heard=e.results[0][0].transcript;
-    const check=speechCheck(heard,target,mode);
-    lastVoice={transcript:heard,confidence:e.results[0][0].confidence||0,check};
-    $("reply").value=heard;
-    $("status").textContent=check.detected?"I heard: "+heard+" — press “Check response”.":"I heard: "+heard+" — it doesn't sound like "+profile.name+" yet. Try again.";
-  };
-  r.onerror=e=>{$("status").textContent=e.error==="not-allowed"?"Microphone access is blocked. Allow it and try again.":"I couldn't understand the recording. Try again.";lastVoice=null;};
-  r.onend=()=>{$("mic").disabled=false;};
-  try{r.start();}catch(e){$("status").textContent="Microphone is already active. Try again in a moment.";}
-};
-
-$("respond").onclick=async()=>{
-  if(step<2){step++;setStep();return;}
-  const value=$("reply").value.trim();
-  if(!value){$("status").textContent="Say something or type a response first.";return;}
-
-  const mode=lesson?.content?.steps?.[step]?.label||"Respond";
-  const target=lesson?.content?.language?.phrase||"";
-  if(lastVoice){
-    const check=speechCheck(value,target,mode);
-    if(!check.ok){
-      $("status").textContent=mode==="Repeat"?"That pronunciation needs another try. Speak the phrase again in "+profile.name+".":"I heard you, but I couldn't verify the response in "+profile.name+". Try again.";
-      return;
-    }
-    $("status").textContent="Target language recognized. +10 XP";
-  }else{
-    $("status").textContent="Response saved. +10 XP";
-  }
-
-  answers.push({step,text:value,voice:lastVoice?{transcript:value,confidence:lastVoice.confidence||0,pronunciation_score:lastVoice.check.pron,target_language_detected:lastVoice.check.detected}:null});
-  xp+=10;
-  $("confidence").style.display="block";
-  $("confidence").querySelector("strong").textContent=lastVoice?"Speech recognized in "+profile.name:"Response saved";
-  $("confidence").querySelector("p").textContent=lastVoice?"Your response was recognized in "+profile.name+".":"Your response was saved.";
-  lastVoice=null;
-
-  const steps=lesson?.content?.steps?.length?lesson.content.steps:fallbackSteps;
-  if(step<steps.length-1){step++;$("reply").value="";setStep();}else await completeLesson();
-};
-
-async function completeLesson(){
-  try{
-    const {data}=await client.auth.getSession();
-    const uid=data?.session?.user?.id;
-    if(uid){
-      await client.from("lesson_attempts").insert({lesson_id:lesson.id,score:Math.min(100,xp*2),responses:answers});
-      await client.from("learner_events").insert({user_id:uid,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:lesson.id,xp}});
-    }
-  }catch(error){console.error("Could not save lesson completion:",error);}
-  $("response").style.display="none";
-  $("confidence").style.display="none";
-  $("complete").style.display="block";
-  const {data:nextAttempts}=await client.from("lesson_attempts").select("lesson_id").order("completed_at",{ascending:false}).limit(200);
-  const completedIds=new Set((nextAttempts||[]).map(row=>row.lesson_id));
-  const {data:nextLessons}=await client.from("lessons").select("id,title,topic,level,created_at").eq("learner_language_id",profile.id).eq("level",profile.level).order("created_at",{ascending:true}).limit(50);
-  const nextLesson=(nextLessons||[]).find(row=>row.id!==lesson.id&&!completedIds.has(row.id));
-  const back=$("complete").querySelector(".back");
-  if(nextLesson){
-    back.textContent="Next lesson →";
-    back.href="lesson.html?id="+encodeURIComponent(nextLesson.id);
-    $("completeCopy").textContent="You earned "+xp+" XP. Next up: "+(nextLesson.title||"another scene")+".";
-  }else{
-    back.textContent="Back to dashboard →";
-    back.href="dashboard.html";
-    $("completeCopy").textContent="You earned "+xp+" XP. You completed the current learning path.";
-  }
-}
+const fallbackSteps=[{label:"Hear",prompt:"Listen to the phrase and notice the rhythm."},{label:"Understand",prompt:"Connect the phrase to the situation."},{label:"Repeat",prompt:"Repeat the phrase out loud."},{label:"Respond",prompt:"Respond naturally in the target language."},{label:"Conversation",prompt:"Keep the interaction moving."}];
+function showError(message){$("languageLabel").textContent="Nahtive";$("lessonTitle").textContent="We couldn't load this lesson";$("sceneCopy").textContent=message;$("phrase").textContent="—";$("meaning").textContent="";$("prompt").textContent="Please return to your dashboard and try again.";$("status").textContent=message;$("respond").disabled=true;$("listen").disabled=true;$("mic").disabled=true}
+function speak(text,lang){if(!text||!("speechSynthesis"in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang||profile?.code||"en-US";u.rate=.9;speechSynthesis.speak(u)}
+function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim()}
+function similarity(a,b){a=normalize(a);b=normalize(b);if(!a||!b)return 0;if(a===b)return 1;const A=[...a],B=[...b],d=Array.from({length:A.length+1},(_,i)=>i);for(let j=1;j<=B.length;j++){let prev=d[0];d[0]=j;for(let i=1;i<=A.length;i++){const old=d[i],cost=A[i-1]===B[j-1]?0:1;d[i]=Math.min(d[i]+1,d[i-1]+1,prev+cost);prev=old}}return Math.max(0,1-d[A.length]/Math.max(A.length,B.length))}
+function languageDetected(text){const code=(profile?.code||"").toLowerCase().split("-")[0];const ranges={ar:/[\u0600-\u06ff]/,pl:/[ąćęłńóśźż]/i,nl:/\b(ik|je|het|een|van|voor|wat|wil|kan|niet|goed|de)\b/i,es:/\b(que|como|quiero|puedo|para|por|una|uno|el|la|me|te|donde|bien)\b/i,en:/\b(i|you|the|a|what|can|get|for|me|is|want)\b/i};if(code==="ar")return ranges.ar.test(text);return ranges[code]?ranges[code].test(text):true}
+function speechCheck(spoken,target,mode){const pron=similarity(spoken,target),detected=languageDetected(spoken),words=normalize(spoken).split(" ").filter(Boolean).length,targetWords=normalize(target).split(" ").filter(Boolean),topical=targetWords.length?targetWords.filter(w=>normalize(spoken).includes(w)).length/targetWords.length:0;return{ok:mode==="Repeat"?pron>=.55&&detected:words>=1&&detected&&(topical>=.2||pron>=.3),pron,detected}}
+function dialogue(){return Array.isArray(lesson?.content?.dialogue)?lesson.content.dialogue:[]}
+function learnerTurns(){return dialogue().filter(x=>x.speaker==="learner")}
+function totalSteps(){return 3+Math.max(1,learnerTurns().length)}
+function currentTurn(){const turns=learnerTurns();return turns[Math.max(0,step-3)]||null}
+function renderConversation(){const box=$("conversation"),items=dialogue();box.innerHTML="";const visible=items.slice(0,Math.max(1,Math.min(items.length,step>=3?step-1:1)));visible.forEach(item=>{const you=item.speaker==="learner",row=document.createElement("div");row.className="bubble"+(you?" you":"");row.innerHTML='<div class="avatar">'+(you?"You":"N")+'</div><div class="bubble-text"><small>'+ (you?"You":"Native speaker") +'</small>'+String(item.text||"")+'</div>';box.appendChild(row)})}
+function setStep(){const n=totalSteps();$("step").textContent=(step+1)+" — "+(step===0?"Hear":step===1?"Understand":step===2?"Repeat":"Conversation");$("stepCount").textContent=(step+1)+" of "+n;$("progressFill").style.width=((step+1)/n*100)+"%";const turn=currentTurn(),lang=lesson.content?.language||{};if(step<3){$("prompt").textContent=step===0?"Listen for the whole phrase and the way it sounds.":step===1?"Understand what the speaker means in this situation.":"Say the phrase out loud. Focus on rhythm, not perfection.";$("phrase").textContent=lang.phrase||"—";$("meaning").textContent=lang.meaning||"";$("reply").style.display="none";$("mic").style.display="none";$("respond").textContent="Continue →"}else{$("prompt").textContent=turn?"Your turn: respond to the native speaker.":"Keep the conversation moving naturally.";$("phrase").textContent=turn?.text||lang.phrase||"—";$("meaning").textContent=turn?"Say this naturally. Don't translate word for word.":lang.meaning||"";$("reply").style.display="block";$("mic").style.display="inline-block";$("respond").textContent=step===n-1?"Finish conversation":"Continue →"}renderConversation()}
+function render(){const scene=lesson.content?.scene||{},lang=lesson.content?.language||{};$("languageLabel").textContent=profile.name+" · "+profile.level;$("lessonTitle").textContent=lesson.title||"Your next scene";const context=[scene.place,scene.time].filter(Boolean).join(" · ");$("sceneCopy").textContent=(context?context+" — ":"")+(scene.situation||"Use this language in a real situation.");$("sceneStep").textContent="Scene "+String((lesson.content?.sceneNumber||1)).padStart(2,"0");$("phrase").textContent=lang.phrase||"—";$("meaning").textContent=lang.meaning||"";setStep()}
+async function load(){try{const{data:sessionData,error:sessionError}=await client.auth.getSession();if(sessionError)throw sessionError;if(!sessionData?.session){location.href="login.html";return}const uid=sessionData.session.user.id,params=new URLSearchParams(location.search),requestedId=params.get("id"),saved=localStorage.getItem("Nahtive_current_learner_language")||localStorage.getItem("native_current_learner_language");if(requestedId){const{data,error}=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,learner_languages(id,user_id,level,languages(name,code))").eq("id",requestedId).maybeSingle();if(error)throw error;if(!data||data.learner_languages?.user_id!==uid)throw new Error("That lesson is not part of your saved learning path.");lesson=data}else{const{data:langs,error}=await client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",uid);if(error)throw error;if(!langs?.length){location.href="onboarding.html";return}const ll=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];const{data:lessons,error:lessonError}=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,learner_languages(id,user_id,level,languages(name,code))").eq("learner_language_id",ll.id).eq("level",ll.level).order("created_at",{ascending:true}).limit(50);if(lessonError)throw lessonError;if(!lessons?.length)throw new Error("There are no lessons at your current level yet.");const{data:attempts}=await client.from("lesson_attempts").select("lesson_id").in("lesson_id",lessons.map(x=>x.id));const done=new Set((attempts||[]).map(x=>x.lesson_id));lesson=lessons.find(x=>!done.has(x.id))||lessons[0]}const linked=lesson.learner_languages;if(!linked?.id||linked.user_id!==uid)throw new Error("This lesson is not linked to your saved learning path.");profile={id:lesson.learner_language_id,name:linked.languages?.name||lesson.content?.language?.name||"Language",code:linked.languages?.code||lesson.content?.language?.code||"en-US",level:linked.level||lesson.level||"A0"};localStorage.setItem("Nahtive_current_learner_language",profile.id);localStorage.setItem("native_current_learner_language",profile.id);render()}catch(error){console.error("Nahtive lesson load failed:",error);showError(error.message||"The lesson data did not load.")}}
+$("listen").onclick=()=>{const t=step>=3?currentTurn()?.text:lesson?.content?.language?.phrase;speak(t,lesson?.content?.language?.code||profile?.code)}
+$("mic").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("status").textContent="Voice input isn't available in this browser. Type your response instead.";return}const target=currentTurn()?.text||lesson?.content?.language?.phrase||"",r=new SR();r.lang=profile?.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("status").textContent="Listening in "+profile.name+"…";$("mic").disabled=true};r.onresult=e=>{const heard=e.results[0][0].transcript,check=speechCheck(heard,target,"Conversation");lastVoice={transcript:heard,confidence:e.results[0][0].confidence||0,check};$("reply").value=heard;$("status").textContent=check.detected?"I heard: "+heard+" — continue when ready.":"I heard you, but it doesn't sound like "+profile.name+" yet. Try again."};r.onerror=e=>{$("status").textContent=e.error==="not-allowed"?"Microphone access is blocked. Allow it and try again.":"I couldn't understand the recording. Try again.";lastVoice=null};r.onend=()=>{$("mic").disabled=false};try{r.start()}catch(e){$("status").textContent="Microphone is already active. Try again in a moment."}}
+$("respond").onclick=async()=>{if(step<3){step++;setStep();return}const value=$("reply").value.trim(),turn=currentTurn();if(!value){$("status").textContent="Say something or type a response first.";return}const target=turn?.text||lesson?.content?.language?.phrase||"",check=lastVoice?speechCheck(value,target,"Conversation"):null;if(lastVoice&&!check.detected){$("status").textContent="I couldn't verify the target language. Try saying it again.";return}answers.push({step,text:value,expected:target,voice:lastVoice?{transcript:value,confidence:lastVoice.confidence||0,pronunciation_score:lastVoice.check.pron,target_language_detected:lastVoice.check.detected}:null});xp+=10;lastVoice=null;const n=totalSteps();if(step<n-1){step++;$("reply").value="";$("status").textContent="Good. Now keep the conversation moving.";setStep()}else await completeLesson()}
+async function completeLesson(){try{const{data}=await client.auth.getSession(),uid=data?.session?.user?.id;if(uid){await client.from("lesson_attempts").insert({lesson_id:lesson.id,score:Math.min(100,xp*2),responses:answers});await client.from("learner_events").insert({user_id:uid,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:lesson.id,xp}})}}catch(error){console.error("Could not save lesson completion:",error)}$("response").style.display="none";$("confidence").style.display="none";$("complete").style.display="block";const{data:nextAttempts}=await client.from("lesson_attempts").select("lesson_id").order("completed_at",{ascending:false}).limit(200),completedIds=new Set((nextAttempts||[]).map(row=>row.lesson_id));const{data:nextLessons}=await client.from("lessons").select("id,title,topic,level,created_at").eq("learner_language_id",profile.id).eq("level",profile.level).order("created_at",{ascending:true}).limit(50),nextLesson=(nextLessons||[]).find(row=>row.id!==lesson.id&&!completedIds.has(row.id)),back=$("complete").querySelector(".back");if(nextLesson){back.textContent="Next lesson →";back.href="lesson.html?id="+encodeURIComponent(nextLesson.id);$("completeCopy").textContent="You earned "+xp+" XP. Next up: "+(nextLesson.title||"another scene")+"."}else{back.textContent="Back to dashboard →";back.href="dashboard.html";$("completeCopy").textContent="You earned "+xp+" XP. You completed the current learning path."}}
 
 load();
 </script>
