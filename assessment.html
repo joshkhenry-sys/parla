@@ -94,7 +94,7 @@ async function init(){
 async function begin(){
   const button=document.querySelector("#intro .next"); button.disabled=true; button.textContent="Building your placement check…";
   try{
-    const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),12000);
+    const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),40000);
     const response=await fetch("/api/assess",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({targetLanguage:language.languages?.name||"Language",targetCode:language.languages?.code||""}),signal:controller.signal});
     clearTimeout(timer);
     if(!response.ok) throw new Error("Assessment unavailable");
@@ -105,7 +105,7 @@ async function begin(){
   }catch(error){
     console.error(error);
     button.disabled=false;button.textContent="Try again";
-    const note=document.querySelector("#intro .note"); if(note) note.textContent="We couldn't build the language-specific test yet. Try again in a moment.";
+    const note=document.querySelector("#intro .note"); if(note) note.textContent="We couldn't build the language-specific test yet. The language test is taking longer than expected. Try again.";
   }
 }
 function render(){
