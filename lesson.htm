@@ -767,15 +767,19 @@
             <div class="scenario">
               <strong>Example</strong><br>
               ${escapeHtml(card.example || "")}
+              <button class="answer" id="exampleButton" type="button" style="margin-top:12px;width:100%;">
+                ▶ Hear the example
+              </button>
             </div>
             <button class="answer" id="repeatButton" type="button" style="margin-top:12px;width:100%;">
-              ▶ Hear it again
+              ▶ Hear the phrase again
             </button>
             <button class="answer" id="readyButton" type="button" style="margin-top:10px;width:100%;">
               I can say it
             </button>`;
 
           document.getElementById("repeatButton").addEventListener("click", () => speakPhrase(card.phrase));
+          document.getElementById("exampleButton").addEventListener("click", () => speakPhrase(card.example));
           document.getElementById("readyButton").addEventListener("click", () => {
             setNext(true);
             document.getElementById("readyButton").textContent = "Ready ✓";
@@ -795,11 +799,20 @@
           <div class="question-card">
             <div class="question-number">One quick question</div>
             <h2>${escapeHtml(card.prompt || "Choose the best answer.")}</h2>
+            <button class="answer" id="quizListenButton" type="button" style="margin:16px 0;width:100%;">
+              ▶ Hear the phrase
+            </button>
             <div class="answers" id="quizAnswers"></div>
             <div class="feedback" id="quizFeedback"></div>
           </div>`;
 
         const answers = document.getElementById("quizAnswers");
+        const quizListenButton = document.getElementById("quizListenButton");
+        if (quizListenButton) {
+          quizListenButton.addEventListener("click", () => {
+            speakPhrase(card.answer || card.phrase);
+          });
+        }
         options.forEach(option => {
           const button = document.createElement("button");
           button.className = "answer";
