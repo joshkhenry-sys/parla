@@ -654,9 +654,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
-
   <script>
     let profile = null;
     let lesson = null;
@@ -711,26 +708,77 @@
       if (!card) return;
 
       if (card.type === "teach") {
-        label.textContent = "New phrase";
-        title.textContent = card.phrase;
-        intro.textContent = card.meaning;
+        label.textContent = "Learn";
+        title.textContent = "First, understand it.";
+        intro.textContent = card.meaning || "Listen first. You do not need to read the word yet.";
 
         container.innerHTML = `
           <div class="context-card">
-            <div class="context-label">Listen first</div>
-            <button class="answer" id="listenButton" type="button" style="margin-top:18px;width:auto;">
-              ▶ Hear it
-            </button>
-            <div class="scenario" style="margin-top:20px;">
-              <strong>Pronunciation</strong><br>
-              ${escapeHtml(card.pronunciation || "Listen and repeat.")}
+            <div class="context-label">What this means</div>
+            <h2 style="margin-top:14px;font-size:30px;letter-spacing:-1px;">${escapeHtml(card.meaning || "A useful everyday phrase.")}</h2>
+            <p style="margin-top:10px;color:var(--muted);line-height:1.55;">${escapeHtml(card.usage || "You will hear this in everyday conversation.")}</p>
+
+            <div class="scenario" style="margin-top:24px;">
+              <strong>Listen to it</strong><br>
+              Hear the phrase before you worry about spelling.
+              <br>
+              <button class="answer" id="listenButton" type="button" style="margin-top:16px;width:auto;">
+                ▶ Hear it
+              </button>
             </div>
-            <p style="margin-top:18px;"><strong>IPA:</strong> ${escapeHtml(card.ipa || "")}</p>
-            <p style="margin-top:12px;"><strong>When to use it:</strong> ${escapeHtml(card.usage || "")}</p>
-            <div class="scenario"><strong>Example</strong><br>${escapeHtml(card.example || "")}</div>
+
+            <div id="revealArea" style="margin-top:20px;">
+              <button class="answer" id="revealButton" type="button" style="width:100%;">
+                Show me the phrase
+              </button>
+            </div>
           </div>`;
-        document.getElementById("listenButton").addEventListener("click", () => speakPhrase(card.phrase));
-        setNext(true);
+
+        const revealButton = document.getElementById("revealButton");
+        const listenButton = document.getElementById("listenButton");
+
+        revealButton.disabled = true;
+        revealButton.style.opacity = ".45";
+
+        listenButton.addEventListener("click", () => {
+          speakPhrase(card.phrase);
+          revealButton.disabled = false;
+          revealButton.style.opacity = "1";
+          revealButton.textContent = "Now show me the phrase";
+        });
+
+        revealButton.addEventListener("click", () => {
+          const area = document.getElementById("revealArea");
+          area.innerHTML = `
+            <div class="scenario" style="margin-top:18px;">
+              <strong>Phrase</strong><br>
+              <div style="font-size:28px;font-weight:700;letter-spacing:-1px;margin-top:8px;">${escapeHtml(card.phrase)}</div>
+            </div>
+            <div class="scenario">
+              <strong>How it sounds</strong><br>
+              ${escapeHtml(card.pronunciation || "Listen and repeat.")}
+              <br><br>
+              <strong>IPA</strong><br>
+              ${escapeHtml(card.ipa || "")}
+            </div>
+            <div class="scenario">
+              <strong>Example</strong><br>
+              ${escapeHtml(card.example || "")}
+            </div>
+            <button class="answer" id="repeatButton" type="button" style="margin-top:12px;width:100%;">
+              ▶ Hear it again
+            </button>
+            <button class="answer" id="readyButton" type="button" style="margin-top:10px;width:100%;">
+              I can say it
+            </button>`;
+
+          document.getElementById("repeatButton").addEventListener("click", () => speakPhrase(card.phrase));
+          document.getElementById("readyButton").addEventListener("click", () => {
+            setNext(true);
+            document.getElementById("readyButton").textContent = "Ready ✓";
+            document.getElementById("readyButton").disabled = true;
+          });
+        });
         return;
       }
 
@@ -874,6 +922,8 @@
         updateProgress();
         window.scrollTo({top:0, behavior:"smooth"});
       } else {
+        sessionStorage.setItem("parla_lesson_completed", "true");
+        sessionStorage.setItem("parla_last_lesson_title", lesson?.title || "Lesson");
         document.getElementById("lessonShell").style.display = "none";
         document.getElementById("result").classList.add("visible");
         document.getElementById("resultLesson").textContent = lesson?.title || "Complete";
