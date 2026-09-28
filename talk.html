@@ -432,7 +432,8 @@
       transform: translateY(-1px);
     }
 
-    .send-button:disabled {
+    .mic-button.listening{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 0 0 5px rgba(156,175,120,.15)}
+.send-button:disabled {
       opacity: 0.35;
       cursor: default;
       transform: none;
@@ -1058,17 +1059,19 @@ p{line-height:1.55}
     });
 
     let listening = false;
-
-    micButton.addEventListener("click", () => {
-      listening = !listening;
-      micButton.classList.toggle("active", listening);
-
-      if (listening) {
-        input.placeholder = "Listening...";
-      } else {
-        input.placeholder = "Write something in " + state.language + "...";
-      }
-    });
+let recognition = null;
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){composerNote.textContent="Voice input isn't supported here. You can type instead.";return;}
+  if(listening){recognition?.stop();return;}
+  recognition=new SR(); recognition.lang=(state.language||"en").toLowerCase(); recognition.interimResults=false; recognition.maxAlternatives=3;
+  recognition.onstart=()=>{listening=true;micButton.classList.add("listening");micButton.setAttribute("aria-label","Stop listening");input.placeholder="Listening...";statusText.innerHTML='<span class="status-dot"></span> Listening to you';};
+  recognition.onresult=e=>{const text=e.results[0][0].transcript;input.value=text;input.style.height="auto";input.style.height=Math.min(input.scrollHeight,120)+"px";sendButton.disabled=false;composerNote.textContent="I heard you. Send it when you're ready.";};
+  recognition.onerror=()=>{composerNote.textContent="I couldn't hear that. Try again or type instead.";};
+  recognition.onend=()=>{listening=false;micButton.classList.remove("listening");micButton.setAttribute("aria-label","Use microphone");input.placeholder="Write something in "+state.language+"...";};
+  recognition.start();
+}
+micButton.addEventListener("click",startVoice);
 
     changeTopic.addEventListener("click", () => {
       const topics = [
@@ -1086,11 +1089,7 @@ p{line-height:1.55}
       topicName.textContent = state.topic;
     });
 
-    reviewButton.addEventListener("click", () => {
-      alert(
-        "Nahtive will turn useful patterns from this conversation into review items as the learning engine is connected."
-      );
-    });
+    reviewButton.addEventListener("click", () => { window.location.href="progress.html"; });
 
     async function initializeTalk() {
       const profile = await loadProfile();
