@@ -53,7 +53,7 @@ export default async function handler(req, res) {
         : "Teach 3 to 5 useful phrases, one at a time.",
       "Choose one simple real-life scenario and keep the entire lesson centered on it.",
       "Do not make the lesson feel like a vocabulary list. Each new phrase should have a clear job in the situation.",
-      "For A0/A1, introduce sound and meaning before written form. The learner should be able to understand what a phrase means before seeing its spelling.
+      "For A0/A1, introduce sound and meaning before written form. The learner should be able to understand what a phrase means before seeing its spelling.",
       beginner
         ? "Use sentences of 1 to 4 words whenever possible. Avoid grammar terminology, idioms, slang, and multiple clauses."
         : "Use natural language appropriate to the learner's level.",
