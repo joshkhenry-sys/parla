@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Set up your learning | Parla</title>
+  <title>Native — Setup</title>
   <meta name="description" content="Build your personalized language learning path with Parla.">
 
   <style>
@@ -664,7 +664,7 @@
 <body>
 
   <nav>
-    <a href="index.html" class="logo">parla<span>•</span></a>
+    <a href="index.html" class="logo">native<span>•</span></a>
     <div class="save-text">Build your learning path</div>
   </nav>
 
@@ -1441,6 +1441,26 @@
       window.SUPABASE_ANON_KEY
     );
 
+    async function redirectReturningLearner() {
+      const params = new URLSearchParams(window.location.search);
+      // A returning learner should never be forced through setup again.
+      // Passing ?language= is the intentional path for adding another language.
+      if (params.get("language") || params.get("targetLanguage")) return;
+      try {
+        const { data } = await supabaseClient.auth.getSession();
+        const user = data?.session?.user;
+        if (!user) return;
+        const { data: existing } = await supabaseClient
+          .from("learner_languages")
+          .select("id")
+          .eq("user_id", user.id)
+          .limit(1);
+        if (existing && existing.length) window.location.replace("dashboard.html");
+      } catch (error) {
+        console.error("Could not check existing learning profile:", error);
+      }
+    }
+
     const state = {
       targetLanguage: null,
       nativeLanguage: null,
@@ -1848,6 +1868,7 @@
       updateContinueButton();
     }
 
+    redirectReturningLearner();
     finishPendingProfileAfterAuth();
   </script>
 
