@@ -1163,7 +1163,16 @@
         }
 
         if (!response.ok) {
-          throw new Error(data?.error || "Lesson generation failed.");
+          const detail = [
+            data?.error,
+            data?.code ? "Code: " + data.code : "",
+            data?.type ? "Type: " + data.type : "",
+            data?.requestId ? "Request: " + data.requestId : ""
+          ].filter(Boolean).join(" · ");
+
+          throw new Error(
+            detail || ("Lesson generation failed (HTTP " + response.status + ").")
+          );
         }
 
         if (!data?.lesson?.cards?.length) {
