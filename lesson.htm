@@ -793,6 +793,62 @@
       progress.style.width = Math.min(100, ((currentCard + 1) / total) * 100) + "%";
     }
 
+    async function rememberTaughtPhrases(client, userId) {
+      const taught = cards
+        .filter(card => card.type === "teach" && card.phrase)
+        .map(card => ({
+          phrase: String(card.phrase).trim(),
+          meaning: String(card.meaning || "").trim(),
+          usage: String(card.usage || "").trim()
+        }))
+        .filter(item => item.phrase);
+
+      if (!taught.length || !learnerLanguageId) return;
+
+      const phrases = taught.map(item => item.phrase);
+      const { data: existing, error: existingError } = await client
+        .from("review_items")
+        .select("id, target_text, mastery")
+        .eq("learner_language_id", learnerLanguageId)
+        .in("target_text", phrases);
+
+      if (existingError) {
+        console.debug("Review lookup skipped:", existingError);
+        return;
+      }
+
+      const existingMap = new Map((existing || []).map(item => [item.target_text, item]));
+
+      for (const item of taught) {
+        const old = existingMap.get(item.phrase);
+        if (old) {
+          await client
+            .from("review_items")
+            .update({
+              mastery: Math.min(100, Number(old.mastery || 0) + 10),
+              next_review_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+              explanation: item.usage || item.meaning
+            })
+            .eq("id", old.id);
+        } else {
+          await client.from("review_items").insert({
+            learner_language_id: learnerLanguageId,
+            item_type: "expression",
+            source_text: item.meaning || item.usage || "Everyday expression",
+            target_text: item.phrase,
+            explanation: item.usage || item.meaning || "",
+            mastery: 10,
+            next_review_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          });
+        }
+      }
+
+      await logEvent("phrases_saved_for_review", {
+        count: taught.length,
+        phrases: phrases.slice(0, 10)
+      });
+    }
+
     async function logEvent(eventType, eventData = {}) {
       if (!profile || !learnerLanguageId) return;
       try {
@@ -1190,6 +1246,8 @@
               console.error("Could not save lesson attempt:", attemptError);
             }
           }
+
+          await rememberTaughtPhrases(client, user.id);
         }
 
         logEvent("lesson_completed", {
