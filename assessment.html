@@ -189,14 +189,16 @@ async function finish(){
     C1:"We'll use fluent, natural language with nuance, register, idioms, and conversational repair.",
     C2:"We'll work at a highly natural level: subtle tone, implied meaning, cultural context, and precise reformulation."
   };
-  const {error:updateError}=await client.from("learner_languages").update({level:result}).eq("id",language.id).eq("user_id",user.id);
-  if(updateError){alert("We couldn't save your placement. Please try again.");return}
-  const {error:eventError}=await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:result,scores:scoreByLevel,question_count:questions.length,version:2}});
-  if(eventError){console.error(eventError)}
-  document.getElementById("test").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
+  // Show the placement result first. Saving progress must never trap the learner on the final question.
+  document.getElementById("test").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
   document.getElementById("resultLevel").textContent=result;
   document.getElementById("resultCopy").textContent=descriptions[result];
   document.getElementById("continueButton").onclick=()=>{localStorage.setItem("Nahtive_current_learner_language",language.id);location.href=returnTo==="lesson"?"lesson.html":"dashboard.html"};
+  const {error:updateError}=await client.from("learner_languages").update({level:result}).eq("id",language.id).eq("user_id",user.id);
+  if(updateError){console.error("Placement level save failed:",updateError);document.getElementById("resultCopy").textContent+= " Your result is shown above; we'll keep the result on this device while we retry the save.";}
+  const {error:eventError}=await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:result,scores:scoreByLevel,question_count:questions.length,version:3}});
+  if(eventError){console.error("Placement event save failed:",eventError)}
 }
 init();
 </script>
