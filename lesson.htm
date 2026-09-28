@@ -891,10 +891,35 @@
           headers: {"Content-Type":"application/json"},
           body: JSON.stringify({profile})
         });
-        const data = await response.json();
 
-        if (!response.ok) throw new Error(data?.error || "Lesson generation failed.");
-        if (!data.lesson?.cards?.length) throw new Error("No lesson cards were returned.");
+        const raw = await response.text();
+        let data = null;
+
+        try {
+          data = raw ? JSON.parse(raw) : null;
+        } catch (parseError) {
+          console.error("Parla lesson returned non-JSON:", raw);
+          const serverPreview = String(raw || "")
+            .replace(/<[^>]*>/g, " ")
+            .replace(/\\s+/g, " ")
+            .trim()
+            .slice(0, 220);
+
+          throw new Error(
+            response.ok
+              ? "The lesson server returned an unexpected response."
+              : "The lesson server returned an error" +
+                (serverPreview ? ": " + serverPreview : ".")
+          );
+        }
+
+        if (!response.ok) {
+          throw new Error(data?.error || "Lesson generation failed.");
+        }
+
+        if (!data?.lesson?.cards?.length) {
+          throw new Error("No lesson cards were returned.");
+        }
 
         lesson = data.lesson;
         cards = lesson.cards;
