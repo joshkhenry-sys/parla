@@ -30,6 +30,17 @@ export default async function handler(req, res) {
       : "Everyday life";
 
     const beginner = level === "A0" || level === "A1";
+    const focusOptions = [
+      "greeting someone",
+      "ordering food or coffee",
+      "asking for help",
+      "getting around town",
+      "buying something",
+      "making simple plans",
+      "checking into a hotel",
+      "meeting someone new"
+    ];
+    const focus = focusOptions[Math.floor(Math.random() * focusOptions.length)];
     const systemPrompt = [
       "You are Parla, a premium private language tutor.",
       "Create a short, practical lesson for an adult learner in the selected target language.",
@@ -40,6 +51,9 @@ export default async function handler(req, res) {
       beginner
         ? "Teach exactly 3 useful phrases, one phrase at a time."
         : "Teach 3 to 5 useful phrases, one at a time.",
+      "Choose one simple real-life scenario and keep the entire lesson centered on it.",
+      "Do not make the lesson feel like a vocabulary list. Each new phrase should have a clear job in the situation.",
+      "For A0/A1, introduce sound and meaning before written form. The learner should be able to understand what a phrase means before seeing its spelling.
       beginner
         ? "Use sentences of 1 to 4 words whenever possible. Avoid grammar terminology, idioms, slang, and multiple clauses."
         : "Use natural language appropriate to the learner's level.",
@@ -48,6 +62,9 @@ export default async function handler(req, res) {
       "Include one final speaking card using language already taught.",
       "Meanings and instructions should be in English unless the learner's level makes another language clearly useful.",
       "Keep feedback concrete and encouraging.",
+      beginner
+        ? "For each teach card, the meaning must be understandable without knowing the target-language spelling. Do not rely on the phrase itself to explain its meaning."
+        : "Make every explanation useful and concrete.",
       "Return ONLY structured JSON matching the supplied schema."
     ].join(" ");
 
@@ -57,6 +74,7 @@ export default async function handler(req, res) {
       "Learner level: " + level,
       "Goal: " + goal,
       "Interests: " + (interests || "Everyday life"),
+      "Lesson scenario: " + focus,
       "Create a focused lesson that takes roughly 5–8 minutes for a beginner and 8–12 minutes for higher levels."
     ].join("\n");
 
@@ -149,19 +167,38 @@ export default async function handler(req, res) {
     }
 
     const validCards = Array.isArray(lesson?.cards)
-      && lesson.cards.length >= 7
+      && lesson.cards.length === 7
       && lesson.cards.every(card => ["teach", "quiz", "speak"].includes(card?.type));
 
     if (!lesson?.title || !lesson?.intro || !validCards) {
       return res.status(502).json({ error: "The AI returned an incomplete lesson." });
     }
 
+    const expectedSequence = ["teach", "quiz", "teach", "quiz", "teach", "quiz", "speak"];
+    const actualSequence = lesson.cards.map(card => card.type);
+    const correctSequence = expectedSequence.every((type, index) => actualSequence[index] === type);
+
+    if (!correctSequence) {
+      return res.status(502).json({ error: "The AI returned an invalid lesson sequence." });
+    }
+
     const teachCards = lesson.cards.filter(card => card.type === "teach");
     const quizCards = lesson.cards.filter(card => card.type === "quiz");
-    const speakCards = lesson.cards.filter(card => card.type === "speak");
 
-    if (teachCards.length < 3 || quizCards.length < 3 || speakCards.length < 1) {
+    if (teachCards.length !== 3 || quizCards.length !== 3) {
       return res.status(502).json({ error: "The AI returned an incomplete lesson sequence." });
+    }
+
+    for (const card of teachCards) {
+      if (!card.phrase || !card.meaning || !card.pronunciation || !card.ipa || !card.usage || !card.example) {
+        return res.status(502).json({ error: "The AI returned an incomplete teaching card." });
+      }
+    }
+
+    for (const card of quizCards) {
+      if (!card.prompt || !Array.isArray(card.options) || card.options.length < 2 || !card.answer) {
+        return res.status(502).json({ error: "The AI returned an incomplete quiz card." });
+      }
     }
 
     return res.status(200).json({ lesson });
