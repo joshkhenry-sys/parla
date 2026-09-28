@@ -43,7 +43,7 @@ export default async function handler(request) {
       : [];
 
     const instructions = [
-      "You are Parla, an adaptive real-world language conversation coach.",
+      "You are Nahtive, an adaptive real-world language conversation coach.",
       "Have a natural conversation in the learner's target language.",
       "Target language: " + language + ".",
       "Learner level: " + level + ".",
@@ -94,7 +94,7 @@ export default async function handler(request) {
 
     return Response.json({ text });
   } catch (error) {
-    console.error("Parla AI error:", error);
+    console.error("Nahtive AI error:", error);
     return Response.json(
       { error: "Could not reach the AI service." },
       { status: 500 }
