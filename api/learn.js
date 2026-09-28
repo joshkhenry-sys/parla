@@ -55,7 +55,13 @@ export default async function handler(req, res) {
       "Include a pronunciation guide and IPA for every taught phrase.",
       "Include English explanations so the learner understands before being asked to produce language.",
       "Do not use grammar terminology unless it directly helps the learner.",
-      "Do not make every stage a multiple-choice quiz.",
+      "Make the lesson feel like a polished game loop: learn something useful, make a choice, build a response, get immediate feedback, then face a slightly harder version of the same situation.",
+      "Use varied challenges rather than repeating the same interaction. Mix recognition, meaning, choosing the most natural phrase, filling or constructing a response, changing one detail, speaking, and a short role-play.",
+      "Keep the learner curious. Use realistic stakes and small surprises inside the scene: a changed order, a follow-up question, a misunderstanding, a preference, a time constraint, or a social nuance.",
+      "Difficulty should rise within the lesson. Early tasks are heavily supported; later tasks remove choices and require the learner to produce language independently.",
+      "Reward progress in the lesson with meaningful momentum, but never use childish characters, cartoon language, or fake praise after every click.",
+      "For B1+, include at least one moment where two answers are grammatically possible but only one sounds natural in the situation.",
+      "For B2+, C1 and C2, include register, tone, idiom, implication, or conversational repair challenges.",
       "Return ONLY JSON matching the schema."
     ].join(" ");
 
@@ -89,13 +95,13 @@ export default async function handler(req, res) {
         },
         cards: {
           type: "array",
-          minItems: 10,
-          maxItems: 12,
+          minItems: 12,
+          maxItems: 14,
           items: {
             type: "object",
             additionalProperties: false,
             properties: {
-              type: { type: "string", enum: ["teach","check","guided","speak","conversation"] },
+              type: { type: "string", enum: ["teach","check","guided","challenge","speak","conversation"] },
               phrase: { type: "string" },
               pronunciation: { type: "string" },
               ipa: { type: "string" },
@@ -163,11 +169,13 @@ export default async function handler(req, res) {
     const conversationCount = cards.filter(c => c.type === "conversation").length;
 
     const hasLearning = teachCount >= 3 && checkCount >= 2;
+    const challengeCount = cards.filter(c => c.type === "challenge").length;
     const hasPractice = guidedCount >= 2;
+    const hasChallenge = challengeCount >= 1;
     const hasSpeaking = speakCount >= 1;
     const hasConversation = conversationCount >= 1;
 
-    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasSpeaking || !hasConversation) {
+    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasChallenge || !hasSpeaking || !hasConversation) {
       return res.status(502).json({ error: "The AI returned an incomplete lesson structure.", requestId });
     }
 
@@ -181,12 +189,12 @@ export default async function handler(req, res) {
       if (card.type === "guided" && !card.prompt) {
         return res.status(502).json({ error: "The AI returned an incomplete guided practice card.", requestId });
       }
-      if ((card.type === "speak" || card.type === "conversation") && !card.prompt) {
+      if ((card.type === "challenge" || card.type === "speak" || card.type === "conversation") && !card.prompt) {
         return res.status(502).json({ error: "The AI returned an incomplete speaking card.", requestId });
       }
     }
 
-    return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, speakCount, conversationCount } });
+    return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, challengeCount, speakCount, conversationCount } });
   } catch (error) {
     console.error("Nahtive lesson generation error:", error);
     if (error?.name === "AbortError") return res.status(504).json({ error: "The AI lesson request timed out after 55 seconds." });
