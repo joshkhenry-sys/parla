@@ -18,7 +18,65 @@ const fallback=[{label:"Hear",prompt:"Listen to the phrase and notice the rhythm
 function speak(t,lang){if(!t||!("speechSynthesis"in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=lang||"en-US";u.rate=1;speechSynthesis.speak(u)}
 function setStep(){const a=lesson?.content?.steps?.length?lesson.content.steps:fallback,s=a[step];$("step").textContent=(step+1)+" — "+(s.label||"Practice");$("stepCount").textContent=(step+1)+" of "+a.length;$("progressFill").style.width=((step+1)/a.length*100)+"%";$("prompt").textContent=s.prompt||"Use the phrase in context.";$("hint").textContent=step===0?"Listen once normally, then again for the rhythm.":step===1?"Connect the phrase to the situation.":"Speak it out loud or type what you would naturally say.";if(step<2){$("reply").style.display="none";$("mic").style.display="none";$("respond").textContent="Continue →"}else{$("reply").style.display="block";$("mic").style.display="inline-block";$("respond").textContent=step===a.length-1?"Finish lesson":"Check response"}}
 function render(){const s=lesson.content?.scene||{},l=lesson.content?.language||{};$("languageLabel").textContent=(profile.name||"Language")+" · "+profile.level;$("lessonTitle").textContent=lesson.title||"Your next scene";$("sceneCopy").textContent=[s.place,s.time].filter(Boolean).join(" · ")+" — "+(s.situation||"");$("mission").textContent=s.mission||"Use the language in a normal interaction.";$("phrase").textContent=l.phrase||"—";$("meaning").textContent=l.meaning||"";setStep()}
-async function load(){const session=(await client.auth.getSession()).data.session;if(!session){location.href="login.html";return}const uid=session.user.id,saved=localStorage.getItem("Nahtive_current_learner_language") || localStorage.getItem("native_current_learner_language"),q=new URLSearchParams(location.search).get("id");const {data:langs}=await client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",uid);if(!langs?.length){location.href="onboarding.html";return}const ll=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];localStorage.setItem("Nahtive_current_learner_language",ll.id);localStorage.setItem("native_current_learner_language",ll.id);profile={id:ll.id,name:ll.languages?.name||"Language",code:ll.languages?.code||"en",level:ll.level||"A0"};let query=client.from("lessons").select("id,title,topic,level,content").eq("learner_language_id",ll.id).order("created_at",{ascending:false}).limit(12);if(q)query=query.eq("id",q);const {data,error}=await query;if(error||!data?.length){$("lessonTitle").textContent="Your first scene is coming next.";return}lesson=data[0];render()}
+async function load(){
+  const session=(await client.auth.getSession()).data.session;
+  if(!session){location.href="login.html";return}
+  const uid=session.user.id;
+  const saved=localStorage.getItem("Nahtive_current_learner_language") || localStorage.getItem("native_current_learner_language");
+  const q=new URLSearchParams(location.search).get("id");
+
+  let targetLesson=null;
+
+  // If the dashboard supplied a lesson id, that lesson is authoritative.
+  // Never mix its content with whatever language happens to be current.
+  if(q){
+    const {data,error}=await client.from("lessons")
+      .select("id,title,topic,level,content,learner_language_id,learner_languages(id,level,languages(name,code))")
+      .eq("id",q).maybeSingle();
+    if(error||!data){
+      console.error("Could not load requested lesson:",error);
+      $("lessonTitle").textContent="Lesson unavailable";
+      $("sceneCopy").textContent="This saved lesson could not be loaded.";
+      return;
+    }
+    targetLesson=data;
+  }else{
+    const {data:langs,error}=await client.from("learner_languages")
+      .select("id,level,is_current,languages(name,code)")
+      .eq("user_id",uid);
+    if(error||!langs?.length){location.href="onboarding.html";return}
+    const ll=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];
+    const {data,error:lessonError}=await client.from("lessons")
+      .select("id,title,topic,level,content,learner_language_id,learner_languages(id,level,languages(name,code))")
+      .eq("learner_language_id",ll.id)
+      .order("created_at",{ascending:false})
+      .limit(1);
+    if(lessonError||!data?.length){
+      $("lessonTitle").textContent="Your first scene is coming next.";
+      $("sceneCopy").textContent="Nahtive is preparing a saved lesson for this language.";
+      return;
+    }
+    targetLesson=data[0];
+  }
+
+  const linked=targetLesson.learner_languages;
+  const linkedName=linked?.languages?.name || targetLesson.content?.language?.name || "Language";
+  const linkedCode=linked?.languages?.code || targetLesson.content?.language?.code || "en-US";
+  const linkedLevel=linked?.level || targetLesson.level || "A0";
+
+  // Keep the selected path synchronized with the actual lesson being opened.
+  localStorage.setItem("Nahtive_current_learner_language",targetLesson.learner_language_id);
+  localStorage.setItem("native_current_learner_language",targetLesson.learner_language_id);
+
+  profile={
+    id:targetLesson.learner_language_id,
+    name:linkedName,
+    code:linkedCode,
+    level:linkedLevel
+  };
+  lesson=targetLesson;
+  render();
+}
 $("listen").onclick=()=>speak(lesson?.content?.language?.phrase,lesson?.content?.language?.code);
 $("respond").onclick=async()=>{if(step<2){step++;setStep();return}const v=$("reply").value.trim();if(!v){$("status").textContent="Say something or type a response first.";return}answers.push({step,text:v});xp+=10;$("status").textContent="Nice. +10 XP";$("confidence").style.display="block";$("confidence").querySelector("strong").textContent="Response saved";$("confidence").querySelector("p").textContent="You earned 10 XP for keeping the interaction moving.";if(step<4){step++;$("reply").value="";setStep()}else await completeLesson()};
 $("mic").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("status").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=lesson?.content?.language?.code||"en-US";r.interimResults=false;r.onstart=()=>$("status").textContent="Listening…";r.onresult=e=>{$("reply").value=e.results[0][0].transcript;$("status").textContent="Got it. Check your response."};r.onerror=()=>$("status").textContent="Try again or type instead.";r.start()};
