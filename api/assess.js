@@ -8,11 +8,19 @@ export default async function handler(req,res){
   const prompt=`Create a CEFR placement test for a language-learning app called Nahtive.
 Target language: ${targetLanguage} (${targetCode}).
 The learner's interface/native language is English.
-Return exactly 14 multiple-choice questions: exactly 2 labeled A0, exactly 2 labeled A1, exactly 2 labeled A2, exactly 2 labeled B1, exactly 2 labeled B2, exactly 2 labeled C1, and exactly 2 labeled C2. The questions should become genuinely more sophisticated as the level rises.
-Questions must test the TARGET LANGUAGE, not English. Show target-language phrases/examples where useful, but write the question/instructions in English.
-Avoid trivial alphabet/greeting questions. For B1 and above test real everyday language, tense/aspect, connectors, idioms, implied meaning, register, conversational nuance, and natural phrasing. For C1/C2 make the distinction meaningful.
+Return exactly 14 multiple-choice questions: exactly 2 labeled A0, exactly 2 labeled A1, exactly 2 labeled A2, exactly 2 labeled B1, exactly 2 labeled B2, exactly 2 labeled C1, and exactly 2 labeled C2. The questions must form a real diagnostic assessment, not a phrase-recognition quiz. Make each question specific to the TARGET LANGUAGE's actual grammar, vocabulary, syntax, and natural usage. Use realistic situations and target-language examples. Write instructions in English, but make the language evidence itself the thing being tested.
+For each level, use two different diagnostic tasks:
+A0: basic comprehension and essential survival vocabulary.
+A1: everyday requests, common verbs, basic sentence structure and simple time references.
+A2: past/future meaning, comparisons, common connectors, routine situations and short contextual choices.
+B1: tense/aspect, pronouns or case where relevant, conditionals, connectors, natural everyday phrasing and conversational repair.
+B2: nuance, register, collocations, idiomatic language, implied meaning and choosing what a native speaker would naturally say.
+C1: sophisticated syntax, discourse markers, subtle register, idiomatic nuance, ambiguity and precise reformulation.
+C2: highly nuanced meaning, stylistic/register distinctions, culturally natural phrasing, implied meaning and fine grammatical distinctions.
+Do not make higher-level questions merely longer. They should require different language knowledge.
+Every question must have a clear real-world context or a precise linguistic task, and distractors must be plausible for a learner at that level. Do not use generic English distractors that make the answer obvious.
 Each question must have exactly 3 answer choices and exactly one correct answer.
-Do not translate everything into English; the target-language evidence should be what the learner is being tested on.
+Do not translate the target-language sentence into English as the only task. The target language must provide meaningful evidence of proficiency.
 `;
   const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),55000);
   const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization:"Bearer "+process.env.OPENAI_API_KEY},body:JSON.stringify({
