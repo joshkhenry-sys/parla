@@ -130,6 +130,8 @@ export default async function handler(req, res) {
       required: ["title","intro","scene","cards"]
     };
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
@@ -147,15 +149,22 @@ export default async function handler(req, res) {
             strict: true,
             schema
           }
-        }
+        },
+        store: false
       })
     });
 
-    const data = await response.json();
+    clearTimeout(timeout);
+
+    const requestId = response.headers.get("x-request-id") || null;
+    const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
       return res.status(response.status).json({
-        error: data?.error?.message || "OpenAI request failed."
+        error: data?.error?.message || "OpenAI request failed.",
+        code: data?.error?.code || null,
+        type: data?.error?.type || null,
+        requestId
       });
     }
 
@@ -169,8 +178,13 @@ export default async function handler(req, res) {
             .trim();
 
     if (!outputText) {
+      const refusal = (data?.output || [])
+        .flatMap(item => item?.content || [])
+        .find(item => item?.type === "refusal")?.refusal || null;
+
       return res.status(502).json({
-        error: "The AI returned no lesson content."
+        error: refusal || "The AI returned no lesson content.",
+        requestId
       });
     }
 
@@ -180,7 +194,8 @@ export default async function handler(req, res) {
       lesson = JSON.parse(outputText);
     } catch {
       return res.status(502).json({
-        error: "The AI returned invalid lesson data."
+        error: "The AI returned invalid lesson data.",
+        requestId
       });
     }
 
@@ -222,8 +237,15 @@ export default async function handler(req, res) {
     return res.status(200).json({ lesson });
   } catch (error) {
     console.error("Parla lesson generation error:", error);
+
+    if (error?.name === "AbortError") {
+      return res.status(504).json({
+        error: "The AI lesson request timed out after 45 seconds."
+      });
+    }
+
     return res.status(500).json({
-      error: "Could not generate the lesson."
+      error: error?.message || "Could not generate the lesson."
     });
   }
 }
