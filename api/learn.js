@@ -24,8 +24,8 @@ export default async function handler(req, res) {
       B1: "Use natural everyday speech, follow-up questions, paraphrases, and a little slang or idiomatic language when appropriate.",
       "B2": "Use nuanced everyday language, register, natural fillers, implied meaning, and flexible responses.",
       "B2+": "Expect spontaneous speech. Include nuance, tone, alternatives, and realistic social pressure.",
-      C1: "Use fluent, natural language with nuance, register shifts, idioms, and conversational repair.",
-      C2: "Use highly natural native-level language, subtle tone, implied meaning, cultural context, and flexible reformulation."
+      C1: "Treat the learner as an advanced speaker. Build lessons around nuanced everyday communication: hedging, tone, register shifts, idiomatic phrasing, indirectness, disagreement, storytelling, persuasion, ambiguity, and conversational repair. Require reformulation rather than simple translation.",
+      C2: "Treat the learner as near-native. Do not teach basic vocabulary. Build lessons around subtle meaning, pragmatic choices, irony when appropriate, cultural assumptions, register, subtext, rhetorical choices, collocations, discourse markers, natural alternatives, and precise reformulation. Ask the learner to explain why one expression fits better than another and to adapt language under changing social conditions."
     }[level] || "Match the learner's level closely.";
 
     const focusOptions = [
@@ -65,6 +65,10 @@ export default async function handler(req, res) {
       "Reward progress in the lesson with meaningful momentum, but never use childish characters, cartoon language, or fake praise after every click.",
       "For B1+, include at least one moment where two answers are grammatically possible but only one sounds natural in the situation.",
       "For B2+, C1 and C2, include register, tone, idiom, implication, or conversational repair challenges.",
+      "Advanced curriculum rule: do not structure C1/C2 as beginner lessons with harder vocabulary. The task itself must require advanced language judgment. Include at least one contrast between two plausible expressions, one reformulation task, one implied-meaning or tone task, and one moment where the social context changes and the learner must adapt.",
+      "C1/C2 progression: first expose a nuanced expression in context, then analyze what it communicates, then compare natural alternatives, then reformulate it for a different relationship or register, then use it spontaneously in the scene.",
+      "C1/C2 questions should test pragmatic competence, not word difficulty. A correct answer should depend on what a native speaker would naturally choose in that exact context.",
+      "Never pad an advanced lesson with greetings, alphabet material, basic introductions, beginner travel phrases, or elementary vocabulary merely to satisfy the lesson structure."
       "Return ONLY JSON matching the schema."
     ].join(" ");
 
