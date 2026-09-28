@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Native — Setup</title>
-  <meta name="description" content="Build your personalized language learning path with Parla.">
+  <meta name="description" content="Build your personalized language learning path with Native.">
 
   <style>
     :root {
-      --bg: #f7f7f4;
-      --surface: #ffffff;
-      --text: #171717;
-      --muted: #777773;
-      --border: #e5e5df;
+      --bg: #f4f2ec;
+      --surface: #faf9f5;
+      --text: #292a27;
+      --muted: #777872;
+      --border: #d9d7cf;
 
-      --blue: #536dff;
-      --blue-soft: #edf0ff;
+      --blue: #aebf68;
+      --blue-soft: #e8edd4;
 
       --coral: #ed927c;
       --green: #78a58d;
@@ -37,13 +37,7 @@
       min-height: 100vh;
       background: var(--bg);
       color: var(--text);
-      font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Inter",
-        "Helvetica Neue",
-        Arial,
-        sans-serif;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -890,7 +884,7 @@
           <h1>What language do you speak?</h1>
 
           <p>
-            This helps Parla explain things in a way that makes sense to you.
+            This helps Native explain things in a way that makes sense to you.
           </p>
 
         </div>
@@ -1028,7 +1022,7 @@
           <h1>How comfortable are you?</h1>
 
           <p>
-            Don't overthink it. Parla will adjust as it learns what you can actually do.
+            Don't overthink it. Native will adjust as it learns what you can actually do.
           </p>
 
         </div>
@@ -1152,7 +1146,7 @@
           <h1>Why are you learning?</h1>
 
           <p>
-            Pick what matters most. Parla will use this to shape the situations and vocabulary you practice.
+            Pick what matters most. Native will use this to shape the situations and vocabulary you practice.
           </p>
 
         </div>
@@ -1276,7 +1270,7 @@
           <h1>What do you want to talk about?</h1>
 
           <p>
-            Choose things you're genuinely interested in. Parla will use them to make practice feel relevant.
+            Choose things you're genuinely interested in. Native will use them to make practice feel relevant.
           </p>
 
         </div>
@@ -1412,7 +1406,7 @@
           <h1>You're ready.</h1>
 
           <p>
-            Your first language is ready to go. And Parla is built so you can keep adding languages as you learn.
+            Your first language is ready to go. And Native is built so you can keep adding languages as you learn.
           </p>
 
           <div class="language-preview" id="languagePreview"></div>
@@ -1443,21 +1437,31 @@
 
     async function redirectReturningLearner() {
       const params = new URLSearchParams(window.location.search);
-      // A returning learner should never be forced through setup again.
-      // Passing ?language= is the intentional path for adding another language.
-      if (params.get("language") || params.get("targetLanguage")) return;
       try {
         const { data } = await supabaseClient.auth.getSession();
         const user = data?.session?.user;
         if (!user) return;
-        const { data: existing } = await supabaseClient
+
+        const requested = params.get("language") || params.get("targetLanguage");
+        const { data: saved } = await supabaseClient
           .from("learner_languages")
-          .select("id")
-          .eq("user_id", user.id)
-          .limit(1);
-        if (existing && existing.length) window.location.replace("dashboard.html");
+          .select("id,is_current,languages(name)")
+          .eq("user_id", user.id);
+
+        if (requested && saved?.length) {
+          const match = saved.find(row => (row.languages?.name || "").toLowerCase() === requested.toLowerCase());
+          if (match) {
+            await supabaseClient.from("learner_languages").update({is_current:false}).eq("user_id", user.id);
+            await supabaseClient.from("learner_languages").update({is_current:true}).eq("id", match.id).eq("user_id", user.id);
+            localStorage.setItem("native_current_learner_language", match.id);
+            window.location.replace("dashboard.html");
+            return;
+          }
+        }
+
+        if (!requested && saved?.length) window.location.replace("dashboard.html");
       } catch (error) {
-        console.error("Could not check existing learning profile:", error);
+        console.error("Could not resume learning:", error);
       }
     }
 
