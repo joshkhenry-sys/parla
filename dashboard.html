@@ -343,9 +343,36 @@ footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-co
       div.textContent = value == null ? "" : String(value);
       return div.innerHTML;
     }
-    function startLesson() {
+    async function startLesson() {
       sessionStorage.removeItem("nahtive_lesson_completed");
-      window.location.href = "lesson.html";
+      try {
+        const { data: sessionData } = await supabaseClient.auth.getSession();
+        const user = sessionData?.session?.user;
+        if (!user) { window.location.href = "login.html"; return; }
+        const savedId = localStorage.getItem("Nahtive_current_learner_language") || localStorage.getItem("native_current_learner_language");
+        const { data: langs, error } = await supabaseClient
+          .from("learner_languages")
+          .select("id,is_current")
+          .eq("user_id", user.id)
+          .order("is_current", { ascending:false });
+        if (error || !langs?.length) { window.location.href = "onboarding.html"; return; }
+        const current = langs.find(row => row.id === savedId) || langs.find(row => row.is_current) || langs[0];
+        const { data: placement } = await supabaseClient
+          .from("learner_events")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("learner_language_id", current.id)
+          .eq("event_type", "placement_completed")
+          .limit(1);
+        if (!placement?.length) {
+          window.location.href = "assessment.html?language_id=" + encodeURIComponent(current.id) + "&return=lesson";
+          return;
+        }
+        window.location.href = "lesson.html";
+      } catch (error) {
+        console.error("Placement check failed:", error);
+        window.location.href = "assessment.html?return=lesson";
+      }
     }
 
     function showLessonState() {
