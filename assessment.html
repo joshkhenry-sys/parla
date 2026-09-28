@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Nahtive — Placement Check</title>
+<style>
+:root{--ink:#46504b;--muted:#78817c;--cream:#f7f5ef;--paper:#fffdf8;--sage:#9caf78;--line:#dddcd3;--soft:#eeece4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+.wrap{width:min(760px,calc(100% - 32px));margin:0 auto;padding:28px 0 60px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:54px}
+.logo{font-size:22px;font-weight:800;letter-spacing:-1px}.logo span{color:var(--sage)}
+.exit{font-size:12px;color:var(--muted);text-decoration:none}
+.progress{height:5px;background:var(--soft);border-radius:99px;overflow:hidden;margin-bottom:38px}.progress i{display:block;height:100%;width:0;background:var(--sage);transition:width .25s}
+.kicker{text-transform:uppercase;letter-spacing:1.7px;font-size:10px;font-weight:800;color:var(--muted)}
+h1{font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-2px;margin-top:13px}
+.lead{margin-top:14px;color:var(--muted);line-height:1.6;font-size:15px;max-width:620px}
+.panel{margin-top:32px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:26px}
+.question-no{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.question{font-size:22px;line-height:1.35;margin-top:12px;letter-spacing:-.4px}
+.options{display:grid;gap:10px;margin-top:24px}
+.option{width:100%;text-align:left;border:1px solid var(--line);background:#fff;padding:15px 16px;border-radius:13px;color:var(--ink);font-size:15px;line-height:1.45;transition:.15s}
+.option:hover{border-color:#b8b8ae;background:#faf9f4}.option.selected{border-color:var(--sage);background:#f1f5e9;box-shadow:0 0 0 2px rgba(156,175,120,.14)}
+.option.correct{border-color:#9caf78;background:#edf4e5}.option.wrong{border-color:#d6a69a;background:#fbefeb}
+.next{margin-top:22px;width:100%;border:0;background:var(--ink);color:#fff;border-radius:13px;padding:15px;font-size:13px;font-weight:800;letter-spacing:.4px}
+.next:disabled{opacity:.35;cursor:not-allowed}
+.note{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.5}
+.result{text-align:center;padding:20px 4px}.level-result{font-size:64px;font-weight:850;letter-spacing:-4px;margin-top:10px}.result h2{font-size:26px;margin-top:8px;letter-spacing:-1px}.result p{margin:12px auto 0;max-width:520px;color:var(--muted);line-height:1.6}
+.result .next{margin-top:26px}
+.hidden{display:none}
+@media(max-width:560px){.wrap{width:min(100% - 24px,760px);padding-top:20px}.panel{padding:20px}.question{font-size:19px}.level-result{font-size:54px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="logo" href="dashboard.html">Nahtive<span>•</span></a><a class="exit" href="dashboard.html">Exit</a></header>
+<div class="progress"><i id="bar"></i></div>
+<section id="intro">
+  <div class="kicker">Before your first lesson</div>
+  <h1>Let's find your real level.</h1>
+  <p class="lead">This is a quick placement check, not a grammar exam. The questions move from everyday basics into natural conversation so your lessons start where you actually are.</p>
+  <div class="panel">
+    <div class="question">You'll see 14 questions. Don't look anything up. Choose the answer that feels natural.</div>
+    <button class="next" onclick="begin()">Start placement check</button>
+    <div class="note">Your result sets the starting level for this language. You can retake the check later.</div>
+  </div>
+</section>
+<section id="test" class="hidden">
+  <div class="kicker" id="languageLabel">Spanish</div>
+  <h1 id="testTitle">Placement check</h1>
+  <div class="panel">
+    <div class="question-no" id="questionNo"></div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <button class="next" id="next" disabled>Choose an answer</button>
+    <div class="note" id="feedback"></div>
+  </div>
+</section>
+<section id="result" class="hidden">
+  <div class="panel result">
+    <div class="kicker">Placement complete</div>
+    <div class="level-result" id="resultLevel">B1</div>
+    <h2 id="resultTitle">Your lessons will start here.</h2>
+    <p id="resultCopy"></p>
+    <button class="next" id="continueButton">Start my first lesson</button>
+  </div>
+</section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+const params=new URLSearchParams(location.search);
+const requestedLanguageId=params.get("language_id");
+const returnTo=params.get("return")==="lesson"?"lesson":"dashboard";
+let user=null,language=null,index=0,selected=null,scoreByLevel={A0:0,A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
+
+const spanishQuestions=[
+{level:"A0",q:"You want to ask where the bathroom is. Which sounds right?",o:["¿Dónde está el baño?","¿Cuánto cuesta el baño?","¿Qué hora tiene el baño?"],a:0},
+{level:"A0",q:"Someone asks “¿Quieres café?” and you do. What do you say?",o:["Sí, quiero.","Sí, fui.","Sí, tengo."],a:0},
+{level:"A1",q:"What does “Ayer fui al supermercado” mean?",o:["Yesterday I went to the supermarket.","Tomorrow I am going to the supermarket.","I usually work at the supermarket."],a:0},
+{level:"A1",q:"Which is the most natural way to say “I have two brothers”?",o:["Tengo dos hermanos.","Soy dos hermanos.","Estoy dos hermanos."],a:0},
+{level:"A2",q:"“Cuando tengo tiempo, salgo a caminar.” What does “cuando” mean here?",o:["when","although","because"],a:0},
+{level:"A2",q:"You need someone to repeat something. Which is natural?",o:["¿Puedes repetirlo?","¿Puedes recordarlo ayer?","¿Puedes conocerlo?"],a:0},
+{level:"B1",q:"“Llevo tres años viviendo en Denver.” What does “llevo” express here?",o:["How long something has been happening.","That something happened once.","That something will happen tomorrow."],a:0},
+{level:"B1",q:"“Al final no fui porque se me hizo tarde.” What happened?",o:["The person didn't go because it got late.","The person arrived early and stayed.","The person went because it was late."],a:0},
+{level:"B2",q:"“No es que no quiera ir; es que ya hice planes.” What is the speaker really communicating?",o:["They don't want to go at all.","They would go, but they already have plans.","They haven't decided whether they like the person."],a:1},
+{level:"B2",q:"“Si me hubieras avisado antes, habría ido.” What does this imply?",o:["They were invited and went.","They would have gone if they had been told earlier.","They are planning to go later."],a:1},
+{level:"C1",q:"“Por mucho que lo intento, no consigo entenderlo.” What is the closest meaning?",o:["No matter how much I try, I can't understand it.","I understand it easily when I try.","I only try when someone explains it."],a:0},
+{level:"C1",q:"“A estas alturas, ya deberías saber cómo funciona.” What does the phrase suggest?",o:["Given how much time has passed, you should know by now.","You should learn it tomorrow.","You have never had a chance to learn it."],a:0},
+{level:"C2",q:"“No deja de ser una buena opción, aunque no sea mi primera elección.” What is the nuance?",o:["It is still a good option despite not being the speaker's first choice.","It is definitely the worst option.","The speaker refuses to consider it."],a:0},
+{level:"C2",q:"“Lo que pasa es que…” is often used conversationally to…",o:["soften or introduce an explanation for a situation.","announce a formal legal decision.","say that something happened in the distant past."],a:0}
+];
+
+function escapeHtml(v){const d=document.createElement("div");d.textContent=v==null?"":String(v);return d.innerHTML}
+async function init(){
+  const {data,error}=await client.auth.getSession();
+  if(error||!data.session){location.href="login.html";return}
+  user=data.session.user;
+  const q=client.from("learner_languages").select("id,level,languages(name,code)").eq("user_id",user.id);
+  if(requestedLanguageId)q.eq("id",requestedLanguageId);
+  const {data:rows,error:langErr}=await q;
+  if(langErr||!rows?.length){location.href="dashboard.html";return}
+  language=rows[0];
+  document.getElementById("languageLabel").textContent=(language.languages?.name||"Language")+" placement";
+}
+function begin(){document.getElementById("intro").classList.add("hidden");document.getElementById("test").classList.remove("hidden");render()}
+function render(){
+  const item=spanishQuestions[index];
+  document.getElementById("questionNo").textContent="Question "+(index+1)+" of "+spanishQuestions.length;
+  document.getElementById("question").textContent=item.q;
+  document.getElementById("feedback").textContent="";
+  document.getElementById("bar").style.width=((index)/spanishQuestions.length*100)+"%";
+  const options=document.getElementById("options");
+  options.innerHTML=item.o.map((x,i)=>'<button class="option" data-index="'+i+'">'+escapeHtml(x)+'</button>').join("");
+  selected=null;
+  const next=document.getElementById("next");next.disabled=true;next.textContent=index===spanishQuestions.length-1?"See my level":"Next question";
+  options.querySelectorAll(".option").forEach(btn=>btn.addEventListener("click",()=>choose(Number(btn.dataset.index))));
+}
+function choose(i){
+  selected=i;
+  document.querySelectorAll(".option").forEach((b,n)=>{b.classList.toggle("selected",n===i)});
+  const next=document.getElementById("next");next.disabled=false;next.textContent=index===spanishQuestions.length-1?"See my level":"Next question";
+}
+document.getElementById("next").addEventListener("click",()=>{if(selected===null)return;const item=spanishQuestions[index];if(selected===item.a)scoreByLevel[item.level]++;if(index<spanishQuestions.length-1){index++;render()}else{finish()}});
+function calculateLevel(){
+  const order=["A0","A1","A2","B1","B2","C1","C2"];
+  let level="A0";
+  for(const l of order){if(scoreByLevel[l]>=2)level=l;else break}
+  return level;
+}
+async function finish(){
+  document.getElementById("bar").style.width="100%";
+  const result=calculateLevel();
+  const descriptions={
+    A0:"We'll start with survival language and build confidence one useful idea at a time.",
+    A1:"We'll build practical everyday language with short phrases, clear support, and simple responses.",
+    A2:"We'll move beyond memorized phrases into short original responses and everyday variations.",
+    B1:"We'll work with natural everyday speech, follow-up questions, useful idioms, and real situations—not beginner greetings.",
+    B2:"We'll focus on nuance, flexible responses, tone, natural fillers, and more spontaneous conversation.",
+    C1:"We'll use fluent, natural language with nuance, register, idioms, and conversational repair.",
+    C2:"We'll work at a highly natural level: subtle tone, implied meaning, cultural context, and precise reformulation."
+  };
+  const {error:updateError}=await client.from("learner_languages").update({level:result}).eq("id",language.id).eq("user_id",user.id);
+  if(updateError){alert("We couldn't save your placement. Please try again.");return}
+  const {error:eventError}=await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:result,scores:scoreByLevel,question_count:spanishQuestions.length,version:1}});
+  if(eventError){console.error(eventError)}
+  document.getElementById("test").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
+  document.getElementById("resultLevel").textContent=result;
+  document.getElementById("resultCopy").textContent=descriptions[result];
+  document.getElementById("continueButton").onclick=()=>{localStorage.setItem("Nahtive_current_learner_language",language.id);location.href=returnTo==="lesson"?"lesson.html":"dashboard.html"};
+}
+init();
+</script>
+</body>
+</html>
