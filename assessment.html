@@ -112,11 +112,11 @@ async function begin(){
 function render(){
   const item=questions[index];
   document.getElementById("questionNo").textContent="Question "+(index+1)+" of "+questions.length;
-  document.getElementById("question").textContent=item.q;
+  document.getElementById("question").textContent=item.question;
   document.getElementById("feedback").textContent="";
   document.getElementById("bar").style.width=((index)/questions.length*100)+"%";
   const options=document.getElementById("options");
-  options.innerHTML=item.o.map((x,i)=>'<button class="option" data-index="'+i+'">'+escapeHtml(x)+'</button>').join("");
+  options.innerHTML=item.options.map((x,i)=>'<button class="option" data-index="'+i+'">'+escapeHtml(x)+'</button>').join("");
   selected=null;
   const next=document.getElementById("next");next.disabled=true;next.textContent=index===questions.length-1?"See my level":"Next question";
   options.querySelectorAll(".option").forEach(btn=>btn.addEventListener("click",()=>choose(Number(btn.dataset.index))));
@@ -124,7 +124,7 @@ function render(){
 function choose(i){
   selected=i;
   document.querySelectorAll(".option").forEach((b,n)=>{b.classList.toggle("selected",n===i)});
-  const next=document.getElementById("next");next.disabled=false;next.textContent=index===spanishQuestions.length-1?"See my level":"Next question";
+  const next=document.getElementById("next");next.disabled=false;next.textContent=index===questions.length-1?"See my level":"Next question";
 }
 document.getElementById("next").addEventListener("click",()=>{if(selected===null)return;const item=questions[index];if(selected===item.answer)scoreByLevel[item.level]++;if(index<questions.length-1){index++;render()}else{finish()}});
 function calculateLevel(){
