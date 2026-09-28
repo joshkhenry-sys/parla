@@ -7,29 +7,29 @@
   <title>Native — Your Learning</title>
 
   <style>
-:root{--bg:#0b0b0a;--surface:#141412;--surface2:#1b1b18;--text:#f3f0e7;--muted:#918f87;--border:#2a2a25;--accent:#d7ff4f;--radius-xl:0px;--radius-lg:0px;--radius-md:0px}
+:root{--bg:#0b0b0a;--surface:#141412;--surface2:#1b1b18;--text:#f3f0e7;--muted:#918f87;--border:#2a2a25;--accent:#aebf68;--radius-xl:0px;--radius-lg:0px;--radius-md:0px}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 button,input{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
 .container{width:min(1240px,calc(100% - 64px));margin:0 auto}
 nav{height:92px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-.logo{font-family:Georgia,"Times New Roman",serif;font-size:28px;font-weight:400;letter-spacing:-1.5px}.logo span{color:var(--accent)}
+.logo{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:28px;font-weight:400;letter-spacing:-1.5px}.logo span{color:var(--accent)}
 .nav-right{display:flex;align-items:center;gap:22px}.streak{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1.2px}.streak-dot{width:7px;height:7px;background:var(--accent);border-radius:50%}.avatar{width:38px;height:38px;border:1px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
 .dashboard-hero{padding:105px 0 78px;display:grid;grid-template-columns:1.15fr .85fr;gap:80px;align-items:end;border-bottom:1px solid var(--border)}
 .eyebrow,.card-label,.recommended-label,.quick-number,.section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
-.eyebrow{color:var(--accent);margin-bottom:25px}.dashboard-hero h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(58px,8vw,104px);line-height:.88;letter-spacing:-5px;font-weight:400;max-width:850px}.dashboard-hero p{margin:0 0 7px;color:var(--muted);font-size:15px;line-height:1.65;max-width:370px}
+.eyebrow{color:var(--accent);margin-bottom:25px}.dashboard-hero h1{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:clamp(58px,8vw,104px);line-height:.88;letter-spacing:-5px;font-weight:400;max-width:850px}.dashboard-hero p{margin:0 0 7px;color:var(--muted);font-size:15px;line-height:1.65;max-width:370px}
 .dashboard-grid{display:grid;grid-template-columns:1.7fr .7fr;gap:1px;background:var(--border);margin-top:1px;border-bottom:1px solid var(--border)}
 .card{background:var(--surface);border:0;border-radius:0}
 .recommended{min-height:480px;padding:42px;position:relative;overflow:hidden;background:var(--surface)}
 .recommended-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.recommended-label{color:var(--accent)}.recommended-time{font-size:12px;color:var(--muted)}
-.recommended h2{margin-top:125px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(42px,5vw,70px);line-height:.94;letter-spacing:-3px;max-width:700px;font-weight:400}.recommended-copy{margin-top:20px;color:var(--muted);font-size:15px;line-height:1.6;max-width:560px}.lesson-meta{display:flex;align-items:center;gap:10px;margin-top:28px;font-size:11px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}.meta-dot{width:4px;height:4px;background:var(--accent)}
+.recommended h2{margin-top:125px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:clamp(42px,5vw,70px);line-height:.94;letter-spacing:-3px;max-width:700px;font-weight:400}.recommended-copy{margin-top:20px;color:var(--muted);font-size:15px;line-height:1.6;max-width:560px}.lesson-meta{display:flex;align-items:center;gap:10px;margin-top:28px;font-size:11px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}.meta-dot{width:4px;height:4px;background:var(--accent)}
 .primary-button{display:inline-flex;align-items:center;gap:24px;border:1px solid var(--accent);background:var(--accent);color:#0b0b0a;padding:15px 18px;margin-top:30px;border-radius:0;font-size:11px;text-transform:uppercase;letter-spacing:1.4px;font-weight:800}.primary-button:hover{transform:none;background:#e4ff86}
 .lesson-orb{position:absolute;width:310px;height:310px;border-radius:50%;right:-95px;bottom:-150px;background:var(--accent);opacity:.9}.lesson-orb:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:var(--bg);right:85px;top:35px}
-.progress-card{padding:42px;min-height:480px;display:flex;flex-direction:column;background:#10100f}.language-row{display:flex;align-items:end;justify-content:space-between;margin-top:36px}.language-name{font-family:Georgia,"Times New Roman",serif;font-size:32px;font-weight:400;letter-spacing:-1px}.level{padding:7px 9px;border:1px solid var(--border);color:var(--accent);font-size:10px;letter-spacing:1.2px;text-transform:uppercase}.progress-number{margin-top:75px;font-family:Georgia,"Times New Roman",serif;font-size:58px;line-height:1;letter-spacing:-3px;font-weight:400}.progress-description{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5}.progress-bar{height:2px;width:100%;background:var(--border);margin-top:28px;overflow:hidden}.progress-fill{height:100%;width:0;background:var(--accent)}.progress-footer{margin-top:auto;padding-top:28px;display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}
+.progress-card{padding:42px;min-height:480px;display:flex;flex-direction:column;background:#10100f}.language-row{display:flex;align-items:end;justify-content:space-between;margin-top:36px}.language-name{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:32px;font-weight:400;letter-spacing:-1px}.level{padding:7px 9px;border:1px solid var(--border);color:var(--accent);font-size:10px;letter-spacing:1.2px;text-transform:uppercase}.progress-number{margin-top:75px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:58px;line-height:1;letter-spacing:-3px;font-weight:400}.progress-description{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5}.progress-bar{height:2px;width:100%;background:var(--border);margin-top:28px;overflow:hidden}.progress-fill{height:100%;width:0;background:var(--accent)}.progress-footer{margin-top:auto;padding-top:28px;display:flex;justify-content:space-between;font-size:10px;text-transform:uppercase;letter-spacing:1.3px;color:var(--muted)}
 .language-switcher-section{margin-top:64px;margin-bottom:64px}.language-switcher-card{padding:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.dashboard-language-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}.dashboard-language-link{min-height:64px;display:flex;align-items:center;justify-content:flex-start;padding:12px 18px;border:0;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;letter-spacing:.3px}.dashboard-language-link:hover{color:var(--text);transform:none}.dashboard-language-link.current{color:var(--accent);background:var(--surface2)}
 .section-title{margin-bottom:18px;color:var(--muted)}
-.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.quick-card{padding:25px;min-height:240px;position:relative;overflow:hidden;transition:background .2s ease}.quick-card:hover{transform:none;background:var(--surface2)}.quick-number{color:var(--accent)}.quick-card h3{margin-top:85px;font-family:Georgia,"Times New Roman",serif;font-size:28px;letter-spacing:-1.2px;font-weight:400}.quick-card p{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.5;max-width:190px}.quick-arrow{position:absolute;right:23px;bottom:22px;font-size:20px;color:var(--accent)}.talk-card,.review-card{background:var(--surface)}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.quick-card{padding:25px;min-height:240px;position:relative;overflow:hidden;transition:background .2s ease}.quick-card:hover{transform:none;background:var(--surface2)}.quick-number{color:var(--accent)}.quick-card h3{margin-top:85px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:28px;letter-spacing:-1.2px;font-weight:400}.quick-card p{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.5;max-width:190px}.quick-arrow{position:absolute;right:23px;bottom:22px;font-size:20px;color:var(--accent)}.talk-card,.review-card{background:var(--surface)}
 .activity-section{margin-top:64px}.activity-card{padding:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.activity-list{margin-top:0}.activity-item{display:grid;grid-template-columns:50px 1fr auto;align-items:center;gap:15px;padding:22px 0;border-bottom:1px solid var(--border)}.activity-item:last-child{border-bottom:none}.activity-icon{width:34px;height:34px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}.activity-icon.blue,.activity-icon.green,.activity-icon.coral{background:transparent;color:var(--accent)}.activity-title{font-size:14px;font-weight:600}.activity-subtitle{margin-top:4px;color:var(--muted);font-size:11px}.activity-score{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
 footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.footer-inner{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1.2px}.footer-links{display:flex;gap:25px}
 @media(max-width:800px){.container{width:min(100% - 32px,600px)}nav{height:72px}.streak{display:none}.dashboard-hero{padding:65px 0 48px;display:block}.dashboard-hero h1{font-size:60px;letter-spacing:-3px}.dashboard-hero p{margin-top:28px}.dashboard-grid{grid-template-columns:1fr}.recommended,.progress-card{min-height:420px;padding:28px}.recommended h2{margin-top:90px;font-size:47px}.dashboard-language-grid{grid-template-columns:repeat(2,1fr)}.quick-grid{grid-template-columns:1fr 1fr}.quick-card{min-height:190px}.quick-card h3{margin-top:55px;font-size:24px}.activity-score{display:none}.footer-inner{align-items:flex-start;gap:18px;flex-direction:column}}
@@ -116,7 +116,7 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
             Resume scene <span>→</span>
           </button>
 
-          <div class="lesson-orb"></div>
+          
 
         </section>
 
@@ -517,6 +517,7 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
         const level = learnerLanguage.level || "A0";
 
         await loadRealStreak(user.id);
+        localStorage.setItem("native_current_learner_language", learnerLanguage.id);
         await loadSavedLessons(learnerLanguage.id, languageName);
 
         const myLanguagesGrid = document.getElementById("myLanguagesGrid");
@@ -524,7 +525,7 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
           myLanguagesGrid.innerHTML = (learnerLanguages || []).map(language => {
             const name = language.languages?.name || "Language";
             const current = language.is_current;
-            return '<a class="dashboard-language-link ' + (current ? 'current' : '') + '" href="onboarding.html?language=' + encodeURIComponent(name) + '"' +
+            return '<a class="dashboard-language-link ' + (current ? 'current' : '') + '" href="#" data-language-id="' + escapeHtml(language.id) + '"' +
               (current ? ' aria-current="page"' : '') + '><span>' + escapeHtml(name) + '</span><span style="margin-left:7px;font-size:11px;color:var(--muted);">' + escapeHtml(language.level || "A0") + '</span></a>';
           }).join("") || '<div style="grid-column:1/-1;color:var(--muted);font-size:14px;">No languages added yet.</div>';
         }
@@ -592,8 +593,19 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
         if (recommendedLanguage) recommendedLanguage.textContent = languageName;
         if (dashboardLevel) dashboardLevel.textContent = level;
         document.querySelectorAll("#myLanguagesGrid .dashboard-language-link").forEach(link => {
-          const isCurrent = link.getAttribute("aria-current") === "page";
-          link.classList.toggle("current", isCurrent);
+          link.addEventListener("click", async (event) => {
+            event.preventDefault();
+            const id = link.dataset.languageId;
+            if (!id || link.getAttribute("aria-current") === "page") return;
+            const { error: clearError } = await supabaseClient
+              .from("learner_languages").update({ is_current:false }).eq("user_id", user.id);
+            if (clearError) { console.error(clearError); return; }
+            const { error: setError } = await supabaseClient
+              .from("learner_languages").update({ is_current:true }).eq("id", id).eq("user_id", user.id);
+            if (setError) { console.error(setError); return; }
+            localStorage.setItem("native_current_learner_language", id);
+            window.location.href = "dashboard.html";
+          });
         });
       } catch (error) {
         console.error("Could not load learner profile:", error);
