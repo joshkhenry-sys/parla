@@ -483,7 +483,12 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
         button.innerHTML = "Start scene <span>→</span>";
         return;
       }
-      const lesson = lessons[0];
+      const completedResult = await supabaseClient
+        .from("lesson_attempts")
+        .select("lesson_id")
+        .in("lesson_id", lessons.map(row => row.id));
+      const completedIds = new Set((completedResult.data || []).map(row => row.lesson_id));
+      const lesson = lessons.find(row => !completedIds.has(row.id)) || lessons[lessons.length - 1];
       title.textContent = lesson.title || "Continue learning";
       copy.textContent = lesson.topic ? "Continue with " + lesson.topic + " and put it into conversation." : "Pick up where you left off.";
       if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(lesson.level || "Scene")+"</span>";
@@ -543,7 +548,7 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
 
         if (attemptsError) throw attemptsError;
 
-        const completedCount = (attempts || []).length;
+        const completedCount = (attempts || []).filter(a => a.lessons?.learner_language_id === learnerLanguage.id).length;
         const progressPercent = document.getElementById("progressPercent");
         const progressDescription = document.getElementById("progressDescription");
         const progressFill = document.getElementById("progressFill");
