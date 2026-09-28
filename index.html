@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Parla — Learn a language. Actually use it.</title>
+  <title>Native — Learn a language. Actually use it.</title>
 
   <meta
     name="description"
@@ -1041,7 +1041,7 @@
 
     <p class="hero-copy">
 
-      Parla adapts to the way you learn, what you care about,
+      Native adapts to the way you learn, what you care about,
       and the language you actually want to use in the real world.
 
     </p>
@@ -1274,7 +1274,7 @@
       <div class="features-heading">
 
         <div class="section-kicker">
-          The Parla difference
+          The Native difference
         </div>
 
         <h2>
@@ -1287,7 +1287,7 @@
 
         <p>
 
-          Parla isn't built around finishing lessons.
+          Native isn't built around finishing lessons.
           It's built around becoming someone who can actually use another language.
 
         </p>
@@ -1401,7 +1401,7 @@
 
       <p>
 
-        Start with a language. Parla will figure out
+        Start with a language. Native will figure out
         how to help you move forward.
 
       </p>
@@ -1427,7 +1427,7 @@
     <div class="container footer-inner">
 
       <div class="footer-copy">
-        © 2026 Parla
+        © 2026 Native
       </div>
 
       <div class="footer-links">
@@ -1480,25 +1480,32 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
-  (async () => {
-    try {
-      const client = window.supabase.createClient(
-        window.SUPABASE_URL,
-        window.SUPABASE_ANON_KEY
-      );
+(async () => {
+  try {
+    const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    const { data } = await client.auth.getSession();
+    const user = data?.session?.user;
+    if (!user) return;
 
-      const { data } = await client.auth.getSession();
-      const user = data?.session?.user;
-      const pending = user?.user_metadata?.parla_onboarding_pending;
+    const { data: learnerLanguages } = await client
+      .from("learner_languages")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1);
 
-      if (user && pending) {
-        window.location.replace("onboarding.html?resume=1");
-      }
-    } catch (error) {
-      console.error("Could not resume onboarding:", error);
+    // Returning learners go straight back into Native. The questionnaire is only for first-time setup.
+    if (learnerLanguages && learnerLanguages.length) {
+      window.location.replace("dashboard.html");
+      return;
     }
-  })();
-</script>
 
+    if (user.user_metadata?.parla_onboarding_pending) {
+      window.location.replace("onboarding.html?resume=1");
+    }
+  } catch (error) {
+    console.error("Could not resume learning:", error);
+  }
+})();
+</script>
 </body>
 </html>
