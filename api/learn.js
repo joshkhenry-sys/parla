@@ -29,21 +29,25 @@ export default async function handler(req, res) {
       ? profile.interests.filter(item => typeof item === "string").slice(0, 8).join(", ")
       : "Everyday life";
 
+    const beginner = level === "A0" || level === "A1";
     const systemPrompt = [
-      "You are Parla, an adaptive real-world language-learning coach.",
-      "Build a short, high-value lesson that teaches language before asking the learner to produce it.",
-      "The lesson should feel human, practical, modern, and relevant to an adult learner.",
-      "Do not make it feel like a children's app, textbook worksheet, or generic vocabulary dump.",
-      "Choose one realistic situation based on the learner's goal and interests.",
-      "Teach 3 to 5 high-value expressions, not a large list.",
-      "Each expression must be natural for the target language and appropriate for the learner's level.",
-      "For B2+ learners, prioritize nuance, collocations, register, idiomatic phrasing, and subtle distinctions.",
-      "For lower levels, keep the amount of new material small and useful.",
-      "Practice should test material that was just taught.",
-      "The production task should have multiple valid answers.",
-      "The speaking challenge should ask the learner to respond naturally in the target language.",
-      "Use English for meanings and instructional explanations unless the target language itself is more useful.",
-      "Never assume Spanish. The selected target language controls every target-language example.",
+      "You are Parla, a premium private language tutor.",
+      "Create a short, practical lesson for an adult learner in the selected target language.",
+      "Never assume Spanish. The target language controls every target-language phrase and example.",
+      beginner
+        ? "This learner is a beginner. Make the lesson extremely easy to complete without guessing."
+        : "Match the lesson difficulty closely to the learner's level.",
+      beginner
+        ? "Teach exactly 3 useful phrases, one phrase at a time."
+        : "Teach 3 to 5 useful phrases, one at a time.",
+      beginner
+        ? "Use sentences of 1 to 4 words whenever possible. Avoid grammar terminology, idioms, slang, and multiple clauses."
+        : "Use natural language appropriate to the learner's level.",
+      "Every teach card must include the target phrase, a simple pronunciation guide, IPA, English meaning, when to use it, and one short example.",
+      "After each teach card, include a tiny multiple-choice quiz about that phrase.",
+      "Include one final speaking card using language already taught.",
+      "Meanings and instructions should be in English unless the learner's level makes another language clearly useful.",
+      "Keep feedback concrete and encouraging.",
       "Return ONLY structured JSON matching the supplied schema."
     ].join(" ");
 
@@ -53,7 +57,7 @@ export default async function handler(req, res) {
       "Learner level: " + level,
       "Goal: " + goal,
       "Interests: " + (interests || "Everyday life"),
-      "Create one focused lesson that takes roughly 8–12 minutes."
+      "Create a focused lesson that takes roughly 5–8 minutes for a beginner and 8–12 minutes for higher levels."
     ].join("\n");
 
     const schema = {
@@ -61,67 +65,33 @@ export default async function handler(req, res) {
       additionalProperties: false,
       properties: {
         title: { type: "string" },
-        scenario: { type: "string" },
         intro: { type: "string" },
-        expressions: {
+        cards: {
           type: "array",
-          minItems: 3,
-          maxItems: 5,
+          minItems: 7,
+          maxItems: 16,
           items: {
             type: "object",
             additionalProperties: false,
             properties: {
+              type: { type: "string", enum: ["teach", "quiz", "speak"] },
               phrase: { type: "string" },
+              pronunciation: { type: "string" },
+              ipa: { type: "string" },
               meaning: { type: "string" },
+              usage: { type: "string" },
               example: { type: "string" },
-              note: { type: "string" }
+              prompt: { type: "string" },
+              options: { type: "array", items: { type: "string" } },
+              answer: { type: "string" },
+              feedback: { type: "string" },
+              instructions: { type: "string" }
             },
-            required: ["phrase", "meaning", "example", "note"]
+            required: ["type","phrase","pronunciation","ipa","meaning","usage","example","prompt","options","answer","feedback","instructions"]
           }
-        },
-        practice: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            prompt: { type: "string" },
-            options: {
-              type: "array",
-              minItems: 3,
-              maxItems: 3,
-              items: {
-                type: "object",
-                additionalProperties: false,
-                properties: {
-                  text: { type: "string" },
-                  correct: { type: "boolean" },
-                  explanation: { type: "string" }
-                },
-                required: ["text", "correct", "explanation"]
-              }
-            }
-          },
-          required: ["prompt", "options"]
-        },
-        production: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            prompt: { type: "string" },
-            starter: { type: "string" }
-          },
-          required: ["prompt", "starter"]
-        },
-        speaking: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            prompt: { type: "string" },
-            instructions: { type: "string" }
-          },
-          required: ["prompt", "instructions"]
         }
       },
-      required: ["title", "scenario", "intro", "expressions", "practice", "production", "speaking"]
+      required: ["title","intro","cards"]
     };
 
     const response = await fetch("https://api.openai.com/v1/responses", {
@@ -178,19 +148,20 @@ export default async function handler(req, res) {
       });
     }
 
-    if (
-      !lesson?.title ||
-      !Array.isArray(lesson?.expressions) ||
-      lesson.expressions.length < 3 ||
-      !lesson?.practice?.prompt ||
-      !Array.isArray(lesson?.practice?.options) ||
-      lesson.practice.options.length !== 3 ||
-      !lesson?.production?.prompt ||
-      !lesson?.speaking?.prompt
-    ) {
-      return res.status(502).json({
-        error: "The AI returned an incomplete lesson."
-      });
+    const validCards = Array.isArray(lesson?.cards)
+      && lesson.cards.length >= 7
+      && lesson.cards.every(card => ["teach", "quiz", "speak"].includes(card?.type));
+
+    if (!lesson?.title || !lesson?.intro || !validCards) {
+      return res.status(502).json({ error: "The AI returned an incomplete lesson." });
+    }
+
+    const teachCards = lesson.cards.filter(card => card.type === "teach");
+    const quizCards = lesson.cards.filter(card => card.type === "quiz");
+    const speakCards = lesson.cards.filter(card => card.type === "speak");
+
+    if (teachCards.length < 3 || quizCards.length < 3 || speakCards.length < 1) {
+      return res.status(502).json({ error: "The AI returned an incomplete lesson sequence." });
     }
 
     return res.status(200).json({ lesson });
