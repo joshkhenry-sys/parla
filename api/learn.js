@@ -58,6 +58,9 @@ export default async function handler(req, res) {
         ? "Use sentences of 1 to 4 words whenever possible. Avoid grammar terminology, idioms, slang, and multiple clauses."
         : "Use natural language appropriate to the learner's level.",
       "Every teach card must include the target phrase, a simple pronunciation guide, IPA, English meaning, when to use it, and one short example.",
+      "Speech is part of every lesson at every level. Always provide pronunciation data for every taught phrase, including A0/A1 and higher levels.",
+      "Every lesson must make it easy for the learner to hear the target phrase and hear the example spoken aloud before or while practicing it.",
+      "For A0/A1, pronunciation should be especially clear and beginner-friendly: simple readable sound guide, accurate IPA, short phrases, and no assumption that the learner can infer pronunciation from spelling."
       "After each teach card, include a tiny multiple-choice quiz about that phrase.",
       "Include one final speaking card using language already taught.",
       "Meanings and instructions should be in English unless the learner's level makes another language clearly useful.",
