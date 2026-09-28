@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Log in | Parla</title>
+  <title>Log in | Nahtive</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
@@ -251,10 +251,10 @@ p{line-height:1.55}
   <div class="page">
 
     <nav>
-      <a href="index.html" class="logo">parla<span>•</span></a>
+      <a href="index.html" class="logo">nahtive<span>•</span></a>
 
       <div class="nav-right">
-        New to Parla?
+        New to Nahtive?
         <a href="signup.html">Create account</a>
       </div>
     </nav>
@@ -319,14 +319,14 @@ p{line-height:1.55}
         </form>
 
         <div class="terms">
-          By continuing, you agree to Parla's Terms and Privacy Policy.
+          By continuing, you agree to Nahtive's Terms and Privacy Policy.
         </div>
 
       </section>
     </main>
 
     <footer>
-      © 2026 Parla
+      © 2026 Nahtive
     </footer>
 
   </div>
@@ -426,7 +426,7 @@ p{line-height:1.55}
       }
 
       const { data: signedInData } = await supabaseClient.auth.getSession();
-      const pending = signedInData?.session?.user?.user_metadata?.parla_onboarding_pending;
+      const pending = signedInData?.session?.user?.user_metadata?.nahtive_onboarding_pending;
 
       window.location.href = pending ? "onboarding.html?resume=1" : getNextPage();
     });
