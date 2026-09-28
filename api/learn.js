@@ -90,7 +90,7 @@ export default async function handler(req, res) {
         cards: {
           type: "array",
           minItems: 10,
-          maxItems: 16,
+          maxItems: 12,
           items: {
             type: "object",
             additionalProperties: false,
@@ -118,12 +118,14 @@ export default async function handler(req, res) {
     };
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 45000);
+    const timeout = setTimeout(() => controller.abort(), 55000);
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
       body: JSON.stringify({
         model: "gpt-5.6-luna",
+        reasoning: { effort: "low" },
+        max_output_tokens: 5000,
         instructions: systemPrompt,
         input: userPrompt,
         text: { format: { type: "json_schema", name: "nahtive_lesson", strict: true, schema } },
@@ -187,7 +189,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, speakCount, conversationCount } });
   } catch (error) {
     console.error("Nahtive lesson generation error:", error);
-    if (error?.name === "AbortError") return res.status(504).json({ error: "The AI lesson request timed out after 45 seconds." });
+    if (error?.name === "AbortError") return res.status(504).json({ error: "The AI lesson request timed out after 55 seconds." });
     return res.status(500).json({ error: error?.message || "Could not generate the lesson." });
   }
 }
