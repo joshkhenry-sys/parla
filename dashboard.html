@@ -708,7 +708,7 @@
         <section class="card recommended">
 
           <div class="recommended-top">
-            <div class="recommended-label">
+            <div class="recommended-label" id="recommendedLabel">
               Recommended for you
             </div>
 
@@ -717,12 +717,12 @@
             </div>
           </div>
 
-          <h2>
+          <h2 id="recommendedTitle">
             Making plans
             without sounding textbook.
           </h2>
 
-          <p class="recommended-copy">
+          <p class="recommended-copy" id="recommendedCopy">
             Learn the expressions people actually use when
             making plans, changing them, or deciding what
             to do next.
@@ -734,7 +734,7 @@
             <span>Everyday conversation</span>
           </div>
 
-          <button class="primary-button" onclick="startLesson()">
+          <button class="primary-button" id="startLessonButton" onclick="startLesson()">
             Start lesson <span>→</span>
           </button>
 
@@ -1134,7 +1134,29 @@
       return div.innerHTML;
     }
     function startLesson() {
+      sessionStorage.removeItem("parla_lesson_completed");
       window.location.href = "lesson.htm";
+    }
+
+    function showLessonState() {
+      const completed = sessionStorage.getItem("parla_lesson_completed") === "true";
+      const lastTitle = sessionStorage.getItem("parla_last_lesson_title");
+
+      const label = document.getElementById("recommendedLabel");
+      const title = document.getElementById("recommendedTitle");
+      const copy = document.getElementById("recommendedCopy");
+      const button = document.getElementById("startLessonButton");
+
+      if (!completed) return;
+
+      if (label) label.textContent = "Next up";
+      if (title) title.textContent = "Ready for another lesson?";
+      if (copy) {
+        copy.textContent = lastTitle
+          ? "You just completed " + lastTitle + ". Parla can build you another short lesson when you're ready."
+          : "You just completed a lesson. Parla can build you another short lesson when you're ready.";
+      }
+      if (button) button.innerHTML = "Start another lesson <span>→</span>";
     }
 
     document.getElementById("logoutButton").addEventListener("click", async () => {
@@ -1142,6 +1164,8 @@
       sessionStorage.removeItem("parla_learning_profile");
       window.location.href = "login.html";
     });
+
+    showLessonState();
 
     (async () => {
       await loadLearningProfile();
