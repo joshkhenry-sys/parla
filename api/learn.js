@@ -1,77 +1,61 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed." });
 
   const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({
-      error: "OPENAI_API_KEY is not configured in Vercel."
-    });
-  }
+  if (!apiKey) return res.status(500).json({ error: "OPENAI_API_KEY is not configured in Vercel." });
 
   try {
     const { profile } = req.body || {};
-
-    if (!profile?.targetLanguage) {
-      return res.status(400).json({
-        error: "A target language is required."
-      });
-    }
+    if (!profile?.targetLanguage) return res.status(400).json({ error: "A target language is required." });
 
     const targetLanguage = String(profile.targetLanguage).slice(0, 80);
     const nativeLanguage = String(profile.nativeLanguage || "English").slice(0, 80);
     const level = String(profile.level || "A1").slice(0, 20);
     const goal = String(profile.goal || "Real conversation").slice(0, 120);
-
     const interests = Array.isArray(profile.interests)
-      ? profile.interests.filter(item => typeof item === "string").slice(0, 8).join(", ")
+      ? profile.interests.filter(x => typeof x === "string").slice(0, 8).join(", ")
       : "Everyday life";
 
-    const beginner = level === "A0" || level === "A1";
+    const difficulty = {
+      A0: "Start extremely gently. Teach survival language, one idea at a time. Use short phrases and lots of English support.",
+      A1: "Build a small practical foundation. Teach short chunks, then simple substitutions and responses.",
+      A2: "Move from memorized phrases into short original responses. Add common connectors and everyday variations.",
+      B1: "Use natural everyday speech, follow-up questions, paraphrases, and a little slang or idiomatic language when appropriate.",
+      "B2": "Use nuanced everyday language, register, natural fillers, implied meaning, and flexible responses.",
+      "B2+": "Expect spontaneous speech. Include nuance, tone, alternatives, and realistic social pressure.",
+      C1: "Use fluent, natural language with nuance, register shifts, idioms, and conversational repair.",
+      C2: "Use highly natural native-level language, subtle tone, implied meaning, cultural context, and flexible reformulation."
+    }[level] || "Match the learner's level closely.";
+
     const focusOptions = [
-      "greeting someone",
-      "ordering food or coffee",
-      "asking for help",
-      "getting around town",
-      "buying something",
-      "making simple plans",
-      "checking into a hotel",
-      "meeting someone new"
+      "ordering food or coffee","meeting someone new","making weekend plans",
+      "asking for help","getting around town","buying something","traveling",
+      "making small talk","handling a misunderstanding","making an appointment",
+      "talking about interests","dealing with an everyday problem"
     ];
     const focus = focusOptions[Math.floor(Math.random() * focusOptions.length)];
+
     const systemPrompt = [
-      "You are Parla, a premium private language tutor.",
-      "Create a short, practical lesson for an adult learner in the selected target language.",
-      "Never assume Spanish. The target language controls every target-language phrase and example.",
-      beginner
-        ? "This learner is a beginner. Make the lesson extremely easy to complete without guessing."
-        : "Match the lesson difficulty closely to the learner's level.",
-      beginner
-        ? "Teach exactly 3 useful phrases, one phrase at a time."
-        : "Teach 3 to 5 useful phrases, one at a time.",
-      "Choose one simple real-life scenario and keep the entire lesson centered on it.",
-      "Do not make the lesson feel like a vocabulary list. Each new phrase should have a clear job in the situation.",
-      "For A0/A1, introduce sound and meaning before written form. The learner should be able to understand what a phrase means before seeing its spelling.",
-      beginner
-        ? "Use sentences of 1 to 4 words whenever possible. Avoid grammar terminology, idioms, slang, and multiple clauses."
-        : "Use natural language appropriate to the learner's level.",
-      "Every teach card must include the target phrase, a simple pronunciation guide, IPA, English meaning, when to use it, and one short example.",
-      "Speech is part of every lesson at every level. Always provide pronunciation data for every taught phrase, including A0/A1 and higher levels.",
-      "Every lesson must make it easy for the learner to hear the target phrase and hear the example spoken aloud before or while practicing it.",
-      "For A0/A1, pronunciation should be especially clear and beginner-friendly: simple readable sound guide, accurate IPA, short phrases, and no assumption that the learner can infer pronunciation from spelling.",
-      "Make the scenario feel like a real moment an adult would actually experience, not a textbook exercise.",
-      "Avoid unnatural example sentences, invented dialogue, or sentences that exist only to demonstrate grammar.",
-      "Use the learner's interests when they naturally fit the scenario, but keep the language practical.",
-      "After each teach card, include a tiny multiple-choice quiz about that phrase.",
-      "Include one final speaking card using language already taught.",
-      "Meanings and instructions should be in English unless the learner's level makes another language clearly useful.",
-      "Keep feedback concrete and encouraging.",
-      beginner
-        ? "For each teach card, the meaning must be understandable without knowing the target-language spelling. Do not rely on the phrase itself to explain its meaning."
-        : "Make every explanation useful and concrete.",
-      "Return ONLY structured JSON matching the supplied schema."
+      "You are Nahtive, a premium real-world language tutor.",
+      "Build a complete lesson, not a vocabulary drill and not a conversation-only activity.",
+      "The lesson must teach first and gradually move toward independent speaking.",
+      "The target language is authoritative: never substitute another language.",
+      "Everything in the target language must sound like something a real speaker would actually say.",
+      difficulty,
+      "Use one coherent real-world scene from beginning to end.",
+      "Teach 3 to 5 high-value language chunks. Explain meaning, pronunciation, usage, and one natural example.",
+      "After teaching each chunk, check understanding without requiring speech.",
+      "Then give guided practice where the learner constructs or chooses a response using what was just taught.",
+      "Only after the learner has learned and practiced should speaking begin.",
+      "End with a short role-play that gradually becomes less scaffolded. Do not jump straight from repeating a phrase into free conversation.",
+      "A0/A1: heavily scaffold the role-play and accept very short responses.",
+      "A2/B1: require simple original responses and one follow-up.",
+      "B2+: require spontaneous responses, natural alternatives, and conversational repair.",
+      "Include a pronunciation guide and IPA for every taught phrase.",
+      "Include English explanations so the learner understands before being asked to produce language.",
+      "Do not use grammar terminology unless it directly helps the learner.",
+      "Do not make every stage a multiple-choice quiz.",
+      "Return ONLY JSON matching the schema."
     ].join(" ");
 
     const userPrompt = [
@@ -80,9 +64,8 @@ export default async function handler(req, res) {
       "Learner level: " + level,
       "Goal: " + goal,
       "Interests: " + (interests || "Everyday life"),
-      "Lesson scenario: " + focus,
-      "Create a focused lesson that takes roughly 5–8 minutes for a beginner and 8–12 minutes for higher levels.",
-      "Return a scene object describing the real-world setting, what is happening right now, the learner's role, and what they are trying to accomplish."
+      "Scenario direction: " + focus,
+      "Make the lesson feel like a guided experience that takes about 10 minutes for A0/A1 and 12–18 minutes for higher levels."
     ].join("\n");
 
     const schema = {
@@ -104,13 +87,13 @@ export default async function handler(req, res) {
         },
         cards: {
           type: "array",
-          minItems: 7,
+          minItems: 10,
           maxItems: 16,
           items: {
             type: "object",
             additionalProperties: false,
             properties: {
-              type: { type: "string", enum: ["teach", "quiz", "speak"] },
+              type: { type: "string", enum: ["teach","check","guided","speak","conversation"] },
               phrase: { type: "string" },
               pronunciation: { type: "string" },
               ipa: { type: "string" },
@@ -121,9 +104,11 @@ export default async function handler(req, res) {
               options: { type: "array", items: { type: "string" } },
               answer: { type: "string" },
               feedback: { type: "string" },
-              instructions: { type: "string" }
+              instructions: { type: "string" },
+              expected: { type: "string" },
+              followUp: { type: "string" }
             },
-            required: ["type","phrase","pronunciation","ipa","meaning","usage","example","prompt","options","answer","feedback","instructions"]
+            required: ["type","phrase","pronunciation","ipa","meaning","usage","example","prompt","options","answer","feedback","instructions","expected","followUp"]
           }
         }
       },
@@ -134,118 +119,73 @@ export default async function handler(req, res) {
     const timeout = setTimeout(() => controller.abort(), 45000);
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey
-      },
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
       body: JSON.stringify({
         model: "gpt-5.6-luna",
         instructions: systemPrompt,
         input: userPrompt,
-        text: {
-          format: {
-            type: "json_schema",
-            name: "parla_lesson",
-            strict: true,
-            schema
-          }
-        },
+        text: { format: { type: "json_schema", name: "nahtive_lesson", strict: true, schema } },
         store: false
-      })
+      }),
+      signal: controller.signal
     });
-
     clearTimeout(timeout);
 
     const requestId = response.headers.get("x-request-id") || null;
     const data = await response.json().catch(() => ({}));
-
     if (!response.ok) {
       return res.status(response.status).json({
         error: data?.error?.message || "OpenAI request failed.",
-        code: data?.error?.code || null,
-        type: data?.error?.type || null,
         requestId
       });
     }
 
-    const outputText =
-      typeof data?.output_text === "string"
-        ? data.output_text.trim()
-        : (data?.output || [])
-            .flatMap(item => item?.content || [])
-            .map(item => item?.text || "")
-            .join("")
-            .trim();
+    const outputText = typeof data?.output_text === "string"
+      ? data.output_text.trim()
+      : (data?.output || []).flatMap(item => item?.content || []).map(item => item?.text || "").join("").trim();
 
-    if (!outputText) {
-      const refusal = (data?.output || [])
-        .flatMap(item => item?.content || [])
-        .find(item => item?.type === "refusal")?.refusal || null;
-
-      return res.status(502).json({
-        error: refusal || "The AI returned no lesson content.",
-        requestId
-      });
-    }
+    if (!outputText) return res.status(502).json({ error: "The AI returned no lesson content.", requestId });
 
     let lesson;
+    try { lesson = JSON.parse(outputText); }
+    catch { return res.status(502).json({ error: "The AI returned invalid lesson data.", requestId }); }
 
-    try {
-      lesson = JSON.parse(outputText);
-    } catch {
-      return res.status(502).json({
-        error: "The AI returned invalid lesson data.",
-        requestId
-      });
+    const cards = Array.isArray(lesson.cards) ? lesson.cards : [];
+    const types = cards.map(c => c.type);
+    const teachCount = cards.filter(c => c.type === "teach").length;
+    const checkCount = cards.filter(c => c.type === "check").length;
+    const guidedCount = cards.filter(c => c.type === "guided").length;
+    const speakCount = cards.filter(c => c.type === "speak").length;
+    const conversationCount = cards.filter(c => c.type === "conversation").length;
+
+    const hasLearning = teachCount >= 3 && checkCount >= 2;
+    const hasPractice = guidedCount >= 2;
+    const hasSpeaking = speakCount >= 1;
+    const hasConversation = conversationCount >= 1;
+
+    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasSpeaking || !hasConversation) {
+      return res.status(502).json({ error: "The AI returned an incomplete lesson structure.", requestId });
     }
 
-    const validCards = Array.isArray(lesson?.cards)
-      && lesson.cards.length === 7
-      && lesson.cards.every(card => ["teach", "quiz", "speak"].includes(card?.type));
-
-    if (!lesson?.title || !lesson?.intro || !lesson?.scene?.setting || !lesson?.scene?.moment || !lesson?.scene?.learnerRole || !lesson?.scene?.goal || !validCards) {
-      return res.status(502).json({ error: "The AI returned an incomplete lesson." });
-    }
-
-    const expectedSequence = ["teach", "quiz", "teach", "quiz", "teach", "quiz", "speak"];
-    const actualSequence = lesson.cards.map(card => card.type);
-    const correctSequence = expectedSequence.every((type, index) => actualSequence[index] === type);
-
-    if (!correctSequence) {
-      return res.status(502).json({ error: "The AI returned an invalid lesson sequence." });
-    }
-
-    const teachCards = lesson.cards.filter(card => card.type === "teach");
-    const quizCards = lesson.cards.filter(card => card.type === "quiz");
-
-    if (teachCards.length !== 3 || quizCards.length !== 3) {
-      return res.status(502).json({ error: "The AI returned an incomplete lesson sequence." });
-    }
-
-    for (const card of teachCards) {
-      if (!card.phrase || !card.meaning || !card.pronunciation || !card.ipa || !card.usage || !card.example) {
-        return res.status(502).json({ error: "The AI returned an incomplete teaching card." });
+    for (const card of cards) {
+      if (card.type === "teach" && (!card.phrase || !card.meaning || !card.pronunciation || !card.ipa || !card.usage || !card.example)) {
+        return res.status(502).json({ error: "The AI returned an incomplete teaching card.", requestId });
+      }
+      if (card.type === "check" && (!card.prompt || !Array.isArray(card.options) || card.options.length < 2 || !card.answer)) {
+        return res.status(502).json({ error: "The AI returned an incomplete understanding check.", requestId });
+      }
+      if (card.type === "guided" && !card.prompt) {
+        return res.status(502).json({ error: "The AI returned an incomplete guided practice card.", requestId });
+      }
+      if ((card.type === "speak" || card.type === "conversation") && !card.prompt) {
+        return res.status(502).json({ error: "The AI returned an incomplete speaking card.", requestId });
       }
     }
 
-    for (const card of quizCards) {
-      if (!card.prompt || !Array.isArray(card.options) || card.options.length < 2 || !card.answer) {
-        return res.status(502).json({ error: "The AI returned an incomplete quiz card." });
-      }
-    }
-
-    return res.status(200).json({ lesson });
+    return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, speakCount, conversationCount } });
   } catch (error) {
-    console.error("Parla lesson generation error:", error);
-
-    if (error?.name === "AbortError") {
-      return res.status(504).json({
-        error: "The AI lesson request timed out after 45 seconds."
-      });
-    }
-
-    return res.status(500).json({
-      error: error?.message || "Could not generate the lesson."
-    });
+    console.error("Nahtive lesson generation error:", error);
+    if (error?.name === "AbortError") return res.status(504).json({ error: "The AI lesson request timed out after 45 seconds." });
+    return res.status(500).json({ error: error?.message || "Could not generate the lesson." });
   }
 }
