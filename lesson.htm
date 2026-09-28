@@ -147,6 +147,115 @@
       line-height: 1.6;
     }
 
+    .scene-board {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 14px;
+    }
+
+    .scene-main,
+    .scene-side {
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--surface);
+      padding: 24px;
+    }
+
+    .scene-main {
+      min-height: 210px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 82% 20%, rgba(83,109,255,.14), transparent 32%),
+        linear-gradient(145deg, #fff 0%, #f2f2ed 100%);
+    }
+
+    .scene-kicker {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .scene-setting {
+      margin-top: 10px;
+      font-size: 30px;
+      line-height: 1.05;
+      letter-spacing: -1.3px;
+      max-width: 360px;
+    }
+
+    .scene-moment {
+      margin-top: 12px;
+      max-width: 390px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .scene-orb {
+      position: absolute;
+      width: 118px;
+      height: 118px;
+      right: 28px;
+      bottom: -28px;
+      border-radius: 50%;
+      background: var(--blue-soft);
+      border: 12px solid rgba(83,109,255,.10);
+    }
+
+    .scene-orb::after {
+      content: "";
+      position: absolute;
+      width: 46px;
+      height: 46px;
+      left: 24px;
+      top: 22px;
+      border-radius: 14px;
+      background: var(--blue);
+      opacity: .78;
+    }
+
+    .scene-side {
+      display: grid;
+      align-content: center;
+      gap: 14px;
+    }
+
+    .scene-detail {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .scene-detail-mark {
+      width: 30px;
+      height: 30px;
+      flex: 0 0 30px;
+      border-radius: 10px;
+      background: #f2f2ed;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .scene-detail-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .9px;
+    }
+
+    .scene-detail-value {
+      margin-top: 3px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
     /* TOPIC CARD */
 
     .context-card {
@@ -626,6 +735,7 @@
       <div class="step-label" id="cardLabel">Learn</div>
       <h1 id="cardTitle">Loading your lesson…</h1>
       <p class="step-intro" id="cardIntro">Parla is preparing something useful for you.</p>
+      <div id="sceneBoard"></div>
       <div id="lessonCard"></div>
       <div class="continue-wrap">
         <button class="continue" id="nextButton" type="button" disabled>Next <span>→</span></button>
@@ -683,6 +793,24 @@
       progress.style.width = Math.min(100, ((currentCard + 1) / total) * 100) + "%";
     }
 
+    async function logEvent(eventType, eventData = {}) {
+      if (!profile || !learnerLanguageId) return;
+      try {
+        const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+        const { data: sessionData } = await client.auth.getSession();
+        const user = sessionData?.session?.user;
+        if (!user) return;
+        await client.from("learner_events").insert({
+          user_id: user.id,
+          learner_language_id: learnerLanguageId,
+          event_type: eventType,
+          event_data: eventData
+        });
+      } catch (error) {
+        console.debug("Parla event logging skipped:", error);
+      }
+    }
+
     function speakPhrase(text) {
       if (!("speechSynthesis" in window) || !text) return;
       window.speechSynthesis.cancel();
@@ -690,6 +818,33 @@
       utterance.lang = speechLocales[profile?.targetLanguage] || "en-US";
       utterance.rate = 0.82;
       window.speechSynthesis.speak(utterance);
+      logEvent("speech_played", {
+        cardIndex: currentCard,
+        text: String(text).slice(0, 240)
+      });
+    }
+
+    function renderScene() {
+      const board = document.getElementById("sceneBoard");
+      if (!board || !lesson?.scene) return;
+      const scene = lesson.scene;
+      board.innerHTML = `
+        <div class="scene-main">
+          <div class="scene-kicker">You're here</div>
+          <div class="scene-setting">${escapeHtml(scene.setting)}</div>
+          <div class="scene-moment">${escapeHtml(scene.moment)}</div>
+          <div class="scene-orb" aria-hidden="true"></div>
+        </div>
+        <div class="scene-side">
+          <div class="scene-detail">
+            <div class="scene-detail-mark">YOU</div>
+            <div><div class="scene-detail-label">Your role</div><div class="scene-detail-value">${escapeHtml(scene.learnerRole)}</div></div>
+          </div>
+          <div class="scene-detail">
+            <div class="scene-detail-mark">GO</div>
+            <div><div class="scene-detail-label">Your goal</div><div class="scene-detail-value">${escapeHtml(scene.goal)}</div></div>
+          </div>
+        </div>`;
     }
 
     function setNext(enabled, label = "Next") {
@@ -709,6 +864,12 @@
       setNext(false);
 
       if (!card) return;
+
+      logEvent("lesson_card_viewed", {
+        cardIndex: currentCard,
+        cardType: card.type,
+        lessonTitle: lesson?.title || ""
+      });
 
       if (card.type === "teach") {
         label.textContent = "Learn";
@@ -833,6 +994,11 @@
               answer: option,
               correct
             });
+            logEvent("quiz_answered", {
+              cardIndex: currentCard,
+              answer: option,
+              correct
+            });
             setNext(correct);
           });
           answers.appendChild(button);
@@ -854,6 +1020,10 @@
       document.getElementById("speakButton").addEventListener("click", () => {
         speakPhrase(card.phrase);
         document.getElementById("recordingText").textContent = "Now say it out loud.";
+        logEvent("speaking_prompt_completed", {
+          cardIndex: currentCard,
+          phrase: card.phrase || ""
+        });
         setNext(true, "I did it");
       });
       setNext(true, "I did it");
@@ -946,6 +1116,12 @@
 
         lesson = data.lesson;
         cards = lesson.cards;
+        renderScene();
+        logEvent("lesson_started", {
+          title: lesson.title,
+          level: profile.level,
+          scenario: lesson.scene?.setting || ""
+        });
 
         // Display the generated lesson immediately. Saving history must never
         // prevent the learner from starting a lesson.
@@ -1016,6 +1192,11 @@
           }
         }
 
+        logEvent("lesson_completed", {
+          title: lesson?.title || "Lesson",
+          score,
+          completedCards: cards.length
+        });
         sessionStorage.setItem("parla_lesson_completed", "true");
         sessionStorage.setItem("parla_last_lesson_title", lesson?.title || "Lesson");
         document.getElementById("lessonShell").style.display = "none";
