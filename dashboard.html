@@ -344,13 +344,13 @@ footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-co
       return div.innerHTML;
     }
     function startLesson() {
-      sessionStorage.removeItem("parla_lesson_completed");
+      sessionStorage.removeItem("nahtive_lesson_completed");
       window.location.href = "lesson.html";
     }
 
     function showLessonState() {
-      const completed = sessionStorage.getItem("parla_lesson_completed") === "true";
-      const lastTitle = sessionStorage.getItem("parla_last_lesson_title");
+      const completed = sessionStorage.getItem("nahtive_lesson_completed") === "true";
+      const lastTitle = sessionStorage.getItem("nahtive_last_lesson_title");
 
       const label = document.getElementById("recommendedLabel");
       const title = document.getElementById("recommendedTitle");
@@ -371,7 +371,7 @@ footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-co
 
     document.getElementById("logoutButton").addEventListener("click", async () => {
       await supabaseClient.auth.signOut();
-      sessionStorage.removeItem("parla_learning_profile");
+      sessionStorage.removeItem("nahtive_learning_profile");
       window.location.href = "login.html";
     });
 
