@@ -12,93 +12,27 @@
 <div class="response" id="response"><div class="response-head"><div class="response-title">02 — Your turn</div><button class="voice" id="mic">Use voice</button></div><textarea class="reply" id="reply" placeholder="What would you say?" rows="1"></textarea><div class="actions"><div class="status" id="status">You don't need the perfect sentence. Get the meaning across.</div><button class="continue" id="respond">Say it →</button></div></div>
 <div class="confidence" id="confidence"><strong>Response recognized</strong><p>Your speech result was evaluated before XP was awarded.</p></div><div class="confidence" id="complete" style="display:none"><strong>Lesson complete</strong><p id="completeCopy">Your progress is saved.</p><a class="back" href="dashboard.html">Continue learning →</a></div>
 </main></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
-const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY),$=id=>document.getElementById(id);let lesson=null,profile=null,step=0,xp=0,answers=[],lastVoice=null;
-const fallback=[{label:"Hear",prompt:"Listen to the phrase and notice the rhythm."},{label:"Understand",prompt:"Connect the phrase to the situation."},{label:"Repeat",prompt:"Repeat the phrase out loud."},{label:"Respond",prompt:"Respond naturally in the target language."},{label:"Conversation",prompt:"Keep the interaction moving."}];
-function speak(t,lang){if(!t||!("speechSynthesis"in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=lang||"en-US";u.rate=1;speechSynthesis.speak(u)}
-function setStep(){const a=lesson?.content?.steps?.length?lesson.content.steps:fallback,s=a[step];$("step").textContent=(step+1)+" — "+(s.label||"Practice");$("stepCount").textContent=(step+1)+" of "+a.length;$("progressFill").style.width=((step+1)/a.length*100)+"%";$("prompt").textContent=s.prompt||"Use the phrase in context.";$("hint").textContent=step===0?"Listen once normally, then again for the rhythm.":step===1?"Connect the phrase to the situation.":"Speak it out loud or type what you would naturally say.";if(step<2){$("reply").style.display="none";$("mic").style.display="none";$("respond").textContent="Continue →"}else{$("reply").style.display="block";$("mic").style.display="inline-block";$("respond").textContent=step===a.length-1?"Finish lesson":"Check response"}}
-function render(){const s=lesson.content?.scene||{},l=lesson.content?.language||{};$("languageLabel").textContent=(profile.name||"Language")+" · "+profile.level;$("lessonTitle").textContent=lesson.title||"Your next scene";$("sceneCopy").textContent=[s.place,s.time].filter(Boolean).join(" · ")+" — "+(s.situation||"");$("phrase").textContent=l.phrase||"—";$("meaning").textContent=l.meaning||"";setStep()}
-async function load(){
-  const session=(await client.auth.getSession()).data.session;
-  if(!session){location.href="login.html";return}
-  const uid=session.user.id;
-  const saved=localStorage.getItem("Nahtive_current_learner_language") || localStorage.getItem("native_current_learner_language");
-  const q=new URLSearchParams(location.search).get("id");
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>function normalizeText(v){return (v||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^\\p{L}\\p{N} ]/gu," ").replace(/\\s+/g," ").trim()}
 
-  let targetLesson=null;
-
-  // If the dashboard supplied a lesson id, that lesson is authoritative.
-  // Never mix its content with whatever language happens to be current.
-  if(q){
-    const {data,error}=await client.from("lessons")
-      .select("id,title,topic,level,content,learner_language_id,learner_languages(id,level,languages(name,code))")
-      .eq("id",q).maybeSingle();
-    if(error||!data){
-      console.error("Could not load requested lesson:",error);
-      $("lessonTitle").textContent="Lesson unavailable";
-      $("sceneCopy").textContent="This saved lesson could not be loaded.";
-      return;
-    }
-    targetLesson=data;
-  }else{
-    const {data:langs,error}=await client.from("learner_languages")
-      .select("id,level,is_current,languages(name,code)")
-      .eq("user_id",uid);
-    if(error||!langs?.length){location.href="onboarding.html";return}
-    const ll=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];
-    const {data,error:lessonError}=await client.from("lessons")
-      .select("id,title,topic,level,content,learner_language_id,learner_languages(id,level,languages(name,code))")
-      .eq("learner_language_id",ll.id)
-      .order("created_at",{ascending:false})
-      .limit(1);
-    if(lessonError||!data?.length){
-      $("lessonTitle").textContent="Your first scene is coming next.";
-      $("sceneCopy").textContent="Nahtive is preparing a saved lesson for this language.";
-      return;
-    }
-    targetLesson=data[0];
-  }
-
-  const linked=targetLesson.learner_languages;
-  const linkedName=linked?.languages?.name || targetLesson.content?.language?.name || "Language";
-  const linkedCode=linked?.languages?.code || targetLesson.content?.language?.code || "en-US";
-  const linkedLevel=linked?.level || targetLesson.level || "A0";
-
-  // Keep the selected path synchronized with the actual lesson being opened.
-  localStorage.setItem("Nahtive_current_learner_language",targetLesson.learner_language_id);
-  localStorage.setItem("native_current_learner_language",targetLesson.learner_language_id);
-
-  profile={
-    id:targetLesson.learner_language_id,
-    name:linkedName,
-    code:linkedCode,
-    level:linkedLevel
-  };
-  lesson=targetLesson;
-  render();
-}
-$("listen").onclick=()=>speak(lesson?.content?.language?.phrase,lesson?.content?.language?.code);
-function normalizeText(v){return (v||"").toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^\\p{L}\\p{N} ]/gu," ").replace(/\\s+/g," ").trim()}
 function levenshtein(a,b){const A=[...normalizeText(a)],B=[...normalizeText(b)],d=Array.from({length:A.length+1},(_,i)=>{const r=new Array(B.length+1);r[0]=i;return r});for(let j=1;j<=B.length;j++)d[0][j]=j;for(let i=1;i<=A.length;i++)for(let j=1;j<=B.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(A[i-1]===B[j-1]?0:1));return d[A.length][B.length]}
+
 function textSimilarity(a,b){const A=normalizeText(a),B=normalizeText(b);if(!A||!B)return 0;if(A===B)return 1;return Math.max(0,1-levenshtein(A,B)/Math.max(A.length,B.length))}
+
 function wordAlignment(spoken,target){const A=normalizeText(spoken).split(" ").filter(Boolean),B=normalizeText(target).split(" ").filter(Boolean);const used=new Set(),rows=[];for(const w of B){let best=-1,bs=0;A.forEach((x,i)=>{if(used.has(i))return;const s=textSimilarity(x,w);if(s>bs){bs=s;best=i}});if(best>=0&&bs>=.55){used.add(best);rows.push({target:w,heard:A[best],score:bs})}else rows.push({target:w,heard:"—",score:0})}return rows}
+
 function pronunciationScore(spoken,target){const rows=wordAlignment(spoken,target);if(!rows.length)return 0;const wordScore=rows.reduce((n,r)=>n+r.score,0)/rows.length;const charScore=textSimilarity(spoken,target);return Math.max(0,Math.min(1,wordScore*.65+charScore*.35))}
+
 function targetLanguageScore(spoken){const text=normalizeText(spoken);if(!text)return 0;const code=(profile?.code||"").toLowerCase();const vocab={es:["que","como","quiero","puedo","para","por","una","un","el","la","me","te","donde","bien"],nl:["ik","je","het","een","van","voor","wat","wil","kan","niet","goed","de"],pl:["ja","ty","to","jest","co","chce","mogę","dla","nie","dobrze","proszę"],ar:["انا","أنت","ماذا","اريد","يمكن","من","في","على","هذا","جيد"],en:["i","you","the","a","what","can","get","for","me","is","want"]};const base=code.split("-")[0];if(base==="ar")return /[\\u0600-\\u06ff]/.test(spoken)?1:.05;const hints=vocab[base]||[];const words=text.split(" ");const hits=words.filter(w=>hints.includes(w)).length;return Math.min(1,hints.length?hits/Math.min(Math.max(words.length,1),3):.5)}
+
 function evaluateSpeech(spoken,target,mode){const lang=targetLanguageScore(spoken);if(mode==="Repeat"){const pron=pronunciationScore(spoken,target);return {ok:pron>=.78&&lang>=.35,pron,lang,rows:wordAlignment(spoken,target)}}const targetWords=normalizeText(target).split(" ").filter(Boolean);const topical=targetWords.length?targetWords.filter(w=>normalizeText(spoken).includes(w)).length/Math.min(targetWords.length,4):0;const pron=pronunciationScore(spoken,target);const ok=spoken.trim().split(/\\s+/).length>=2&&(lang>=.25||topical>=.25);return {ok,pron,lang,rows:wordAlignment(spoken,target)}}
+
 function setVoiceFeedback(result,mode){const p=Math.round(result.pron*100);if(result.ok){$("status").textContent=mode==="Repeat"?"Pronunciation match "+p+"%. Target language detected.":"Target language detected. Speech match "+p+"%.";return true}if(mode==="Repeat")$("status").textContent="Not quite yet — speech match "+p+"%. Try the phrase again and focus on the sounds.";else $("status").textContent="I heard your response, but I couldn't confidently verify the target language. Try saying it again in "+profile.name+".";return false}
+
+$("listen").onclick=()=>speak(lesson?.content?.language?.phrase,lesson?.content?.language?.code);
+$("mic").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("status").textContent="Voice input isn't available here. Type instead.";return}const mode=lesson?.content?.steps?.[step]?.label||"Respond";const target=lesson?.content?.language?.phrase||"";const r=new SR();r.lang=profile?.code||"en-US";r.interimResults=false;r.maxAlternatives=5;r.continuous=false;r.onstart=()=>{$("status").textContent="Listening in "+(profile?.name||"the target language")+"…";$("mic").disabled=true};r.onresult=e=>{let best=e.results[0][0],bestResult=evaluateSpeech(best.transcript,target,mode);for(let i=1;i<e.results[0].length;i++){const alt=e.results[0][i],res=evaluateSpeech(alt.transcript,target,mode);if((res.ok&&!bestResult.ok)||(res.ok===bestResult.ok&&res.pron>bestResult.pron)){best=alt;bestResult=res}}lastVoice={transcript:best.transcript,confidence:best.confidence||0,pron:bestResult.pron,lang:bestResult.lang,mode,rows:bestResult.rows};$("reply").value=best.transcript;$("status").textContent="I heard: "+best.transcript+" — press “Check response”.";};r.onerror=e=>{$("status").textContent=e.error==="not-allowed"?"Microphone access is blocked. Allow the microphone and try again.":"I couldn't understand the recording. Try again.";lastVoice=null};r.onend=()=>{$("mic").disabled=false};try{r.start()}catch(e){$("status").textContent="Microphone is already active. Try again in a moment."}};
+$("respond").onclick=async()=>{if(step<2){step++;setStep();return}const v=$("reply").value.trim();if(!v){$("status").textContent="Say something or type a response first.";return}const mode=lesson?.content?.steps?.[step]?.label||"Respond";const target=lesson?.content?.language?.phrase||"";let evaluation=null;if(lastVoice){evaluation=evaluateSpeech(v,target,mode);if(!setVoiceFeedback(evaluation,mode))return}answers.push({step,text:v,voice:lastVoice?{transcript:v,confidence:lastVoice.confidence||0,pronunciation_score:evaluation?.pron||0,target_language_score:evaluation?.lang||0,alignment:evaluation?.rows||[]}:null});xp+=10;$("status").textContent="Response accepted. +10 XP";$("confidence").style.display="block";$("confidence").querySelector("strong").textContent=lastVoice?"Speech recognized in "+profile.name:"Response saved";$("confidence").querySelector("p").textContent=lastVoice?"Pronunciation match "+Math.round(evaluation.pron*100)+"%. Target-language confidence "+Math.round(evaluation.lang*100)+"%.":"Your response was saved.";if(step<4){step++;$("reply").value="";lastVoice=null;setStep()}else await completeLesson()};
+
 async function completeLesson(){const {data}=await client.auth.getSession(),uid=data?.session?.user?.id;if(uid){await client.from("lesson_attempts").insert({lesson_id:lesson.id,score:Math.min(100,xp*2),responses:answers});await client.from("learner_events").insert({user_id:uid,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:lesson.id,xp}})}$("response").style.display="none";$("confidence").style.display="none";$("complete").style.display="block";$("completeCopy").textContent="You earned "+xp+" XP. Your "+profile.name+" progress is saved."}
-load();
-</script>
-</body></html$("respond").onclick=async()=>{if(step<2){step++;setStep();return}const v=$("reply").value.trim();if(!v){$("status").textContent="Say something or type a response first.";return}const mode=lesson?.content?.steps?.[step]?.label||"Respond";const target=lesson?.content?.language?.phrase||"";let evaluation=null;if(lastVoice){evaluation=evaluateSpeech(v,target,mode);if(!setVoiceFeedback(evaluation,mode))return}answers.push({step,text:v,voice:lastVoice?{transcript:v,confidence:lastVoice.confidence||0,pronunciation_score:evaluation?.pron||0,target_language_score:evaluation?.lang||0,alignment:evaluation?.rows||[]}:null});xp+=10;$("status").textContent="Response accepted. +10 XP";$("confidence").style.display="block";$("confidence").querySelector("strong").textContent=lastVoice?"Speech recognized in "+profile.name:"Response saved";$("confidence").querySelector("p").textContent=lastVoice?"Pronunciation match "+Math.round(evaluation.pron*100)+"%. Target-language confidence "+Math.round(evaluation.lang*100)+"%.":"Your response was saved.";if(step<4){step++;$("reply").value="";lastVoice=null;setStep()}else await completeLesson()};
-async function completeLesson(){const {data}=await client.auth.getSession(),uid=data?.session?.user?.id;if(uid){await client.from("lesson_attempts").insert({lesson_id:lesson.id,score:Math.min(100,xp*2),responses:answers});await client.from("learner_events").insert({user_id:uid,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:lesson.id,xp}})}$("response").style.display="none";$("complete").style.display="block";$("completeCopy").textContent="You earned "+xp+" XP. Your "+profile.name+" progress is saved."}
-load();
-</script>
-</body></html$("mic").onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("status").textContent="Voice input isn't available here. Type instead.";return}const mode=lesson?.content?.steps?.[step]?.label||"Respond";const target=lesson?.content?.language?.phrase||"";const r=new SR();r.lang=profile?.code||"en-US";r.interimResults=false;r.maxAlternatives=5;r.continuous=false;r.onstart=()=>{$("status").textContent="Listening in "+(profile?.name||"the target language")+"…";$("mic").disabled=true};r.onresult=e=>{let best=e.results[0][0],bestResult=evaluateSpeech(best.transcript,target,mode);for(let i=1;i<e.results[0].length;i++){const alt=e.results[0][i],res=evaluateSpeech(alt.transcript,target,mode);if((res.ok&&!bestResult.ok)||(res.ok===bestResult.ok&&res.pron>bestResult.pron)){best=alt;bestResult=res}}lastVoice={transcript:best.transcript,confidence:best.confidence||0,pron:bestResult.pron,lang:bestResult.lang,mode,rows:bestResult.rows};$("reply").value=best.transcript;$("status").textContent="I heard: "+best.transcript+" — press “Check response”.";};r.onerror=e=>{$("status").textContent=e.error==="not-allowed"?"Microphone access is blocked. Allow the microphone and try again.":"I couldn't understand the recording. Try again.";lastVoice=null};r.onend=()=>{$("mic").disabled=false};try{r.start()}catch(e){$("status").textContent="Microphone is already active. Try again in a moment."}};
-async function completeLesson(){const {data}=await client.auth.getSession(),uid=data?.session?.user?.id;if(uid){await client.from("lesson_attempts").insert({lesson_id:lesson.id,score:Math.min(100,xp*2),responses:answers});await client.from("learner_events").insert({user_id:uid,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:lesson.id,xp}})}$("response").style.display="none";$("complete").style.display="block";$("completeCopy").textContent="You earned "+xp+" XP. Your "+profile.name+" progress is saved."}
-load();
-</script>
-</body></html$("respond").onclick=async()=>{if(step<2){step++;setStep();return}const v=$("reply").value.trim();if(!v){$("status").textContent="Say something or type a response first.";return}const mode=lesson?.content?.steps?.[step]?.label||"Respond";const target=lesson?.content?.language?.phrase||"";let evaluation=null;if(lastVoice){evaluation=evaluateSpeech(v,target,mode);if(!setVoiceFeedback(evaluation,mode))return}answers.push({step,text:v,voice:lastVoice?{transcript:v,confidence:lastVoice.confidence||0,pronunciation_score:evaluation?.pron||0,target_language_score:evaluation?.lang||0,alignment:evaluation?.rows||[]}:null});xp+=10;$("status").textContent="Response accepted. +10 XP";$("confidence").style.display="block";$("confidence").querySelector("strong").textContent=lastVoice?"Speech recognized in "+profile.name:"Response saved";$("confidence").querySelector("p").textContent=lastVoice?"Pronunciation match "+Math.round(evaluation.pron*100)+"%. Target-language confidence "+Math.round(evaluation.lang*100)+"%.":"Your response was saved.";if(step<4){step++;$("reply").value="";lastVoice=null;setStep()}else await completeLesson()};
-async function completeLesson(){const {data}=await client.auth.getSession(),uid=data?.session?.user?.id;if(uid){await client.from("lesson_attempts").insert({lesson_id:lesson.id,score:Math.min(100,xp*2),responses:answers});await client.from("learner_events").insert({user_id:uid,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:lesson.id,xp}})}$("response").style.display="none";$("complete").style.display="block";$("completeCopy").textContent="You earned "+xp+" XP. Your "+profile.name+" progress is saved."}
 load();
 </script>
 </body></html>
