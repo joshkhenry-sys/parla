@@ -656,10 +656,13 @@
 
   <script>
     let profile = null;
+    let learnerLanguageId = null;
     let lesson = null;
+    let lessonId = null;
     let cards = [];
     let currentCard = 0;
     let selectedCorrect = false;
+    const quizResponses = [];
 
     const speechLocales = {
       Polish: "pl-PL", Spanish: "es-ES", English: "en-US", Portuguese: "pt-BR",
@@ -812,6 +815,11 @@
               : "<strong>Not quite.</strong> " + escapeHtml(card.feedback || "Listen to the phrase again and try it.");
             feedback.classList.add("visible");
             selectedCorrect = correct;
+            quizResponses.push({
+              cardIndex: currentCard,
+              answer: option,
+              correct
+            });
             setNext(correct);
           });
           answers.appendChild(button);
@@ -864,6 +872,8 @@
         ja:"Japanese",ko:"Korean",zh:"Mandarin",ar:"Arabic",nl:"Dutch",sv:"Swedish",
         el:"Greek",tr:"Turkish",hi:"Hindi",pl:"Polish"
       };
+
+      learnerLanguageId = learnerLanguage.id;
 
       return {
         targetLanguage: learnerLanguage.languages?.name || "",
@@ -923,6 +933,26 @@
 
         lesson = data.lesson;
         cards = lesson.cards;
+
+        const { data: savedLesson, error: saveLessonError } = await window.supabase
+          .createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+          .from("lessons")
+          .insert({
+            learner_language_id: learnerLanguageId,
+            title: lesson.title,
+            topic: lesson.intro || "Everyday conversation",
+            level: profile.level,
+            content: lesson
+          })
+          .select("id")
+          .single();
+
+        if (saveLessonError) {
+          console.error("Could not save lesson:", saveLessonError);
+          throw new Error("The lesson was generated but could not be saved to your learning history.");
+        }
+
+        lessonId = savedLesson.id;
         document.getElementById("cardTitle").textContent = lesson.title;
         document.getElementById("cardIntro").textContent = lesson.intro;
         document.title = "Parla — " + profile.targetLanguage + " lesson";
@@ -947,6 +977,30 @@
         updateProgress();
         window.scrollTo({top:0, behavior:"smooth"});
       } else {
+        if (lessonId && profile) {
+          const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+          const quizCount = quizResponses.length;
+          const correctCount = quizResponses.filter(item => item.correct).length;
+          const score = quizCount ? Math.round((correctCount / quizCount) * 100) : 100;
+
+          const { error: attemptError } = await client
+            .from("lesson_attempts")
+            .insert({
+              lesson_id: lessonId,
+              score,
+              responses: {
+                quizResponses,
+                completedCards: cards.length,
+                targetLanguage: profile.targetLanguage
+              }
+            });
+
+          if (attemptError) {
+            console.error("Could not save lesson attempt:", attemptError);
+            throw new Error("Your lesson finished, but Parla could not save your completion.");
+          }
+        }
+
         sessionStorage.setItem("parla_lesson_completed", "true");
         sessionStorage.setItem("parla_last_lesson_title", lesson?.title || "Lesson");
         document.getElementById("lessonShell").style.display = "none";
