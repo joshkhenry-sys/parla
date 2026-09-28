@@ -46,10 +46,7 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
       <a href="index.html" class="logo">native<span>•</span></a>
 
       <div class="nav-right">
-        <div class="streak">
-          <span class="streak-dot"></span>
-          <span>3 day streak</span>
-        </div>
+        <div class="streak" id="streak"><span class="streak-dot"></span><span id="streakText">Learning</span></div>
 
         <div style="display:flex;align-items:center;gap:10px;">
           <button
@@ -434,6 +431,62 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
       }
     }
 
+    async function loadRealStreak(userId) {
+      const el = document.getElementById("streakText");
+      if (!el) return;
+      const { data, error } = await supabaseClient
+        .from("learner_events")
+        .select("created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) { el.textContent = "Start speaking"; return; }
+      const days = new Set((data || []).map(row => {
+        const d = new Date(row.created_at);
+        return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString();
+      }).filter(Boolean));
+      let streak = 0;
+      const cursor = new Date();
+      cursor.setHours(0,0,0,0);
+      while (days.has(cursor.toLocaleDateString())) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+      if (streak === 0) {
+        el.textContent = days.size ? "Keep going" : "Start today";
+      } else {
+        el.textContent = streak + (streak === 1 ? " day" : " days") + " active";
+      }
+    }
+
+    async function loadSavedLessons(learnerLanguageId, languageName) {
+      const card = document.querySelector(".recommended");
+      const title = document.getElementById("recommendedTitle");
+      const copy = document.getElementById("recommendedCopy");
+      const meta = document.querySelector(".lesson-meta");
+      const button = document.getElementById("startLessonButton");
+      const { data: lessons, error } = await supabaseClient
+        .from("lessons")
+        .select("id,title,topic,level,content,created_at")
+        .eq("learner_language_id", learnerLanguageId)
+        .order("created_at", { ascending: false })
+        .limit(12);
+      if (error) { console.error("Could not load lessons:", error); return; }
+      if (!lessons || !lessons.length) {
+        title.textContent = "Your first scene is ready.";
+        copy.textContent = "Native will build your next lesson around real situations, useful language, and the things you need to say.";
+        if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>Native scene</span>";
+        button.innerHTML = "Start scene <span>→</span>";
+        return;
+      }
+      const lesson = lessons[0];
+      title.textContent = lesson.title || "Continue learning";
+      copy.textContent = lesson.topic ? "Continue with " + lesson.topic + " and put it into conversation." : "Pick up where you left off.";
+      if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(lesson.level || "Scene")+"</span>";
+      button.innerHTML = "Continue <span>→</span>";
+      button.onclick = () => { sessionStorage.setItem("native_lesson_id", lesson.id); window.location.href = "lesson.html?id=" + encodeURIComponent(lesson.id); };
+    }
+
     async function loadLearningProfile() {
       try {
         const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
@@ -462,6 +515,9 @@ footer{margin-top:90px;border-top:1px solid var(--border);padding:28px 0 42px}.f
 
         const languageName = learnerLanguage.languages?.name || "English";
         const level = learnerLanguage.level || "A0";
+
+        await loadRealStreak(user.id);
+        await loadSavedLessons(learnerLanguage.id, languageName);
 
         const myLanguagesGrid = document.getElementById("myLanguagesGrid");
         if (myLanguagesGrid) {
