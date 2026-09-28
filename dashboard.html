@@ -780,28 +780,37 @@
       </div>
 
 
-      <!-- LANGUAGE SWITCHER -->
+      <!-- MY LANGUAGES -->
 
       <section class="language-switcher-section">
-        <div class="section-title">Explore languages</div>
+        <div class="section-title">My languages</div>
+        <div class="card language-switcher-card">
+          <div class="dashboard-language-grid" id="myLanguagesGrid">
+            <div style="grid-column:1/-1;color:var(--muted);font-size:14px;">Loading your languages…</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="language-switcher-section" style="margin-top:0;">
+        <div class="section-title">Add another language</div>
         <div class="card language-switcher-card">
           <div class="dashboard-language-grid">
-            <a class="dashboard-language-link" data-language="Spanish" href="onboarding.html?language=Spanish">Spanish</a>
-            <a class="dashboard-language-link" data-language="English" href="onboarding.html?language=English">English</a>
-            <a class="dashboard-language-link" data-language="Portuguese" href="onboarding.html?language=Portuguese">Portuguese</a>
-            <a class="dashboard-language-link" data-language="French" href="onboarding.html?language=French">French</a>
-            <a class="dashboard-language-link" data-language="Italian" href="onboarding.html?language=Italian">Italian</a>
-            <a class="dashboard-language-link" data-language="German" href="onboarding.html?language=German">German</a>
-            <a class="dashboard-language-link" data-language="Japanese" href="onboarding.html?language=Japanese">Japanese</a>
-            <a class="dashboard-language-link" data-language="Korean" href="onboarding.html?language=Korean">Korean</a>
-            <a class="dashboard-language-link" data-language="Mandarin" href="onboarding.html?language=Mandarin">Mandarin</a>
-            <a class="dashboard-language-link" data-language="Arabic" href="onboarding.html?language=Arabic">Arabic</a>
-            <a class="dashboard-language-link" data-language="Dutch" href="onboarding.html?language=Dutch">Dutch</a>
-            <a class="dashboard-language-link" data-language="Swedish" href="onboarding.html?language=Swedish">Swedish</a>
-            <a class="dashboard-language-link" data-language="Greek" href="onboarding.html?language=Greek">Greek</a>
-            <a class="dashboard-language-link" data-language="Turkish" href="onboarding.html?language=Turkish">Turkish</a>
-            <a class="dashboard-language-link" data-language="Hindi" href="onboarding.html?language=Hindi">Hindi</a>
-            <a class="dashboard-language-link" data-language="Polish" href="onboarding.html?language=Polish">Polish</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Spanish">Spanish</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=English">English</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Portuguese">Portuguese</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=French">French</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Italian">Italian</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=German">German</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Japanese">Japanese</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Korean">Korean</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Mandarin">Mandarin</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Arabic">Arabic</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Dutch">Dutch</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Swedish">Swedish</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Greek">Greek</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Turkish">Turkish</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Hindi">Hindi</a>
+            <a class="dashboard-language-link" href="onboarding.html?language=Polish">Polish</a>
           </div>
         </div>
       </section>
@@ -1055,14 +1064,16 @@
 
         const user = sessionData.session.user;
 
-        const { data: learnerLanguage, error: learnerError } = await supabaseClient
+        const { data: learnerLanguages, error: learnerLanguagesError } = await supabaseClient
           .from("learner_languages")
           .select("id, level, goal, interests, is_current, languages(name, code)")
           .eq("user_id", user.id)
-          .eq("is_current", true)
-          .maybeSingle();
+          .order("is_current", { ascending: false })
+          .order("updated_at", { ascending: false });
 
-        if (learnerError) throw learnerError;
+        if (learnerLanguagesError) throw learnerLanguagesError;
+
+        const learnerLanguage = (learnerLanguages || [])[0];
 
         if (!learnerLanguage) {
           window.location.href = "onboarding.html";
@@ -1072,17 +1083,54 @@
         const languageName = learnerLanguage.languages?.name || "English";
         const level = learnerLanguage.level || "A0";
 
+        const myLanguagesGrid = document.getElementById("myLanguagesGrid");
+        if (myLanguagesGrid) {
+          myLanguagesGrid.innerHTML = (learnerLanguages || []).map(language => {
+            const name = language.languages?.name || "Language";
+            const current = language.is_current;
+            return '<a class="dashboard-language-link ' + (current ? 'current' : '') + '" href="onboarding.html?language=' + encodeURIComponent(name) + '"' +
+              (current ? ' aria-current="page"' : '') + '><span>' + escapeHtml(name) + '</span><span style="margin-left:7px;font-size:11px;color:var(--muted);">' + escapeHtml(language.level || "A0") + '</span></a>';
+          }).join("") || '<div style="grid-column:1/-1;color:var(--muted);font-size:14px;">No languages added yet.</div>';
+        }
+
+        const { data: attempts, error: attemptsError } = await supabaseClient
+          .from("lesson_attempts")
+          .select("id, score, completed_at, lessons(title, learner_language_id, learner_languages(languages(name)))")
+          .order("completed_at", { ascending: false })
+          .limit(20);
+
+        if (attemptsError) throw attemptsError;
+
+        const completedCount = (attempts || []).length;
+        const progressPercent = document.getElementById("progressPercent");
+        const progressDescription = document.getElementById("progressDescription");
+        const progressFill = document.getElementById("progressFill");
+        const progressFraction = document.getElementById("progressFraction");
+
+        if (progressPercent) progressPercent.textContent = completedCount === 0 ? "Not started" : completedCount + (completedCount === 1 ? " lesson" : " lessons");
+        if (progressDescription) progressDescription.textContent = completedCount === 0 ? "Complete a lesson to start tracking your progress." : "Completed lessons are now being tracked in your account.";
+        if (progressFill) progressFill.style.width = Math.min(100, completedCount * 10) + "%";
+        if (progressFraction) progressFraction.textContent = completedCount + " completed";
+
+        const activityList = document.querySelector(".activity-list");
+        if (activityList) {
+          activityList.innerHTML = (attempts || []).slice(0, 6).map((attempt, index) => {
+            const title = attempt.lessons?.title || "Lesson";
+            const lang = attempt.lessons?.learner_languages?.languages?.name || "";
+            const score = attempt.score == null ? "Completed" : Math.round(Number(attempt.score)) + "%";
+            const date = new Date(attempt.completed_at);
+            const when = Number.isNaN(date.getTime()) ? "Recently" : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+            const icons = ["blue", "green", "coral"];
+            return '<div class="activity-item"><div class="activity-icon ' + icons[index % icons.length] + '">' + escapeHtml(title.charAt(0).toUpperCase()) + '</div><div><div class="activity-title">' + escapeHtml(title) + '</div><div class="activity-subtitle">Lesson' + (lang ? ' · ' + escapeHtml(lang) : '') + ' · ' + escapeHtml(when) + '</div></div><div class="activity-score">' + escapeHtml(score) + '</div></div>';
+          }).join("") || '<div style="color:var(--muted);padding:18px 0;">No lessons completed yet.</div>';
+        }
+
         const { data: skills, error: skillsError } = await supabaseClient
           .from("learner_skills")
           .select("mastery")
           .eq("learner_language_id", learnerLanguage.id);
 
         if (skillsError) throw skillsError;
-
-        const masteryValues = (skills || []).map(skill => Number(skill.mastery) || 0);
-        const mastery = masteryValues.length
-          ? Math.round(masteryValues.reduce((sum, value) => sum + value, 0) / masteryValues.length)
-          : 0;
 
         const displayName =
           user.user_metadata?.full_name ||
@@ -1110,17 +1158,9 @@
         if (dashboardLanguage) dashboardLanguage.textContent = languageName;
         if (recommendedLanguage) recommendedLanguage.textContent = languageName;
         if (dashboardLevel) dashboardLevel.textContent = level;
-        if (progressPercent) {
-          progressPercent.textContent = mastery > 0 ? mastery + "%" : "Not started";
-        }
-        if (progressFill) progressFill.style.width = mastery + "%";
-        if (progressFraction) progressFraction.textContent = mastery > 0 ? mastery + " / 100" : "0 / 100";
-
-        document.querySelectorAll(".dashboard-language-link").forEach(link => {
-          const isCurrent = link.dataset.language === languageName;
+        document.querySelectorAll("#myLanguagesGrid .dashboard-language-link").forEach(link => {
+          const isCurrent = link.getAttribute("aria-current") === "page";
           link.classList.toggle("current", isCurrent);
-          if (isCurrent) link.setAttribute("aria-current", "page");
-          else link.removeAttribute("aria-current");
         });
       } catch (error) {
         console.error("Could not load learner profile:", error);
