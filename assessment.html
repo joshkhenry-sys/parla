@@ -67,15 +67,14 @@ h1{font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-2px;margin-to
   </div>
 </section>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="nahtive.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
 const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const params=new URLSearchParams(location.search);
 const requestedLanguageId=params.get("language_id");
 const returnTo=params.get("return")==="lesson"?"lesson":"dashboard";
-let user=null,language=null,index=0,selected=null,scoreByLevel={A0:0,A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
-
+let user=null,language=null,index=0,selected=null;
 let questions=[];
 let scoreByLevel={A0:0,A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
 
