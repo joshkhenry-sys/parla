@@ -12,6 +12,7 @@ export default async function handler(req, res) {
     const nativeLanguage = String(profile.nativeLanguage || "English").slice(0, 80);
     const level = String(profile.level || "A1").slice(0, 20);
     const goal = String(profile.goal || "Real conversation").slice(0, 120);
+    const lessonContext = profile.lessonContext && typeof profile.lessonContext === "object" ? profile.lessonContext : {};
     const interests = Array.isArray(profile.interests)
       ? profile.interests.filter(x => typeof x === "string").slice(0, 8).join(", ")
       : "Everyday life";
@@ -65,6 +66,7 @@ export default async function handler(req, res) {
       "Goal: " + goal,
       "Interests: " + (interests || "Everyday life"),
       "Scenario direction: " + focus,
+      "Existing lesson seed (use it as a starting point, but expand it rather than copying it): " + JSON.stringify(lessonContext),
       "Make the lesson feel like a guided experience that takes about 10 minutes for A0/A1 and 12–18 minutes for higher levels."
     ].join("\n");
 
