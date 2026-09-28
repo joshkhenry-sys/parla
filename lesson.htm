@@ -1086,18 +1086,35 @@
     }
 
     async function getProfile() {
+      if (!window.supabase || typeof window.supabase.createClient !== "function") {
+        throw new Error("Parla could not load its connection to Supabase.");
+      }
+      if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+        throw new Error("Parla is missing its Supabase configuration.");
+      }
+
       const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
       const { data: sessionData } = await client.auth.getSession();
       if (!sessionData?.session) return null;
 
       const user = sessionData.session.user;
-      const { data: learnerLanguage } = await client
-        .from("learner_languages")
-        .select("id, level, goal, interests, languages(name, code)")
-        .eq("user_id", user.id)
-        .eq("is_current", true)
-        .maybeSingle();
+      const learnerLanguageResult = await Promise.race([
+        client
+          .from("learner_languages")
+          .select("id, level, goal, interests, languages(name, code)")
+          .eq("user_id", user.id)
+          .eq("is_current", true)
+          .maybeSingle(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Supabase took too long to load your language profile.")), 10000)
+        )
+      ]);
 
+      const { data: learnerLanguage, error: learnerLanguageError } = learnerLanguageResult;
+      if (learnerLanguageError) {
+        throw new Error("Could not load your language profile: " + learnerLanguageError.message);
+      }
+      
       if (!learnerLanguage) return null;
 
       const { data: dbProfile } = await client
@@ -1135,11 +1152,16 @@
         document.getElementById("cardTitle").textContent = "Building your lesson…";
         document.getElementById("cardIntro").textContent = "One useful phrase at a time.";
 
-        const response = await fetch("/api/learn", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({profile})
-        });
+        const response = await Promise.race([
+          fetch("/api/learn", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({profile})
+          }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("The lesson generator took too long to respond. Please try again.")), 50000)
+          )
+        ]);
 
         const raw = await response.text();
         let data = null;
@@ -1286,7 +1308,14 @@
       window.location.href = "dashboard.html";
     }
 
-    loadLesson();
+    if (!window.supabase) {
+      document.getElementById("cardLabel").textContent = "Connection problem";
+      document.getElementById("cardTitle").textContent = "Parla couldn't start.";
+      document.getElementById("cardIntro").textContent = "The Supabase library did not load. Refresh the page and try again.";
+      setNext(false);
+    } else {
+      loadLesson();
+    }
   </script>
 
 </body>
