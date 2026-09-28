@@ -1665,7 +1665,7 @@ p{line-height:1.55}
 
       try {
         sessionStorage.setItem(
-          "parla_learning_profile",
+          "nahtive_learning_profile",
           JSON.stringify(learningProfile)
         );
 
@@ -1760,7 +1760,7 @@ p{line-height:1.55}
 
         const { error: metadataError } = await client.auth.updateUser({
           data: {
-            parla_onboarding_pending: false
+            nahtive_onboarding_pending: false
           }
         });
 
@@ -1811,8 +1811,8 @@ p{line-height:1.55}
 
       if (!(pendingTarget && pendingNahtive && pendingLevel && pendingGoal && pendingInterests.length)) {
         const { data } = await supabaseClient.auth.getSession();
-        const pending = data?.session?.user?.user_metadata?.parla_onboarding_pending;
-        const saved = data?.session?.user?.user_metadata?.parla_onboarding_profile;
+        const pending = data?.session?.user?.user_metadata?.nahtive_onboarding_pending;
+        const saved = data?.session?.user?.user_metadata?.nahtive_onboarding_profile;
 
         if (pending && saved) {
           pendingTarget = saved.targetLanguage || pendingTarget;
