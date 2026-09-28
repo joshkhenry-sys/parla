@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Just Talk — Parla</title>
+  <title>Just Talk — Nahtive</title>
 
   <style>
     :root {
@@ -278,7 +278,7 @@
       font-weight: 700;
     }
 
-    .parla-avatar {
+    .nahtive-avatar {
       background: var(--blue-soft);
       color: var(--blue);
     }
@@ -311,7 +311,7 @@
       border-radius: 18px 18px 4px 18px;
     }
 
-    .message.parla .message-text {
+    .message.nahtive .message-text {
       padding-top: 1px;
     }
 
@@ -667,7 +667,7 @@ p{line-height:1.55}
   <!-- NAV -->
 
   <nav class="nav">
-    <a href="dashboard.html" class="logo">parla<span>•</span></a>
+    <a href="dashboard.html" class="logo">nahtive<span>•</span></a>
 
     <div class="nav-right">
       <div class="language-pill">
@@ -704,7 +704,7 @@ p{line-height:1.55}
 
       <p>
         No script. No lesson plan. Just a real conversation.
-        Parla will pay attention to what you say and quietly learn
+        Nahtive will pay attention to what you say and quietly learn
         where you can improve.
       </p>
 
@@ -823,7 +823,7 @@ p{line-height:1.55}
         </div>
 
         <div class="composer-note">
-          Parla won't interrupt you to correct every mistake.
+          Nahtive won't interrupt you to correct every mistake.
         </div>
 
       </div>
@@ -846,7 +846,7 @@ p{line-height:1.55}
         </h2>
 
         <p>
-          Parla can identify patterns in what you said and turn
+          Nahtive can identify patterns in what you said and turn
           them into practice later — without making you stop
           the conversation every few seconds.
         </p>
@@ -854,7 +854,7 @@ p{line-height:1.55}
       </div>
 
       <button class="review-button" id="reviewButton">
-        See what Parla noticed
+        See what Nahtive noticed
       </button>
 
     </section>
@@ -867,7 +867,7 @@ p{line-height:1.55}
   <footer>
 
     <div>
-      © 2026 Parla
+      © 2026 Nahtive
     </div>
 
     <div class="footer-links">
@@ -937,7 +937,7 @@ p{line-height:1.55}
       };
 
       sessionStorage.setItem(
-        "parla_learning_profile",
+        "nahtive_learning_profile",
         JSON.stringify(profile)
       );
 
@@ -953,10 +953,10 @@ p{line-height:1.55}
 
     function addMessage(role, text, options = {}) {
       const message = document.createElement("div");
-      message.className = "message " + (role === "user" ? "user" : "parla");
+      message.className = "message " + (role === "user" ? "user" : "nahtive");
 
       const avatar = document.createElement("div");
-      avatar.className = "message-avatar " + (role === "user" ? "user-avatar" : "parla-avatar");
+      avatar.className = "message-avatar " + (role === "user" ? "user-avatar" : "nahtive-avatar");
       avatar.textContent = role === "user" ? "J" : "P";
 
       const content = document.createElement("div");
@@ -964,7 +964,7 @@ p{line-height:1.55}
 
       const name = document.createElement("div");
       name.className = "message-name";
-      name.textContent = role === "user" ? "You" : "Parla";
+      name.textContent = role === "user" ? "You" : "Nahtive";
 
       const textNode = document.createElement("div");
       textNode.className = "message-text";
@@ -991,11 +991,11 @@ p{line-height:1.55}
         ? '<span class="status-dot"></span> Thinking'
         : '<span class="status-dot"></span> Listening';
       composerNote.textContent = value
-        ? "Parla is thinking..."
-        : "Parla won't interrupt you to correct every mistake.";
+        ? "Nahtive is thinking..."
+        : "Nahtive won't interrupt you to correct every mistake.";
     }
 
-    async function callParla() {
+    async function callNahtive() {
       setBusy(true);
 
       try {
@@ -1039,7 +1039,7 @@ p{line-height:1.55}
       input.style.height = "auto";
       sendButton.disabled = true;
 
-      callParla();
+      callNahtive();
     }
 
     input.addEventListener("input", () => {
@@ -1088,7 +1088,7 @@ p{line-height:1.55}
 
     reviewButton.addEventListener("click", () => {
       alert(
-        "Parla will turn useful patterns from this conversation into review items as the learning engine is connected."
+        "Nahtive will turn useful patterns from this conversation into review items as the learning engine is connected."
       );
     });
 
@@ -1106,7 +1106,7 @@ p{line-height:1.55}
       state.interests = Array.isArray(profile.interests) ? profile.interests : [];
 
       updateLanguageUI();
-      callParla();
+      callNahtive();
     }
 
     initializeTalk();
