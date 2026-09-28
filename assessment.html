@@ -116,7 +116,7 @@ function localPlacement(code){
    const [phrase,meaning]=item;
    const pool=base.map(x=>x[0]);
    const distractors=pool.filter((_,n)=>n!==i).slice(0,2);
-   qs.push({level:levels[i],question:"What does this target-language phrase mean?\\n\\n"+phrase,options:[meaning,"I need directions to the nearest station.","I am asking someone to wait for me."],answer:0});
+   qs.push({level:levels[i],question:"What does this target-language phrase mean? • "+phrase,options:[meaning,"I need directions to the nearest station.","I am asking someone to wait for me."],answer:0});
    const prompts=[
      "Which phrase would you use to greet someone and ask about their condition?",
      "Which phrase would you use to make this request politely?",
