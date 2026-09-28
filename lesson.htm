@@ -765,6 +765,38 @@
   <script src="supabase-config.js"></script>
 
   <script>
+    (function () {
+      let finished = false;
+      function showBootError(message) {
+        if (finished) return;
+        const label = document.getElementById("cardLabel");
+        const title = document.getElementById("cardTitle");
+        const intro = document.getElementById("cardIntro");
+        const next = document.getElementById("nextButton");
+        if (label) label.textContent = "Lesson startup error";
+        if (title) title.textContent = "Parla couldn't start."; 
+        if (intro) intro.textContent = message || "Refresh the page and try again.";
+        if (next) next.disabled = true;
+        console.error("Parla boot error:", message);
+      }
+      window.__parlaBootFinished = function () {
+        finished = true;
+      };
+      window.addEventListener("error", function (event) {
+        showBootError(event.error?.message || event.message || "A JavaScript error stopped the lesson from starting.");
+      });
+      window.addEventListener("unhandledrejection", function (event) {
+        showBootError(event.reason?.message || "A background error stopped the lesson from starting.");
+      });
+      setTimeout(function () {
+        if (!finished && document.getElementById("cardTitle")?.textContent === "Loading your lesson…") {
+          showBootError("The lesson page loaded, but its startup code never finished. Please refresh once.");
+        }
+      }, 12000);
+    })();
+  </script>
+
+  <script>
     let profile = null;
     let learnerLanguageId = null;
     let lesson = null;
@@ -1307,6 +1339,8 @@
     function goBack() {
       window.location.href = "dashboard.html";
     }
+
+    window.__parlaBootFinished?.();
 
     if (!window.supabase) {
       document.getElementById("cardLabel").textContent = "Connection problem";
