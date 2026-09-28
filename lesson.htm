@@ -622,586 +622,54 @@
   <!-- LESSON -->
 
   <main class="container lesson">
-
-
-    <!-- STEP 1 -->
-
-    <section class="step" id="step1">
-
-      <div class="step-label">
-        Let's start with something useful
-      </div>
-
-      <h1 id="lessonTitle">
-        Making plans
-        without sounding textbook.
-      </h1>
-
-      <p class="step-intro" id="lessonIntro">
-        Today you'll learn practical language for a real-world situation.
-      </p>
-
-      <div class="context-card">
-
-        <div class="context-label">
-          Real-world situation
-        </div>
-
-        <h2 id="scenarioTitle">
-          You're making plans with a friend.
-        </h2>
-
-        <p id="scenarioDescription">
-          You want to use useful language in a realistic situation.
-        </p>
-
-        <div class="scenario" id="scenarioText">
-          <strong>Imagine this:</strong><br>
-          You are in a realistic everyday situation.
-        </div>
-
-      </div>
-
+    <section class="step" id="lessonShell">
+      <div class="step-label" id="cardLabel">Learn</div>
+      <h1 id="cardTitle">Loading your lesson…</h1>
+      <p class="step-intro" id="cardIntro">Parla is preparing something useful for you.</p>
+      <div id="lessonCard"></div>
       <div class="continue-wrap">
-        <button class="continue" onclick="nextStep()">
-          Let's learn <span>→</span>
-        </button>
+        <button class="continue" id="nextButton" type="button" disabled>Next <span>→</span></button>
       </div>
-
     </section>
-
-
-    <!-- STEP 2 -->
-
-    <section class="step" id="step2" style="display:none;">
-
-      <div class="step-label">
-        Useful language
-      </div>
-
-      <h1 id="expressionsTitle">
-        These are the phrases you actually need.
-      </h1>
-
-      <p class="step-intro" id="expressionsIntro">
-        Start with a few high-value expressions you can immediately use.
-      </p>
-
-      <div class="language-grid" id="expressionsGrid"></div>
-
-      <div class="continue-wrap">
-        <button class="continue" onclick="nextStep()">      <div class="continue-wrap">
-        <button class="continue" onclick="nextStep()">
-          Practice them <span>→</span>
-        </button>
-      </div>
-
-    </section>
-
-
-    <!-- STEP 3 -->
-
-    <section class="step" id="step3" style="display:none;">
-
-      <div class="step-label">
-        Practice
-      </div>
-
-      <h1 id="practiceTitle">
-        Now make the choice.
-      </h1>
-
-      <p class="step-intro" id="practiceIntro">
-        Choose the phrase that sounds natural in this situation.
-      </p>
-
-      <div class="question-card">
-
-        <div class="question-number">
-          Question 1 of 3
-        </div>
-
-        <h2 id="practicePrompt">
-          You want to respond naturally in this situation.
-        </h2>
-
-        <div class="answers" id="practiceAnswers"></div>
-
-        <div class="feedback" id="feedback1">        <div class="feedback" id="feedback1"></div>
-
-      </div>
-
-      <div class="continue-wrap">
-        <button
-          class="continue"
-          id="practiceContinue"
-          onclick="nextStep()"
-          disabled>
-          Continue <span>→</span>
-        </button>
-      </div>
-
-    </section>
-
-
-    <!-- STEP 4 -->
-
-    <section class="step" id="step4" style="display:none;">
-
-      <div class="step-label">
-        Make it yours
-      </div>
-
-      <h1 id="productionTitle">
-        Finish the thought.
-      </h1>
-
-      <p class="step-intro" id="productionIntro">
-        Use what you learned to create something you might actually say.
-      </p>
-
-      <div class="question-card">
-
-        <div class="question-number">
-          Question 2 of 3
-        </div>
-
-        <h2 id="productionPrompt">
-          Respond naturally using one of the expressions you learned.
-        </h2>
-
-        <p style="margin-top:12px;color:var(--muted);line-height:1.5;">
-          Complete the sentence naturally:
-        </p>
-
-        <input
-          class="fill-input"
-          id="fillAnswer"
-          placeholder="Write your response..."
-          autocomplete="off"
-        />
-
-        <div class="feedback" id="feedback2">
-          Nice. The goal here isn't one perfect answer.
-          Parla will eventually learn how you naturally express
-          yourself and help you sound more natural over time.
-        </div>
-
-      </div>
-
-      <div class="continue-wrap">
-        <button
-          class="continue"
-          id="fillContinue"
-          onclick="finishFill()">
-          Check answer <span>→</span>
-        </button>
-      </div>
-
-    </section>
-
-
-    <!-- STEP 5 -->
-
-    <section class="step" id="step5" style="display:none;">
-
-      <div class="step-label">
-        Final challenge
-      </div>
-
-      <h1 id="speakingTitle">
-        Now use it in real life.
-      </h1>
-
-      <p class="step-intro" id="speakingIntro">
-        Imagine you're actually in the situation and respond naturally.
-      </p>
-
-      <div class="speaking-card">
-
-        <div class="question-number">
-          Speaking challenge
-        </div>
-
-        <h2 id="speakingPrompt">
-          Respond naturally to the situation.
-        </h2>
-
-        <p id="speakingInstructions">
-          Speak naturally. Parla will use what you say to understand what to teach you next.
-        </p>
-
-        <button
-          class="mic-button"
-          id="micButton"
-          onclick="toggleRecording()">
-          ●
-        </button>
-
-        <div class="recording-text" id="recordingText">
-          Tap to speak
-        </div>
-
-      </div>
-
-      <div class="continue-wrap">
-        <button
-          class="continue"
-          id="finishButton"
-          onclick="showResult()"
-          disabled>
-          Finish lesson <span>→</span>
-        </button>
-      </div>
-
-    </section>
-
-
-    <!-- RESULT -->
 
     <section class="result" id="result">
-
-      <div class="result-mark">
-        ✓
-      </div>
-
-      <h1>
-        Nice work.
-      </h1>
-
-      <p>
-        You practiced useful language, made your own response,
-        and used it in a real-world speaking situation.
-      </p>
-
+      <div class="result-mark">✓</div>
+      <h1>Nice work.</h1>
+      <p id="resultText">You learned useful language and practiced using it.</p>
       <div class="score-card">
-
-        <div class="score-row">
-          <span>Useful expressions</span>
-          <strong>4 / 4</strong>
-        </div>
-
-        <div class="score-row">
-          <span>Practice</span>
-          <strong>3 / 3</strong>
-        </div>
-
-        <div class="score-row">
-          <span>Production</span>
-          <strong>Completed</strong>
-        </div>
-
-        <div class="score-row">
-          <span>Speaking</span>
-          <strong>Completed</strong>
-        </div>
-
+        <div class="score-row"><span>Lesson</span><strong id="resultLesson">Complete</strong></div>
+        <div class="score-row"><span>Cards</span><strong id="resultCards">Complete</strong></div>
         <div class="things">
           <h3>What to remember</h3>
           <div id="thingsList"></div>
         </div>
-
       </div>
-
-      <div class="continue-wrap" style="justify-content:center;">        </div>
-
-      </div>
-
       <div class="continue-wrap" style="justify-content:center;">
-        <button class="continue" onclick="goDashboard()">
-          Back to my learning <span>→</span>
-        </button>
+        <button class="continue" id="dashboardButton" type="button">Back to my learning <span>→</span></button>
       </div>
-
     </section>
-
   </main>
 
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
   <script>
+    let profile = null;
+    let lesson = null;
+    let cards = [];
+    let currentCard = 0;
+    let selectedCorrect = false;
 
-    let currentStep = 1;
-    const totalSteps = 5;
-    let aiLesson = null;
-
-    function updateProgress() {
-      const progress = document.getElementById("progress");
-      progress.style.width = ((currentStep / totalSteps) * 100) + "%";
-    }
-
-    function showStep(step) {
-      document.querySelectorAll(".step").forEach(section => {
-        section.style.display = "none";
-      });
-
-      const selected = document.getElementById("step" + step);
-      if (selected) selected.style.display = "block";
-
-      updateProgress();
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    }
-
-    function nextStep() {
-      if (currentStep < totalSteps) {
-        currentStep++;
-        showStep(currentStep);
-      }
-    }
-
-    function chooseAnswer(button, correct, explanation) {
-      const answers = document.querySelectorAll("#practiceAnswers .answer");
-
-      answers.forEach(answer => {
-        answer.classList.remove("selected", "correct", "wrong");
-      });
-
-      button.classList.add(correct ? "correct" : "wrong");
-
-      const feedback = document.getElementById("feedback1");
-
-      if (correct) {
-        feedback.innerHTML = "<strong>Good choice.</strong> " + explanation;
-        feedback.classList.add("visible");
-        document.getElementById("practiceContinue").disabled = false;
-      } else {
-        feedback.innerHTML = "<strong>Not quite.</strong> " + explanation;
-        feedback.classList.add("visible");
-        document.getElementById("practiceContinue").disabled = true;
-      }
-    }
-
-    function finishFill() {
-      const input = document.getElementById("fillAnswer");
-      const feedback = document.getElementById("feedback2");
-      const button = document.getElementById("fillContinue");
-
-      if (!input.value.trim()) {
-        input.focus();
-        return;
-      }
-
-      feedback.innerHTML = "<strong>Good.</strong> Your response is now part of your learning history.";
-      feedback.classList.add("visible");
-
-      button.innerHTML = "Continue <span>→</span>";
-      button.onclick = nextStep;
-    }
-
-    let recording = false;
-
-    function toggleRecording() {
-      const mic = document.getElementById("micButton");
-      const text = document.getElementById("recordingText");
-      const finish = document.getElementById("finishButton");
-
-      recording = !recording;
-
-      if (recording) {
-        mic.classList.add("recording");
-        text.textContent = "Listening...";
-      } else {
-        mic.classList.remove("recording");
-        text.textContent = "Response recorded";
-        finish.disabled = false;
-      }
-    }
-
-    function showResult() {
-      document.querySelectorAll(".step").forEach(section => {
-        section.style.display = "none";
-      });
-
-      document.getElementById("result").classList.add("visible");
-      document.getElementById("progress").style.width = "100%";
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    }
-
-    function goDashboard() {
-      window.location.href = "dashboard.html";
-    }
-
-    function goBack() {
-      if (currentStep > 1) {
-        currentStep--;
-        showStep(currentStep);
-      } else {
-        window.location.href = "dashboard.html";
-      }
-    }
-
-    async function getProfile() {
-      try {
-        const client = window.supabase.createClient(
-          window.SUPABASE_URL,
-          window.SUPABASE_ANON_KEY
-        );
-
-        const { data: sessionData, error: sessionError } =
-          await client.auth.getSession();
-
-        if (sessionError || !sessionData?.session) {
-          return null;
-        }
-
-        const user = sessionData.session.user;
-
-        const { data: learnerLanguage, error: learnerError } = await client
-          .from("learner_languages")
-          .select("id, level, goal, interests, languages(name, code)")
-          .eq("user_id", user.id)
-          .eq("is_current", true)
-          .maybeSingle();
-
-        if (learnerError || !learnerLanguage) {
-          return null;
-        }
-
-        const nativeMap = {
-          en: "English",
-          es: "Spanish",
-          pt: "Portuguese",
-          fr: "French",
-          de: "German",
-          it: "Italian",
-          ja: "Japanese",
-          ko: "Korean",
-          zh: "Mandarin",
-          ar: "Arabic",
-          nl: "Dutch",
-          sv: "Swedish",
-          el: "Greek",
-          tr: "Turkish",
-          hi: "Hindi",
-          pl: "Polish"
-        };
-
-        let nativeLanguage = "";
-        const { data: profile } = await client
-          .from("profiles")
-          .select("native_language_code")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        nativeLanguage = nativeMap[profile?.native_language_code] || "";
-
-        const result = {
-          targetLanguage: learnerLanguage.languages?.name || "",
-          nativeLanguage,
-          level: learnerLanguage.level || "A0",
-          goal: learnerLanguage.goal || "",
-          interests: Array.isArray(learnerLanguage.interests)
-            ? learnerLanguage.interests
-            : []
-        };
-
-        sessionStorage.setItem(
-          "parla_learning_profile",
-          JSON.stringify(result)
-        );
-
-        return result;
-      } catch (error) {
-        console.error("Could not load learner profile from Supabase.", error);
-        return null;
-      }
-    }
-
-    function renderAiLesson(lesson, profile) {
-      aiLesson = lesson;
-
-      const language = profile?.targetLanguage || "Loading…";
-      const level = profile?.level || "A1";
-
-      document.getElementById("lessonLanguage").textContent = language;
-      document.getElementById("lessonTitle").textContent = lesson.title;
-      document.getElementById("lessonIntro").textContent = lesson.intro;
-      document.getElementById("scenarioTitle").textContent = lesson.title;
-      document.getElementById("scenarioDescription").textContent = lesson.scenario;
-      document.getElementById("scenarioText").innerHTML =
-        "<strong>Imagine this:</strong><br>" + lesson.scenario;
-
-      const expressionGrid = document.getElementById("expressionsGrid");
-      expressionGrid.innerHTML = "";
-
-      (lesson.expressions || []).forEach((item, index) => {
-        const card = document.createElement("div");
-        card.className = "language-card";
-        card.innerHTML = `
-          <div class="tag">Useful expression</div>
-          <div class="phrase">${escapeHtml(item.phrase)}</div>
-          <div class="translation">${escapeHtml(item.meaning)}</div>
-          <div class="example">
-            ${escapeHtml(item.example)}
-            <br>
-            <span>${escapeHtml(item.note || "")}</span>
-          </div>
-        `;
-        expressionGrid.appendChild(card);
-      });
-
-      document.getElementById("practiceTitle").textContent =
-        "Now use what you learned.";
-      document.getElementById("practiceIntro").textContent =
-        "Pick the response that fits the situation naturally.";
-
-      document.getElementById("practicePrompt").textContent =
-        lesson.practice?.prompt || "Choose the most natural response.";
-
-      const answers = document.getElementById("practiceAnswers");
-      answers.innerHTML = "";
-
-      (lesson.practice?.options || []).forEach(option => {
-        const button = document.createElement("button");
-        button.className = "answer";
-        button.textContent = option.text;
-        button.addEventListener("click", () =>
-          chooseAnswer(button, !!option.correct, option.explanation || "")
-        );
-        answers.appendChild(button);
-      });
-
-      document.getElementById("practiceContinue").disabled = true;
-      document.getElementById("feedback1").classList.remove("visible");
-
-      document.getElementById("productionTitle").textContent =
-        "Make it yours.";
-      document.getElementById("productionPrompt").textContent =
-        lesson.production?.prompt || "Write a natural response.";
-
-      document.getElementById("fillAnswer").placeholder =
-        lesson.production?.starter || "Write your response...";
-
-      document.getElementById("speakingTitle").textContent =
-        "Now use it in real life.";
-      document.getElementById("speakingPrompt").textContent =
-        lesson.speaking?.prompt || "Respond naturally to the situation.";
-      document.getElementById("speakingInstructions").textContent =
-        lesson.speaking?.instructions ||
-        "Speak naturally. Parla will use your response to understand what to teach you next.";
-
-      const thingsList = document.getElementById("thingsList");
-      if (thingsList) {
-        thingsList.innerHTML = (lesson.expressions || []).slice(0, 3).map(item =>
-          '<div class="thing"><strong>' + escapeHtml(item.phrase || "") + '</strong> — ' + escapeHtml(item.note || item.meaning || "") + '</div>'
-        ).join("");
-      }
-
-      document.title = "Parla — " + language + " lesson";
-      document.documentElement.lang = "en";
-      document.body.dataset.language = language;
-      document.body.dataset.level = level;
-    }
+    const speechLocales = {
+      Polish: "pl-PL", Spanish: "es-ES", English: "en-US", Portuguese: "pt-BR",
+      French: "fr-FR", Italian: "it-IT", German: "de-DE", Japanese: "ja-JP",
+      Korean: "ko-KR", Mandarin: "zh-CN", Arabic: "ar-SA", Dutch: "nl-NL",
+      Swedish: "sv-SE", Greek: "el-GR", Turkish: "tr-TR", Hindi: "hi-IN"
+    };
 
     function escapeHtml(value) {
       const div = document.createElement("div");
@@ -1209,46 +677,224 @@
       return div.innerHTML;
     }
 
-    async function loadAiLesson() {
-      const profile = await getProfile();
+    function updateProgress() {
+      const progress = document.getElementById("progress");
+      const total = Math.max(cards.length, 1);
+      progress.style.width = Math.min(100, ((currentCard + 1) / total) * 100) + "%";
+    }
 
-      if (!profile?.targetLanguage) {
-        window.location.href = "dashboard.html";
+    function speakPhrase(text) {
+      if (!("speechSynthesis" in window) || !text) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = speechLocales[profile?.targetLanguage] || "en-US";
+      utterance.rate = 0.82;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function setNext(enabled, label = "Next") {
+      const button = document.getElementById("nextButton");
+      button.disabled = !enabled;
+      button.innerHTML = label + " <span>→</span>";
+    }
+
+    function renderCard() {
+      const card = cards[currentCard];
+      const container = document.getElementById("lessonCard");
+      const label = document.getElementById("cardLabel");
+      const title = document.getElementById("cardTitle");
+      const intro = document.getElementById("cardIntro");
+      selectedCorrect = false;
+      container.innerHTML = "";
+      setNext(false);
+
+      if (!card) return;
+
+      if (card.type === "teach") {
+        label.textContent = "New phrase";
+        title.textContent = card.phrase;
+        intro.textContent = card.meaning;
+
+        container.innerHTML = `
+          <div class="context-card">
+            <div class="context-label">Listen first</div>
+            <button class="answer" id="listenButton" type="button" style="margin-top:18px;width:auto;">
+              ▶ Hear it
+            </button>
+            <div class="scenario" style="margin-top:20px;">
+              <strong>Pronunciation</strong><br>
+              ${escapeHtml(card.pronunciation || "Listen and repeat.")}
+            </div>
+            <p style="margin-top:18px;"><strong>IPA:</strong> ${escapeHtml(card.ipa || "")}</p>
+            <p style="margin-top:12px;"><strong>When to use it:</strong> ${escapeHtml(card.usage || "")}</p>
+            <div class="scenario"><strong>Example</strong><br>${escapeHtml(card.example || "")}</div>
+          </div>`;
+        document.getElementById("listenButton").addEventListener("click", () => speakPhrase(card.phrase));
+        setNext(true);
         return;
       }
 
+      if (card.type === "quiz") {
+        label.textContent = "Quick check";
+        title.textContent = "Can you use it?";
+        intro.textContent = card.prompt || "Choose the answer that fits.";
+
+        const options = Array.isArray(card.options) ? card.options : [];
+        container.innerHTML = `
+          <div class="question-card">
+            <div class="question-number">One quick question</div>
+            <h2>${escapeHtml(card.prompt || "Choose the best answer.")}</h2>
+            <div class="answers" id="quizAnswers"></div>
+            <div class="feedback" id="quizFeedback"></div>
+          </div>`;
+
+        const answers = document.getElementById("quizAnswers");
+        options.forEach(option => {
+          const button = document.createElement("button");
+          button.className = "answer";
+          button.type = "button";
+          button.textContent = option;
+          button.addEventListener("click", () => {
+            answers.querySelectorAll(".answer").forEach(b => b.classList.remove("correct","wrong"));
+            const correct = option === card.answer;
+            button.classList.add(correct ? "correct" : "wrong");
+            const feedback = document.getElementById("quizFeedback");
+            feedback.innerHTML = correct
+              ? "<strong>Good.</strong> " + escapeHtml(card.feedback || "That's the phrase to use.")
+              : "<strong>Not quite.</strong> " + escapeHtml(card.feedback || "Listen to the phrase again and try it.");
+            feedback.classList.add("visible");
+            selectedCorrect = correct;
+            setNext(correct);
+          });
+          answers.appendChild(button);
+        });
+        return;
+      }
+
+      label.textContent = "Speak";
+      title.textContent = "Use it out loud";
+      intro.textContent = card.prompt || "Say the phrase naturally.";
+      container.innerHTML = `
+        <div class="speaking-card">
+          <div class="question-number">Speaking challenge</div>
+          <h2>${escapeHtml(card.prompt || "Say it naturally.")}</h2>
+          <p>${escapeHtml(card.instructions || "Listen first, then say it out loud.")}</p>
+          <button class="mic-button" id="speakButton" type="button" aria-label="Listen to the phrase">▶</button>
+          <div class="recording-text" id="recordingText">Tap to hear it, then say it yourself.</div>
+        </div>`;
+      document.getElementById("speakButton").addEventListener("click", () => {
+        speakPhrase(card.phrase);
+        document.getElementById("recordingText").textContent = "Now say it out loud.";
+        setNext(true, "I did it");
+      });
+      setNext(true, "I did it");
+    }
+
+    async function getProfile() {
+      const client = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+      const { data: sessionData } = await client.auth.getSession();
+      if (!sessionData?.session) return null;
+
+      const user = sessionData.session.user;
+      const { data: learnerLanguage } = await client
+        .from("learner_languages")
+        .select("id, level, goal, interests, languages(name, code)")
+        .eq("user_id", user.id)
+        .eq("is_current", true)
+        .maybeSingle();
+
+      if (!learnerLanguage) return null;
+
+      const { data: dbProfile } = await client
+        .from("profiles")
+        .select("native_language_code")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const nativeMap = {
+        en:"English",es:"Spanish",pt:"Portuguese",fr:"French",de:"German",it:"Italian",
+        ja:"Japanese",ko:"Korean",zh:"Mandarin",ar:"Arabic",nl:"Dutch",sv:"Swedish",
+        el:"Greek",tr:"Turkish",hi:"Hindi",pl:"Polish"
+      };
+
+      return {
+        targetLanguage: learnerLanguage.languages?.name || "",
+        nativeLanguage: nativeMap[dbProfile?.native_language_code] || "English",
+        level: learnerLanguage.level || "A0",
+        goal: learnerLanguage.goal || "Real conversation",
+        interests: Array.isArray(learnerLanguage.interests) ? learnerLanguage.interests : []
+      };
+    }
+
+    async function loadLesson() {
       try {
-        document.getElementById("lessonIntro").textContent =
-          "Building a lesson around your goals and interests...";
+        profile = await getProfile();
+        if (!profile?.targetLanguage) {
+          window.location.href = "dashboard.html";
+          return;
+        }
+
+        document.getElementById("lessonLanguage").textContent = profile.targetLanguage;
+        document.getElementById("cardTitle").textContent = "Building your lesson…";
+        document.getElementById("cardIntro").textContent = "One useful phrase at a time.";
 
         const response = await fetch("/api/learn", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ profile })
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({profile})
         });
-
         const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data?.error || "AI lesson generation failed.");
-        }
+        if (!response.ok) throw new Error(data?.error || "Lesson generation failed.");
+        if (!data.lesson?.cards?.length) throw new Error("No lesson cards were returned.");
 
-        if (!data.lesson) {
-          throw new Error("No lesson was returned.");
-        }
+        lesson = data.lesson;
+        cards = lesson.cards;
+        document.getElementById("cardTitle").textContent = lesson.title;
+        document.getElementById("cardIntro").textContent = lesson.intro;
+        document.title = "Parla — " + profile.targetLanguage + " lesson";
 
-        renderAiLesson(data.lesson, profile);
+        currentCard = 0;
+        renderCard();
+        updateProgress();
       } catch (error) {
         console.error("Parla lesson error:", error);
-        document.getElementById("lessonIntro").textContent = "We couldn't generate this lesson yet.";
+        document.getElementById("cardLabel").textContent = "Lesson unavailable";
+        document.getElementById("cardTitle").textContent = "We couldn't build this lesson.";
+        document.getElementById("cardIntro").textContent = error?.message || "Please try again.";
+        document.getElementById("lessonCard").innerHTML = "";
+        setNext(false);
       }
     }
 
-    updateProgress();
-    loadAiLesson();
+    document.getElementById("nextButton").addEventListener("click", () => {
+      if (currentCard < cards.length - 1) {
+        currentCard++;
+        renderCard();
+        updateProgress();
+        window.scrollTo({top:0, behavior:"smooth"});
+      } else {
+        document.getElementById("lessonShell").style.display = "none";
+        document.getElementById("result").classList.add("visible");
+        document.getElementById("resultLesson").textContent = lesson?.title || "Complete";
+        document.getElementById("resultCards").textContent = cards.length + " completed";
+        const things = document.getElementById("thingsList");
+        things.innerHTML = cards.filter(c => c.type === "teach").slice(0,3).map(c =>
+          '<div class="thing"><strong>' + escapeHtml(c.phrase) + '</strong> — ' + escapeHtml(c.meaning) + '</div>'
+        ).join("");
+        document.getElementById("progress").style.width = "100%";
+      }
+    });
 
+    document.getElementById("dashboardButton").addEventListener("click", () => {
+      window.location.href = "dashboard.html";
+    });
+
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
+
+    loadLesson();
   </script>
 
 </body>
