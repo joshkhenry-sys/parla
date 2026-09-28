@@ -252,7 +252,7 @@ footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-co
           .limit(1);
         await loadSavedLessons(learnerLanguage.id, languageName);
         const startButton = document.getElementById("startLessonButton");
-        if (startButton && !placement?.length) {
+        if (startButton && !placement?.length && (learnerLanguage.level || "A0") === "A0") {
           startButton.innerHTML = "Check my level <span>→</span>";
           startButton.onclick = startLesson;
         }
