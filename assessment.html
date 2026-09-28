@@ -128,8 +128,10 @@ async function begin(){
     document.getElementById("intro").classList.add("hidden");document.getElementById("test").classList.remove("hidden");render();
   }catch(error){
     console.error(error);
-    button.disabled=false;button.textContent="Try again";
-    const note=document.querySelector("#intro .note"); if(note) note.textContent="We couldn't build the language-specific test yet. The language test is taking longer than expected. Try again.";
+    questions=localPlacement(language.languages?.code||"es");
+    document.getElementById("intro").classList.add("hidden");
+    document.getElementById("test").classList.remove("hidden");
+    render();
   }
 }
 function render(){
