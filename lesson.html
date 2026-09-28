@@ -147,6 +147,9 @@ async function load(){
     }
 
     const linked=lesson.learner_languages;
+    if(!linked?.id) throw new Error("This lesson is not linked to a saved learning path.");
+    if(linked.user_id && linked.user_id!==uid) throw new Error("This lesson does not belong to your learning path.");
+    if(linked.level && lesson.level && linked.level!==lesson.level) throw new Error("This lesson is not at your current level.");
     profile={
       id:lesson.learner_language_id,
       name:linked?.languages?.name||lesson.content?.language?.name||"Language",
@@ -227,7 +230,20 @@ async function completeLesson(){
   $("response").style.display="none";
   $("confidence").style.display="none";
   $("complete").style.display="block";
-  $("completeCopy").textContent="You earned "+xp+" XP. Your "+profile.name+" progress is saved.";
+  const {data:nextAttempts}=await client.from("lesson_attempts").select("lesson_id").order("completed_at",{ascending:false}).limit(200);
+  const completedIds=new Set((nextAttempts||[]).map(row=>row.lesson_id));
+  const {data:nextLessons}=await client.from("lessons").select("id,title,topic,level,created_at").eq("learner_language_id",profile.id).eq("level",profile.level).order("created_at",{ascending:true}).limit(50);
+  const nextLesson=(nextLessons||[]).find(row=>row.id!==lesson.id&&!completedIds.has(row.id));
+  const back=$("complete").querySelector(".back");
+  if(nextLesson){
+    back.textContent="Next lesson →";
+    back.href="lesson.html?id="+encodeURIComponent(nextLesson.id);
+    $("completeCopy").textContent="You earned "+xp+" XP. Next up: "+(nextLesson.title||"another scene")+".";
+  }else{
+    back.textContent="Back to dashboard →";
+    back.href="dashboard.html";
+    $("completeCopy").textContent="You earned "+xp+" XP. You completed the current learning path.";
+  }
 }
 
 load();
