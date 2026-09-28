@@ -41,9 +41,12 @@ export default async function handler(req, res) {
       "Build a complete lesson, not a vocabulary drill and not a conversation-only activity.",
       "The lesson must teach first and gradually move toward independent speaking.",
       "The target language is authoritative: never substitute another language.",
+      "The learner level is authoritative. Never teach below the requested level. A B1/B2/B2+/C1/C2 learner must NOT receive beginner greetings, alphabet material, survival phrases, or elementary vocabulary unless the advanced task is explicitly analyzing register or nuance.",
+      "For C1/C2, assume the learner already knows common greetings, introductions, basic requests, and everyday beginner vocabulary. Start with sophisticated, high-frequency native language used in real adult conversation."
       "Everything in the target language must sound like something a real speaker would actually say.",
       difficulty,
       "Use one coherent real-world scene from beginning to end.",
+      "For B2/B2+/C1/C2, make the scene intellectually or socially demanding: negotiation, disagreement, explaining a position, resolving ambiguity, making a nuanced request, telling a story, or navigating an awkward social moment.",
       "Teach 3 to 5 high-value language chunks. Explain meaning, pronunciation, usage, and one natural example.",
       "After teaching each chunk, check understanding without requiring speech.",
       "Then give guided practice where the learner constructs or chooses a response using what was just taught.",
@@ -167,6 +170,8 @@ export default async function handler(req, res) {
     const guidedCount = cards.filter(c => c.type === "guided").length;
     const speakCount = cards.filter(c => c.type === "speak").length;
     const conversationCount = cards.filter(c => c.type === "conversation").length;
+    const basicGreetingPattern = /^(hola|hello|hi|buenos d[ií]as|buenas|hey|bonjour|hallo|ciao|oi|ol[aá])\b/i;
+    const advancedTeachIsTooBasic = ["B1","B2","B2+","C1","C2"].includes(level) && cards.some(c => c.type === "teach" && basicGreetingPattern.test(String(c.phrase || "").trim()));
 
     const hasLearning = teachCount >= 3 && checkCount >= 2;
     const challengeCount = cards.filter(c => c.type === "challenge").length;
@@ -175,7 +180,7 @@ export default async function handler(req, res) {
     const hasSpeaking = speakCount >= 1;
     const hasConversation = conversationCount >= 1;
 
-    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasChallenge || !hasSpeaking || !hasConversation) {
+    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasChallenge || !hasSpeaking || !hasConversation || advancedTeachIsTooBasic) {
       return res.status(502).json({ error: "The AI returned an incomplete lesson structure.", requestId });
     }
 
