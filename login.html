@@ -11,7 +11,7 @@
   
 <link rel="stylesheet" href="nahtive.css"></head>
 
-<body class="auth-gate">
+<body style="visibility:hidden">
   <div class="page">
 
     <nav>
@@ -222,7 +222,7 @@
     async function showExistingSession() {
       const { data, error } = await supabaseClient.auth.getSession();
       if (error) {
-        document.body.classList.add("auth-ready");
+        document.body.style.visibility="visible";
         return;
       }
       if (!data.session) {
