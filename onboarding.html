@@ -10,7 +10,7 @@
   
 <link rel="stylesheet" href="nahtive.css"></head>
 
-<body>
+<body style="visibility:hidden">
 
   <nav>
     <a href="index.html" class="logo">Nahtive<span>•</span></a>
@@ -459,15 +459,25 @@
       try {
         const { data } = await supabaseClient.auth.getSession();
         const user = data?.session?.user;
-        if (!user) return;
+        if (!user) {
+          document.body.style.visibility = "visible";
+          return;
+        }
 
         const requested = params.get("language") || params.get("targetLanguage");
+        const adding = params.get("add") === "1";
+
         const { data: saved } = await supabaseClient
           .from("learner_languages")
           .select("id,is_current,languages(name)")
           .eq("user_id", user.id);
 
-        if (requested && saved?.length) {
+        if (!adding && !requested && saved?.length) {
+          window.location.replace("dashboard.html");
+          return;
+        }
+
+        if (!adding && requested && saved?.length) {
           const match = saved.find(row => (row.languages?.name || "").toLowerCase() === requested.toLowerCase());
           if (match) {
             await supabaseClient.from("learner_languages").update({is_current:false}).eq("user_id", user.id);
@@ -478,11 +488,13 @@
           }
         }
 
-        if (!requested && saved?.length) window.location.replace("dashboard.html");
+        document.body.style.visibility = "visible";
       } catch (error) {
         console.error("Could not resume learning:", error);
+        document.body.style.visibility = "visible";
       }
     }
+
 
     const state = {
       targetLanguage: null,
