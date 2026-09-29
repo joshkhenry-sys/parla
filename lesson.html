@@ -233,6 +233,23 @@ function buildFallbackLesson(){
     {phrase:"Als we willen dat dit werkt, zullen we een middenweg moeten vinden.",meaning:"If we want this to work, we'll have to find a middle ground.",pronunciation:"als vuh VIL-un dat dit werkt, ZUL-un vuh un MID-un-vaykh moht-un VIND-un",usage:"Use this when both sides need to compromise for the situation to work.",example:"Als we willen dat dit werkt, zullen we een middenweg moeten vinden.",exampleMeaning:"“If we want this to work, we'll have to find a middle ground.”"}
    ]
   },
+  pl:{
+   beginner:[
+    {phrase:"Chciałbym o coś zapytać.",meaning:"I would like to ask you something.",pronunciation:"khchyaw-BYM oh kosh ZAH-py-tatch",usage:"Use this to introduce a question or request in a natural, polite way.",example:"Chciałbym o coś zapytać. Masz chwilę?",exampleMeaning:"“I would like to ask you something. Do you have a minute?”"},
+    {phrase:"Czy możesz mi wyjaśnić, jak to działa?",meaning:"Can you explain how this works?",pronunciation:"chih MOH-zhesh mee vyah-SHNITCH yak toh DJAH-wah",usage:"Use this when you need someone to explain a process, rule, or situation.",example:"Czy możesz mi wyjaśnić, jak to działa?",exampleMeaning:"“Can you explain how this works?”"},
+    {phrase:"Dobrze, daj mi chwilę, żebym się zastanowił.",meaning:"Okay, give me a moment to think about it.",pronunciation:"DOH-bzhe dai mee FHVEE-leh ZHEH-bym shyeh zah-stah-NOH-veew",usage:"Use this when you need a moment before answering or deciding.",example:"Dobrze, daj mi chwilę, żebym się zastanowił.",exampleMeaning:"“Okay, give me a moment to think about it.”"}
+   ],
+   intermediate:[
+    {phrase:"Jeśli dobrze rozumiem...",meaning:"Let me make sure I understand.",pronunciation:"YESH-lee DOH-bzhe roh-ZOO-myem",usage:"Use this to confirm that you understood what someone just explained.",example:"Jeśli dobrze rozumiem, mamy zacząć w piątek?",exampleMeaning:"“If I understand correctly, are we supposed to start on Friday?”"},
+    {phrase:"Nie jestem do końca przekonany.",meaning:"I'm not completely convinced.",pronunciation:"nyeh YES-tem doh KOHN-tsah psheh-koh-NAH-nih",usage:"Use this when you have doubts about an idea without rejecting it outright.",example:"Nie jestem do końca przekonany. Możemy rozważyć inną opcję?",exampleMeaning:"“I'm not completely convinced. Can we consider another option?”"},
+    {phrase:"A gdybyśmy spróbowali zrobić to inaczej?",meaning:"What if we tried doing it another way?",pronunciation:"ah gdih-BIH-shmih sproo-BOH-vah-lee ZROH-bitch toh ee-NAH-chey",usage:"Use this to suggest an alternative in a collaborative, non-confrontational way.",example:"A gdybyśmy spróbowali zrobić to inaczej?",exampleMeaning:"“What if we tried doing it another way?”"}
+   ],
+   advanced:[
+    {phrase:"Nie chodzi o to, że się z tobą nie zgadzam, ale mam wrażenie, że pomijamy coś istotnego.",meaning:"It's not that I disagree with you, but I feel we're overlooking something important.",pronunciation:"nyeh HOD-zhee oh toh zheh shyeh z toh-BOH nyeh ZGA-dzam AH-leh mam VRAH-zheh-nyeh zheh poh-mee-YAH-mih tsosh ee-STOT-neh-goh",usage:"Use this to disagree carefully while keeping the conversation constructive.",example:"Nie chodzi o to, że się z tobą nie zgadzam, ale mam wrażenie, że pomijamy ważny szczegół.",exampleMeaning:"“It's not that I disagree with you, but I feel we're overlooking an important detail.”"},
+    {phrase:"Rozumiem, co masz na myśli, ale martwią mnie długoterminowe konsekwencje.",meaning:"I understand your point, but the long-term consequences concern me.",pronunciation:"roh-ZOO-myem tso mash nah MIH-shlee AH-leh MAR-tvyom nyeh dwoog-oh-teer-MOH-veh kohn-seh-KVEN-tsyeh",usage:"Use this to acknowledge someone's reasoning before explaining your concern.",example:"Rozumiem, co masz na myśli, ale martwią mnie długoterminowe konsekwencje.",exampleMeaning:"“I understand your point, but the long-term consequences concern me.”"},
+    {phrase:"Jeśli chcemy, żeby to zadziałało, musimy znaleźć kompromis.",meaning:"If we want this to work, we'll have to find a compromise.",pronunciation:"YESH-lee HTEH-mih ZHEH-bih toh zah-DJAH-wah-oh MOO-sih-mih ZNAH-lehzh KOHM-proh-mees",usage:"Use this when both sides need to compromise for the situation to work.",example:"Jeśli chcemy, żeby to zadziałało, musimy znaleźć kompromis.",exampleMeaning:"“If we want this to work, we'll have to find a compromise.”"}
+   ]
+  },
   ar:{
    beginner:[
     {phrase:"أريد أن أسألك شيئًا.",meaning:"I want to ask you something.",pronunciation:"u-reed an as-a-lak shay-an",usage:"Use this when you want to introduce a question or request naturally.",example:"أريد أن أسألك شيئًا. هل لديك دقيقة؟",exampleMeaning:"“I want to ask you something. Do you have a minute?”"},
@@ -268,7 +285,7 @@ function buildFallbackLesson(){
    ]
   }
  };
- const bank=contextual[code]||contextual.en;
+ const bank=contextual[code]||contextual.pl;
  const tier=["A0","A1","A2"].includes(level)?"beginner":(["B1","B2"].includes(level)?"intermediate":"advanced");
  const lessons=bank[tier];
  const primary=lessons[0],second=lessons[1]||primary,third=lessons[2]||primary;
