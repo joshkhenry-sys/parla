@@ -138,7 +138,7 @@ function levelName(){return profile?.level||"A1";}
 function stageName(card){return ({teach:"Learn",check:"Choose",guided:"Build",challenge:"React",speak:"Say it",conversation:"Talk"})[card.type]||"Learn";}
 function toast(message){const t=$("toast");if(!t)return;t.textContent=message;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),1500);}
 function advance(){index++;render();window.scrollTo({top:0,behavior:"smooth"});}
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if($("lessonScore"))$("lessonScore").textContent=Array.from({length:3},(_,i)=>i<Math.min(3,Math.floor(xp/35))?"●":"○").join(" ");if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
+function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
 function renderTeach(c){
  const body='<div class="lesson-task-label">Learn the expression</div>'+
@@ -160,15 +160,15 @@ function lessonSound(kind){
   const gain=ctx.createGain();
   gain.gain.setValueAtTime(0.0001,now);
   gain.connect(ctx.destination);
-  const notes=kind==="correct"?[523.25,659.25,783.99]:kind==="wrong"?[220,165]:[392];
+  const notes=kind==="correct"?[392,523.25,659.25]:kind==="wrong"?[174.61,146.83]:[329.63];
   notes.forEach((freq,i)=>{
    const osc=ctx.createOscillator();
-   osc.type=kind==="wrong"?"sine":"triangle";
+   osc.type=kind==="wrong"?"sine":"sine";
    osc.frequency.setValueAtTime(freq,now+i*.075);
    const t=now+i*.075;
    gain.gain.setValueAtTime(0.0001,t);
-   gain.gain.exponentialRampToValueAtTime(kind==="wrong"?.075:.095,t+.012);
-   gain.gain.exponentialRampToValueAtTime(0.0001,t+.18);
+   gain.gain.exponentialRampToValueAtTime(kind==="wrong"?.065:.085,t+.014);
+   gain.gain.exponentialRampToValueAtTime(0.0001,t+.24);
    osc.connect(gain);osc.start(t);osc.stop(t+.18);
   });
   setTimeout(()=>ctx.close().catch(()=>{}),700);
