@@ -195,7 +195,7 @@ async function finish(){
   document.getElementById("result").classList.remove("hidden");
   document.getElementById("resultLevel").textContent=result;
   document.getElementById("resultCopy").textContent=descriptions[result];
-  document.getElementById("continueButton").onclick=()=>{localStorage.setItem("Nahtive_current_learner_language",language.id);location.href=returnTo==="lesson"?"lesson.html":"dashboard.html"};
+  document.getElementById("continueButton").onclick=()=>{localStorage.setItem("Nahtive_current_learner_language",language.id);location.href="dashboard.html"};
   const {error:updateError}=await client.from("learner_languages").update({level:result}).eq("id",language.id).eq("user_id",user.id);
   if(updateError){console.error("Placement level save failed:",updateError);document.getElementById("resultCopy").textContent+= " Your result is shown above; we'll keep the result on this device while we retry the save.";}
   const {error:eventError}=await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:result,scores:scoreByLevel,question_count:questions.length,version:3}});
