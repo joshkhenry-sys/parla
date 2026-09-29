@@ -135,14 +135,14 @@ export default async function handler(req, res) {
     };
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 11000);
+    const timeout = setTimeout(() => controller.abort(), 8500);
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         reasoning: { effort: "low" },
-        max_output_tokens: 5000,
+        max_output_tokens: 3800,
         instructions: systemPrompt,
         input: userPrompt,
         text: { format: { type: "json_schema", name: "nahtive_lesson", strict: true, schema } },
@@ -165,11 +165,11 @@ export default async function handler(req, res) {
       ? data.output_text.trim()
       : (data?.output || []).flatMap(item => item?.content || []).map(item => item?.text || "").join("").trim();
 
-    if (!outputText) return res.status(502).json({ error: "The AI returned no lesson content.", requestId });
+    if (!outputText) return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned no lesson content.", requestId });
 
     let lesson;
     try { lesson = JSON.parse(outputText); }
-    catch { return res.status(502).json({ error: "The AI returned invalid lesson data.", requestId }); }
+    catch { return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned invalid lesson data.", requestId }); }
 
     const cards = Array.isArray(lesson.cards) ? lesson.cards : [];
     const types = cards.map(c => c.type);
@@ -189,28 +189,28 @@ export default async function handler(req, res) {
     const hasConversation = conversationCount >= 1;
 
     if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasChallenge || !hasSpeaking || !hasConversation || advancedTeachIsTooBasic) {
-      return res.status(502).json({ error: "The AI returned an incomplete lesson structure.", requestId });
+      return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete lesson structure.", requestId });
     }
 
     for (const card of cards) {
       if (card.type === "teach" && (!card.phrase || !card.meaning || !card.pronunciation || !card.ipa || !card.usage || !card.example)) {
-        return res.status(502).json({ error: "The AI returned an incomplete teaching card.", requestId });
+        return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete teaching card.", requestId });
       }
       if (card.type === "check" && (!card.prompt || !Array.isArray(card.options) || card.options.length < 2 || !card.answer)) {
-        return res.status(502).json({ error: "The AI returned an incomplete understanding check.", requestId });
+        return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete understanding check.", requestId });
       }
       if (card.type === "guided" && !card.prompt) {
-        return res.status(502).json({ error: "The AI returned an incomplete guided practice card.", requestId });
+        return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete guided practice card.", requestId });
       }
       if ((card.type === "challenge" || card.type === "speak" || card.type === "conversation") && !card.prompt) {
-        return res.status(502).json({ error: "The AI returned an incomplete speaking card.", requestId });
+        return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete speaking card.", requestId });
       }
     }
 
     return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, challengeCount, speakCount, conversationCount } });
   } catch (error) {
     console.error("Nahtive lesson generation error:", error);
-    if (error?.name === "AbortError") return res.status(504).json({ error: "The AI lesson request timed out after 11 seconds." });
-    return res.status(500).json({ error: error?.message || "Could not generate the lesson." });
+    if (error?.name === "AbortError") return res.status(200).json({ lesson: null, degraded: true, error: "AI generation timed out; local lesson fallback is active." });
+    return res.status(200).json({ lesson: null, degraded: true, error: error?.message || "AI generation unavailable; local lesson fallback is active." });
   }
 }
