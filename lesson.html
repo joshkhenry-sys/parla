@@ -142,6 +142,28 @@ function renderTeach(c){
  $("hear").onclick=()=>speak(c.phrase,profile.code); $("hearExample").onclick=()=>speak(c.example,profile.code);
  $("next").onclick=()=>{xp+=5;toast("Meaning locked in.");advance();};
 }
+function lessonSound(kind){
+ try{
+  const C=window.AudioContext||window.webkitAudioContext;
+  if(!C)return;
+  const ctx=new C(),now=ctx.currentTime;
+  const gain=ctx.createGain();
+  gain.gain.setValueAtTime(0.0001,now);
+  gain.connect(ctx.destination);
+  const notes=kind==="correct"?[523.25,659.25,783.99]:kind==="wrong"?[220,165]:[392];
+  notes.forEach((freq,i)=>{
+   const osc=ctx.createOscillator();
+   osc.type=kind==="wrong"?"sine":"triangle";
+   osc.frequency.setValueAtTime(freq,now+i*.075);
+   const t=now+i*.075;
+   gain.gain.setValueAtTime(0.0001,t);
+   gain.gain.exponentialRampToValueAtTime(kind==="wrong"?.045:.055,t+.012);
+   gain.gain.exponentialRampToValueAtTime(0.0001,t+.16);
+   osc.connect(gain);osc.start(t);osc.stop(t+.18);
+  });
+  setTimeout(()=>ctx.close().catch(()=>{}),700);
+ }catch(e){}
+}
 function renderCheck(c){
  let answered=false; const phrase=c.phrase||"";
  const body='<div class="lesson-task-label">SEE IT · HEAR IT · USE IT</div>'+
@@ -154,8 +176,8 @@ function renderCheck(c){
    '<div class="notice feedback" id="feedback">Listen to the expression. Then choose the line you would actually say.</div>';
  shell("Use it","See the language, hear the pronunciation, and choose the response that works in the scene.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
  $("hear").onclick=()=>speak(phrase,profile.code); $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
- document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"Good. That is the natural choice for this situation."):(c.feedback||"Not quite. Listen again and notice which response fits the scene.");$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
- $("next").onclick=()=>{toast("Good. Now use it.");advance();};
+ document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");lessonSound(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"Good. That is the natural choice for this situation."):(c.feedback||"Not quite. Listen again and notice which response fits the scene.");$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
+ $("next").onclick=()=>{lessonSound("click");toast("Good. Now use it.");advance();};
 }
 function renderChallenge(c){
  const options=Array.isArray(c.options)&&c.options.length?c.options:[c.expected||c.answer||"Try your own response.","Ask for clarification.","Change the situation."];
@@ -170,7 +192,7 @@ function renderChallenge(c){
    b.classList.add(ok?"correct":"wrong");
    $("feedback").textContent=ok?(c.feedback||"That fits the situation."):(c.feedback||("Not quite. A more natural choice is: "+(c.answer||c.expected||"the first option.")));
    answers.push({type:"challenge",prompt:c.prompt,choice,correct:ok});
-   xp+=ok?12:5; $("next").disabled=false;
+   xp+=ok?12:5; $("next").disabled=false; lessonSound(ok?"correct":"wrong");
    toast(ok?"Nice choice.":"Good attempt — notice the difference.");
  });
  $("next").onclick=()=>advance();
@@ -190,7 +212,7 @@ function renderGuided(c){
  shell("Build it","Use the expression yourself. Change the details so the sentence belongs to you.",body,'<div class="actions"><button class="primary" id="submit">Check my practice →</button></div>');
  $("hear").onclick=()=>speak(phrase,profile.code); $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
  $("voice").onclick=()=>speechButton(c.expected||phrase,()=>{});
- $("submit").onclick=()=>{const v=$("input").value.trim()||voice?.text||"";if(!v){$("feedback").textContent="Say it or type your response before continuing.";return}const expected=c.expected||c.answer||"";const score=expected?similarity(v,expected):.5;answers.push({type:"guided",prompt:c.prompt,response:v,expected,score,voice});$("feedback").textContent=score>.55?(c.feedback||"Good. You used the expression."):("Good attempt. Compare your sentence with the model and notice what changes.");xp+=score>.55?15:6;toast(score>.55?"Practice complete.":"Good attempt.");$("submit").textContent="Continue →";$("submit").onclick=()=>advance();};
+ $("submit").onclick=()=>{const v=$("input").value.trim()||voice?.text||"";if(!v){$("feedback").textContent="Say it or type your response before continuing.";return}const expected=c.expected||c.answer||"";const score=expected?similarity(v,expected):.5;answers.push({type:"guided",prompt:c.prompt,response:v,expected,score,voice});$("feedback").textContent=score>.55?(c.feedback||"Good. You used the expression."):("Good attempt. Compare your sentence with the model and notice what changes.");xp+=score>.55?15:6;lessonSound(score>.55?"correct":"wrong");toast(score>.55?"Practice complete.":"Good attempt.");$("submit").textContent="Continue →";$("submit").onclick=()=>advance();};
 }
 function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
 function renderSpeak(c){const body='<div class="lesson-task-label">Say it naturally</div><div class="phrase">'+esc(c.phrase||"")+'</div><div class="meaning">'+esc(c.prompt)+'</div><div class="listen-row"><button class="secondary" id="hear">Hear it</button></div><textarea class="input" id="input" placeholder="Type it if you prefer…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak it</button></div><div class="notice" id="voiceStatus">Speaking is practice, not a gate. You can type and continue.</div>';shell("Now say it","You have already learned the language. Now put it in your mouth.",body,'<div class="actions"><div class="notice">Aim for natural rhythm, not perfection.</div><button class="primary" id="next">Continue →</button></div>');$("hear").onclick=()=>speak(c.phrase,profile.code);$("voice").onclick=()=>speechButton(c.phrase,()=>{});$("next").onclick=()=>{const v=$("input").value.trim()||voice?.text||"";answers.push({type:"speak",response:v,voice});xp+=v?15:5;toast(v?"You used it — nice.":"Keep practicing.");advance();};}
