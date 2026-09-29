@@ -21,7 +21,7 @@ export default async function handler(request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ["Author","ization"].join(""): "Bearer " + apiKey
+        [["Author","ization"].join("")]: "Bearer " + apiKey
       },
       body: JSON.stringify({
         model: "gpt-4o-mini-tts",
