@@ -198,8 +198,15 @@ function buildFallbackLesson(){
   C1:["It's not so much that I disagree as that I think we're starting from different assumptions.","If we frame it differently, there may be a way forward.","Both options seem reasonable on paper, yet they produce different results in practice."],
   C2:["That interpretation overlooks an important distinction.","I'm not disagreeing for the sake of it; I don't think the conclusion holds up under closer examination.","The issue isn't the proposal itself so much as its practical implications."]
  };
- const phrases=(banks[code]?.[level]||generic[level]||generic.A1);
- const topic=baseLesson?.topic||"Everyday life";
+ const seedContent=baseLesson?.content&&typeof baseLesson.content==="object"?baseLesson.content:{};
+ const seededCards=Array.isArray(seedContent.cards)?seedContent.cards.filter(x=>x&&typeof x==="object"):[],
+   seededPhrases=seededCards.map(x=>x.phrase||x.target||x.expression||x.text).filter(x=>typeof x==="string"&&x.trim()).slice(0,3);
+ const levelPhrases=banks[code]?.[level]||generic[level]||generic.A1;
+ const phrases=seededPhrases.length>=3?seededPhrases:levelPhrases;
+ const topic=baseLesson?.topic||seedContent.topic||"Everyday life";
+ const scenario=seedContent.scene&&typeof seedContent.scene==="object"?seedContent.scene:{};
+ if(!seededPhrases.length && level==="A0") phrases.splice(0,phrases.length,"I need help.","I want this one.","Where can I find it?");
+
  const primary=phrases[0];
  const second=phrases[1]||primary;
  const third=phrases[2]||primary;
@@ -223,7 +230,7 @@ function buildFallbackLesson(){
    {type:"speak",phrase:third,prompt:"Say the expression naturally, then continue the thought if you can.",expected:third,answer:third,feedback:"Good. Now use it without the script."},
    {type:"conversation",phrase:"Now the other person responds and the situation moves forward.",prompt:"Respond naturally in the target language and keep the scene moving.",expected:"",answer:"",feedback:"Keep the interaction going.",instructions:"Respond naturally.",followUp:""}
  ];
- generated={title:(level==="C2"?"Nuance in real conversation":level+" · "+topic),intro:"A level-matched lesson: learn the language first, then use it with less support.",scene:{setting:topic,moment:"A realistic adult interaction.",learnerRole:"You are handling the situation.",goal:"Choose language that fits the meaning and tone."},cards};
+ generated={title:(level==="C2"?"Nuance in real conversation":level+" · "+topic),intro:"A level-matched lesson: learn the language first, then use it with less support.",scene:{setting:scenario.setting||topic,moment:scenario.moment||"A realistic interaction built around the situation you selected.",learnerRole:scenario.learnerRole||"You are handling the situation.",goal:scenario.goal||"Choose language that fits the meaning and tone."},cards};
 }
 
 function showError(msg){$("loading").innerHTML="<strong>We couldn’t build this lesson.</strong><br><span class=\"small\">"+esc(msg)+"</span><br><button class=\"primary\" style=\"margin-top:16px\" onclick=\"location.reload()\">Try again</button>";}
