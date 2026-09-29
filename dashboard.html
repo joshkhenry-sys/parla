@@ -330,17 +330,33 @@ footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-co
         if (dashboardLevel) dashboardLevel.textContent = level;
         document.querySelectorAll("#myLanguagesGrid .dashboard-language-link").forEach(link => {
           link.addEventListener("click", async (event) => {
+            if(event.target.closest(".manage-button")) return;
             event.preventDefault();
-            const id = link.dataset.languageId;
-            if (!id || link.getAttribute("aria-current") === "page") return;
-            const { error: clearError } = await supabaseClient
-              .from("learner_languages").update({ is_current:false }).eq("user_id", user.id);
-            if (clearError) { console.error(clearError); return; }
-            const { error: setError } = await supabaseClient
-              .from("learner_languages").update({ is_current:true }).eq("id", id).eq("user_id", user.id);
-            if (setError) { console.error(setError); return; }
-            localStorage.setItem("Nahtive_current_learner_language", id);
-            window.location.href = "dashboard.html";
+            const id=link.dataset.languageId;
+            if(!id) return;
+            await supabaseClient.from("learner_languages").update({is_current:false}).eq("user_id",user.id);
+            await supabaseClient.from("learner_languages").update({is_current:true}).eq("id",id).eq("user_id",user.id);
+            localStorage.setItem("Nahtive_current_learner_language",id);
+            window.location.href="dashboard.html";
+          });
+        });
+        document.querySelectorAll("[data-manage-id]").forEach(button => {
+          button.addEventListener("click", () => {
+            const lang=learnerLanguages.find(row => row.id===button.dataset.manageId);
+            if(!lang) return;
+            const hub=document.getElementById("languageHub");
+            hub.classList.add("open");
+            const name=lang.languages?.name||"Language", level=lang.level||"A0";
+            hub.innerHTML="<div class='level-panel-head'><div><h3>"+escapeHtml(name)+" learning path</h3><p>Choose the level Nahtive should build lessons for. You can change it anytime.</p></div><button type='button' class='manage-button' id='closeHub'>Close</button></div><div class='level-options'>"+["A0","A1","A2","B1","B2","B2+","C1","C2"].map(l=>"<button type='button' class='level-option "+(l===level?"active":"")+"' data-level='"+l+"'>"+l+"</button>").join("")+"</div><div class='hub-actions'><a href='assessment.html?language_id="+encodeURIComponent(lang.id)+"&return=dashboard'>Retake placement</a></div>";
+            hub.querySelector("#closeHub").onclick=()=>hub.classList.remove("open");
+            hub.querySelectorAll(".level-option").forEach(opt=>opt.onclick=async()=>{
+              const newLevel=opt.dataset.level;
+              const {error}=await supabaseClient.from("learner_languages").update({level:newLevel}).eq("id",lang.id).eq("user_id",user.id);
+              if(error){console.error(error);return}
+              await supabaseClient.from("learner_events").insert({user_id:user.id,learner_language_id:lang.id,event_type:"level_manually_changed",event_data:{from:level,to:newLevel}});
+              localStorage.setItem("Nahtive_current_learner_language",lang.id);
+              window.location.reload();
+            });
           });
         });
       } catch (error) {
