@@ -71,18 +71,19 @@
 <script src="supabase-config.js"></script>
 <script>
 (async()=>{
-  document.documentElement.style.visibility="hidden";
   try{
+    if(!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY)return;
     const c=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
-    const {data}=await c.auth.getSession();
-    const u=data?.session?.user;
-    if(u){
-      const {data:l}=await c.from("learner_languages").select("id").eq("user_id",u.id).limit(1);
-      if(l&&l.length){window.location.replace("dashboard.html");return}
-      if(u.user_metadata?.nahtive_onboarding_pending){window.location.replace("onboarding.html?resume=1");return}
-    }
-  }catch(e){console.error("Could not resume learning:",e)}
-  document.documentElement.style.visibility="visible";
+    const result=await Promise.race([
+      c.auth.getSession(),
+      new Promise(resolve=>setTimeout(()=>resolve({data:{session:null}}),3500))
+    ]);
+    const u=result?.data?.session?.user;
+    if(!u)return;
+    const {data:l}=await c.from("learner_languages").select("id").eq("user_id",u.id).limit(1);
+    if(l&&l.length){window.location.replace("dashboard.html");return;}
+    if(u.user_metadata?.nahtive_onboarding_pending){window.location.replace("onboarding.html?resume=1");}
+  }catch(e){console.warn("Nahtive auth resume check skipped:",e)}
 })();
 </script>
 </body>
