@@ -47,10 +47,13 @@ export default async function handler(req, res) {
       difficulty,
       "Use one coherent real-world scene from beginning to end.",
       "For B2/B2+/C1/C2, make the scene intellectually or socially demanding: negotiation, disagreement, explaining a position, resolving ambiguity, making a nuanced request, telling a story, or navigating an awkward social moment.",
-      "Teach 3 to 5 high-value language chunks. Explain meaning, pronunciation, usage, and one natural example.",
-      "After teaching each chunk, check understanding without requiring speech.",
-      "Then give guided practice where the learner constructs or chooses a response using what was just taught.",
-      "Only after the learner has learned and practiced should speaking begin.",
+      "Teach exactly 3 high-value language chunks, one at a time. Every teach card MUST explicitly explain the phrase in clear English before the learner is asked to answer anything.",
+      "Each teach card must contain: target phrase, plain-English meaning, pronunciation, IPA, when a native speaker uses it, one natural target-language example, and an English explanation of why that example fits the scene.",
+      "Use this exact progression: teach chunk 1 -> check its meaning -> guided practice with it -> teach chunk 2 -> check its meaning -> guided practice -> teach chunk 3 -> check meaning/tone -> guided practice -> challenge -> speak -> short role-play.",
+      "Every check, guided, and challenge prompt MUST be written in the learner's native language (English in this product) and clearly state what the learner is being asked to do.",
+      "Checks must come only after the relevant phrase has been taught. Never introduce an unexplained target-language phrase inside a question and expect the learner to infer its meaning.",
+      "Guided practice must show the relevant phrase or a clear English situation before asking for a response. The learner should always know what they are trying to say.",
+      "Only after the learner has learned and practiced all three chunks should speaking begin.",
       "End with a short role-play that gradually becomes less scaffolded. Do not jump straight from repeating a phrase into free conversation.",
       "A0/A1: heavily scaffold the role-play and accept very short responses.",
       "A2/B1: require simple original responses and one follow-up.",
@@ -69,6 +72,7 @@ export default async function handler(req, res) {
       "C1/C2 progression: first expose a nuanced expression in context, then analyze what it communicates, then compare natural alternatives, then reformulate it for a different relationship or register, then use it spontaneously in the scene.",
       "C1/C2 questions should test pragmatic competence, not word difficulty. A correct answer should depend on what a native speaker would naturally choose in that exact context.",
       "Never pad an advanced lesson with greetings, alphabet material, basic introductions, beginner travel phrases, or elementary vocabulary merely to satisfy the lesson structure."
+      "Card ordering is mandatory. Return 12 to 14 cards and keep the teaching-to-practice progression coherent. Do not front-load questions. The learner should never reach a question containing unfamiliar target-language material without having first been taught it.",
       "Return ONLY JSON matching the schema."
     ].join(" ");
 
@@ -177,7 +181,7 @@ export default async function handler(req, res) {
     const basicGreetingPattern = /^(hola|hello|hi|buenos d[ií]as|buenas|hey|bonjour|hallo|ciao|oi|ol[aá])\b/i;
     const advancedTeachIsTooBasic = ["B1","B2","B2+","C1","C2"].includes(level) && cards.some(c => c.type === "teach" && basicGreetingPattern.test(String(c.phrase || "").trim()));
 
-    const hasLearning = teachCount >= 3 && checkCount >= 2;
+    const hasLearning = teachCount === 3 && checkCount >= 3;
     const challengeCount = cards.filter(c => c.type === "challenge").length;
     const hasPractice = guidedCount >= 2;
     const hasChallenge = challengeCount >= 1;
