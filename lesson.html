@@ -82,25 +82,18 @@ function renderTeach(c){
  $("next").onclick=()=>{xp+=5;toast("Meaning locked in.");advance();};
 }
 function renderCheck(c){
- let answered=false;
- const phrase=c.phrase||"";
- const body='<div class="lesson-task-label">First, make sure you understand it</div>'+
-   (phrase?'<div class="phrase compact">'+esc(phrase)+'</div>':'')+
-   '<div class="task-question">'+esc(c.prompt||"What does this expression mean in this situation?")+'</div>'+
+ let answered=false; const phrase=c.phrase||"";
+ const body='<div class="lesson-task-label">SEE IT · HEAR IT</div>'+
+   '<div class="phrase">'+esc(phrase)+'</div>'+
+   '<div class="pron"><strong>How to say it</strong><br>'+esc(c.pronunciation||phrase)+(c.ipa?' · '+esc(c.ipa):'')+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Hear it</button><button class="secondary" id="hearExample">Hear example</button></div>'+
+   '<div class="task-question">'+esc(c.prompt||"Which response uses the expression naturally?")+'</div>'+
    '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'">'+esc(o)+'</button>').join("")+'</div>'+
-   '<div class="notice feedback" id="feedback">Read the question first. Then choose the meaning that fits the scene.</div>';
- shell("Check your understanding","You just learned this. Now prove the meaning landed before we move on.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
- document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{
-   if(answered)return; answered=true;
-   const choice=c.options[Number(b.dataset.i)];
-   const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer)>.86;
-   document.querySelectorAll(".option").forEach(x=>x.disabled=true);
-   b.classList.add(ok?"correct":"wrong");
-   $("feedback").textContent=ok?(c.feedback||"Exactly. You understood what it means."):("Not quite. "+(c.feedback||"The answer is "+c.answer+"."));
-   $("next").disabled=false; xp+=ok?8:3;
-   answers.push({type:"check",prompt:c.prompt,choice,correct:ok});
- });
- $("next").onclick=()=>{toast("Meaning locked in. Now use it.");advance();};
+   '<div class="notice feedback" id="feedback">Listen first. Then choose the response that sounds natural.</div>';
+ shell("Practice it","You should be able to see it and hear it before you are asked to use it.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
+ $("hear").onclick=()=>speak(phrase,profile.code); $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
+ document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"That sounds natural here."):("Not quite. "+(c.feedback||"Listen again and notice the difference."));$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
+ $("next").onclick=()=>{toast("Good. Now use it.");advance();};
 }
 function renderChallenge(c){
  const options=Array.isArray(c.options)&&c.options.length?c.options:[c.expected||c.answer||"Try your own response.","Ask for clarification.","Change the situation."];
