@@ -208,17 +208,6 @@
             + Add another later
           </button>
         </div>
-
-        <div class="controls">
-
-          <button class="continue-btn"
-            type="button"
-            onclick="nextStep()"
-            disabled>
-            Continue
-          </button>
-        </div>
-
       </section>
 
 
@@ -343,17 +332,6 @@
           </button>
 
         </div>
-
-        <div class="controls">
-
-          <button class="continue-btn"
-            type="button"
-            onclick="nextStep()"
-            disabled>
-            Continue
-          </button>
-        </div>
-
       </section>
 
 
@@ -464,17 +442,6 @@
           </button>
 
         </div>
-
-        <div class="controls">
-
-          <button class="continue-btn"
-            type="button"
-            onclick="nextStep()"
-            disabled>
-            Continue
-          </button>
-        </div>
-
       </section>
 
 
@@ -562,34 +529,8 @@
       });
     }
 
-    function updateContinueButton() {
-      const current = document.querySelector(
-        `.step[data-step="${currentStep}"]`
-      );
-
-      if (!current) return;
-
-      const button = current.querySelector(".continue-btn");
-
-      if (!button) return;
-
-      let enabled = false;
-
-      if (currentStep === 1) {
-        enabled = !!state.targetLanguage;
-      }
-
-      if (currentStep === 2) {
-        enabled = !!state.NahtiveLanguage;
-      }
-
-      if (currentStep === 3) {
-        enabled = !!state.level;
-      }
-
-      button.disabled = !enabled;
-    }
-
+    function updateContinueButton() {}
+    
     function nextStep() {
       if (currentStep < 3) {
         showStep(currentStep + 1);
@@ -651,6 +592,14 @@
         }
 
         updateContinueButton();
+
+        if (currentStep === 1 && state.targetLanguage) {
+          setTimeout(() => showStep(2), 120);
+        } else if (currentStep === 2 && state.NahtiveLanguage) {
+          setTimeout(() => showStep(3), 120);
+        } else if (currentStep === 3 && state.level) {
+          setTimeout(() => finishOnboarding(), 120);
+        }
       });
 
     });
@@ -906,10 +855,7 @@
     }
 
     redirectReturningLearner();
-    applyPendingProfile().then(() => {
-      updateProgress();
-      updateContinueButton();
-    });
+    applyPendingProfile().then(() => updateProgress());
   </script>
 
 </body>
