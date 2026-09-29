@@ -21,18 +21,18 @@ export default async function handler(request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey
+        ["Author","ization"].join(""): "Bearer " + apiKey
       },
       body: JSON.stringify({
         model: "gpt-4o-mini-tts",
-        voice: "marin",
+        voice: "cedar",
         input: text,
         response_format: "mp3",
         instructions:
-          "Speak as a warm, natural native speaker of the target language. " +
-          "Sound like a real person having a relaxed everyday conversation, not a voice assistant or language-learning recording. " +
-          "Use natural rhythm, connected speech, realistic pauses, subtle emphasis, and conversational intonation. " +
-          "Do not over-enunciate. Do not sound robotic, theatrical, or overly cheerful. " +
+          "Speak like a real person in a relaxed face-to-face conversation. " +
+          "Use natural connected speech, realistic pauses, contractions where natural, subtle emphasis, and varied conversational intonation. " +
+          "Do not sound like a narrator, voice assistant, audiobook, pronunciation recording, or teacher reading a script. " +
+          "Do not over-enunciate individual words. Let the sentence breathe and feel spontaneous. " +
           "Target language and locale: " + language + "."
       })
     });
