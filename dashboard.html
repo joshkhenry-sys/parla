@@ -91,18 +91,29 @@
 
     async function loadRealStreak(userId) {
       const el = document.getElementById("streakText");
-      if (!el) return;
+      const xpEl = document.getElementById("xpText");
+      if (!el || !xpEl) return;
+
       const { data, error } = await supabaseClient
         .from("learner_events")
-        .select("created_at")
+        .select("event_type,event_data,created_at")
         .eq("user_id", userId)
+        .eq("event_type", "lesson_completed")
         .order("created_at", { ascending: false })
-        .limit(500);
-      if (error) { el.textContent = "Start speaking"; return; }
-      const days = new Set((data || []).map(row => {
+        .limit(1000);
+
+      if (error) {
+        el.textContent = "0 day streak";
+        xpEl.textContent = "0 XP";
+        return;
+      }
+
+      const completedEvents = data || [];
+      const days = new Set(completedEvents.map(row => {
         const d = new Date(row.created_at);
         return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString();
       }).filter(Boolean));
+
       let streak = 0;
       const cursor = new Date();
       cursor.setHours(0,0,0,0);
@@ -110,15 +121,14 @@
         streak++;
         cursor.setDate(cursor.getDate() - 1);
       }
-      const xpEl = document.getElementById("xpText");
-      const xpRows = (data || []).filter(row => row.event_type === "lesson_completed");
-      let xpTotal = xpRows.reduce((sum,row) => sum + Number(row.event_data?.xp || 0), 0);
-      if (xpEl) xpEl.textContent = xpTotal + " XP";
-      if (streak === 0) {
-        el.textContent = days.size ? "Keep going" : "Start today";
-      } else {
-        el.textContent = streak + (streak === 1 ? " day" : " days") + " active";
-      }
+
+      const xpTotal = completedEvents.reduce((sum,row) => {
+        const earned = Number(row.event_data?.xp);
+        return sum + (Number.isFinite(earned) && earned > 0 ? earned : 0);
+      }, 0);
+
+      xpEl.textContent = Math.round(xpTotal) + " XP";
+      el.textContent = streak === 0 ? "0 day streak" : streak + (streak === 1 ? " day" : " days") + " streak";
     }
 
     async function loadSavedLessons(learnerLanguageId, languageName) {
