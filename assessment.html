@@ -169,10 +169,11 @@ function choose(i){
 document.getElementById("next").addEventListener("click",()=>{if(selected===null)return;const item=questions[index];if(selected===item.answer)scoreByLevel[item.level]++;if(index<questions.length-1){index++;render()}else{finish()}});
 function calculateLevel(){
   const order=["A0","A1","A2","B1","B2","C1","C2"];
-  let level="A0",correct=0,total=0;
+  // Placement is conservative: a learner must demonstrate the level itself,
+  // not merely accumulate enough easy answers from lower bands.
+  let level="A0";
   for(const l of order){
-    correct+=scoreByLevel[l]; total+=2;
-    if(correct/total>=0.75) level=l;
+    if(scoreByLevel[l] >= 2) level=l;
     else break;
   }
   return level;
