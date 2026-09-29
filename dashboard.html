@@ -186,19 +186,6 @@
 
         await loadRealStreak(user.id);
         localStorage.setItem("Nahtive_current_learner_language", learnerLanguage.id);
-        const { data: placement } = await supabaseClient
-          .from("learner_events")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("learner_language_id", learnerLanguage.id)
-          .eq("event_type", "placement_completed")
-          .limit(1);
-        await loadSavedLessons(learnerLanguage.id, languageName);
-        const startButton = document.getElementById("startLessonButton");
-        if (startButton && !placement?.length && (learnerLanguage.level || "A0") === "A0") {
-          startButton.innerHTML = "Check my level <span>→</span>";
-          startButton.onclick = startLesson;
-        }
 
         const myLanguagesGrid = document.getElementById("myLanguagesGrid");
         if (myLanguagesGrid) {
@@ -284,7 +271,8 @@
           });
         });
         document.querySelectorAll("[data-manage-id]").forEach(button => {
-          button.addEventListener("click", () => {
+          button.addEventListener("click", (event) => {
+            event.preventDefault(); event.stopPropagation();
             const lang=learnerLanguages.find(row => row.id===button.dataset.manageId);
             if(!lang) return;
             const hub=document.getElementById("languageHub");
@@ -327,21 +315,11 @@
           .order("is_current", { ascending:false });
         if (error || !langs?.length) { window.location.href = "onboarding.html"; return; }
         const current = langs.find(row => row.id === savedId) || langs.find(row => row.is_current) || langs[0];
-        const { data: placement } = await supabaseClient
-          .from("learner_events")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("learner_language_id", current.id)
-          .eq("event_type", "placement_completed")
-          .limit(1);
-        if (!placement?.length) {
-          window.location.href = "assessment.html?language_id=" + encodeURIComponent(current.id) + "&return=lesson";
-          return;
-        }
+        localStorage.setItem("Nahtive_current_learner_language", current.id);
         window.location.href = "lesson.html";
       } catch (error) {
-        console.error("Placement check failed:", error);
-        window.location.href = "assessment.html?return=lesson";
+        console.error("Could not start lesson:", error);
+        window.location.href = "lesson.html";
       }
     }
 
