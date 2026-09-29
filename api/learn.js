@@ -18,9 +18,9 @@ export default async function handler(req, res) {
       : "Everyday life";
 
     const difficulty = {
-      A0: "Start extremely gently. Teach survival language, one idea at a time. Use short phrases and lots of English support.",
-      A1: "Build a small practical foundation. Teach short chunks, then simple substitutions and responses.",
-      A2: "Move from memorized phrases into short original responses. Add common connectors and everyday variations.",
+      A0: "Treat A0 as Pre-A1. Teach only isolated words, very short fixed expressions, and immediate needs. Prefer 1–3 target-language words per chunk, with English support. Do not use full sentences unless absolutely necessary. No idioms, slang, subordinate clauses, tense contrasts, abstract vocabulary, or long questions. Examples must also be extremely short and concrete.",
+      A1: "Use true beginner language: familiar everyday expressions, personal details, basic needs, simple one-clause sentences, and very short questions. Avoid idioms, slang, abstract language, and multi-clause sentences.",
+      A2: "Use short routine exchanges and simple original sentences about familiar topics. Add basic connectors and common everyday variations, but keep grammar and vocabulary concrete.",
       B1: "Use natural everyday speech, follow-up questions, paraphrases, and a little slang or idiomatic language when appropriate.",
       "B2": "Use nuanced everyday language, register, natural fillers, implied meaning, and flexible responses.",
       "B2+": "Expect spontaneous speech. Include nuance, tone, alternatives, and realistic social pressure.",
@@ -41,13 +41,13 @@ export default async function handler(req, res) {
       "Build a complete lesson, not a vocabulary drill and not a conversation-only activity.",
       "The lesson must teach first and gradually move toward independent speaking.",
       "The target language is authoritative: never substitute another language.",
-      "The learner level is authoritative. Never teach below the requested level. A B1/B2/B2+/C1/C2 learner must NOT receive beginner greetings, alphabet material, survival phrases, or elementary vocabulary unless the advanced task is explicitly analyzing register or nuance.",
+      "The learner level is authoritative. Match the requested level exactly. A0 means Pre-A1, A1 means true beginner, A2 means elementary, B1 means intermediate, B2/B2+ means upper-intermediate, and C1/C2 means advanced. Never use advanced language just because it sounds more interesting. A0/A1 lessons must be genuinely easy before difficulty rises."",
       "For C1/C2, assume the learner already knows common greetings, introductions, basic requests, and everyday beginner vocabulary. Start with sophisticated, high-frequency native language used in real adult conversation."
       "Everything in the target language must sound like something a real speaker would actually say.",
       difficulty,
-      "Use one coherent real-world scene from beginning to end.",
+      "Use one coherent real-world scene from beginning to end. The scene must be scaled to the learner: A0 should be a tiny survival moment such as greeting, choosing, paying, yes/no, or identifying a basic item; A1 should be a simple everyday interaction; A2 should be a routine exchange with a little flexibility; higher levels can introduce social pressure and nuance.",
       "For B2/B2+/C1/C2, make the scene intellectually or socially demanding: negotiation, disagreement, explaining a position, resolving ambiguity, making a nuanced request, telling a story, or navigating an awkward social moment.",
-      "Teach exactly 3 high-value language chunks, one at a time. Every teach card MUST explicitly explain the phrase in clear English before the learner is asked to answer anything.",
+      "Teach exactly 3 high-value language chunks, one at a time. Every teach card MUST explicitly explain the phrase in clear English before the learner is asked to answer anything. Level constraints are hard requirements: A0 chunks should normally be 1–3 target-language words; A1 chunks should normally be short fixed expressions or one-clause sentences; A2 chunks can be short routine sentences; B1+ can become progressively more natural, idiomatic, and nuanced.",
       "Each teach card must contain: target phrase, plain-English meaning, pronunciation, IPA, when a native speaker uses it, one natural target-language example, and an English explanation of why that example fits the scene.",
       "Use this exact progression: teach chunk 1 -> check its meaning -> guided practice with it -> teach chunk 2 -> check its meaning -> guided practice -> teach chunk 3 -> check meaning/tone -> guided practice -> challenge -> speak -> short role-play.",
       "Every check, guided, and challenge prompt MUST be written in the learner's native language (English in this product) and clearly state what the learner is being asked to do.",
@@ -172,6 +172,17 @@ export default async function handler(req, res) {
     catch { return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned invalid lesson data.", requestId }); }
 
     const cards = Array.isArray(lesson.cards) ? lesson.cards : [];
+    const levelLimits = {
+      A0: { phraseMax: 4, exampleMax: 7 },
+      A1: { phraseMax: 9, exampleMax: 12 },
+      A2: { phraseMax: 14, exampleMax: 18 }
+    };
+    const limit = levelLimits[level];
+    const levelContentTooHard = limit && cards.some(c => {
+      const phraseWords = String(c.phrase || "").trim().split(/\s+/).filter(Boolean).length;
+      const exampleWords = String(c.example || "").trim().split(/\s+/).filter(Boolean).length;
+      return phraseWords > limit.phraseMax || exampleWords > limit.exampleMax;
+    });
     const types = cards.map(c => c.type);
     const teachCount = cards.filter(c => c.type === "teach").length;
     const checkCount = cards.filter(c => c.type === "check").length;
@@ -188,7 +199,7 @@ export default async function handler(req, res) {
     const hasSpeaking = speakCount >= 1;
     const hasConversation = conversationCount >= 1;
 
-    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasChallenge || !hasSpeaking || !hasConversation || advancedTeachIsTooBasic) {
+    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasChallenge || !hasSpeaking || !hasConversation || advancedTeachIsTooBasic || levelContentTooHard) {
       return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete lesson structure.", requestId });
     }
 
