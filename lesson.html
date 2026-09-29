@@ -200,7 +200,6 @@ function buildFallbackLesson(){
  };
  const phrases=(banks[code]?.[level]||generic[level]||generic.A1);
  const topic=baseLesson?.topic||"Everyday life";
- const cards=phrases.slice(0,3).map((phrase,i)=>({type:"teach",phrase,pronunciation:phrase,ipa:"",meaning:i===0?"A natural phrase for this level and situation.":"A second useful expression you can adapt in the same situation.",usage:"Use it naturally in the scene; focus on meaning and tone.",example:phrase}));
  const primary=phrases[0];
  const second=phrases[1]||primary;
  const third=phrases[2]||primary;
