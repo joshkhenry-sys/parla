@@ -55,7 +55,7 @@ nav{height:78px;display:flex;align-items:center;justify-content:space-between}
 footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;font-weight:700}.footer-links{display:flex;gap:20px}
 @media(max-width:900px){.container{width:min(100% - 28px,650px)}.dashboard-hero{display:block;padding-top:25px}.dashboard-hero .eyebrow{margin-bottom:16px}.dashboard-hero p{margin-top:20px}.dashboard-grid{grid-template-columns:1fr}.dashboard-language-grid{grid-template-columns:repeat(2,1fr)}.quick-grid{grid-template-columns:1fr 1fr}.recommended,.progress-card{min-height:390px}}
 @media(max-width:520px){.nav-right .streak{display:none}.dashboard-hero h1{font-size:42px;letter-spacing:-2px}.recommended{padding:24px}.recommended h2{margin-top:82px;font-size:34px}.quick-grid{grid-template-columns:1fr}.quick-card{min-height:180px}.quick-card h3{margin-top:50px}.dashboard-language-grid{grid-template-columns:1fr 1fr}}
-</style><link rel="stylesheet" href="nahtive.css"></head>
+</style><style>.manage-button{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 10px;border-radius:10px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.7px}.manage-button:hover{background:var(--blue)}.level-panel{display:none;margin-top:14px;padding:18px;border:1px solid var(--line);border-radius:18px;background:#faf9f4}.level-panel.open{display:block}.level-panel-head{display:flex;justify-content:space-between;align-items:start;gap:15px}.level-panel h3{font-size:19px}.level-panel p{font-size:11px;color:var(--muted);margin-top:5px}.level-options{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:15px}.level-option{border:1px solid var(--line);background:#fff;padding:10px 4px;border-radius:9px;font-size:10px;font-weight:850;color:var(--muted)}.level-option.active{background:var(--ink);color:#fff}@media(max-width:650px){.level-options{grid-template-columns:repeat(4,1fr)}}</style><link rel="stylesheet" href="nahtive.css"></head>
 <body>
 <div class="container">
 <nav>
@@ -94,7 +94,7 @@ footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-co
 
 <section class="language-switcher-section">
   <div class="section-title">My languages</div>
-  <div class="card language-switcher-card"><div class="dashboard-language-grid" id="myLanguagesGrid"><div style="grid-column:1/-1;padding:14px;color:var(--muted);font-size:13px;">Loading your languages…</div></div></div>
+  <div class="card language-switcher-card"><div class="dashboard-language-grid" id="myLanguagesGrid"><div style="grid-column:1/-1;padding:14px;color:var(--muted);font-size:13px;">Loading your languages…</div></div><div id="languageHub" class="level-panel"></div></div>
 </section>
 
 <section class="language-switcher-section" style="margin-top:36px">
@@ -262,8 +262,7 @@ footer{margin-top:70px;padding:24px 0 36px}.footer-inner{display:flex;justify-co
           myLanguagesGrid.innerHTML = (learnerLanguages || []).map(language => {
             const name = language.languages?.name || "Language";
             const current = language.is_current;
-            return '<a class="dashboard-language-link ' + (current ? 'current' : '') + '" href="#" data-language-id="' + escapeHtml(language.id) + '"' +
-              (current ? ' aria-current="page"' : '') + '><span>' + escapeHtml(name) + '</span><span style="margin-left:7px;font-size:11px;color:var(--muted);">' + escapeHtml(language.level || "A0") + '</span></a>';
+            return '<div class="dashboard-language-link '+(current ? 'current' : '')+'" data-language-id="'+escapeHtml(language.id)+'"><span>'+escapeHtml(name)+' · '+escapeHtml(language.level || "A0")+'</span><button type="button" class="manage-button" data-manage-id="'+escapeHtml(language.id)+'">Manage</button></div>';
           }).join("") || '<div style="grid-column:1/-1;color:var(--muted);font-size:14px;">No languages added yet.</div>';
         }
 
