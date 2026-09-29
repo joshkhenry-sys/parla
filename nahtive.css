@@ -333,3 +333,50 @@ nav::after{
   }
   .reveal{opacity:1;transform:none}
 }
+
+
+/* NAHTIVE LESSON BREATHING + TEACHING HIERARCHY */
+.lesson{max-width:860px;margin:58px auto 100px!important}
+.lesson .context{padding:0 8px 18px}
+.lesson .context h1{margin-top:10px;max-width:720px}
+.lesson .context>p{margin-top:16px;max-width:650px;line-height:1.8;font-size:16px}
+.lesson .scene{margin-top:26px;padding:30px 32px!important;line-height:1.75}
+.lesson .main{margin-top:32px!important}
+.stage{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.bar{margin-top:12px;height:8px}
+#card{margin-top:30px}
+.lesson .card{padding:44px 48px!important;border-radius:28px!important}
+.lesson .card h2{margin-bottom:10px}
+.lesson .card .sub{max-width:620px;color:var(--muted);font-size:14px;line-height:1.75}
+.lesson-task-label{margin-top:28px;color:var(--sageDeep);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.lesson .phrase{margin-top:22px;max-width:700px;font-size:clamp(30px,4vw,46px);line-height:1.14}
+.lesson .phrase.compact{font-size:clamp(24px,3vw,34px);margin-top:22px}
+.lesson .meaning{margin-top:22px;padding:20px 22px;border-radius:18px;background:var(--sageSoft);color:var(--ink);font-size:17px;line-height:1.65}
+.lesson .meaning::before{content:"Meaning";display:block;margin-bottom:7px;color:var(--sageDeep);font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.lesson .pron{margin-top:24px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;line-height:1.7}
+.lesson .usage,.lesson .example{margin-top:22px;padding:18px 20px;border-radius:16px;background:var(--surface2);font-size:14px;line-height:1.75}
+.lesson .example strong,.lesson .usage strong{display:block;margin-bottom:5px;color:var(--ink)}
+.lesson .listen-row{margin-top:28px;gap:12px}
+.lesson .actions{margin-top:34px;padding-top:28px;border-top:1px solid var(--line);justify-content:space-between;align-items:center}
+.lesson .actions .notice{max-width:470px}
+.lesson .options{margin-top:26px;gap:12px}
+.lesson .option{min-height:62px;padding:17px 19px!important;border-radius:16px!important;font-size:14px;line-height:1.5}
+.lesson .task-question{margin-top:24px;font-size:19px;font-weight:650;line-height:1.55;max-width:680px}
+.lesson .task-context{margin-top:14px;padding:16px 18px;border-left:3px solid var(--sage);background:var(--surface2);color:var(--muted);line-height:1.7;border-radius:0 14px 14px 0}
+.lesson .feedback{margin-top:18px!important;line-height:1.65}
+.lesson .input{width:100%;min-height:120px;padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);resize:vertical;outline:none}
+.lesson .input:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(135,155,104,.12)}
+.lesson .chat{margin-top:26px;gap:16px}
+.lesson .bubble{max-width:78%;padding:16px 18px;border-radius:18px;line-height:1.65}
+.lesson .complete{padding:58px 48px!important}
+.lesson-toast{bottom:32px}
+@media(max-width:600px){
+ .lesson{margin-top:34px!important;margin-bottom:70px!important}
+ .lesson .card{padding:30px 22px!important}
+ .lesson .scene{padding:22px!important}
+ .lesson .actions{align-items:stretch;flex-direction:column}
+ .lesson .actions .primary{width:100%}
+ .lesson .phrase{font-size:32px}
+ .lesson .meaning{font-size:15px;padding:17px 18px}
+ .lesson .task-question{font-size:17px}
+}
