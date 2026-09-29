@@ -71,7 +71,7 @@ export default async function handler(req, res) {
       "Advanced curriculum rule: do not structure C1/C2 as beginner lessons with harder vocabulary. The task itself must require advanced language judgment. Include at least one contrast between two plausible expressions, one reformulation task, one implied-meaning or tone task, and one moment where the social context changes and the learner must adapt.",
       "C1/C2 progression: first expose a nuanced expression in context, then analyze what it communicates, then compare natural alternatives, then reformulate it for a different relationship or register, then use it spontaneously in the scene.",
       "C1/C2 questions should test pragmatic competence, not word difficulty. A correct answer should depend on what a native speaker would naturally choose in that exact context.",
-      "Never pad an advanced lesson with greetings, alphabet material, basic introductions, beginner travel phrases, or elementary vocabulary merely to satisfy the lesson structure."
+      "Never pad an advanced lesson with greetings, alphabet material, basic introductions, beginner travel phrases, or elementary vocabulary merely to satisfy the lesson structure.",
       "Card ordering is mandatory. Return 12 to 14 cards and keep the teaching-to-practice progression coherent. Do not front-load questions. The learner should never reach a question containing unfamiliar target-language material without having first been taught it.",
       "Return ONLY JSON matching the schema."
     ].join(" ");
@@ -140,7 +140,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
       body: JSON.stringify({
-        model: "gpt-5.6-luna",
+        model: "gpt-4o-mini",
         reasoning: { effort: "low" },
         max_output_tokens: 5000,
         instructions: systemPrompt,
