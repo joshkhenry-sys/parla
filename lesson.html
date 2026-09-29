@@ -38,15 +38,21 @@ let activeAudio=null;
 async function speak(text,lang){
  if(!text)return false;
  const targetLang=lang||profile?.code||"en-US";
+ const buttons=[...document.querySelectorAll("#hear,#hearExample")];
+ const button=buttons.find(b=>b.matches(":focus"));
+ const original=button?.textContent;
+ if(button){button.disabled=true;button.textContent="Playing…";}
  try{
    if(activeAudio){activeAudio.pause();activeAudio=null}
    const res=await fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:String(text).slice(0,1200),language:targetLang})});
-   if(!res.ok)throw new Error("TTS unavailable");
+   if(!res.ok)throw new Error("TTS request failed: "+res.status);
    const blob=await res.blob();
-   if(!blob.size)throw new Error("Empty audio");
+   if(!blob.size)throw new Error("Empty audio response");
    const url=URL.createObjectURL(blob);
-   const audio=new Audio(url);
+   const audio=new Audio();
    activeAudio=audio;
+   audio.preload="auto";
+   audio.src=url;
    audio.onended=()=>{URL.revokeObjectURL(url);if(activeAudio===audio)activeAudio=null};
    audio.onerror=()=>{URL.revokeObjectURL(url);if(activeAudio===audio)activeAudio=null};
    await audio.play();
@@ -57,7 +63,9 @@ async function speak(text,lang){
      if("speechSynthesis"in window){
        speechSynthesis.cancel();
        const u=new SpeechSynthesisUtterance(String(text));
-       u.lang=targetLang;u.rate=.94;u.pitch=1;
+       u.lang=targetLang;
+       u.rate=.9;
+       u.pitch=1;
        const voices=speechSynthesis.getVoices();
        const base=targetLang.split("-")[0].toLowerCase();
        const match=voices.find(v=>v.lang?.toLowerCase().startsWith(base));
@@ -67,7 +75,10 @@ async function speak(text,lang){
        return true;
      }
    }catch(fallbackError){console.warn("Nahtive browser voice unavailable:",fallbackError)}
+   toast("Audio is unavailable right now. Try again.");
    return false;
+ }finally{
+   if(button){button.disabled=false;button.textContent=original||"Hear it";}
  }
 }
 function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();}
