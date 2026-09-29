@@ -15,3 +15,324 @@ input,textarea,select{width:100%;border:1px solid var(--line)!important;border-r
 .hero{padding:95px 0 110px;display:grid;grid-template-columns:1.1fr .9fr;gap:80px;align-items:end}.hero h1,.cta h2,.statement h2{font-family:var(--font)!important;font-weight:700!important;letter-spacing:-.055em!important}.hero h1{font-size:clamp(52px,8vw,94px);line-height:.95}.hero h1 em{text-decoration:underline;text-decoration-color:var(--sage);text-decoration-thickness:7px;text-underline-offset:7px}.hero-copy{max-width:390px;color:var(--muted);font-size:15px;line-height:1.7}.actions{margin-top:28px;display:flex;gap:9px;flex-wrap:wrap}.statement{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:75px 0;display:grid;grid-template-columns:1fr 1fr;gap:80px}.statement h2{font-size:42px;line-height:1.03}.statement p{max-width:430px;color:var(--muted);line-height:1.7}.steps{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}.step{padding:50px 25px 60px 0;border-right:1px solid var(--line)}.step+.step{padding-left:25px}.step:last-child{border-right:0}.step h3{margin:55px 0 10px;font-size:26px}.step p{max-width:270px;color:var(--muted);font-size:13px}.cta{padding:105px 0 120px}.cta h2{max-width:800px;font-size:clamp(45px,6vw,76px);line-height:.98}.cta p{margin:18px 0 24px;color:var(--muted)}.footer,.footer-inner{border-top:1px solid var(--line);padding:22px 0 34px;color:var(--muted);font-size:10px}.footer-inner,.footer{display:flex;justify-content:space-between;gap:15px}.footer-links{display:flex;gap:18px}.hidden{display:none!important}.loading{color:var(--muted)}.toast,.lesson-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 14px;border-radius:999px;background:var(--ink);color:#fff;font-size:11px;box-shadow:var(--shadow);z-index:50}
 @media(max-width:900px){.container,.shell,.page,.wrap{width:min(100% - 32px,700px)}.dashboard-grid,.overview,.two-column,.hero,.statement{grid-template-columns:1fr}.dashboard-hero{padding-top:28px}.quick-grid{grid-template-columns:1fr 1fr}.dashboard-language-grid{grid-template-columns:repeat(2,1fr)}.language-grid,.big-options{grid-template-columns:1fr 1fr}.hero{gap:40px;padding:70px 0 80px}.steps{grid-template-columns:1fr}.step,.step+.step{padding:34px 0;border-right:0;border-bottom:1px solid var(--line)}.step:last-child{border-bottom:0}}
 @media(max-width:600px){.container,.shell,.page,.wrap{width:calc(100% - 24px)}nav,.nav{min-height:68px}.nav-right .streak{display:none}.dashboard-hero h1{font-size:42px}.recommended,.progress-card{min-height:360px;padding:24px!important}.recommended h2{margin-top:78px;font-size:32px}.quick-grid,.summary{grid-template-columns:1fr}.quick-card{min-height:170px}.level-options{grid-template-columns:repeat(4,1fr)}.question{font-size:20px}.panel,.card,.review-card,.login-card,.signup-wrap>.card{padding:21px!important}.composer{flex-wrap:wrap}.input-wrap{min-width:100%}.language-grid,.big-options{grid-template-columns:1fr}.controls{flex-direction:column-reverse}.controls>*{width:100%;justify-content:center}.hero h1{font-size:54px}.statement h2{font-size:34px}.footer,.footer-inner{flex-direction:column}}
+
+/* =========================================================
+   NAHTIVE EXPERIENCE LAYER
+   ========================================================= */
+
+:root{
+  --nahtive-cream:#f8f4e9;
+  --nahtive-paper:#fffdf8;
+  --nahtive-sage:#91a86f;
+  --nahtive-sage-dark:#536445;
+  --nahtive-coral:#e99b83;
+  --nahtive-blue:#a9cfe0;
+  --nahtive-yellow:#f0d77a;
+  --nahtive-ink:#334039;
+}
+
+body{
+  background:
+    radial-gradient(circle at 8% 12%, rgba(240,215,122,.18), transparent 23%),
+    radial-gradient(circle at 92% 8%, rgba(169,207,224,.2), transparent 25%),
+    var(--nahtive-cream)!important;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  width:420px;
+  height:420px;
+  left:-220px;
+  top:34%;
+  border-radius:48% 52% 63% 37% / 42% 38% 62% 58%;
+  background:rgba(145,168,111,.10);
+  filter:blur(2px);
+  pointer-events:none;
+  z-index:-1;
+  animation:nahtiveFloat 14s ease-in-out infinite alternate;
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  width:300px;
+  height:300px;
+  right:-150px;
+  bottom:5%;
+  border-radius:55% 45% 37% 63% / 49% 58% 42% 51%;
+  background:rgba(233,155,131,.10);
+  pointer-events:none;
+  z-index:-1;
+  animation:nahtiveFloatReverse 17s ease-in-out infinite alternate;
+}
+
+.logo{
+  position:relative;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.logo:hover{transform:translateY(-2px)}
+.logo span,.logo i{
+  display:inline-block;
+  animation:nahtivePulse 2.8s ease-in-out infinite;
+}
+
+nav{
+  position:relative;
+  z-index:10;
+}
+
+nav::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--line),transparent);
+  opacity:.65;
+}
+
+.primary,.primary-button,.next,.submit-btn,.continue-btn,.continue-button,.start-btn{
+  background:var(--nahtive-ink)!important;
+  box-shadow:0 8px 0 rgba(83,100,69,.10),0 14px 30px rgba(51,64,57,.10);
+  transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s ease,background .22s ease!important;
+}
+.primary:hover,.primary-button:hover,.next:hover,.submit-btn:hover,.continue-btn:hover,.continue-button:hover,.start-btn:hover{
+  transform:translateY(-3px) scale(1.015);
+  box-shadow:0 11px 0 rgba(83,100,69,.10),0 20px 36px rgba(51,64,57,.14);
+}
+.primary:active,.primary-button:active,.next:active,.submit-btn:active,.continue-btn:active,.continue-button:active,.start-btn:active{
+  transform:translateY(1px) scale(.99);
+}
+
+.card,.panel,.activity-card,.language-switcher-card,.topic-card,.level-card,.streak-card,.review-card,.summary-card,.insight-card,.vocab-card,.why-card,.login-card,.signup-wrap>.card{
+  box-shadow:0 14px 40px rgba(51,64,57,.055)!important;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease,border-color .28s ease;
+}
+.card:hover,.panel:hover,.activity-card:hover,.language-switcher-card:hover,.topic-card:hover,.level-card:hover,.streak-card:hover,.review-card:hover,.summary-card:hover,.insight-card:hover,.vocab-card:hover,.why-card:hover{
+  box-shadow:0 20px 48px rgba(51,64,57,.09)!important;
+}
+
+.dashboard-hero{
+  position:relative;
+  padding-top:58px;
+}
+.dashboard-hero::before{
+  content:"";
+  position:absolute;
+  width:130px;
+  height:130px;
+  right:8%;
+  top:40px;
+  background:var(--nahtive-yellow);
+  border-radius:58% 42% 47% 53% / 44% 52% 48% 56%;
+  opacity:.7;
+  animation:nahtiveOrbit 8s ease-in-out infinite alternate;
+  z-index:-1;
+}
+.dashboard-hero::after{
+  content:"";
+  position:absolute;
+  width:68px;
+  height:68px;
+  right:2%;
+  top:150px;
+  background:var(--nahtive-coral);
+  border-radius:50%;
+  opacity:.72;
+  animation:nahtivePulse 4s ease-in-out infinite;
+  z-index:-1;
+}
+
+.recommended{
+  isolation:isolate;
+  overflow:hidden;
+  background:linear-gradient(135deg,#e7eddc 0%,#edf0df 62%,#f5edc8 100%)!important;
+}
+.recommended::before{
+  content:"";
+  position:absolute;
+  width:240px;
+  height:240px;
+  right:15%;
+  bottom:-130px;
+  border-radius:50%;
+  background:rgba(169,207,224,.55);
+  animation:nahtiveFloat 9s ease-in-out infinite alternate;
+}
+.recommended::after{
+  width:160px!important;
+  height:160px!important;
+  right:-45px!important;
+  top:-45px!important;
+  background:var(--nahtive-coral)!important;
+  opacity:.8;
+  animation:nahtiveOrbit 10s ease-in-out infinite alternate;
+}
+.recommended-top,.recommended h2,.recommended-copy,.lesson-meta,.recommended .primary-button{
+  animation:nahtiveRise .65s both;
+}
+.recommended h2{animation-delay:.08s}
+.recommended-copy{animation-delay:.15s}
+.lesson-meta{animation-delay:.22s}
+.recommended .primary-button{animation-delay:.28s}
+
+.progress-card{
+  position:relative;
+  overflow:hidden;
+}
+.progress-card::before{
+  content:"";
+  position:absolute;
+  width:170px;
+  height:170px;
+  right:-80px;
+  bottom:-80px;
+  border-radius:50%;
+  background:var(--nahtive-blue);
+  opacity:.45;
+}
+
+.quick-card{
+  overflow:hidden;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s ease!important;
+}
+.quick-card::before{
+  content:"";
+  position:absolute;
+  width:90px;
+  height:90px;
+  right:-28px;
+  top:-28px;
+  border-radius:47% 53% 42% 58%;
+  background:rgba(255,255,255,.38);
+  transition:transform .5s ease;
+}
+.quick-card:hover::before{transform:scale(1.5) rotate(18deg)}
+.quick-card:hover{transform:translateY(-6px)!important}
+
+.dashboard-language-link{
+  transition:transform .2s ease,background .2s ease,color .2s ease!important;
+}
+.dashboard-language-link:hover{transform:translateY(-2px)}
+
+.lesson .scene,.complete,.adaptive{
+  position:relative;
+  overflow:hidden;
+}
+.lesson .scene::before,.complete::before,.adaptive::before{
+  content:"";
+  position:absolute;
+  width:110px;
+  height:110px;
+  right:-35px;
+  top:-45px;
+  border-radius:50%;
+  background:rgba(240,215,122,.55);
+  animation:nahtiveFloat 7s ease-in-out infinite alternate;
+}
+.lesson .scene>*,.complete>* ,.adaptive>*{position:relative;z-index:1}
+
+.option,.answer{
+  transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease!important;
+}
+.option:hover,.answer:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(51,64,57,.06);
+}
+.option.selected,.option.correct{
+  animation:nahtiveSelect .28s ease both;
+}
+
+.bubble{
+  animation:nahtiveBubble .4s cubic-bezier(.2,.8,.2,1) both;
+}
+.bubble.speaker{animation-delay:.08s}
+
+.conversation{
+  box-shadow:0 20px 50px rgba(51,64,57,.07)!important;
+}
+
+.day-dot{
+  transition:transform .2s ease,background .2s ease;
+}
+.day:hover .day-dot{transform:scale(1.12)}
+.day.active .day-dot{box-shadow:0 5px 14px rgba(145,168,111,.25)}
+
+.level-option{
+  transition:transform .18s ease,background .18s ease,border-color .18s ease!important;
+}
+.level-option:hover{transform:translateY(-2px)}
+
+.onboarding .step.active{
+  animation:nahtiveRise .5s cubic-bezier(.2,.8,.2,1) both;
+}
+.language-card,.big-option,.option{
+  transition:transform .2s ease,border-color .2s ease,background .2s ease,box-shadow .2s ease!important;
+}
+.language-card:hover,.big-option:hover,.option:hover{
+  box-shadow:0 10px 24px rgba(51,64,57,.065);
+}
+.language-card.selected,.big-option.selected{
+  box-shadow:0 10px 24px rgba(145,168,111,.16);
+}
+
+.login-card,.signup-wrap>.card{
+  animation:nahtiveRise .6s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.hero,.statement,.steps,.cta{
+  position:relative;
+}
+
+.reveal{
+  opacity:0;
+  transform:translateY(22px);
+  transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1);
+}
+.reveal.visible{
+  opacity:1;
+  transform:none;
+}
+
+@keyframes nahtiveRise{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes nahtiveBubble{
+  from{opacity:0;transform:translateY(7px) scale(.98)}
+  to{opacity:1;transform:none}
+}
+@keyframes nahtiveSelect{
+  0%{transform:scale(.985)}
+  55%{transform:scale(1.012)}
+  100%{transform:scale(1)}
+}
+@keyframes nahtivePulse{
+  0%,100%{transform:scale(1);opacity:.8}
+  50%{transform:scale(1.12);opacity:1}
+}
+@keyframes nahtiveFloat{
+  from{transform:translate3d(0,0,0) rotate(-3deg)}
+  to{transform:translate3d(18px,-14px,0) rotate(5deg)}
+}
+@keyframes nahtiveFloatReverse{
+  from{transform:translate3d(0,0,0) rotate(4deg)}
+  to{transform:translate3d(-14px,12px,0) rotate(-5deg)}
+}
+@keyframes nahtiveOrbit{
+  from{transform:translate(0,0) rotate(-4deg)}
+  to{transform:translate(-12px,18px) rotate(8deg)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important;
+    transition-duration:.01ms!important;
+  }
+  .reveal{opacity:1;transform:none}
+}
