@@ -69,7 +69,18 @@ function toast(message){const t=$("toast");if(!t)return;t.textContent=message;t.
 function advance(){index++;render();window.scrollTo({top:0,behavior:"smooth"});}
 function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=(index+1)+" of "+cards.length+" · "+stageName(card);$("fill").style.width=((index+1)/cards.length*100)+"%";if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card"><h2>'+esc(title)+'</h2><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';}
-function renderTeach(c){const body='<div class="phrase">'+esc(c.phrase)+'</div><div class="meaning">'+esc(c.meaning)+'</div><div class="pron">Pronunciation: '+esc(c.pronunciation)+' · '+esc(c.ipa)+'</div><div class="usage"><strong>When you use it</strong><br>'+esc(c.usage)+'</div><div class="example"><strong>Natural example</strong><br>'+esc(c.example)+'</div><div class="listen-row"><button class="secondary" id="hear">Hear phrase</button><button class="secondary" id="hearExample">Hear example</button></div>';shell("Learn this","Understand it before you have to produce it.",body,'<div class="actions"><div class="notice">Take a second to connect the meaning to the scene.</div><button class="primary" id="next">Continue →</button></div>');$("hear").onclick=()=>speak(c.phrase,profile.code);$("hearExample").onclick=()=>speak(c.example,profile.code);$("next").onclick=()=>{xp+=5;toast("Nice — keep going.");advance();};}
+function renderTeach(c){
+ const body='<div class="lesson-task-label">Learn the expression</div>'+
+   '<div class="phrase">'+esc(c.phrase)+'</div>'+
+   '<div class="meaning">'+esc(c.meaning)+'</div>'+
+   '<div class="pron"><strong>How it sounds</strong><br>'+esc(c.pronunciation)+(c.ipa?' · '+esc(c.ipa):'')+'</div>'+
+   '<div class="usage"><strong>When a native speaker uses it</strong><br>'+esc(c.usage)+'</div>'+
+   '<div class="example"><strong>Natural example</strong><br>'+esc(c.example)+(c.exampleMeaning?'<br><span class="example-explanation">'+esc(c.exampleMeaning)+'</span>':'')+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Hear phrase</button><button class="secondary" id="hearExample">Hear example</button></div>';
+ shell("Learn this","Do not guess. Read the meaning, hear it, and connect it to the scene.",body,'<div class="actions"><div class="notice">First understand it. Then we will ask you to use it.</div><button class="primary" id="next">I understand →</button></div>');
+ $("hear").onclick=()=>speak(c.phrase,profile.code); $("hearExample").onclick=()=>speak(c.example,profile.code);
+ $("next").onclick=()=>{xp+=5;toast("Meaning locked in.");advance();};
+}
 function renderCheck(c){
  let answered=false;
  const phrase=c.phrase||"";
