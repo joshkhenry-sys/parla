@@ -83,7 +83,7 @@ const globalLanguagePhrases=[
 const track=document.getElementById("track");
 if(track){
   const items=[...globalLanguagePhrases,...globalLanguagePhrases];
-  track.innerHTML=items.map(([lang,phrase])=>'<span><b>'+phrase.replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</b> <small>'+lang+'</small></span>').join("");
+  track.innerHTML=items.map(([lang,phrase])=>'<span><b>'+phrase.replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</b></span>').join("");
 }
 </script>
 <script>
