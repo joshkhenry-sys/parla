@@ -114,23 +114,21 @@ function renderChallenge(c){
  $("next").onclick=()=>advance();
 }
 function renderGuided(c){
- const body='<div class="lesson-task-label">Now use what you learned</div>'+
-   (c.phrase?'<div class="phrase compact">'+esc(c.phrase)+'</div>':'')+
-   '<div class="task-question">'+esc(c.prompt||"Use the expression in your own response.")+'</div>'+
+ const phrase=c.phrase||"";
+ const body='<div class="lesson-task-label">BUILD IT · YOUR TURN</div>'+
+   '<div class="phrase">'+esc(phrase)+'</div>'+
+   '<div class="pron"><strong>How to say it</strong><br>'+esc(c.pronunciation||phrase)+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Hear it</button><button class="secondary" id="hearExample">Hear example</button></div>'+
+   '<div class="task-question">'+esc(c.prompt||"Build your own response using the expression.")+'</div>'+
    (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
-   '<textarea class="input" id="input" placeholder="Type your answer in the target language…"></textarea>'+
-   '<div class="notice feedback" id="feedback">You can borrow the structure. Your goal is to make the response fit the situation.</div>';
- shell("Practice it","You know what the expression means. Now build a response with it.",body,'<div class="actions"><button class="primary" id="submit">Check →</button></div>');
- $("submit").onclick=()=>{
-   const v=$("input").value.trim();
-   if(!v){$("feedback").textContent="Write a response first. You can use the phrase above as your starting point.";return}
-   const expected=c.expected||c.answer||"";
-   const score=expected?similarity(v,expected):.5;
-   answers.push({type:"guided",prompt:c.prompt,response:v,expected,score}); xp+=score>.55?10:6;
-   $("feedback").textContent=score>.55?(c.feedback||"Good. That response fits the situation."):("Good attempt. A natural model is: "+(expected||"Try the target phrase in your own sentence."));
-   toast(score>.55?"That works.":"Good attempt — compare it with the model.");
-   $("submit").textContent="Continue →"; $("submit").onclick=()=>advance();
- };
+   '<textarea class="input" id="input" placeholder="Build your own sentence in the target language…"></textarea>'+
+   '<div class="listen-row"><button class="secondary" id="voice">Speak your answer</button></div>'+
+   '<div class="notice" id="voiceStatus">Say it out loud, or type it if you prefer.</div>'+
+   '<div class="notice feedback" id="feedback"></div>';
+ shell("Build it","Use the expression yourself. Change the details so the sentence belongs to you.",body,'<div class="actions"><button class="primary" id="submit">Check my practice →</button></div>');
+ $("hear").onclick=()=>speak(phrase,profile.code); $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
+ $("voice").onclick=()=>speechButton(c.expected||phrase,()=>{});
+ $("submit").onclick=()=>{const v=$("input").value.trim()||voice?.text||"";if(!v){$("feedback").textContent="Say it or type your response before continuing.";return}const expected=c.expected||c.answer||"";const score=expected?similarity(v,expected):.5;answers.push({type:"guided",prompt:c.prompt,response:v,expected,score,voice});$("feedback").textContent=score>.55?(c.feedback||"Good. You used the expression."):("Good attempt. Compare your sentence with the model and notice what changes.");xp+=score>.55?15:6;toast(score>.55?"Practice complete.":"Good attempt.");$("submit").textContent="Continue →";$("submit").onclick=()=>advance();};
 }
 function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
 function renderSpeak(c){const body='<div class="lesson-task-label">Say it naturally</div><div class="phrase">'+esc(c.phrase||"")+'</div><div class="meaning">'+esc(c.prompt)+'</div><div class="listen-row"><button class="secondary" id="hear">Hear it</button></div><textarea class="input" id="input" placeholder="Type it if you prefer…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak it</button></div><div class="notice" id="voiceStatus">Speaking is practice, not a gate. You can type and continue.</div>';shell("Now say it","You have already learned the language. Now put it in your mouth.",body,'<div class="actions"><div class="notice">Aim for natural rhythm, not perfection.</div><button class="primary" id="next">Continue →</button></div>');$("hear").onclick=()=>speak(c.phrase,profile.code);$("voice").onclick=()=>speechButton(c.phrase,()=>{});$("next").onclick=()=>{const v=$("input").value.trim()||voice?.text||"";answers.push({type:"speak",response:v,voice});xp+=v?15:5;toast(v?"You used it — nice.":"Keep practicing.");advance();};}
