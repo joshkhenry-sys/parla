@@ -43,7 +43,7 @@
 <section class="language-switcher-section" style="margin-top:36px">
   <div class="section-title">Add another language</div>
   <div class="card language-switcher-card"><div class="dashboard-language-grid">
-    <a class="dashboard-language-link" href="onboarding.html?language=Spanish">Spanish</a><a class="dashboard-language-link" href="onboarding.html?language=English">English</a><a class="dashboard-language-link" href="onboarding.html?language=Portuguese">Portuguese</a><a class="dashboard-language-link" href="onboarding.html?language=French">French</a><a class="dashboard-language-link" href="onboarding.html?language=Italian">Italian</a><a class="dashboard-language-link" href="onboarding.html?language=German">German</a><a class="dashboard-language-link" href="onboarding.html?language=Japanese">Japanese</a><a class="dashboard-language-link" href="onboarding.html?language=Korean">Korean</a><a class="dashboard-language-link" href="onboarding.html?language=Mandarin">Mandarin</a><a class="dashboard-language-link" href="onboarding.html?language=Arabic">Arabic</a><a class="dashboard-language-link" href="onboarding.html?language=Dutch">Dutch</a><a class="dashboard-language-link" href="onboarding.html?language=Swedish">Swedish</a><a class="dashboard-language-link" href="onboarding.html?language=Greek">Greek</a><a class="dashboard-language-link" href="onboarding.html?language=Turkish">Turkish</a><a class="dashboard-language-link" href="onboarding.html?language=Hindi">Hindi</a><a class="dashboard-language-link" href="onboarding.html?language=Polish">Polish</a>
+    <button class="dashboard-language-link add-language-choice" type="button" data-add-language="Spanish">Spanish</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="English">English</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Portuguese">Portuguese</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="French">French</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Italian">Italian</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="German">German</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Japanese">Japanese</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Korean">Korean</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Mandarin">Mandarin</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Arabic">Arabic</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Dutch">Dutch</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Swedish">Swedish</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Greek">Greek</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Turkish">Turkish</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Hindi">Hindi</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Polish">Polish</button>
   </div></div>
 </section>
 
@@ -162,6 +162,66 @@
       if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(lesson.level || "Scene")+"</span>";
       button.innerHTML = "Continue <span>→</span>";
       button.onclick = () => { sessionStorage.setItem("Nahtive_lesson_id", lesson.id); window.location.href = "lesson.html?id=" + encodeURIComponent(lesson.id); };
+    }
+
+    async function addLanguage(languageName, button) {
+      if (!languageName || !button) return;
+      button.disabled = true;
+      button.textContent = "Adding…";
+
+      try {
+        const { data: sessionData } = await supabaseClient.auth.getSession();
+        const user = sessionData?.session?.user;
+        if (!user) { window.location.href = "login.html"; return; }
+
+        const languageMap = {
+          Spanish:"es", English:"en", Portuguese:"pt", French:"fr", Italian:"it",
+          German:"de", Japanese:"ja", Korean:"ko", Mandarin:"zh", Arabic:"ar",
+          Dutch:"nl", Swedish:"sv", Greek:"el", Turkish:"tr", Hindi:"hi", Polish:"pl"
+        };
+        const code = languageMap[languageName];
+        if (!code) throw new Error("Unsupported language.");
+
+        const { data: language, error: languageError } = await supabaseClient
+          .from("languages").select("id").eq("code", code).single();
+        if (languageError) throw languageError;
+
+        const { data: existing } = await supabaseClient
+          .from("learner_languages").select("id").eq("user_id", user.id).eq("language_id", language.id).maybeSingle();
+
+        if (existing?.id) {
+          await supabaseClient.from("learner_languages").update({is_current:true}).eq("user_id",user.id).eq("id",existing.id);
+          await supabaseClient.from("learner_languages").update({is_current:false}).eq("user_id",user.id).neq("id",existing.id);
+          localStorage.setItem("Nahtive_current_learner_language", existing.id);
+          window.location.href="dashboard.html";
+          return;
+        }
+
+        const { data: profileRow } = await supabaseClient.from("profiles").select("goal,interests").eq("id",user.id).maybeSingle();
+        const goal = profileRow?.goal || "Conversation";
+        const interests = Array.isArray(profileRow?.interests) && profileRow.interests.length ? profileRow.interests : ["EverydayLife"];
+
+        await supabaseClient.from("learner_languages").update({is_current:false}).eq("user_id",user.id);
+        const { data: learnerLanguage, error: learnerError } = await supabaseClient.from("learner_languages").insert({
+          user_id:user.id, language_id:language.id, level:"A0", goal, interests, is_current:true
+        }).select("id").single();
+        if (learnerError) throw learnerError;
+
+        await supabaseClient.from("learner_skills").upsert(
+          ["vocabulary","grammar","understanding","conversation","confidence"].map(skill=>({
+            learner_language_id:learnerLanguage.id, skill, mastery:0
+          })),
+          {onConflict:"learner_language_id,skill"}
+        );
+
+        localStorage.setItem("Nahtive_current_learner_language", learnerLanguage.id);
+        window.location.href="dashboard.html";
+      } catch (error) {
+        console.error("Could not add language:",error);
+        button.disabled=false;
+        button.textContent=languageName;
+        alert("We couldn't add that language yet. Please try again.");
+      }
     }
 
     async function loadLearningProfile() {
@@ -359,6 +419,8 @@
       sessionStorage.removeItem("nahtive_learning_profile");
       window.location.href = "login.html";
     });
+
+    document.querySelectorAll("[data-add-language]").forEach(button => button.addEventListener("click", () => addLanguage(button.dataset.addLanguage, button)));
 
     showLessonState();
 
