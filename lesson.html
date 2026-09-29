@@ -181,13 +181,13 @@ function buildFallbackLesson(){
  });
  const cards=[
   makeTeach(primary,1),
-  {type:"check",phrase:primary,prompt:"What is the main meaning of this expression in the situation?",options:["The intended meaning in context","A completely different idea","A grammar rule"],answer:"The intended meaning in context",feedback:"Exactly. You understood the expression."},
+  {type:"check",phrase:primary,pronunciation:primary,example:primary,prompt:"Which response uses this expression naturally in the situation?",options:[primary,second,"That is not what I mean."],answer:primary,feedback:"Good. You recognized how the expression is actually used."},
   {type:"guided",phrase:primary,prompt:"Use this expression to respond to the situation in your own words.",context:"Keep the same meaning, but make the response fit the scene.",expected:primary,answer:primary,feedback:"Good. You are using the expression rather than just recognizing it."},
   makeTeach(second,2),
-  {type:"check",phrase:second,prompt:"Which interpretation best fits the tone of this expression here?",options:["The intended meaning and tone","A completely different situation","A literal word-for-word translation"],answer:"The intended meaning and tone",feedback:"Right. Natural language depends on context and tone."},
+  {type:"check",phrase:second,pronunciation:second,example:second,prompt:"Which response fits the situation and sounds natural?",options:[second,primary,"I do not know."],answer:second,feedback:"Good. The expression fits the situation."},
   {type:"guided",phrase:second,prompt:"Change one detail in the situation and use this expression in your response.",context:"Keep the idea, but adapt the response to the changed situation.",expected:second,answer:second,feedback:"Nice. You adapted the language to the moment."},
   makeTeach(third,3),
-  {type:"check",phrase:third,prompt:"Why would a native speaker choose this expression in this situation?",options:["It fits the intended meaning and tone","It is always the only correct choice","It has no connection to the situation"],answer:"It fits the intended meaning and tone",feedback:"Exactly. The situation determines what sounds natural."},
+  {type:"check",phrase:third,pronunciation:third,example:third,prompt:"Which response sounds most natural for this moment?",options:[third,second,"I am not sure."],answer:third,feedback:"Good. You chose the expression that fits the moment."},
   {type:"guided",phrase:third,prompt:"Build your own response using this expression. Keep the meaning but make the sentence yours.",context:"Change the details so the response belongs to you.",expected:third,answer:third,feedback:"Good. You are moving from recognition to production."},
   {type:"challenge",phrase:third,prompt:"The situation changes unexpectedly. Which response sounds most natural now?",options:[third,second,primary],answer:third,feedback:"Notice how the best choice depends on what is happening now."},
   {type:"speak",phrase:third,prompt:"Say the expression naturally, then continue the thought if you can.",expected:third,answer:third,feedback:"Good. Now use it without the script."},
