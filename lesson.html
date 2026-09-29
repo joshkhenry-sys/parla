@@ -34,30 +34,40 @@ const $=id=>document.getElementById(id);
 let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],conversation=[],xp=0,voice=null;
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
+let activeAudio=null;
 async function speak(text,lang){
- if(!text)return;
+ if(!text)return false;
+ const targetLang=lang||profile?.code||"en-US";
  try{
-   const res=await fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:String(text).slice(0,1200),language:lang||profile?.code||"en-US"})});
+   if(activeAudio){activeAudio.pause();activeAudio=null}
+   const res=await fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:String(text).slice(0,1200),language:targetLang})});
    if(!res.ok)throw new Error("TTS unavailable");
    const blob=await res.blob();
+   if(!blob.size)throw new Error("Empty audio");
    const url=URL.createObjectURL(blob);
    const audio=new Audio(url);
-   audio.playbackRate=1;
-   audio.onended=()=>URL.revokeObjectURL(url);
+   activeAudio=audio;
+   audio.onended=()=>{URL.revokeObjectURL(url);if(activeAudio===audio)activeAudio=null};
+   audio.onerror=()=>{URL.revokeObjectURL(url);if(activeAudio===audio)activeAudio=null};
    await audio.play();
+   return true;
  }catch(e){
-   if("speechSynthesis"in window){
-     speechSynthesis.cancel();
-     const u=new SpeechSynthesisUtterance(text);
-     u.lang=lang||profile?.code||"en-US";
-     u.rate=.94;
-     u.pitch=1;
-     const voices=speechSynthesis.getVoices();
-     const base=(u.lang||"en-US").split("-")[0].toLowerCase();
-     const match=voices.find(v=>v.lang?.toLowerCase().startsWith(base));
-     if(match)u.voice=match;
-     speechSynthesis.speak(u);
-   }
+   console.warn("Nahtive AI voice unavailable:",e);
+   try{
+     if("speechSynthesis"in window){
+       speechSynthesis.cancel();
+       const u=new SpeechSynthesisUtterance(String(text));
+       u.lang=targetLang;u.rate=.94;u.pitch=1;
+       const voices=speechSynthesis.getVoices();
+       const base=targetLang.split("-")[0].toLowerCase();
+       const match=voices.find(v=>v.lang?.toLowerCase().startsWith(base));
+       if(match)u.voice=match;
+       speechSynthesis.resume();
+       speechSynthesis.speak(u);
+       return true;
+     }
+   }catch(fallbackError){console.warn("Nahtive browser voice unavailable:",fallbackError)}
+   return false;
  }
 }
 function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();}
