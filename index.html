@@ -70,21 +70,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
-(async()=>{
-  try{
-    if(!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY)return;
-    const c=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
-    const result=await Promise.race([
-      c.auth.getSession(),
-      new Promise(resolve=>setTimeout(()=>resolve({data:{session:null}}),3500))
-    ]);
-    const u=result?.data?.session?.user;
-    if(!u)return;
-    const {data:l}=await c.from("learner_languages").select("id").eq("user_id",u.id).limit(1);
-    if(l&&l.length){window.location.replace("dashboard.html");return;}
-    if(u.user_metadata?.nahtive_onboarding_pending){window.location.replace("onboarding.html?resume=1");}
-  }catch(e){console.warn("Nahtive auth resume check skipped:",e)}
-})();
+// The landing page is intentionally public. Authentication and onboarding
+// routing happen only after the learner chooses to continue.
 </script>
 </body>
 </html>
