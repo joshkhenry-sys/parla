@@ -145,6 +145,7 @@ async function begin(){
   }catch(error){
     console.error(error);
     questions=localPlacement(language.languages?.code||"es");
+    if(questions.length===14){ const expanded=[]; questions.forEach(q=>{ ["reading","listening"].forEach(type=>expanded.push({...q,type,audioText:type==="listening" ? String(q.options?.[0]||"") : ""})); }); questions=expanded; }
     document.getElementById("intro").classList.add("hidden");
     document.getElementById("test").classList.remove("hidden");
     render();
