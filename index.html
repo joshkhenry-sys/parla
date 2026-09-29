@@ -6,6 +6,8 @@
 <title>Nahtive — Learn to actually use a language</title>
 <meta name="description" content="Nahtive helps you understand, speak, and use another language in real situations.">
 <link rel="stylesheet" href="nahtive.css">
+<style id="nahtive-auth-gate">html.nahtive-auth-check body{visibility:hidden}html.nahtive-auth-ready body{visibility:visible}</style>
+<script>document.documentElement.classList.add("nahtive-auth-check");</script>
 <style>
 .landing{position:relative;overflow:hidden}
 .landing-hero{min-height:610px;display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:60px;padding:70px 0 85px;position:relative}
@@ -185,17 +187,22 @@
 <script src="supabase-config.js"></script>
 <script>
 (async()=>{
+let redirected=false;
 try{
  const c=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
  const {data}=await c.auth.getSession();
  const u=data?.session?.user;
  if(u){
    const {data:l}=await c.from("learner_languages").select("id").eq("user_id",u.id).limit(1);
-   if(l&&l.length){window.location.replace("dashboard.html");return}
-   if(u.user_metadata?.nahtive_onboarding_pending){window.location.replace("onboarding.html?resume=1");return}
+   if(l&&l.length){redirected=true;window.location.replace("dashboard.html");return}
+   if(u.user_metadata?.nahtive_onboarding_pending){redirected=true;window.location.replace("onboarding.html?resume=1");return}
  }
 }catch(e){console.error("Could not resume learning:",e)}
-document.querySelectorAll(".reveal").forEach(el=>el.classList.add("visible"));
+if(!redirected){
+ document.documentElement.classList.remove("nahtive-auth-check");
+ document.documentElement.classList.add("nahtive-auth-ready");
+ document.querySelectorAll(".reveal").forEach(el=>el.classList.add("visible"));
+}
 const observer=("IntersectionObserver" in window)?new IntersectionObserver(entries=>{
  entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add("visible");observer.unobserve(entry.target)}})
 },{threshold:.14}):null;
