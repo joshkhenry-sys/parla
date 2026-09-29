@@ -135,7 +135,7 @@ export default async function handler(req, res) {
     };
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 55000);
+    const timeout = setTimeout(() => controller.abort(), 11000);
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
@@ -210,7 +210,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, challengeCount, speakCount, conversationCount } });
   } catch (error) {
     console.error("Nahtive lesson generation error:", error);
-    if (error?.name === "AbortError") return res.status(504).json({ error: "The AI lesson request timed out after 55 seconds." });
+    if (error?.name === "AbortError") return res.status(504).json({ error: "The AI lesson request timed out after 11 seconds." });
     return res.status(500).json({ error: error?.message || "Could not generate the lesson." });
   }
 }
