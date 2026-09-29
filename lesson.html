@@ -12,6 +12,31 @@
 <nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
 <div id="loading" class="loading">Building your lesson…<br><span id="loadingDetail" class="small">Creating the scene and lesson steps.</span></div>
 <div id="lesson" class="lesson" style="display:none">
+<div class="lesson-header">
+  <div class="lesson-head-copy">
+    <div class="eyebrow">LIVE SCENE</div>
+    <div class="lesson-title-row"><h1 id="title">Lesson</h1><span class="level-chip" id="levelChip">A1</span></div>
+    <p id="intro"></p>
+  </div>
+  <div class="lesson-energy">
+    <span class="energy-dot"></span><span id="xpMini">0 XP</span>
+  </div>
+</div>
+<div class="lesson-scene">
+  <div class="scene-kicker">YOU'RE HERE</div>
+  <strong id="setting"></strong>
+  <span id="moment"></span>
+  <div class="scene-role"><span class="role-pulse"></span><span id="role"></span></div>
+</div>
+<div class="lesson-progress">
+  <div class="progress-top"><span id="stage">Getting started</span><strong id="progressCount">1 / 12</strong></div>
+  <div class="progress-track"><div class="fill" id="fill"></div></div>
+</div>
+<main class="main">
+  <div id="card"></div>
+  <div class="lesson-toast" id="toast" role="status" aria-live="polite"></div>
+</main>
+</div>
 <aside class="context">
 <div class="eyebrow" id="language">Language</div>
 <h1 id="title">Lesson</h1>
