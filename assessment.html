@@ -30,10 +30,16 @@ h1{font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-2px;margin-to
 .result .next{margin-top:26px}
 .hidden{display:none}
 @media(max-width:560px){.wrap{width:min(100% - 24px,760px);padding-top:20px}.panel{padding:20px}.question{font-size:19px}.level-result{font-size:54px}}
+</style><style>
+.test-shell{max-width:820px;margin:auto}.wrap{padding-top:24px}.progress{height:7px;margin-bottom:28px;background:#e5e4dc}.progress i{background:var(--sage)}
+.test-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}.test-brand{font-size:13px;font-weight:850;letter-spacing:.3px}.test-skill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:#eef2e8;color:#65734f;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:1px}.test-skill:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--sage)}
+.question-kicker{display:flex;align-items:center;justify-content:space-between}.question-type{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:1.2px;color:#65734f}.question{font-size:25px;font-weight:750;line-height:1.28}.option{background:var(--paper);min-height:58px;display:flex;align-items:center}.option.selected{transform:translateY(-1px)}
+#audioPrompt{width:auto;padding:11px 14px;border:1px solid #d9ddce!important;background:#f0f4e9!important;color:#526143!important;border-radius:11px!important;font-size:11px!important;margin-top:16px!important}.result .level-result{font-size:72px;color:var(--ink)}
+@media(max-width:560px){.test-top{margin-bottom:16px}.question{font-size:21px}.panel{border-radius:17px}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap"><div class="test-shell">
 <header><a class="logo" href="dashboard.html">Nahtive<span>•</span></a><a class="exit" href="dashboard.html">Exit</a></header>
 <div class="progress"><i id="bar"></i></div>
 <section id="intro">
@@ -47,10 +53,11 @@ h1{font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-2px;margin-to
   </div>
 </section>
 <section id="test" class="hidden">
-  <div class="kicker" id="languageLabel">Spanish</div>
-  <h1 id="testTitle">Placement check</h1>
+  <div class="test-top"><div class="test-brand">Nahtive placement</div><div class="test-skill" id="skillLabel">Reading</div></div>
+  <div class="kicker" id="languageLabel">Spanish placement</div>
+  <h1 id="testTitle">Find your working level.</h1>
   <div class="panel">
-    <div class="question-no" id="questionNo"></div>
+    <div class="question-kicker"><div class="question-no" id="questionNo"></div><div class="question-type" id="questionType">Reading</div></div>
     <div class="question" id="question"></div>
     <div class="options" id="options"></div>
     <button class="next" id="next" disabled>Choose an answer</button>
@@ -66,7 +73,7 @@ h1{font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-2px;margin-to
     <button class="next" id="continueButton">Start my first lesson</button>
   </div>
 </section>
-</div>
+</div></div>
 <link rel="stylesheet" href="nahtive.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
@@ -154,6 +161,8 @@ async function begin(){
 function render(){
   const item=questions[index];
   document.getElementById("questionNo").textContent="Question "+(index+1)+" of "+questions.length;
+  document.getElementById("questionType").textContent=(item.type||"reading").toUpperCase();
+  document.getElementById("skillLabel").textContent=(item.type||"reading");
   document.getElementById("question").textContent=item.question;
   const oldAudio=document.getElementById("audioPrompt"); if(oldAudio) oldAudio.remove();
   if(item.type==="listening" && item.audioText){ const audio=document.createElement("button"); audio.id="audioPrompt"; audio.className="next"; audio.style.marginTop="14px"; audio.style.background="#9caf78"; audio.textContent="▶ Hear it again"; audio.onclick=()=>speakTarget(item.audioText); document.getElementById("question").after(audio); setTimeout(()=>speakTarget(item.audioText),180); }
