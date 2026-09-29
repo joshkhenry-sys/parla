@@ -276,6 +276,11 @@ function buildFallbackLesson(){
    ]
   },
   ar:{
+   a0:[
+    {phrase:"مرحبًا.",meaning:"Hello.",pronunciation:"mar-ha-ban",usage:"Use this simple greeting when you meet someone.",example:"مرحبًا.",exampleMeaning:"A basic greeting."},
+    {phrase:"نعم.",meaning:"Yes.",pronunciation:"na-am",usage:"Use this to answer yes.",example:"نعم.",exampleMeaning:"A simple yes."},
+    {phrase:"شكرًا.",meaning:"Thank you.",pronunciation:"shuk-ran",usage:"Use this when someone helps you or gives you something.",example:"شكرًا.",exampleMeaning:"A basic way to say thank you."}
+   ],
    beginner:[
     {phrase:"أريد أن أسألك شيئًا.",meaning:"I want to ask you something.",pronunciation:"u-reed an as-a-lak shay-an",usage:"Use this when you want to introduce a question or request naturally.",example:"أريد أن أسألك شيئًا. هل لديك دقيقة؟",exampleMeaning:"“I want to ask you something. Do you have a minute?”"},
     {phrase:"هل يمكنك أن تشرح لي كيف يعمل هذا؟",meaning:"Can you explain how this works?",pronunciation:"hal yum-ki-nu-ka an tash-ra-ha lee kay-fa ya-mal ha-tha",usage:"Use this when you need someone to explain a process or situation.",example:"هل يمكنك أن تشرح لي كيف يعمل هذا؟",exampleMeaning:"“Can you explain how this works?”"},
@@ -311,7 +316,7 @@ function buildFallbackLesson(){
   }
  };
  const bank=contextual[code]||contextual.pl;
- const tier=["A0","A1","A2"].includes(level)?"beginner":(["B1","B2"].includes(level)?"intermediate":"advanced");
+ const tier=level==="A0"?"a0":(["A1","A2"].includes(level)?"beginner":(["B1","B2"].includes(level)?"intermediate":"advanced"));
  const lessons=bank[tier];
  const primary=lessons[0],second=lessons[1]||primary,third=lessons[2]||primary;
  const makeTeach=p=>({type:"teach",phrase:p.phrase,pronunciation:p.pronunciation,ipa:"",meaning:p.meaning,usage:p.usage,example:p.example,exampleMeaning:p.exampleMeaning,prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""});
