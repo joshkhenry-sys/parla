@@ -209,10 +209,17 @@ function renderChallenge(c){
 }
 function renderGuided(c){
  const phrase=c.phrase||"";
- const words=phrase.trim().split(/\s+/).filter(Boolean);
+ const target=c.expected||c.answer||phrase;
+ const words=target.trim().split(/\\s+/).filter(Boolean);
  const shuffled=[...words].sort(()=>Math.random()-.5);
  let built=[];
- const renderTiles=()=>{const picked=$("built");const bank=$("tileBank");if(!picked||!bank)return;picked.innerHTML=built.length?built.map((w,i)=>'<button type="button" class="word-tile picked" data-built="'+i+'">'+esc(w)+'</button>').join(""):'<span class="tile-placeholder">Tap the words to build the response.</span>';bank.innerHTML=shuffled.map((w,i)=>{const used=built.filter(x=>x.i===i).length>0;return '<button type="button" class="word-tile" data-word="'+i+'" '+(used?'disabled':'')+'>'+esc(w)+'</button>';}).join("");};
+ const renderTiles=()=>{
+   const picked=$("built"),bank=$("tileBank"),submit=$("submit");
+   if(!picked||!bank)return;
+   picked.innerHTML=built.length?built.map((x,i)=>'<button type="button" class="word-tile picked" data-built="'+i+'">'+esc(x.w)+'</button>').join(""):'<span class="tile-placeholder">Tap the words to build your response.</span>';
+   bank.innerHTML=shuffled.map((w,i)=>{const used=built.some(x=>x.i===i);return '<button type="button" class="word-tile" data-word="'+i+'" '+(used?'disabled':'')+'>'+esc(w)+'</button>';}).join("");
+   if(submit)submit.disabled=built.length!==words.length;
+ };
  const body='<div class="lesson-task-label">BUILD IT · YOUR TURN</div>'+
    '<div class="phrase compact">'+esc(phrase)+'</div>'+
    '<div class="pron"><strong>Hear the model</strong><br>'+esc(c.pronunciation||phrase)+'</div>'+
@@ -223,31 +230,45 @@ function renderGuided(c){
    '<div class="tile-bank" id="tileBank"></div>'+
    '<textarea class="input compact-input" id="input" placeholder="Or type your own response…"></textarea>'+
    '<div class="listen-row"><button class="secondary" id="voice">Speak your answer</button></div>'+
-   '<div class="notice" id="voiceStatus">Build it first. Then try saying it yourself.</div>'+
+   '<div class="notice" id="voiceStatus">Build the response first. Then try saying it yourself.</div>'+
    '<div class="notice feedback" id="feedback"></div>';
- shell("Build it","The words are here. Put them together, then make the response your own.",body,'<div class="actions"><button class="primary" id="submit" disabled>Check response →</button></div>');
+ shell("Build it","Put the words together. You can then type or say your own version.",body,'<div class="actions"><button class="primary" id="submit" disabled>Check response →</button></div>');
  renderTiles();
- document.querySelectorAll("#tileBank .word-tile").forEach(b=>b.onclick=()=>{const i=Number(b.dataset.word);if(b.disabled)return;built.push({i,w:shuffled[i]});renderTiles();if(built.length===words.length){$("submit").disabled=false;toast("Response built.");}});
- $("hear").onclick=()=>speak(phrase,profile.code); $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
- $("voice").onclick=()=>speechButton(c.expected||phrase,()=>{});
+ $("tileBank").onclick=e=>{
+   const b=e.target.closest(".word-tile");
+   if(!b||b.disabled)return;
+   const i=Number(b.dataset.word);
+   if(!Number.isInteger(i)||built.some(x=>x.i===i))return;
+   built.push({i,w:shuffled[i]});
+   renderTiles();
+ };
+ $("built").onclick=e=>{
+   const b=e.target.closest(".word-tile");
+   if(!b)return;
+   const i=Number(b.dataset.built);
+   if(!Number.isInteger(i)||!built[i])return;
+   built.splice(i,1);
+   renderTiles();
+ };
+ $("hear").onclick=()=>speak(phrase,profile.code);
+ $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
+ $("voice").onclick=()=>speechButton(target,()=>{});
  $("submit").onclick=()=>{
    const typed=$("input").value.trim();
    const builtText=built.map(x=>x.w).join(" ");
    const v=typed||builtText||voice?.text||"";
    if(!v){$("feedback").textContent="Build, type, or say your response first.";return}
-   const expected=c.expected||c.answer||phrase;
-   const score=similarity(v,expected);
+   const score=similarity(v,target);
    const ok=score>.72;
-   answers.push({type:"guided",prompt:c.prompt,response:v,expected,score,voice});
-   $("feedback").textContent=ok?(c.feedback||"That works in the scene."):"Close. Listen again, then notice the word order and phrasing.";
+   answers.push({type:"guided",prompt:c.prompt,response:v,expected:target,score,voice});
+   $("feedback").textContent=ok?(c.feedback||"That works in the scene."):"Close. Try the order again, then say it yourself.";
    lessonSound(ok?"correct":"wrong");
    xp+=ok?15:6;
    $("submit").textContent="Continue →";
    $("submit").onclick=()=>advance();
    toast(ok?"Nice. Now make it yours.":"Good attempt.");
  };
-}
-function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
+}function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
 function renderSpeak(c){const body='<div class="lesson-task-label">Say it naturally</div><div class="phrase">'+esc(c.phrase||"")+'</div><div class="meaning">'+esc(c.prompt)+'</div><div class="listen-row"><button class="secondary" id="hear">Hear it</button></div><textarea class="input" id="input" placeholder="Type it if you prefer…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak it</button></div><div class="notice" id="voiceStatus">Speaking is practice, not a gate. You can type and continue.</div>';shell("Now say it","You have already learned the language. Now put it in your mouth.",body,'<div class="actions"><div class="notice">Aim for natural rhythm, not perfection.</div><button class="primary" id="next">Continue →</button></div>');$("hear").onclick=()=>speak(c.phrase,profile.code);$("voice").onclick=()=>speechButton(c.phrase,()=>{});$("next").onclick=()=>{const v=$("input").value.trim()||voice?.text||"";answers.push({type:"speak",response:v,voice});xp+=v?15:5;toast(v?"You used it — nice.":"Keep practicing.");advance();};}
 function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
 function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
