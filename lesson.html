@@ -157,66 +157,67 @@ function buildFallbackLesson(){
 
  const contextual={
   es:{
-   beginner:["Quiero pedirte algo.","¿Me puedes explicar cómo funciona?","Vale, déjame pensarlo."],
-   intermediate:["A ver si lo entiendo bien.","No estoy del todo convencido.","¿Qué te parece si lo hacemos de otra manera?"],
-   advanced:["No es que esté en desacuerdo, pero creo que estamos pasando por alto algo importante.","Entiendo lo que planteas; lo que me preocupa son las consecuencias a largo plazo.","Si queremos que esto funcione, tendremos que encontrar un punto medio."]
+   beginner:[
+    {phrase:"Quiero pedirte algo.",meaning:"I want to ask you something.",pronunciation:"KYEH-roh peh-DEER-teh AHL-goh",usage:"Use this when you want to introduce a request in a direct but natural way.",example:"Quiero pedirte algo. ¿Tienes un minuto?",exampleMeaning:"“I want to ask you something. Do you have a minute?”"},
+    {phrase:"¿Me puedes explicar cómo funciona?",meaning:"Can you explain how this works?",pronunciation:"meh PWEH-des eks-plee-KAR KOH-moh foon-SYOH-nah",usage:"Use this when you need someone to explain a process, rule, or situation.",example:"¿Me puedes explicar cómo funciona este sistema?",exampleMeaning:"“Can you explain how this system works?”"},
+    {phrase:"Vale, déjame pensarlo.",meaning:"Okay, let me think about it.",pronunciation:"BAH-leh, DEH-hah-meh pen-SAR-loh",usage:"Use this when you want a moment to consider something before answering.",example:"Vale, déjame pensarlo y te digo mañana.",exampleMeaning:"“Okay, let me think about it and I'll tell you tomorrow.”"}
+   ],
+   intermediate:[
+    {phrase:"A ver si lo entiendo bien.",meaning:"Let me make sure I understand.",pronunciation:"ah BEHR see loh en-TYEN-doh BYEN",usage:"Use this to confirm that you understood what someone just explained. It often introduces a quick summary or clarification.",example:"A ver si lo entiendo bien. ¿Entonces tengo que pagar el viernes?",exampleMeaning:"“Let me make sure I understand. So I have to pay on Friday?”"},
+    {phrase:"No estoy del todo convencido.",meaning:"I'm not completely convinced.",pronunciation:"noh es-TOY del TOH-doh kon-ben-SEE-doh",usage:"Use this when you have doubts about an idea or proposal without rejecting it outright.",example:"No estoy del todo convencido. ¿Podemos pensarlo un poco más?",exampleMeaning:"“I'm not completely convinced. Can we think about it a little more?”"},
+    {phrase:"¿Qué te parece si lo hacemos de otra manera?",meaning:"What do you think if we do it another way?",pronunciation:"keh teh pah-REH-seh see loh ah-SEH-mohs deh OH-trah mah-NEH-rah",usage:"Use this to suggest an alternative in a collaborative, non-confrontational way.",example:"¿Qué te parece si lo hacemos de otra manera?",exampleMeaning:"“What if we did it another way?”"}
+   ],
+   advanced:[
+    {phrase:"No es que esté en desacuerdo, pero creo que estamos pasando por alto algo importante.",meaning:"It's not that I disagree, but I think we're overlooking something important.",pronunciation:"noh es keh es-TEH en deh-sah-KWEHR-doh, PEH-roh KREH-oh keh es-TAH-mohs pah-SAHN-doh por AHL-toh AL-goh eem-por-TAHN-teh",usage:"Use this to disagree carefully while making it clear that your concern is about something being overlooked.",example:"No es que esté en desacuerdo, pero creo que estamos pasando por alto un detalle importante.",exampleMeaning:"“It's not that I disagree, but I think we're overlooking an important detail.”"},
+    {phrase:"Entiendo lo que planteas; lo que me preocupa son las consecuencias a largo plazo.",meaning:"I understand your point; what concerns me are the long-term consequences.",pronunciation:"en-TYEN-doh loh keh plan-TEH-ahs; loh keh meh proh-oh-KOO-pah son las kon-seh-KWEN-syahs ah LAR-goh PLAH-soh",usage:"Use this when you want to acknowledge someone's idea before explaining your concern.",example:"Entiendo lo que planteas, pero me preocupan las consecuencias a largo plazo.",exampleMeaning:"“I understand your point, but I'm concerned about the long-term consequences.”"},
+    {phrase:"Si queremos que esto funcione, tendremos que encontrar un punto medio.",meaning:"If we want this to work, we'll have to find a middle ground.",pronunciation:"see keh-REH-mohs keh ES-toh foon-SYOH-neh, ten-DREH-mohs keh en-kon-TRAR oon POON-toh MEH-dyoh",usage:"Use this when a situation requires compromise and neither side is likely to get everything it wants.",example:"Si queremos que esto funcione, tendremos que encontrar un punto medio.",exampleMeaning:"“If we want this to work, we'll have to find a middle ground.”"}
+   ]
   },
   en:{
-   beginner:["I'd like to ask you something.","Could you explain how this works?","Okay, let me think about it."],
-   intermediate:["Let me make sure I understand.","I'm not completely convinced.","What if we tried doing it another way?"],
-   advanced:["It's not that I disagree, but I think we're overlooking something important.","I see what you're getting at; what concerns me is the long-term impact.","If we want this to work, we're going to have to find some middle ground."]
-  },
-  fr:{
-   beginner:["Je voudrais te demander quelque chose.","Tu peux m'expliquer comment ça marche ?","D'accord, laisse-moi réfléchir."],
-   intermediate:["Si je comprends bien...","Je ne suis pas complètement convaincu.","Et si on essayait de faire autrement ?"],
-   advanced:["Ce n'est pas que je ne sois pas d'accord, mais je pense qu'on passe à côté de quelque chose d'important.","Je comprends ton point de vue ; ce qui m'inquiète, ce sont les conséquences à long terme.","Si on veut que ça fonctionne, il va falloir trouver un compromis."]
-  },
-  nl:{
-   beginner:["Ik wil je iets vragen.","Kun je uitleggen hoe dit werkt?","Oké, laat me er even over nadenken."],
-   intermediate:["Als ik het goed begrijp...","Ik ben nog niet helemaal overtuigd.","Wat als we het op een andere manier proberen?"],
-   advanced:["Niet dat ik het oneens ben, maar volgens mij zien we iets belangrijks over het hoofd.","Ik begrijp wat je bedoelt; wat me zorgen baart, zijn de gevolgen op lange termijn.","Als we willen dat dit werkt, zullen we een middenweg moeten vinden."]
+   beginner:[
+    {phrase:"I'd like to ask you something.",meaning:"I want to ask you something.",pronunciation:"ayd like tuh ask yuh SUM-thing",usage:"Use this to introduce a request or question naturally.",example:"I'd like to ask you something. Do you have a minute?",exampleMeaning:"A polite, natural way to start a question."},
+    {phrase:"Could you explain how this works?",meaning:"Can you explain how this works?",pronunciation:"kud yuh ex-PLAYN how this works",usage:"Use this when you need an explanation of a process or situation.",example:"Could you explain how this works?",exampleMeaning:"A direct but polite request for an explanation."},
+    {phrase:"Okay, let me think about it.",meaning:"Give me a moment to consider it.",pronunciation:"oh-KAY, let me THINK uh-bout it",usage:"Use this when you do not want to answer immediately.",example:"Okay, let me think about it and get back to you.",exampleMeaning:"A natural way to ask for time before deciding."}
+   ],
+   intermediate:[
+    {phrase:"Let me make sure I understand.",meaning:"I want to confirm that I understood you correctly.",pronunciation:"let me make shore eye un-der-STAND",usage:"Use this before checking or summarizing what someone just told you.",example:"Let me make sure I understand. You're saying the deadline is Friday?",exampleMeaning:"You are checking your understanding, not asking for a definition."},
+    {phrase:"I'm not completely convinced.",meaning:"I still have some doubts.",pronunciation:"I'm not kum-PLEET-lee kun-VINST",usage:"Use this to express doubt without saying that you completely reject an idea.",example:"I'm not completely convinced. Could we look at another option?",exampleMeaning:"A softer way to say you are not persuaded yet."},
+    {phrase:"What if we tried doing it another way?",meaning:"I want to suggest a different approach.",pronunciation:"what if we tried DOO-ing it uh-NUH-ther way",usage:"Use this to suggest an alternative without sounding confrontational.",example:"What if we tried doing it another way?",exampleMeaning:"A collaborative way to propose a different solution."}
+   ],
+   advanced:[
+    {phrase:"It's not that I disagree, but I think we're overlooking something important.",meaning:"I don't necessarily reject your idea; I think we're missing an important point.",pronunciation:"it's not that eye dis-uh-GREE, but I think we're oh-ver-LOOK-ing something im-POR-tant",usage:"Use this to disagree carefully while keeping the conversation constructive.",example:"It's not that I disagree, but I think we're overlooking an important detail.",exampleMeaning:"You soften disagreement before raising a concern."},
+    {phrase:"I see what you're getting at; what concerns me is the long-term impact.",meaning:"I understand your point, but I'm worried about what it could cause later.",pronunciation:"eye see what yer GET-ing at; what kun-SERNZ me is the long-term IM-pact",usage:"Use this when you want to acknowledge someone's reasoning before explaining your concern.",example:"I see what you're getting at, but what concerns me is the long-term impact.",exampleMeaning:"You show understanding before introducing a concern."},
+    {phrase:"If we want this to work, we're going to have to find some middle ground.",meaning:"Both sides will need to compromise for this to work.",pronunciation:"if we want this tuh work, we're gonna hafta find some MID-ul ground",usage:"Use this when a disagreement requires compromise.",example:"If we want this to work, we're going to have to find some middle ground.",exampleMeaning:"You are saying that neither side can get everything it wants."}
+   ]
   }
  };
  const bank=contextual[code]||contextual.en;
  const tier=["A0","A1","A2"].includes(level)?"beginner":(["B1","B2"].includes(level)?"intermediate":"advanced");
- const phrases=bank[tier];
-
- const primary=phrases[0],second=phrases[1]||primary,third=phrases[2]||primary;
- const makeTeach=(phrase,n)=>({
-   type:"teach",phrase,pronunciation:phrase,ipa:"",
-   meaning:n===1?"A natural expression for the situation.":n===2?"A useful alternative when the situation changes.":"A higher-value expression that helps you sound more natural and precise.",
-   usage:"Use it when the situation calls for this meaning and tone. Listen for how direct, casual, or careful it sounds.",
-   example:phrase,
-   exampleMeaning:"This is a natural use of the expression in the scene.",
-   prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""
- });
+ const lessons=bank[tier];
+ const primary=lessons[0],second=lessons[1]||primary,third=lessons[2]||primary;
+ const makeTeach=p=>({type:"teach",phrase:p.phrase,pronunciation:p.pronunciation,ipa:"",meaning:p.meaning,usage:p.usage,example:p.example,exampleMeaning:p.exampleMeaning,prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""});
+ const makeCheck=(p,others)=>({type:"check",phrase:p.phrase,pronunciation:p.pronunciation,example:p.example,prompt:"Which line would you actually say in this situation?",options:[p.example,others[0]?.example||p.example,"That doesn't fit what we're talking about."],answer:p.example,feedback:"Good. That response uses the expression naturally in the situation."});
  const cards=[
-  makeTeach(primary,1),
-  {type:"check",phrase:primary,pronunciation:primary,example:primary,prompt:"Which response uses this expression naturally in the situation?",options:[primary,second,"That is not what I mean."],answer:primary,feedback:"Good. You recognized how the expression is actually used."},
-  {type:"guided",phrase:primary,prompt:"Use this expression to respond to the situation in your own words.",context:"Keep the same meaning, but make the response fit the scene.",expected:primary,answer:primary,feedback:"Good. You are using the expression rather than just recognizing it."},
-  makeTeach(second,2),
-  {type:"check",phrase:second,pronunciation:second,example:second,prompt:"Which response fits the situation and sounds natural?",options:[second,primary,"I do not know."],answer:second,feedback:"Good. The expression fits the situation."},
-  {type:"guided",phrase:second,prompt:"Change one detail in the situation and use this expression in your response.",context:"Keep the idea, but adapt the response to the changed situation.",expected:second,answer:second,feedback:"Nice. You adapted the language to the moment."},
-  makeTeach(third,3),
-  {type:"check",phrase:third,pronunciation:third,example:third,prompt:"Which response sounds most natural for this moment?",options:[third,second,"I am not sure."],answer:third,feedback:"Good. You chose the expression that fits the moment."},
-  {type:"guided",phrase:third,prompt:"Build your own response using this expression. Keep the meaning but make the sentence yours.",context:"Change the details so the response belongs to you.",expected:third,answer:third,feedback:"Good. You are moving from recognition to production."},
-  {type:"challenge",phrase:third,prompt:"The situation changes unexpectedly. Which response sounds most natural now?",options:[third,second,primary],answer:third,feedback:"Notice how the best choice depends on what is happening now."},
-  {type:"speak",phrase:third,prompt:"Say the expression naturally, then continue the thought if you can.",expected:third,answer:third,feedback:"Good. Now use it without the script."},
+  makeTeach(primary),
+  makeCheck(primary,[second]),
+  {type:"guided",phrase:primary.phrase,pronunciation:primary.pronunciation,example:primary.example,prompt:"Use this expression to respond to the situation in your own words.",context:primary.meaning,expected:primary.phrase,answer:primary.phrase,feedback:"Good. You are producing the expression instead of only recognizing it."},
+  makeTeach(second),
+  makeCheck(second,[primary]),
+  {type:"guided",phrase:second.phrase,pronunciation:second.pronunciation,example:second.example,prompt:"Change one detail in the situation and use this expression naturally.",context:second.meaning,expected:second.phrase,answer:second.phrase,feedback:"Nice. You adapted the expression to the situation."},
+  makeTeach(third),
+  makeCheck(third,[second]),
+  {type:"guided",phrase:third.phrase,pronunciation:third.pronunciation,example:third.example,prompt:"Build your own response using this expression.",context:third.meaning,expected:third.phrase,answer:third.phrase,feedback:"Good. You are moving from recognition to production."},
+  {type:"challenge",phrase:third.phrase,pronunciation:third.pronunciation,example:third.example,prompt:"The situation changes. Which line would you actually say now?",options:[third.example,second.example,primary.example],answer:third.example,feedback:"Good. The choice fits the situation and tone."},
+  {type:"speak",phrase:third.phrase,pronunciation:third.pronunciation,meaning:third.meaning,prompt:"Say the expression naturally, then continue the thought if you can.",expected:third.phrase,answer:third.phrase,feedback:"Good. Now use it without the script."},
   {type:"conversation",phrase:"Now the other person responds and the situation moves forward.",prompt:"Respond naturally in the target language and keep the scene moving.",expected:"",answer:"",feedback:"Keep the interaction going.",instructions:"Respond naturally.",followUp:""}
  ];
  generated={
   title:(["B2+","C1","C2"].includes(level)?level+" · Nuance in real conversation":level+" · "+topic),
   intro:"A level-matched lesson built around a real situation. Learn the language first, then use it with less support.",
-  scene:{
-   setting:scenario.setting||topic,
-   moment:scenario.moment||"The situation changes and you need to respond naturally.",
-   learnerRole:scenario.learnerRole||"You are handling the interaction.",
-   goal:scenario.goal||"Choose language that fits the meaning, relationship, and tone."
-  },
+  scene:{setting:scenario.setting||topic,moment:scenario.moment||"The situation changes and you need to respond naturally.",learnerRole:scenario.learnerRole||"You are handling the interaction.",goal:scenario.goal||"Choose language that fits the meaning, relationship, and tone."},
   cards
  };
 }
-
 function showError(msg){$("loading").innerHTML="<strong>We couldn’t build this lesson.</strong><br><span class=\"small\">"+esc(msg)+"</span><br><button class=\"primary\" style=\"margin-top:16px\" onclick=\"location.reload()\">Try again</button>";}
 async function ensurePlacement(languageId){return true}
 async function load(){try{const {data,error}=await client.auth.getUser();if(error||!data?.user){location.href="login.html";return}user=data.user;const params=new URLSearchParams(location.search),requested=params.get("id"),saved=localStorage.getItem("Nahtive_current_learner_language");let q=client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id);const {data:langs,error:langErr}=await q;if(langErr)throw langErr;if(!langs?.length){location.href="onboarding.html";return}const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];const placementResult=await client.from("learner_events").select("event_data").eq("user_id",user.id).eq("learner_language_id",current.id).eq("event_type","placement_completed").order("created_at",{ascending:false}).limit(1).maybeSingle();if(placementResult.error)throw placementResult.error;currentLevelForPlacement=current.level||"A0";if(requested){const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,learner_languages(id,user_id,level,languages(name,code))").eq("id",requested).maybeSingle();if(r.error)throw r.error;if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("That lesson isn't part of your learning path.");baseLesson=r.data}else{const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,learner_languages(id,user_id,level,languages(name,code))").eq("learner_language_id",current.id).eq("level",current.level).order("created_at",{ascending:true}).limit(50);if(r.error)throw r.error;if(r.data?.length){const a=await client.from("lesson_attempts").select("lesson_id").in("lesson_id",r.data.map(x=>x.id));const done=new Set((a.data||[]).map(x=>x.lesson_id));baseLesson=r.data.find(x=>!done.has(x.id))||r.data[0];}else{baseLesson={id:null,title:"Nahtive scene",topic:"Everyday life",level:current.level,content:{},learner_language_id:current.id,learner_languages:{id:current.id,user_id:user.id,level:current.level,languages:current.languages}};}}const linked=baseLesson.learner_languages;const placementReady=await ensurePlacement(baseLesson.learner_language_id);if(!placementReady)return;const authoritativeLevel=String(current.level||linked.level||baseLesson.level||"A0");profile={id:baseLesson.learner_language_id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:authoritativeLevel,goal:"Real conversation"};localStorage.setItem("Nahtive_current_learner_language",profile.id);const payload={...profile,targetLanguage:profile.name,nativeLanguage:"English",lessonContext:{title:baseLesson.title,topic:baseLesson.topic,level:profile.level,scene:baseLesson.content?.scene||null}};/* Render a guaranteed local lesson first. AI enhancement happens after the learner can already start. */
