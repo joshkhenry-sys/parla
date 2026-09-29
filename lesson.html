@@ -35,27 +35,41 @@ let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],con
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
-async function speak(text,lang){
+async function speak(text,lang,button){
  if(!text)return false;
  const targetLang=lang||profile?.code||"en-US";
- const buttons=[...document.querySelectorAll("#hear,#hearExample")];
- const button=buttons.find(b=>b.matches(":focus"));
- const original=button?.textContent;
- if(button){button.disabled=true;button.textContent="Playing…";}
+ const targetButton=button||document.activeElement?.closest?.("#hear,#hearExample");
+ const original=targetButton?.textContent;
+ if(targetButton){targetButton.disabled=true;targetButton.textContent="Loading audio…";}
  try{
-   if(activeAudio){activeAudio.pause();activeAudio=null}
-   const res=await fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:String(text).slice(0,1200),language:targetLang})});
+   if(activeAudio){activeAudio.pause();activeAudio.src="";activeAudio=null}
+   const controller=new AbortController();
+   const timeout=setTimeout(()=>controller.abort(),10000);
+   const res=await fetch("/api/speak",{
+     method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify({text:String(text).slice(0,1200),language:targetLang}),
+     signal:controller.signal
+   });
+   clearTimeout(timeout);
    if(!res.ok)throw new Error("TTS request failed: "+res.status);
    const blob=await res.blob();
    if(!blob.size)throw new Error("Empty audio response");
    const url=URL.createObjectURL(blob);
-   const audio=new Audio();
+   const audio=new Audio(url);
    activeAudio=audio;
    audio.preload="auto";
-   audio.src=url;
-   audio.onended=()=>{URL.revokeObjectURL(url);if(activeAudio===audio)activeAudio=null};
-   audio.onerror=()=>{URL.revokeObjectURL(url);if(activeAudio===audio)activeAudio=null};
-   await audio.play();
+   if(targetButton)targetButton.textContent="Playing…";
+   await new Promise((resolve,reject)=>{
+     let settled=false;
+     const done=(fn)=>{if(settled)return;settled=true;clearTimeout(timer);fn()};
+     const timer=setTimeout(()=>done(()=>reject(new Error("Audio playback timed out."))),12000);
+     audio.onended=()=>done(resolve);
+     audio.onerror=()=>done(()=>reject(new Error("Audio playback failed.")));
+     audio.play().catch(err=>done(()=>reject(err)));
+   });
+   URL.revokeObjectURL(url);
+   if(activeAudio===audio)activeAudio=null;
    return true;
  }catch(e){
    console.warn("Nahtive AI voice unavailable:",e);
@@ -78,9 +92,10 @@ async function speak(text,lang){
    toast("Audio is unavailable right now. Try again.");
    return false;
  }finally{
-   if(button){button.disabled=false;button.textContent=original||"Hear it";}
+   if(targetButton){targetButton.disabled=false;targetButton.textContent=original||"Hear it";}
  }
 }
+
 function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();}
 function similarity(a,b){a=normalize(a);b=normalize(b);if(!a||!b)return 0;if(a===b)return 1;const A=[...a],B=[...b],d=Array.from({length:A.length+1},(_,i)=>i);for(let j=1;j<=B.length;j++){let p=d[0];d[0]=j;for(let i=1;i<=A.length;i++){const old=d[i],cost=A[i-1]===B[j-1]?0:1;d[i]=Math.min(d[i]+1,d[i-1]+1,p+cost);p=old}}return Math.max(0,1-d[A.length]/Math.max(A.length,B.length));}
 function detected(text){const code=(profile?.code||"").toLowerCase().split("-")[0];const r={ar:/[\u0600-\u06ff]/,pl:/[ąćęłńóśźż]/i,nl:/\b(ik|je|het|een|van|voor|wat|wil|kan|niet|goed|de)\b/i,es:/\b(que|como|quiero|puedo|para|por|una|uno|el|la|me|te|donde|bien)\b/i,en:/\b(i|you|the|a|what|can|get|for|me|is|want)\b/i};return code==="ar"?r.ar.test(text):r[code]?r[code].test(text):true;}
@@ -216,6 +231,23 @@ function buildFallbackLesson(){
     {phrase:"Niet dat ik het oneens ben, maar volgens mij zien we iets belangrijks over het hoofd.",meaning:"It's not that I disagree, but I think we're overlooking something important.",pronunciation:"neet dat ik ut oh-NAYNS ben, mar fol-GUNS may zeen vuh iets buh-LANG-rikes OH-vur ut hoft",usage:"Use this to disagree carefully while pointing out something that may have been missed.",example:"Niet dat ik het oneens ben, maar volgens mij zien we een belangrijk detail over het hoofd.",exampleMeaning:"“It's not that I disagree, but I think we're overlooking an important detail.”"},
     {phrase:"Ik begrijp wat je bedoelt; waar ik me zorgen over maak, zijn de gevolgen op lange termijn.",meaning:"I understand your point; what concerns me are the long-term consequences.",pronunciation:"ik buh-GRYPE vat yuh buh-DOOLT; var ik muh ZOR-ghun OH-vur make, zyn duh guh-VOL-ghun op LANG-uh termyn",usage:"Use this to acknowledge someone's reasoning before explaining your concern.",example:"Ik begrijp wat je bedoelt, maar ik maak me zorgen over de gevolgen op lange termijn.",exampleMeaning:"“I understand your point, but I'm concerned about the long-term consequences.”"},
     {phrase:"Als we willen dat dit werkt, zullen we een middenweg moeten vinden.",meaning:"If we want this to work, we'll have to find a middle ground.",pronunciation:"als vuh VIL-un dat dit werkt, ZUL-un vuh un MID-un-vaykh moht-un VIND-un",usage:"Use this when both sides need to compromise for the situation to work.",example:"Als we willen dat dit werkt, zullen we een middenweg moeten vinden.",exampleMeaning:"“If we want this to work, we'll have to find a middle ground.”"}
+   ]
+  },
+  ar:{
+   beginner:[
+    {phrase:"أريد أن أسألك شيئًا.",meaning:"I want to ask you something.",pronunciation:"u-reed an as-a-lak shay-an",usage:"Use this when you want to introduce a question or request naturally.",example:"أريد أن أسألك شيئًا. هل لديك دقيقة؟",exampleMeaning:"“I want to ask you something. Do you have a minute?”"},
+    {phrase:"هل يمكنك أن تشرح لي كيف يعمل هذا؟",meaning:"Can you explain how this works?",pronunciation:"hal yum-ki-nu-ka an tash-ra-ha lee kay-fa ya-mal ha-tha",usage:"Use this when you need someone to explain a process or situation.",example:"هل يمكنك أن تشرح لي كيف يعمل هذا؟",exampleMeaning:"“Can you explain how this works?”"},
+    {phrase:"حسنًا، دعني أفكر في الأمر.",meaning:"Okay, let me think about it.",pronunciation:"ha-san-an, da-nee af-ak-ker fee al-amr",usage:"Use this when you need a moment before answering or deciding.",example:"حسنًا، دعني أفكر في الأمر وأخبرك غدًا.",exampleMeaning:"“Okay, let me think about it and I'll tell you tomorrow.”"}
+   ],
+   intermediate:[
+    {phrase:"دعني أتأكد أنني فهمت بشكل صحيح.",meaning:"Let me make sure I understand.",pronunciation:"da-nee a-ta-ak-kad an-na-nee fa-himt bi-shakl sa-heeh",usage:"Use this to check your understanding before responding.",example:"دعني أتأكد أنني فهمت بشكل صحيح. تقصد أننا نبدأ يوم الجمعة؟",exampleMeaning:"“Let me make sure I understand. You mean we start Friday?”"},
+    {phrase:"لست مقتنعًا تمامًا.",meaning:"I'm not completely convinced.",pronunciation:"las-tu muq-ta-na-an ta-ma-man",usage:"Use this when you have doubts without completely rejecting an idea.",example:"لست مقتنعًا تمامًا. هل يمكننا التفكير في خيار آخر؟",exampleMeaning:"“I'm not completely convinced. Can we consider another option?”"},
+    {phrase:"ما رأيك أن نجرب طريقة أخرى؟",meaning:"What if we tried another way?",pronunciation:"ma ra-yu-ka an nu-jar-rib ta-ree-qa ukhra",usage:"Use this to suggest an alternative without sounding confrontational.",example:"ما رأيك أن نجرب طريقة أخرى؟",exampleMeaning:"“What if we tried another way?”"}
+   ],
+   advanced:[
+    {phrase:"ليس الأمر أنني أختلف معك، لكن أعتقد أننا نتجاهل شيئًا مهمًا.",meaning:"It's not that I disagree with you, but I think we're overlooking something important.",pronunciation:"lay-sa al-amr an-na-nee akh-ta-li-fu ma-ak, la-kin a-ta-qi-du an-na-na na-ta-ja-hal shay-an mu-him-man",usage:"Use this to disagree carefully while keeping the conversation constructive.",example:"ليس الأمر أنني أختلف معك، لكن أعتقد أننا نتجاهل نقطة مهمة.",exampleMeaning:"“It's not that I disagree with you, but I think we're overlooking an important point.”"},
+    {phrase:"أفهم وجهة نظرك، لكن ما يقلقني هو التأثير على المدى الطويل.",meaning:"I understand your point, but what concerns me is the long-term impact.",pronunciation:"af-ham wij-hat na-za-rik, la-kin ma yu-laq-qi-nee hu-wa at-ta-theer a-la al-ma-da at-ta-weel",usage:"Use this to acknowledge someone's reasoning before explaining your concern.",example:"أفهم وجهة نظرك، لكن ما يقلقني هو التأثير على المدى الطويل.",exampleMeaning:"“I understand your point, but what concerns me is the long-term impact.”"},
+    {phrase:"إذا أردنا أن ينجح هذا، فعلينا أن نجد حلًا وسطًا.",meaning:"If we want this to work, we'll have to find a middle ground.",pronunciation:"i-tha a-rad-na an yan-jah ha-tha, fa-a-lay-na an naj-id hal-an wa-sa-tan",usage:"Use this when both sides need to compromise.",example:"إذا أردنا أن ينجح هذا، فعلينا أن نجد حلًا وسطًا.",exampleMeaning:"“If we want this to work, we'll have to find a middle ground.”"}
    ]
   },
   en:{
