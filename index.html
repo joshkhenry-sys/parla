@@ -1,13 +1,158 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nahtive — Learn to actually use a language</title>
 <meta name="description" content="Nahtive helps you understand, speak, and use another language in real situations.">
-<link rel="stylesheet" href="nahtive.css"><link rel="stylesheet" href="nahtive.css"></head><body><div class="shell"><nav><a class="logo" href="index.html">Nahtive<i></i></a><div class="navlinks"><a href="#how">How it works</a><a class="login" href="login.html">Log in</a><a class="primary" href="signup.html">Start learning</a></div></nav>
-<section class="hero"><div><div class="eyebrow">Language learning for real life</div><h1>Stop studying.<br><em>Start speaking.</em></h1></div><div><p class="hero-copy">Nahtive puts you into real situations, teaches you the language people actually use, and gets you talking from the first session.</p><div class="actions"><a class="primary" href="signup.html">Start learning →</a><a class="secondary" href="#how">See how it works</a></div></div></section>
-<section class="statement"><h2>Language only matters when you can use it.</h2><p>Forget the endless cards, points, and random vocabulary lists. Nahtive is built around situations you actually encounter — ordering coffee, meeting people, making plans, telling a story, having a conversation.</p></section>
-<section class="steps" id="how"><article class="step"><div class="num">01 — HEAR</div><h3>Hear how people actually talk.</h3><p>Natural phrases, pronunciation, rhythm, and context before you're asked to produce anything.</p></article><article class="step"><div class="num">02 — RESPOND</div><h3>Use it yourself.</h3><p>Speak or type your response. Nahtive cares about getting your meaning across, not punishing every imperfect sentence.</p></article><article class="step"><div class="num">03 — REMEMBER</div><h3>Build on what you need.</h3><p>Your conversations and practice shape what comes next, so lessons become more useful over time.</p></article></section>
-<section class="cta"><h2>Learn a language you can actually live in.</h2><p>Start with your level. Nahtive takes it from there.</p><a class="primary" href="signup.html">Start learning →</a></section>
-<footer class="footer"><span>© 2026 Nahtive</span><span>Real language. Real situations.</span></footer></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-config.js"></script><script>
-(async()=>{try{const c=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);const{data}=await c.auth.getSession();const u=data?.session?.user;if(!u){document.body.style.visibility="visible";return;}const{data:l}=await c.from("learner_languages").select("id").eq("user_id",u.id).limit(1);if(l&&l.length){window.location.replace("dashboard.html");return;}if(u.user_metadata?.nahtive_onboarding_pending){window.location.replace("onboarding.html?resume=1");return;}document.body.style.visibility="visible";}catch(e){console.error("Could not resume learning:",e);document.body.style.visibility="visible";}})();
-</script></body></html>
+<link rel="stylesheet" href="nahtive.css">
+<style>
+.landing{position:relative;overflow:hidden}
+.landing-hero{min-height:610px;display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:60px;padding:70px 0 85px;position:relative}
+.landing-copy{position:relative;z-index:2}
+.landing-copy h1{font-size:clamp(48px,6.7vw,84px);line-height:.94;max-width:760px;margin-top:16px}
+.landing-copy h1 em{font-style:normal;color:var(--nahtive-sage-dark);position:relative}
+.landing-copy h1 em::after{content:"";position:absolute;left:0;right:5%;bottom:-5px;height:7px;border-radius:99px;background:var(--nahtive-yellow);transform:rotate(-1.5deg);z-index:-1}
+.landing-copy p{max-width:500px;margin-top:24px;color:var(--muted);font-size:17px;line-height:1.7}
+.landing-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
+.hero-art{min-height:470px;position:relative;display:grid;place-items:center}
+.hero-art::before{content:"";position:absolute;width:360px;height:360px;border-radius:53% 47% 42% 58% / 45% 54% 46% 55%;background:var(--nahtive-sage);opacity:.17;animation:nahtiveFloat 10s ease-in-out infinite alternate}
+.hero-art::after{content:"";position:absolute;width:150px;height:150px;right:4%;top:4%;border-radius:50%;background:var(--nahtive-coral);opacity:.75;animation:nahtiveFloatReverse 8s ease-in-out infinite alternate}
+.phrase-orbit{position:relative;width:min(100%,500px);height:450px}
+.phrase-card{position:absolute;padding:18px 20px;background:rgba(255,253,248,.92);border:1px solid rgba(83,100,69,.12);border-radius:22px;box-shadow:0 20px 45px rgba(51,64,57,.10);backdrop-filter:blur(8px);animation:phraseDrift 7s ease-in-out infinite}
+.phrase-card strong{display:block;font-size:19px;letter-spacing:-.02em}
+.phrase-card span{display:block;margin-top:5px;font-size:11px;color:var(--muted)}
+.phrase-one{left:3%;top:12%;transform:rotate(-4deg)}
+.phrase-two{right:0;top:31%;transform:rotate(4deg);animation-delay:-2s}
+.phrase-three{left:12%;bottom:12%;transform:rotate(2deg);animation-delay:-4s}
+.phrase-four{right:10%;bottom:3%;transform:rotate(-3deg);animation-delay:-5.5s}
+.phrase-dot{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--nahtive-yellow);right:25%;top:13%;animation:nahtivePulse 3s ease-in-out infinite}
+.phrase-dot.two{width:14px;height:14px;background:var(--nahtive-blue);left:5%;bottom:25%;animation-delay:-1s}
+@keyframes phraseDrift{0%,100%{translate:0 0}50%{translate:0 -10px}}
+.arrival-note{display:flex;align-items:center;gap:9px;margin-top:22px;color:var(--muted);font-size:11px}
+.arrival-note i{width:7px;height:7px;border-radius:50%;background:var(--nahtive-coral);animation:nahtivePulse 2.2s infinite}
+.landing-statement{padding:95px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.landing-statement h2{font-size:clamp(36px,4.5vw,58px);line-height:1;max-width:620px}
+.landing-statement p{max-width:480px;color:var(--muted);font-size:15px;line-height:1.8;padding-top:10px}
+.experience-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px;padding:70px 0}
+.experience-card{border:1px solid var(--line);border-radius:30px;min-height:320px;padding:30px;position:relative;overflow:hidden;background:var(--nahtive-paper);box-shadow:0 18px 45px rgba(51,64,57,.055)}
+.experience-card.large{background:#e8eedf}
+.experience-card.blue{background:#dfeef3}
+.experience-card.coral{background:#f3dfd6}
+.experience-card h3{position:absolute;left:30px;bottom:68px;max-width:430px;font-size:29px;line-height:1.04}
+.experience-card p{position:absolute;left:30px;bottom:28px;color:rgba(51,64,57,.64);font-size:12px}
+.mini-orbit{position:absolute;right:30px;top:30px;width:120px;height:120px;border:1px dashed rgba(51,64,57,.22);border-radius:50%;animation:spin 18s linear infinite}
+.mini-orbit::after{content:"";position:absolute;width:24px;height:24px;border-radius:50%;background:var(--nahtive-coral);top:-8px;left:47px}
+.burst{position:absolute;right:40px;bottom:35px;width:120px;height:120px}
+.burst span{position:absolute;left:50%;top:50%;width:15px;height:15px;border-radius:50%;background:var(--nahtive-yellow);animation:burst 4s ease-in-out infinite}
+.burst span:nth-child(2){background:var(--nahtive-sage);animation-delay:-1s}
+.burst span:nth-child(3){background:var(--nahtive-blue);animation-delay:-2s}
+@keyframes spin{to{rotate:360deg}}
+@keyframes burst{0%,100%{transform:translate(-50%,-50%) scale(.7)}50%{transform:translate(calc(-50% + var(--x,34px)),calc(-50% + var(--y,-30px))) scale(1)}}
+.pathway{padding:10px 0 100px}
+.pathway-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:28px}
+.pathway-head p{max-width:360px;color:var(--muted);font-size:13px}
+.pathway-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.path-step{padding:25px;border-radius:22px;min-height:180px;border:1px solid var(--line);position:relative;overflow:hidden}
+.path-step:nth-child(1){background:#f5edc8}.path-step:nth-child(2){background:#dfeef3}.path-step:nth-child(3){background:#f3dfd6}
+.path-step .num{color:rgba(51,64,57,.52)}
+.path-step h3{margin-top:55px;font-size:21px}
+.path-step::after{content:"";position:absolute;width:80px;height:80px;right:-25px;top:-25px;border-radius:50%;background:rgba(255,255,255,.35)}
+.landing-cta{padding:85px 0 105px}
+.landing-cta h2{font-size:clamp(42px,6vw,72px);line-height:.98;max-width:800px}
+.landing-cta p{margin-top:17px;color:var(--muted)}
+.landing-footer{border-top:1px solid var(--line);padding:24px 0 35px;display:flex;justify-content:space-between;color:var(--muted);font-size:10px}
+@media(max-width:800px){
+ .landing-hero,.landing-statement,.experience-grid{grid-template-columns:1fr;gap:35px}
+ .landing-hero{padding-top:45px}
+ .hero-art{min-height:390px}
+ .phrase-orbit{height:390px}
+ .landing-copy h1{font-size:clamp(44px,13vw,68px)}
+ .experience-grid{padding:55px 0}
+ .pathway-steps{grid-template-columns:1fr}
+ .pathway-head{display:block}
+ .landing-footer{display:block}
+ .landing-footer span+span{display:block;margin-top:8px}
+}
+</style>
+</head>
+<body>
+<div class="shell landing">
+<nav>
+<a class="logo" href="index.html">Nahtive<span>•</span></a>
+<div class="navlinks"><a href="#experience">How it works</a><a class="login" href="login.html">Log in</a><a class="primary" href="signup.html">Start learning</a></div>
+</nav>
+
+<section class="landing-hero">
+<div class="landing-copy">
+<div class="eyebrow">Language learning for real life</div>
+<h1>Learn it.<br><em>Live it.</em><br>Speak it.</h1>
+<p>Nahtive puts you inside real conversations, teaches you the language people actually use, and helps you become comfortable using it.</p>
+<div class="landing-actions"><a class="primary" href="signup.html">Start learning <span>→</span></a><a class="secondary" href="#experience">Explore Nahtive</a></div>
+<div class="arrival-note"><i></i><span>Built around how you actually want to speak.</span></div>
+</div>
+
+<div class="hero-art" aria-label="Examples of natural language in context">
+<div class="phrase-orbit">
+<div class="phrase-card phrase-one"><strong>¿Qué onda?</strong><span>What's up?</span></div>
+<div class="phrase-card phrase-two"><strong>I'm down.</strong><span>I'm interested / sure.</span></div>
+<div class="phrase-card phrase-three"><strong>¿Te late?</strong><span>Are you into it?</span></div>
+<div class="phrase-card phrase-four"><strong>That works for me.</strong><span>Natural everyday English.</span></div>
+<div class="phrase-dot"></div><div class="phrase-dot two"></div>
+</div>
+</div>
+</section>
+
+<section class="landing-statement reveal" id="experience">
+<h2>You're not learning a language. You're learning how to <em style="color:var(--nahtive-sage-dark);font-style:normal">use</em> one.</h2>
+<p>Hear it in context. Understand why people say it. Practice it. Then have the conversation yourself. Nahtive remembers what you've learned and uses it to shape what comes next.</p>
+</section>
+
+<section class="experience-grid">
+<article class="experience-card large reveal"><div class="num">01 · HEAR</div><div class="mini-orbit"></div><h3>Start with a situation, not a vocabulary list.</h3><p>Real places. Real moments. Useful language.</p></article>
+<article class="experience-card blue reveal"><div class="num">02 · RESPOND</div><div class="burst"><span style="--x:32px;--y:-30px"></span><span style="--x:-30px;--y:-25px"></span><span style="--x:28px;--y:28px"></span></div><h3>Then make the language yours.</h3><p>Speak, listen, adjust, try again.</p></article>
+<article class="experience-card coral reveal"><div class="num">03 · REMEMBER</div><h3>Your learning path gets smarter as you use it.</h3><p>Review what matters. Move forward when you're ready.</p></article>
+</section>
+
+<section class="pathway reveal">
+<div class="pathway-head"><div><div class="eyebrow">The Nahtive loop</div><h2>Every session moves you forward.</h2></div><p>Small wins compound. The goal isn't to finish a course. It's to become comfortable having the conversation.</p></div>
+<div class="pathway-steps">
+<article class="path-step"><div class="num">01</div><h3>Understand</h3></article>
+<article class="path-step"><div class="num">02</div><h3>Use it</h3></article>
+<article class="path-step"><div class="num">03</div><h3>Own it</h3></article>
+</div>
+</section>
+
+<section class="landing-cta reveal">
+<div class="eyebrow">Your next conversation</div>
+<h2>Start learning a language you can actually live in.</h2>
+<p>Find your level. Build your path. Start speaking.</p>
+<div class="landing-actions"><a class="primary" href="signup.html">Start learning <span>→</span></a></div>
+</section>
+
+<footer class="landing-footer"><span>© 2026 Nahtive</span><span>Real language. Real situations.</span></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+(async()=>{
+try{
+ const c=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+ const {data}=await c.auth.getSession();
+ const u=data?.session?.user;
+ if(u){
+   const {data:l}=await c.from("learner_languages").select("id").eq("user_id",u.id).limit(1);
+   if(l&&l.length){window.location.replace("dashboard.html");return}
+   if(u.user_metadata?.nahtive_onboarding_pending){window.location.replace("onboarding.html?resume=1");return}
+ }
+}catch(e){console.error("Could not resume learning:",e)}
+document.querySelectorAll(".reveal").forEach(el=>el.classList.add("visible"));
+const observer=("IntersectionObserver" in window)?new IntersectionObserver(entries=>{
+ entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add("visible");observer.unobserve(entry.target)}})
+},{threshold:.14}):null;
+if(observer)document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+})();
+</script>
+</body>
+</html>
