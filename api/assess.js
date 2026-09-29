@@ -21,7 +21,7 @@ B1: storytelling, conditionals, tense/aspect, conversational repair, everyday id
 B2: nuance, register, collocations, idiomatic language, implied meaning, natural alternatives and social situations.
 C1: sophisticated syntax, discourse markers, subtle register, ambiguity, pragmatic meaning, indirectness and precise reformulation.
 C2: near-native distinctions, subtle connotation, culturally natural phrasing, rhetorical intent, style shifts and fine grammatical distinctions.
-Do not make higher-level questions merely longer. The task itself must become more demanding. Never pad B2/C1/C2 with greetings, introductions, beginner travel phrases, or elementary vocabulary.
+Do not make higher-level questions merely longer. The task itself must become more demanding. Never pad B2, C1, or C2 with greetings, introductions, beginner travel phrases, or elementary vocabulary. The task itself must become more demanding. Never pad B2/C1/C2 with greetings, introductions, beginner travel phrases, or elementary vocabulary.
 Each question must have exactly 3 answer choices and exactly one correct answer. Distractors must be plausible for a learner at that level and must be written in the target language whenever the task is choosing a target-language response.
 Do not reduce the assessment to English translations. The target language must provide meaningful evidence of proficiency.
 `;
@@ -39,6 +39,8 @@ Do not reduce the assessment to English translations. The target language must p
   const counts=Object.fromEntries(expectedLevels.map(level=>[level,0]));
   for(const q of parsed.questions){if(!counts[q.level]&&counts[q.level]!==0)return res.status(502).json({error:"Invalid assessment level"});counts[q.level]++;}
   if(expectedLevels.some(level=>counts[level]!==4)) return res.status(502).json({error:"Assessment level distribution was invalid"});
+  const types=["reading","listening","grammar","production"];
+  for(const level of expectedLevels){ const rows=parsed.questions.filter(q=>q.level===level); if(types.some(type=>rows.filter(q=>q.type===type).length!==1)) return res.status(502).json({error:"Assessment task distribution was invalid"}); }
   const types=["reading","listening","grammar","production"];
   for(const level of expectedLevels){
     const levelQuestions=parsed.questions.filter(q=>q.level===level);
