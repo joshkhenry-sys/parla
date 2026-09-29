@@ -191,16 +191,28 @@ function buildFallbackLesson(){
  const topic=baseLesson?.topic||"Everyday life";
  const cards=phrases.slice(0,3).map((phrase,i)=>({type:"teach",phrase,pronunciation:phrase,ipa:"",meaning:i===0?"A natural phrase for this level and situation.":"A second useful expression you can adapt in the same situation.",usage:"Use it naturally in the scene; focus on meaning and tone.",example:phrase}));
  const primary=phrases[0];
- const alternatives=phrases.slice(1);
- cards.push(
-  {type:"check",prompt:"Which expression best fits the situation?",options:[primary,...alternatives],answer:primary,feedback:"That's the best fit for this moment."},
-  {type:"check",prompt:"What is the speaker trying to communicate?",options:["The intended meaning in context","Something unrelated","A grammar rule"],answer:"The intended meaning in context",feedback:"Exactly."},
-  {type:"guided",prompt:"Build a short response using the language you just learned.",expected:primary,answer:primary,feedback:"Good. Keep the structure and make it your own."},
-  {type:"guided",prompt:"Change one detail in the scene and adapt your response.",expected:alternatives[0]||primary,answer:alternatives[0]||primary,feedback:"Nice. You adapted the language instead of memorizing it."},
-  {type:"challenge",prompt:"The situation changes unexpectedly. Which response sounds most natural now?",options:[alternatives[0]||primary,primary,alternatives[1]||primary],answer:alternatives[0]||primary,feedback:"Notice how the choice changes with the situation."},
-  {type:"speak",phrase:primary,prompt:"Say the expression naturally, then continue the thought if you can.",expected:primary,answer:primary,feedback:"Good. Now use it without the script."},
-  {type:"conversation",phrase:"Now the other person responds and the situation moves forward.",prompt:"Respond naturally in the target language and keep the scene moving.",expected:"",answer:"",feedback:"Keep the interaction going.",instructions:"Respond naturally.",followUp:""}
- );
+ const second=phrases[1]||primary;
+ const third=phrases[2]||primary;
+ const makeTeach=(phrase,n)=>({type:"teach",phrase,pronunciation:phrase,ipa:"",meaning:
+   n===1?"A natural expression for the situation.":n===2?"A useful alternative you can use when the situation changes.":"A higher-value expression that helps you sound more natural in this scene.",
+   usage:"Use it when the situation calls for this meaning and tone. Pay attention to how direct or casual it sounds.",
+   example:phrase,
+   exampleMeaning:"This example shows the expression being used naturally in the scene.",
+   prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""});
+ const cards=[
+   makeTeach(primary,1),
+   {type:"check",phrase:primary,prompt:"What does this expression mean in this situation?",options:["The intended meaning in context","A completely different idea","A grammar rule"],answer:"The intended meaning in context",feedback:"Exactly. You understood the expression."},
+   {type:"guided",phrase:primary,prompt:"Use this expression to respond to the situation in your own words.",context:"You know what the expression means. Now make it fit the scene.",expected:primary,answer:primary,feedback:"Good. The goal is to use the structure naturally."},
+   makeTeach(second,2),
+   {type:"check",phrase:second,prompt:"Which meaning best matches this expression here?",options:["The intended meaning in context","A different situation","A literal word-for-word translation"],answer:"The intended meaning in context",feedback:"Right. Context matters here."},
+   {type:"guided",phrase:second,prompt:"Change one detail in the situation and use this expression in your response.",context:"Keep the same idea, but adapt it to the new situation.",expected:second,answer:second,feedback:"Nice. You adapted the language instead of just memorizing it."},
+   makeTeach(third,3),
+   {type:"check",phrase:third,prompt:"Why would a native speaker choose this expression in this situation?",options:["It fits the intended meaning and tone","It is always the only grammatically correct choice","It has no connection to the situation"],answer:"It fits the intended meaning and tone",feedback:"Exactly. Natural language depends on context and tone."},
+   {type:"guided",phrase:third,prompt:"Build your own response using this expression. Keep the meaning but make the sentence yours.",context:"You can copy the structure, but change the details to fit the scene.",expected:third,answer:third,feedback:"Good. You are moving from recognition to production."},
+   {type:"challenge",phrase:third,prompt:"The situation changes unexpectedly. Which response sounds most natural now?",options:[third,second,primary],answer:third,feedback:"Notice how the best choice depends on what is happening now."},
+   {type:"speak",phrase:third,prompt:"Say the expression naturally, then continue the thought if you can.",expected:third,answer:third,feedback:"Good. Now use it without the script."},
+   {type:"conversation",phrase:"Now the other person responds and the situation moves forward.",prompt:"Respond naturally in the target language and keep the scene moving.",expected:"",answer:"",feedback:"Keep the interaction going.",instructions:"Respond naturally.",followUp:""}
+ ];
  generated={title:(level==="C2"?"Nuance in real conversation":level+" · "+topic),intro:"A level-matched lesson: learn the language first, then use it with less support.",scene:{setting:topic,moment:"A realistic adult interaction.",learnerRole:"You are handling the situation.",goal:"Choose language that fits the meaning and tone."},cards};
 }
 
