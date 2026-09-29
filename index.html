@@ -8,181 +8,53 @@
 <link rel="stylesheet" href="nahtive.css">
 <style id="nahtive-auth-gate">html.nahtive-auth-check body{visibility:hidden}html.nahtive-auth-ready body{visibility:visible}</style>
 <script>document.documentElement.classList.add("nahtive-auth-check");</script>
+<style id="nahtive-auth-gate">html.nahtive-auth-check body{visibility:hidden}html.nahtive-auth-ready body{visibility:visible}</style>
+<script>document.documentElement.classList.add("nahtive-auth-check");</script>
 <style>
-.landing{position:relative;overflow:hidden}
-.landing-hero{min-height:610px;display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:60px;padding:70px 0 85px;position:relative}
-.landing-copy{position:relative;z-index:2}
-.landing-copy h1{font-size:clamp(48px,6.7vw,84px);line-height:.94;max-width:760px;margin-top:16px}
-.landing-copy h1 em{font-style:normal;color:var(--nahtive-sage-dark);position:relative}
-.landing-copy h1 em::after{content:"";position:absolute;left:0;right:5%;bottom:-5px;height:7px;border-radius:99px;background:var(--nahtive-yellow);transform:rotate(-1.5deg);z-index:-1}
-.landing-copy p{max-width:500px;margin-top:24px;color:var(--muted);font-size:17px;line-height:1.7}
-.landing-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
-.hero-art{min-height:470px;position:relative;display:grid;place-items:center}
-.hero-art::before{content:"";position:absolute;width:360px;height:360px;border-radius:53% 47% 42% 58% / 45% 54% 46% 55%;background:var(--nahtive-sage);opacity:.17;animation:nahtiveFloat 10s ease-in-out infinite alternate}
-.hero-art::after{content:"";position:absolute;width:150px;height:150px;right:4%;top:4%;border-radius:50%;background:var(--nahtive-coral);opacity:.75;animation:nahtiveFloatReverse 8s ease-in-out infinite alternate}
-.phrase-orbit{position:relative;width:min(100%,500px);height:450px}
-.phrase-card{position:absolute;padding:18px 20px;background:rgba(255,253,248,.92);border:1px solid rgba(83,100,69,.12);border-radius:22px;box-shadow:0 20px 45px rgba(51,64,57,.10);backdrop-filter:blur(8px);animation:phraseDrift 7s ease-in-out infinite}
-.phrase-card strong{display:block;font-size:19px;letter-spacing:-.02em}
-.phrase-card span{display:block;margin-top:5px;font-size:11px;color:var(--muted)}
-.phrase-one{left:3%;top:12%;transform:rotate(-4deg)}
-.phrase-two{right:0;top:31%;transform:rotate(4deg);animation-delay:-2s}
-.phrase-three{left:12%;bottom:12%;transform:rotate(2deg);animation-delay:-4s}
-.phrase-four{right:10%;bottom:3%;transform:rotate(-3deg);animation-delay:-5.5s}
-.phrase-dot{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--nahtive-yellow);right:25%;top:13%;animation:nahtivePulse 3s ease-in-out infinite}
-.phrase-dot.two{width:14px;height:14px;background:var(--nahtive-blue);left:5%;bottom:25%;animation-delay:-1s}
-@keyframes phraseDrift{0%,100%{translate:0 0}50%{translate:0 -10px}}
-.arrival-note{display:flex;align-items:center;gap:9px;margin-top:22px;color:var(--muted);font-size:11px}
-.arrival-note i{width:7px;height:7px;border-radius:50%;background:var(--nahtive-coral);animation:nahtivePulse 2.2s infinite}
-.landing-statement{padding:95px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
-.landing-statement h2{font-size:clamp(36px,4.5vw,58px);line-height:1;max-width:620px}
-.landing-statement p{max-width:480px;color:var(--muted);font-size:15px;line-height:1.8;padding-top:10px}
-.experience-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px;padding:70px 0}
-.experience-card{border:1px solid var(--line);border-radius:30px;min-height:320px;padding:30px;position:relative;overflow:hidden;background:var(--nahtive-paper);box-shadow:0 18px 45px rgba(51,64,57,.055)}
-.experience-card.large{background:#e8eedf}
-.experience-card.blue{background:#dfeef3}
-.experience-card.coral{background:#f3dfd6}
-.experience-card h3{position:absolute;left:30px;bottom:68px;max-width:430px;font-size:29px;line-height:1.04}
-.experience-card p{position:absolute;left:30px;bottom:28px;color:rgba(51,64,57,.64);font-size:12px}
-.mini-orbit{position:absolute;right:30px;top:30px;width:120px;height:120px;border:1px dashed rgba(51,64,57,.22);border-radius:50%;animation:spin 18s linear infinite}
-.mini-orbit::after{content:"";position:absolute;width:24px;height:24px;border-radius:50%;background:var(--nahtive-coral);top:-8px;left:47px}
-.burst{position:absolute;right:40px;bottom:35px;width:120px;height:120px}
-.burst span{position:absolute;left:50%;top:50%;width:15px;height:15px;border-radius:50%;background:var(--nahtive-yellow);animation:burst 4s ease-in-out infinite}
-.burst span:nth-child(2){background:var(--nahtive-sage);animation-delay:-1s}
-.burst span:nth-child(3){background:var(--nahtive-blue);animation-delay:-2s}
-@keyframes spin{to{rotate:360deg}}
-@keyframes burst{0%,100%{transform:translate(-50%,-50%) scale(.7)}50%{transform:translate(calc(-50% + var(--x,34px)),calc(-50% + var(--y,-30px))) scale(1)}}
-.pathway{padding:10px 0 100px}
-.pathway-head{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:28px}
-.pathway-head p{max-width:360px;color:var(--muted);font-size:13px}
-.pathway-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.path-step{padding:25px;border-radius:22px;min-height:180px;border:1px solid var(--line);position:relative;overflow:hidden}
-.path-step:nth-child(1){background:#f5edc8}.path-step:nth-child(2){background:#dfeef3}.path-step:nth-child(3){background:#f3dfd6}
-.path-step .num{color:rgba(51,64,57,.52)}
-.path-step h3{margin-top:55px;font-size:21px}
-.path-step::after{content:"";position:absolute;width:80px;height:80px;right:-25px;top:-25px;border-radius:50%;background:rgba(255,255,255,.35)}
-.landing-cta{padding:85px 0 105px}
-.landing-cta h2{font-size:clamp(42px,6vw,72px);line-height:.98;max-width:800px}
-.landing-cta p{margin-top:17px;color:var(--muted)}
-.landing-footer{border-top:1px solid var(--line);padding:24px 0 35px;display:flex;justify-content:space-between;color:var(--muted);font-size:10px}
-@media(max-width:800px){
- .landing-hero,.landing-statement,.experience-grid{grid-template-columns:1fr;gap:35px}
- .landing-hero{padding-top:45px}
- .hero-art{min-height:390px}
- .phrase-orbit{height:390px}
- .landing-copy h1{font-size:clamp(44px,13vw,68px)}
- .experience-grid{padding:55px 0}
- .pathway-steps{grid-template-columns:1fr}
- .pathway-head{display:block}
- .landing-footer{display:block}
- .landing-footer span+span{display:block;margin-top:8px}
-}
-</style>
-
-<style id="nahtive-readability-overhaul">
-/* Spacious navigation + editorial rhythm */
-.landing nav{min-height:76px;padding:18px 0!important;gap:30px}
-.landing .navlinks{display:flex;align-items:center;gap:28px!important}
-.landing .navlinks a{font-size:13px!important;line-height:1.4;white-space:nowrap}
-.landing .navlinks .primary{padding:13px 21px!important}
-.landing-hero{min-height:650px!important;grid-template-columns:minmax(0,1fr) minmax(400px,.9fr)!important;gap:100px!important;padding:105px 0 120px!important}
-.landing-copy h1{max-width:680px!important;letter-spacing:-.055em!important}
-.landing-copy p{max-width:560px!important;font-size:18px!important;line-height:1.8!important;margin-top:30px!important}
-.landing-actions{gap:16px!important;margin-top:36px!important}
-.arrival-note{margin-top:28px!important}
-.landing-statement{padding:125px 0!important;grid-template-columns:minmax(0,1.05fr) minmax(300px,.65fr)!important;gap:120px!important}
-.landing-statement h2{max-width:650px!important;line-height:1.03!important;letter-spacing:-.045em!important}
-.landing-statement p{font-size:16px!important;line-height:1.9!important;padding-top:16px!important}
-.experience-grid{padding:105px 0!important;gap:22px!important}
-.experience-card{min-height:390px!important;padding:38px!important;border-radius:32px!important}
-.experience-card h3{left:38px!important;bottom:82px!important;max-width:470px!important;font-size:31px!important;line-height:1.12!important}
-.experience-card p{left:38px!important;bottom:38px!important;font-size:13px!important}
-.pathway{padding:35px 0 135px!important}
-.pathway-head{margin-bottom:38px!important;gap:70px!important}
-.pathway-head h2{margin-top:12px!important;line-height:1.08!important}
-.pathway-head p{font-size:14px!important;line-height:1.75!important}
-.pathway-steps{gap:20px!important}
-.path-step{min-height:205px!important;padding:30px!important;border-radius:26px!important}
-.path-step h3{margin-top:75px!important;font-size:23px!important}
-.landing-cta{padding:125px 0 145px!important}
-.landing-cta h2{max-width:850px!important;line-height:1.02!important;letter-spacing:-.045em!important}
-.landing-cta p{font-size:16px!important;line-height:1.7!important;margin-top:24px!important}
-.landing-footer{padding:30px 0 45px!important}
-@media(max-width:900px){
- .landing nav{min-height:68px}
- .landing .navlinks{gap:15px!important}
- .landing-hero{grid-template-columns:1fr!important;gap:55px!important;padding:75px 0 90px!important}
- .landing-statement{grid-template-columns:1fr!important;gap:30px!important;padding:90px 0!important}
- .experience-grid{padding:80px 0!important}
- .landing-cta{padding:90px 0 105px!important}
-}
-@media(max-width:620px){
- .landing .navlinks a:first-child{display:none}
- .landing .navlinks{gap:10px!important}
- .landing-hero{padding-top:55px!important}
- .landing-copy p{font-size:16px!important}
- .experience-card{min-height:330px!important;padding:28px!important}
- .experience-card h3{left:28px!important;bottom:68px!important;font-size:26px!important}
- .experience-card p{left:28px!important;bottom:28px!important}
-}
-</style>
-</head>
+:root{--n-bg:#f7f4ea;--n-ink:#334039;--n-sage:#91a86f;--n-coral:#e99b83;--n-blue:#a9cfe0;--n-yellow:#f0d77a}
+html{scroll-behavior:smooth}.landing{background:var(--n-bg);color:var(--n-ink);overflow:clip}
+.landing nav{height:82px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:20}
+.landing .logo{font-size:25px}.landing .navlinks{display:flex;align-items:center;gap:28px}.landing .navlinks a{font-size:13px}.landing .navlinks .primary{padding:12px 19px}
+.scroll-progress{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:30;display:grid;gap:13px}.scroll-progress a{width:7px;height:7px;border-radius:50%;background:rgba(51,64,57,.22);transition:.3s}.scroll-progress a.active{background:var(--n-sage);transform:scale(1.7)}
+.hero{min-height:calc(100vh - 82px);display:grid;place-items:center;position:relative;padding:70px 0 120px}.hero-copy{max-width:920px;position:relative;z-index:4}.hero-kicker,.section-kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6d786f}.hero h1{font-size:clamp(62px,10vw,150px);line-height:.86;letter-spacing:-.075em;font-weight:700;margin:22px 0 32px}.hero h1 em{font-style:normal;color:var(--n-sage-dark,#536445)}.hero-copy p{max-width:560px;font-size:18px;line-height:1.75;color:#66716a}.hero-actions{display:flex;gap:14px;margin-top:32px}.hero-actions a{display:inline-flex;align-items:center;gap:12px}.hero-visual{height:180px;position:absolute;inset:auto 0 25px;pointer-events:none}.float-word{position:absolute;font-size:clamp(25px,3vw,45px);font-weight:600;letter-spacing:-.04em;white-space:nowrap;animation:floatWord 8s ease-in-out infinite}.float-word small{display:block;font-size:10px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;margin-top:6px;opacity:.55}.fw1{left:7%;top:10%;color:var(--n-coral);transform:rotate(-5deg)}.fw2{left:39%;top:48%;color:var(--n-sage);animation-delay:-2s}.fw3{right:8%;top:5%;color:#6f9bad;transform:rotate(4deg);animation-delay:-4s}.fw4{right:29%;top:76%;color:#a08c37;animation-delay:-6s}
+@keyframes floatWord{0%,100%{translate:0 0}50%{translate:0 -14px}}
+.story{position:relative;min-height:110vh;display:grid;align-items:center;padding:120px 0}.story-inner{width:min(1100px,100%);margin:auto;position:relative}.story-title{font-size:clamp(48px,7vw,100px);line-height:.94;letter-spacing:-.065em;max-width:850px}.story-title em{font-style:normal;color:var(--n-sage)}.story-copy{max-width:440px;margin:48px 0 0 30%;font-size:17px;line-height:1.85;color:#69736c}.orbit{position:absolute;width:340px;height:340px;border:1px solid rgba(51,64,57,.13);border-radius:50%;right:2%;top:4%;animation:spin 24s linear infinite}.orbit:before,.orbit:after{content:"";position:absolute;border-radius:50%}.orbit:before{width:22px;height:22px;background:var(--n-coral);left:12%;top:14%}.orbit:after{width:13px;height:13px;background:var(--n-blue);right:8%;bottom:18%}@keyframes spin{to{rotate:360deg}}
+.scene{min-height:100vh;position:relative;display:grid;align-items:center;padding:100px 0}.scene-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:80px}.scene-copy h2{font-size:clamp(45px,6vw,82px);line-height:.93;letter-spacing:-.06em;margin-top:15px}.scene-copy p{max-width:430px;color:#69736c;font-size:16px;line-height:1.8;margin-top:28px}.language-cloud{height:520px;position:relative}.word{position:absolute;padding:7px 13px;border-radius:999px;font-size:13px;letter-spacing:-.01em;animation:floatWord 7s ease-in-out infinite}.w1{left:8%;top:14%;background:#e8eedf}.w2{right:12%;top:8%;background:#f3dfd6;animation-delay:-1s}.w3{left:28%;top:34%;background:#dfeef3;animation-delay:-2s}.w4{right:2%;top:48%;background:#f5edc8;animation-delay:-3s}.w5{left:4%;top:63%;background:#dfeef3;animation-delay:-4s}.w6{right:24%;bottom:9%;background:#e8eedf;animation-delay:-5s}.w7{left:39%;top:68%;background:#f3dfd6;animation-delay:-6s}.scene-number{font-size:12px;color:#87918a;letter-spacing:.14em}
+.horizontal{padding:120px 0;overflow:hidden}.horizontal-head{display:flex;justify-content:space-between;align-items:end;gap:40px;margin-bottom:55px}.horizontal-head h2{font-size:clamp(48px,6vw,84px);line-height:.92;letter-spacing:-.06em;max-width:680px}.horizontal-head p{max-width:300px;color:#69736c;line-height:1.7;font-size:14px}.rail{display:flex;gap:90px;width:max-content;padding-left:4vw;animation:railDrift 28s linear infinite}.rail-item{width:340px;flex:none}.rail-item .big{font-size:clamp(75px,9vw,130px);line-height:.8;letter-spacing:-.08em;color:rgba(51,64,57,.13)}.rail-item h3{font-size:28px;letter-spacing:-.035em;margin-top:22px}.rail-item p{color:#69736c;line-height:1.7;margin-top:10px;font-size:14px}@keyframes railDrift{0%{transform:translateX(0)}100%{transform:translateX(-38%)}}
+.final{min-height:90vh;display:grid;place-items:center;text-align:center;padding:120px 0}.final h2{font-size:clamp(55px,8vw,115px);line-height:.88;letter-spacing:-.07em;max-width:1000px}.final h2 em{font-style:normal;color:var(--n-coral)}.final p{margin:28px auto 30px;color:#69736c;font-size:16px}.landing-footer{border-top:1px solid rgba(51,64,57,.12);padding:30px 0 45px;display:flex;justify-content:space-between;color:#69736c;font-size:10px}
+.reveal{opacity:0;transform:translateY(35px);transition:opacity .8s ease,transform .9s cubic-bezier(.2,.7,.2,1)}.reveal.visible{opacity:1;transform:none}
+@media(max-width:800px){.scroll-progress{display:none}.landing nav{height:72px}.landing .navlinks{gap:12px}.landing .navlinks a:first-child{display:none}.hero{min-height:calc(100vh - 72px);padding:45px 0 80px}.hero h1{font-size:clamp(57px,17vw,92px)}.hero-copy p{font-size:16px}.hero-visual{height:150px}.float-word{font-size:24px}.fw1{left:0}.fw3{right:0}.story{min-height:auto;padding:120px 0}.story-copy{margin:42px 0 0 8%;font-size:16px}.orbit{width:220px;height:220px;right:-10%;top:12%}.scene{min-height:auto;padding:110px 0}.scene-inner{grid-template-columns:1fr;gap:35px}.language-cloud{height:340px}.horizontal{padding:100px 0}.horizontal-head{display:block}.horizontal-head p{margin-top:24px}.rail{gap:55px;animation:none}.rail-item{width:270px}.final{min-height:80vh;padding:100px 0}.landing-footer{display:block}.landing-footer span+span{display:block;margin-top:8px}}
+</style></head>
 <body>
 <div class="shell landing">
-<nav>
-<a class="logo" href="index.html">Nahtive<span>•</span></a>
-<div class="navlinks"><a href="#experience">How it works</a><a class="login" href="login.html">Log in</a><a class="primary" href="signup.html">Start learning</a></div>
-</nav>
+<nav><a class="logo" href="index.html">Nahtive<span>•</span></a><div class="navlinks"><a href="#story">How it works</a><a class="login" href="login.html">Log in</a><a class="primary" href="signup.html">Start learning</a></div></nav>
+<div class="scroll-progress" aria-hidden="true"><a href="#top" class="active"></a><a href="#story"></a><a href="#scene"></a><a href="#method"></a><a href="#start"></a></div>
 
-<section class="landing-hero">
-<div class="landing-copy">
-<div class="eyebrow">Language learning for real life</div>
+<main id="top">
+<section class="hero">
+<div class="hero-copy">
+<div class="hero-kicker">Language learning for real life</div>
 <h1>Learn it.<br><em>Live it.</em><br>Speak it.</h1>
-<p>Nahtive puts you inside real conversations, teaches you the language people actually use, and helps you become comfortable using it.</p>
-<div class="landing-actions"><a class="primary" href="signup.html">Start learning <span>→</span></a><a class="secondary" href="#experience">Explore Nahtive</a></div>
-<div class="arrival-note"><i></i><span>Built around how you actually want to speak.</span></div>
+<p>Language learning built around the moments you actually want to have — not vocabulary lists you forget.</p>
+<div class="hero-actions"><a class="primary" href="signup.html">Start learning <span>→</span></a><a class="secondary" href="#story">See how it works</a></div>
 </div>
-
-<div class="hero-art" aria-label="Examples of natural language in context">
-<div class="phrase-orbit">
-<div class="phrase-card phrase-one"><strong>¿Qué onda?</strong><span>What's up?</span></div>
-<div class="phrase-card phrase-two"><strong>I'm down.</strong><span>I'm interested / sure.</span></div>
-<div class="phrase-card phrase-three"><strong>¿Te late?</strong><span>Are you into it?</span></div>
-<div class="phrase-card phrase-four"><strong>That works for me.</strong><span>Natural everyday English.</span></div>
-<div class="phrase-dot"></div><div class="phrase-dot two"></div>
-</div>
+<div class="hero-visual" aria-hidden="true">
+<div class="float-word fw1">¿Qué onda?<small>what's up?</small></div><div class="float-word fw2">I'm down.<small>I'm interested.</small></div><div class="float-word fw3">¿Te late?<small>are you into it?</small></div><div class="float-word fw4">That works.<small>natural English</small></div>
 </div>
 </section>
 
-<section class="landing-statement reveal" id="experience">
-<h2>You're not learning a language. You're learning how to <em style="color:var(--nahtive-sage-dark);font-style:normal">use</em> one.</h2>
-<p>Hear it in context. Understand why people say it. Practice it. Then have the conversation yourself. Nahtive remembers what you've learned and uses it to shape what comes next.</p>
-</section>
+<section class="story reveal" id="story"><div class="story-inner"><div class="orbit"></div><div class="section-kicker">The problem</div><h2 class="story-title">You don't need another <em>vocabulary list.</em></h2><p class="story-copy">You need to understand what people mean, hear how they actually say it, and feel comfortable enough to answer without translating every word in your head.</p></div></section>
 
-<section class="experience-grid">
-<article class="experience-card large reveal"><div class="num">01 · HEAR</div><div class="mini-orbit"></div><h3>Start with a situation, not a vocabulary list.</h3><p>Real places. Real moments. Useful language.</p></article>
-<article class="experience-card blue reveal"><div class="num">02 · RESPOND</div><div class="burst"><span style="--x:32px;--y:-30px"></span><span style="--x:-30px;--y:-25px"></span><span style="--x:28px;--y:28px"></span></div><h3>Then make the language yours.</h3><p>Speak, listen, adjust, try again.</p></article>
-<article class="experience-card coral reveal"><div class="num">03 · REMEMBER</div><h3>Your learning path gets smarter as you use it.</h3><p>Review what matters. Move forward when you're ready.</p></article>
-</section>
+<section class="scene reveal" id="scene"><div class="scene-inner"><div class="scene-copy"><div class="scene-number">01 / REAL SITUATIONS</div><h2>Start with the moment.</h2><p>Coffee with a friend. Meeting someone new. Making plans. Asking for help. Nahtive teaches language through the situations where you will actually use it.</p></div><div class="language-cloud" aria-hidden="true"><span class="word w1">What are you up to?</span><span class="word w2">I'm down.</span><span class="word w3">¿Qué te pongo?</span><span class="word w4">That works for me.</span><span class="word w5">¿Te late?</span><span class="word w6">No worries.</span><span class="word w7">¿Qué onda?</span></div></div></section>
 
-<section class="pathway reveal">
-<div class="pathway-head"><div><div class="eyebrow">The Nahtive loop</div><h2>Every session moves you forward.</h2></div><p>Small wins compound. The goal isn't to finish a course. It's to become comfortable having the conversation.</p></div>
-<div class="pathway-steps">
-<article class="path-step"><div class="num">01</div><h3>Understand</h3></article>
-<article class="path-step"><div class="num">02</div><h3>Use it</h3></article>
-<article class="path-step"><div class="num">03</div><h3>Own it</h3></article>
-</div>
-</section>
+<section class="scene reveal"><div class="scene-inner"><div class="language-cloud" aria-hidden="true"><span class="word w1">Hear it.</span><span class="word w2">Understand it.</span><span class="word w3">Say it.</span><span class="word w4">Try again.</span><span class="word w5">Use it.</span><span class="word w6">Remember it.</span><span class="word w7">Own it.</span></div><div class="scene-copy"><div class="scene-number">02 / LEARN BY USING</div><h2>Then the language starts to stick.</h2><p>Every lesson gives you meaning before testing you. You hear natural speech, practice with support, and eventually have the conversation yourself.</p></div></div></section>
 
-<section class="landing-cta reveal">
-<div class="eyebrow">Your next conversation</div>
-<h2>Start learning a language you can actually live in.</h2>
-<p>Find your level. Build your path. Start speaking.</p>
-<div class="landing-actions"><a class="primary" href="signup.html">Start learning <span>→</span></a></div>
-</section>
+<section class="horizontal reveal" id="method"><div class="horizontal-head"><div><div class="section-kicker">The Nahtive method</div><h2>Understand. Use it. Own it.</h2></div><p>One continuous learning experience instead of a pile of disconnected exercises.</p></div><div class="rail"><div class="rail-item"><div class="big">01</div><h3>Understand</h3><p>Know what the expression means, how it sounds, and when a native speaker would actually use it.</p></div><div class="rail-item"><div class="big">02</div><h3>Use it</h3><p>Put the language into context before you're asked to produce it on your own.</p></div><div class="rail-item"><div class="big">03</div><h3>Own it</h3><p>Keep speaking until the phrase stops feeling like something you learned and starts feeling like something you say.</p></div><div class="rail-item"><div class="big">04</div><h3>Remember it</h3><p>Your path adapts around what you've practiced, missed, and mastered.</p></div></div></section>
 
+<section class="final reveal" id="start"><div><div class="section-kicker">Your next conversation</div><h2>Learn a language you can actually <em>live in.</em></h2><p>Find your level. Build your path. Start speaking.</p><a class="primary" href="signup.html">Start learning <span>→</span></a></div></section>
+</main>
 <footer class="landing-footer"><span>© 2026 Nahtive</span><span>Real language. Real situations.</span></footer>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
