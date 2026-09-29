@@ -380,3 +380,124 @@ nav::after{
  .lesson .meaning{font-size:15px;padding:17px 18px}
  .lesson .task-question{font-size:17px}
 }
+
+
+/* =========================================================
+   NAHTIVE 2026 — UNIVERSAL VISUAL SYSTEM
+   Matches the new landing page: dark, editorial, premium.
+   This final layer intentionally overrides the legacy cream UI.
+   ========================================================= */
+:root{
+  --bg:#0b0f1a;
+  --surface:#141a2b;
+  --surface2:#1b2238;
+  --line:rgba(255,255,255,.09);
+  --text:#f4f1ea;
+  --muted:#9ba4ba;
+  --accent:#b6f36a;
+  --accent-ink:#10200a;
+  --accent-deep:#7fbf3a;
+  --warm:#ff9f5a;
+  --violet:#7c6cff;
+  --bad:#ff6b6b;
+  --font:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --r:24px;
+}
+html,body{background:var(--bg)!important;color:var(--text)!important}
+body{font-family:var(--font)!important}
+h1,h2,h3,.logo,.language-name,.level-result,.summary-number,.streak-number{
+  font-family:var(--serif)!important;color:var(--text)!important;
+}
+p,.muted,.lead,.note,.section-note,.level-description,.streak-text,.skill-score,.word-meaning,.adaptive-copy,
+.lesson .context>p,.lesson .card .sub{color:var(--muted)!important}
+nav,.nav{border-bottom:1px solid var(--line)}
+nav::after{display:none}
+.logo{color:var(--text)!important}
+.logo span,.logo i{color:var(--accent)!important}
+.exit,.back,.nav-right a,.footer-links a{color:var(--muted)!important}
+.card,.panel,.activity-card,.language-switcher-card,.topic-card,.level-card,.streak-card,.review-card,.summary-card,.insight-card,.vocab-card,.why-card,.login-card,.signup-wrap>.card,
+.conversation,.lesson .card{
+  background:var(--surface)!important;
+  border:1px solid var(--line)!important;
+  box-shadow:0 24px 70px -35px rgba(0,0,0,.8)!important;
+  color:var(--text)!important;
+}
+.card:hover,.panel:hover,.activity-card:hover,.language-switcher-card:hover,.topic-card:hover,.level-card:hover,.streak-card:hover,.review-card:hover,.summary-card:hover,.insight-card:hover,.vocab-card:hover,.why-card:hover{
+  border-color:rgba(182,243,106,.22)!important;
+  box-shadow:0 28px 80px -38px rgba(0,0,0,.9)!important;
+}
+.primary,.primary-button,.next,.submit-btn,.continue-btn,.continue-button,.start-btn{
+  background:var(--accent)!important;color:var(--accent-ink)!important;
+  box-shadow:0 4px 0 var(--accent-deep)!important;
+  border-radius:14px!important;
+}
+.primary:hover,.primary-button:hover,.next:hover,.submit-btn:hover,.continue-btn:hover,.continue-button:hover,.start-btn:hover{
+  box-shadow:0 7px 0 var(--accent-deep),0 18px 36px rgba(0,0,0,.28)!important;
+}
+.secondary,.manage-button,.back-btn,.add-language-btn,.icon-button,.change-topic,.review-button{
+  background:transparent!important;color:var(--text)!important;border:1px solid var(--line)!important;
+  border-radius:14px!important;
+}
+.secondary:hover,.manage-button:hover,.back-btn:hover,.add-language-btn:hover,.icon-button:hover,.change-topic:hover,.review-button:hover{
+  background:var(--surface2)!important;border-color:rgba(182,243,106,.35)!important;
+}
+.eyebrow,.kicker,.section-title,.card-label,.recommended-label,.question-type,.num,.after-eyebrow,.word-label,.adaptive-label,
+.lesson-task-label,.stage{color:var(--accent)!important}
+input,textarea,select{
+  background:var(--surface2)!important;color:var(--text)!important;border:1px solid var(--line)!important;
+}
+input::placeholder,textarea::placeholder{color:#68728b!important}
+input:focus,textarea:focus,select:focus{
+  border-color:rgba(182,243,106,.55)!important;
+  box-shadow:0 0 0 4px rgba(182,243,106,.08)!important;
+}
+.recommended,.lesson .scene,.adaptive,.complete{
+  background:var(--surface2)!important;
+  border:1px solid var(--line)!important;
+}
+.recommended::after,.lesson .scene::before,.complete::before,.adaptive::before,
+.dashboard-hero::before,.dashboard-hero::after,.progress-card::before,
+.recommended::before,.quick-card::before,body::before,body::after{opacity:.12!important}
+.progress-bar,.progress-track,.progress,.skill-bar,.bar{background:rgba(255,255,255,.08)!important}
+.progress-fill,.progress i,.skill-fill,.fill{background:var(--accent)!important}
+.dashboard-language-link,.quick-card:nth-child(1),.quick-card:nth-child(2),.quick-card:nth-child(3),.quick-card:nth-child(4){
+  background:var(--surface2)!important;color:var(--text)!important;border:1px solid var(--line)!important;
+}
+.dashboard-language-link.current{background:var(--accent)!important;color:var(--accent-ink)!important}
+.topic-icon,.language-card.selected,.big-option.selected,.option.selected,.option.correct,.explanation,#audioPrompt{
+  background:rgba(182,243,106,.12)!important;border-color:rgba(182,243,106,.38)!important;color:var(--text)!important;
+}
+.language-card,.big-option,.option,.answer,.level-option{
+  background:var(--surface)!important;color:var(--text)!important;border-color:var(--line)!important;
+}
+.language-card:hover,.big-option:hover,.option:hover,.answer:hover,.level-option:hover{
+  background:var(--surface2)!important;border-color:rgba(182,243,106,.3)!important;
+}
+.option.wrong{background:rgba(255,107,107,.10)!important;border-color:rgba(255,107,107,.5)!important}
+.lesson{max-width:860px}
+.lesson .context{color:var(--muted)!important}
+.lesson .scene{color:var(--text)!important}
+.lesson .meaning{
+  background:rgba(182,243,106,.10)!important;color:var(--text)!important;
+  border:1px solid rgba(182,243,106,.16);
+}
+.lesson .usage,.lesson .example,.task-context,.notice{
+  background:var(--surface2)!important;color:var(--muted)!important;border:1px solid var(--line);
+}
+.lesson .usage strong,.lesson .example strong{color:var(--text)!important}
+.lesson .pron{border-color:var(--line)!important;color:var(--muted)!important}
+.lesson .phrase{color:var(--text)!important;font-family:var(--serif)!important}
+.lesson .actions{border-color:var(--line)!important}
+.lesson .option{background:var(--surface2)!important;color:var(--text)!important}
+.lesson .option:hover{background:#222b45!important}
+.lesson .feedback{color:var(--text)!important}
+.lesson .chat .bubble{background:var(--surface2)!important;color:var(--text)!important}
+.lesson .chat .bubble.you{background:rgba(182,243,106,.12)!important}
+.lesson .complete{color:var(--text)!important}
+.streak,.streak-number{color:var(--warm)!important}
+.footer,.footer-inner{border-color:var(--line)!important;color:var(--muted)!important}
+.toast,.lesson-toast{background:var(--accent)!important;color:var(--accent-ink)!important}
+@media(prefers-color-scheme:light){
+  /* Nahtive is intentionally dark now; system light mode no longer changes the app. */
+}
