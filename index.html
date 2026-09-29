@@ -70,6 +70,23 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
+const globalLanguagePhrases=[
+  ["Español","¿Qué onda?"],["Español","Me apunto."],["Français","Ça marche."],["Français","On y va ?"],
+  ["Deutsch","Wie geht's?"],["Deutsch","Klingt gut."],["Italiano","Come va?"],["Italiano","Ci sto."],
+  ["Português","Tudo bem?"],["Português","Bora?"],["Polski","Co słychać?"],["Polski","Jasne."],
+  ["Nederlands","Hoe gaat het?"],["Nederlands","Komt goed."],["العربية","كيف حالك؟"],["العربية","تمام."],
+  ["日本語","元気？"],["日本語","いいね。"],["한국어","잘 지내?"],["한국어","좋아."],
+  ["中文","怎么样？"],["中文","好啊。"],["Türkçe","Nasılsın?"],["Türkçe","Hadi gidelim."],
+  ["Ελληνικά","Τι κάνεις;"],["Ελληνικά","Πάμε!"],["Svenska","Hur är läget?"],["Svenska","Absolut."],
+  ["Čeština","Jak se máš?"],["Čeština","Jasně."],["Tiếng Việt","Bạn khỏe không?"],["Tiếng Việt","Được thôi."]
+];
+const track=document.getElementById("track");
+if(track){
+  const items=[...globalLanguagePhrases,...globalLanguagePhrases];
+  track.innerHTML=items.map(([lang,phrase])=>'<span><b>'+phrase.replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</b> <small>'+lang+'</small></span>').join("");
+}
+</script>
+<script>
 // The landing page is intentionally public. Authentication and onboarding
 // routing happen only after the learner chooses to continue.
 </script>
