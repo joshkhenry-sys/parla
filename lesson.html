@@ -113,7 +113,20 @@
  .lesson-header #intro{font-size:16px!important}
  .lesson-card-live>.sub{font-size:16px!important}
 }
-</style></head>
+<style id="nahtive-live-scene">
+.live-scene-intro{padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025);margin-bottom:20px}
+.live-scene-meta{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:900;letter-spacing:.14em;color:var(--accent)}
+.live-scene-pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px rgba(184,243,107,.08);animation:lessonLivePulse 1.7s ease-in-out infinite}
+.live-scene-place{margin-left:auto;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:none}
+.live-scene-goal{margin-top:9px;color:var(--text);font-size:15px;line-height:1.5;font-weight:600}
+.live-response{margin-top:20px}
+.live-response-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.live-response-row .notice{flex:1;margin:0}
+.live-targets{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.live-targets>span{width:100%;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800}
+.live-target{padding:7px 10px;border-radius:999px;background:rgba(184,243,107,.06);border:1px solid rgba(184,243,107,.16);color:var(--text);font-size:12px}
+@media(max-width:600px){.live-scene-place{display:none}.live-response-row{align-items:stretch;flex-direction:column}.live-response-row .secondary{width:100%}}
+</style></style></head>
 <body>
 <div class="shell">
 <nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
@@ -136,7 +149,7 @@
   <div class="scene-role"><span class="role-pulse"></span><span id="role"></span></div>
 </div>
 <div class="lesson-progress lesson-progress-clean">
-  <div class="progress-top"><span id="stage">Mission</span><strong id="progressCount">Moment 1 of 8</strong></div>
+  <div class="progress-top"><span id="stage">Mission</span><strong id="progressCount">Live lesson</strong></div>
   <div class="progress-track"><div class="fill" id="fill"></div></div>
 </div>
 <main class="main">
@@ -149,7 +162,7 @@
 <script>
 const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);let currentLevelForPlacement="A0";
 const $=id=>document.getElementById(id);
-let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],conversation=[],conversationContext={},xp=0,voice=null,conversationFailures=0;
+let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],conversation=[],conversationContext={},xp=0,voice=null,conversationFailures=0,conversationTurn=0;
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
@@ -244,7 +257,7 @@ function visualForSetting(setting){
  else if(key.includes("weekend")){icon="○";label="Weekend plans"}
  return '<div class="scene-visual" aria-hidden="true"><div class="visual-orbit"></div><div class="visual-icon">'+icon+'</div><div class="visual-label">'+esc(label)+'</div></div>';
 }
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent="Moment "+(index+1)+" of "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="vocab")renderVocab(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
+function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent="Live lesson";$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="vocab")renderVocab(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
 function sceneIllustration(setting){
  const k=String(setting||"").toLowerCase();
@@ -502,70 +515,137 @@ function renderSpeak(c){
  $("next").onclick=()=>advance();
 }
 function renderConversation(c){
-  const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">Say or type what you would actually say.</div>';
-  shell("Your turn","The exercises are over. You are now inside the situation.",body,'<div class="actions"><div class="notice">Use your own words.</div><button class="primary" id="send">Respond →</button></div>');
-  $("voice").onclick=()=>speechButton("",()=>{if(voice?.text){$("input").value=voice.text;$("voiceStatus").textContent="Heard: "+voice.text;}});
+  const ctx=c.conversationContext||{};
+  const targets=(ctx.targetPhrases||[]).map(p=>'<span class="live-target">'+esc(p.phrase)+'</span>').join("");
+  const body=
+    '<div class="live-scene-intro">'+
+      '<div class="live-scene-meta"><span class="live-scene-pulse"></span><span>LIVE SCENE</span><span class="live-scene-place">'+esc(ctx.setting||"Real life")+'</span></div>'+
+      '<div class="live-scene-goal">'+esc(ctx.goal||"Handle the situation naturally.")+'</div>'+
+    '</div>'+
+    '<div class="chat" id="chat"></div>'+
+    '<div class="live-response">'+
+      '<textarea class="input" id="input" placeholder="Say what you would actually say…"></textarea>'+
+      '<div class="live-response-row"><button class="secondary" id="voice">Speak</button><div class="notice" id="voiceStatus">Type or speak. Nahtive will react to what you say.</div></div>'+
+    '</div>'+
+    (targets?'<div class="live-targets"><span>Useful language from this scene</span>'+targets+'</div>':'');
+  shell("You're in","Forget the exercises. Respond to the person and let the situation move.",body,
+    '<div class="actions"><div class="notice" id="turnStatus">The other person is waiting for you.</div><button class="primary" id="send">Respond →</button></div>');
+  $("voice").onclick=()=>speechButton("",()=>{
+    if(voice?.text){
+      $("input").value=voice.text;
+      $("voiceStatus").textContent="Heard: "+voice.text;
+    }
+  });
   conversation=[];
-  conversationContext=c.conversationContext||{};
+  conversationContext=ctx;
+  conversationTurn=0;
+  conversationFailures=0;
   if(c.phrase)conversation.push({role:"assistant",content:c.phrase});
   drawChat();
   $("send").onclick=sendConversation;
+  setTimeout(()=>speak(c.phrase||ctx.openingLine||"",profile.code,null),350);
 }
-function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
+function drawChat(){
+  const box=$("chat");
+  if(!box)return;
+  box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");
+  box.scrollTop=box.scrollHeight;
+}
+function localConversationReply(input){
+  const code=String(profile?.code||"").split("-")[0].toLowerCase();
+  const setting=String(conversationContext.setting||"").toLowerCase();
+  const turn=conversationTurn;
+  if(code==="es"){
+    if(setting.includes("coffee")){
+      return turn===1?"Claro. Te lo puedo preparar con leche de avena. ¿Quieres algo más?":turn===2?"Perfecto. Entonces te preparo el café con leche de avena. ¿Lo quieres caliente?":"Listo. Aquí tienes. Que tengas un buen día.";
+    }
+    if(setting.includes("taco")){
+      return turn===1?"Claro, no hay problema. Te los preparo sin cebolla. ¿Quieres algo para tomar?":turn===2?"Perfecto. Son dos tacos de asada, sin cebolla. ¿Algo más?":"Son ocho dólares. Puedes pagar aquí.";
+    }
+    if(setting.includes("grocery")){
+      return turn===1?"Sí, claro. La leche está al fondo, a la derecha.":turn===2?"Sí, justo después de los productos lácteos. ¿La encontraste?":"Perfecto. De nada.";
+    }
+    if(setting.includes("apartment")){
+      return turn===1?"Sí, el estacionamiento está incluido. También tienes acceso al garaje. ¿Quieres verlo?":turn===2?"Claro. El garaje está al lado del edificio. Te puedo enseñar dónde entrar.":"Perfecto. Tómate tu tiempo y dime si tienes otra pregunta.";
+    }
+    if(setting.includes("work")){
+      return turn===1?"Claro. Te enseño. Primero haces clic aquí y después eliges la opción correcta.":turn===2?"Exacto. Y si tienes algún problema, me preguntas. ¿Quieres probarlo tú?":"Sí, así es. Ya lo tienes.";
+    }
+    if(setting.includes("direction")){
+      return turn===1?"Sí. Sigue derecho dos cuadras y luego gira a la izquierda.":turn===2?"No, no está muy lejos. Son como diez minutos caminando.":"Sí, vas bien. Es por ahí.";
+    }
+    if(setting.includes("restaurant")){
+      return turn===1?"Claro, tómate tu tiempo. ¿Quieres que te recomiende algo?":turn===2?"Si quieres algo ligero, la sopa y la ensalada están muy buenas.": "Perfecto. Te doy unos minutos más.";
+    }
+    if(setting.includes("weekend")){
+      return turn===1?"Sí, podemos hacerlo. ¿Qué te gustaría hacer?":turn===2?"A mí me parece bien. Podemos hacerlo por la tarde.":"Perfecto, entonces quedamos para el sábado.";
+    }
+  }
+  return turn===1?"Sure. That works. What would you like to do next?":turn===2?"Sounds good. Let me know what you decide.":"Perfect. That works for me.";
+}
 async function sendConversation(){
   const button=$("send");
   const input=$("input").value.trim()||voice?.text||"";
-  if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}
-  const topic=conversationContext.setting||baseLesson?.topic||"Everyday life";
+  if(!input){
+    $("voiceStatus").textContent="Say or type something first.";
+    $("input").focus();
+    return;
+  }
+  conversationTurn++;
   conversation.push({role:"user",content:input});
   $("input").value="";
+  voice=null;
   drawChat();
   button.disabled=true;
-  $("voiceStatus").textContent="Thinking…";
+  $("voiceStatus").textContent="Listening to your response…";
+  if($("turnStatus"))$("turnStatus").textContent="The scene is reacting to you.";
+  let reply="";
+  let usedFallback=false;
   try{
     const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),15000);
-    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    const timeout=setTimeout(()=>controller.abort(),9000);
+    const res=await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
         language:profile.name,
         level:levelName(),
         goal:conversationContext.goal||profile.goal||"Real conversation",
-        topic,
+        topic:conversationContext.setting||baseLesson?.topic||"Everyday life",
         context:conversationContext,
         messages:conversation
-      }),signal:controller.signal});
+      }),
+      signal:controller.signal
+    });
     clearTimeout(timeout);
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||"Conversation failed.");
-    conversation.push({role:"assistant",content:String(data.text||"Let's keep going.")});
-    answers.push({type:"conversation",user:input,assistant:data.text});
-    xp+=20;
-    drawChat();
-    voice=null;
-    const turns=answers.filter(a=>a.type==="conversation").length;
-    if(turns>=2){
-      button.textContent="Finish lesson";
-      button.onclick=finish;
-      $("voiceStatus").textContent="You kept the conversation going. Finish when you're ready.";
-      toast("Conversation complete.");
-    }else{
-      button.textContent="Send →";
-      button.onclick=sendConversation;
-      $("voiceStatus").textContent="Good. Keep the interaction natural.";
-    }
+    reply=String(data.text||"").trim();
+    if(!reply)throw new Error("The conversation returned no response.");
   }catch(e){
-    conversationFailures++;
-    if(conversationFailures>=2){
-      button.disabled=false;
-      button.textContent="Finish lesson";
-      button.onclick=finish;
-      $("voiceStatus").textContent="The conversation service is taking too long. Your lesson is still complete — you can finish and save your progress.";
-    }else{
-      $("voiceStatus").textContent=e.name==="AbortError"?"That took too long. Try once more.":(e.message||"The conversation couldn't continue. Try again.");
-      button.textContent="Try again";
-      button.onclick=sendConversation;
-    }
-  }finally{
+    usedFallback=true;
+    reply=localConversationReply(input);
+  }
+  conversation.push({role:"assistant",content:reply});
+  answers.push({type:"conversation",user:input,assistant:reply,fallback:usedFallback,turn:conversationTurn});
+  xp+=20;
+  drawChat();
+  if(usedFallback){
+    $("voiceStatus").textContent="The scene kept going without interrupting your lesson.";
+  }else{
+    $("voiceStatus").textContent="Good. Keep the interaction natural.";
+  }
+  if(conversationTurn>=3){
     button.disabled=false;
+    button.textContent="Finish lesson";
+    button.onclick=finish;
+    if($("turnStatus"))$("turnStatus").textContent="You handled the interaction. Finish here or keep reviewing the exchange.";
+    toast("Scene complete.");
+  }else{
+    button.disabled=false;
+    button.textContent=conversationTurn===1?"Respond again →":"Keep going →";
+    button.onclick=sendConversation;
+    if($("turnStatus"))$("turnStatus").textContent=(3-conversationTurn)+" more response"+(3-conversationTurn===1?"":"s")+" to complete the scene.";
   }
 }
 async function finish(){if($("card").dataset.done)return;$("card").dataset.done="1";try{if(user&&baseLesson?.id){await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{generated_lesson:generated,answers}});await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,level:profile.level}});}}catch(e){console.error("Nahtive completion save failed:",e)}$("card").innerHTML='<section class="card complete"><h2>Lesson complete</h2><p class="sub">You learned first, practiced with support, and then used the language in a real interaction.</p><div class="xp">'+xp+' XP earned</div><div class="skill-summary"><div><strong>Situation</strong><span>'+esc(generated?.scene?.setting||"Real life")+'</span></div><div><strong>Speaking</strong><span>Attempt recorded</span></div><div><strong>Next</strong><span>Keep building the skill</span></div></div><div class="actions" style="justify-content:center"><a class="primary" href="dashboard.html" style="text-decoration:none">Continue learning →</a></div></section>';$("card").querySelector(".complete").style.display="block";$("stage").textContent="Complete";$("fill").style.width="100%";}
