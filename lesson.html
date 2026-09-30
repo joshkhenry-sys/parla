@@ -112,8 +112,7 @@ function buildLessonFromContent(baseLesson){
  const phrase=String(lang.phrase||nativeLine||learnerLines[0]||"").trim();
  const meaning=String(lang.meaning||lang.usage||"").trim();
  const second=learnerLines[0]&&learnerLines[0]!==phrase?learnerLines[0]:"";
- const secondMeaning=String(learnerLines[0]===second?(dialogue.find(x=>String(x.speaker||"").toLowerCase()==="native"&&x.text!==nativeLine)?.text||"Use this naturally in the situation.":"Use this naturally in the situation.").trim();
- const pool=[...new Set(dialogue.map(x=>String(x.text||"").trim()).filter(Boolean))];
+ const secondNative=dialogue.filter(x=>String(x.speaker||"").toLowerCase()==="native").map(x=>String(x.text||"")).find(x=>x!==nativeLine)||"";\n const secondMeaning=secondNative?"Use this naturally in the situation.":"Use this naturally in the situation.";\n const pool=[...new Set(dialogue.map(x=>String(x.text||"").trim()).filter(Boolean))];
  const distractors=pool.filter(x=>x!==phrase&&x!==second).slice(0,3);
  while(distractors.length<3)distractors.push(["Thanks, that's all.","Maybe later.","I'm not sure."][distractors.length]);
  const setting=String(scene.place||baseLesson.topic||"Everyday situation");
