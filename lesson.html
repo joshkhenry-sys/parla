@@ -54,7 +54,28 @@
  .scene-text{font-size:20px}
 }
 </style>
-</head>
+<style id="nahtive-readable-light-lesson">
+body:has(.lesson){background:#f6f3eb!important;color:#26312d!important}
+body:has(.lesson) .lesson-card{background:#fffefa!important;color:#26312d!important;border:1px solid #d8d8cf!important;box-shadow:0 14px 34px rgba(38,49,45,.07)!important}
+body:has(.lesson) .lesson-header h1,body:has(.lesson) .question,body:has(.lesson) .scene-text,body:has(.lesson) .phrase,body:has(.lesson) .speak-target,body:has(.lesson) .complete h2{color:#26312d!important}
+body:has(.lesson) .lesson-header p,body:has(.lesson) .meaning,body:has(.lesson) .scene-goal,body:has(.lesson) .speak-meaning,body:has(.lesson) .status,body:has(.lesson) .feedback,body:has(.lesson) .progress-top{color:#5d6863!important}
+body:has(.lesson) .kicker{color:#667b4f!important}
+body:has(.lesson) .progress-track{background:#dfdfd7!important}
+body:has(.lesson) .progress-track .fill{background:#879b68!important}
+body:has(.lesson) .option{background:#fffefa!important;color:#26312d!important;border:1px solid #cfd1c9!important;box-shadow:none!important}
+body:has(.lesson) .option:hover{background:#eef2e7!important;border-color:#879b68!important}
+body:has(.lesson) .option.correct{background:#e7eddc!important;border-color:#879b68!important}
+body:has(.lesson) .option.wrong{background:#f5dfd7!important;border-color:#d9957f!important}
+body:has(.lesson) .letter{background:#edf0e9!important;color:#39443f!important}
+body:has(.lesson) .speak-box{background:#f0eee6!important;border-color:#d8d8cf!important}
+body:has(.lesson) .chat .bubble{background:#f0eee6!important;color:#26312d!important;border-color:#d8d8cf!important}
+body:has(.lesson) .chat .bubble.you{background:#e7eddc!important;border-color:#c8d5b5!important}
+body:has(.lesson) textarea.input{background:#fffefa!important;color:#26312d!important;border:1px solid #cfd1c9!important}
+body:has(.lesson) textarea.input::placeholder{color:#7a827e!important}
+body:has(.lesson) .primary{background:#26312d!important;color:#fffefa!important;box-shadow:none!important}
+body:has(.lesson) .secondary{background:#fffefa!important;color:#26312d!important;border:1px solid #cfd1c9!important}
+body:has(.lesson) .complete{background:#e7eddc!important}
+</style></head>
 <body>
 <div class="shell">
 <nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
