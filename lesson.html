@@ -507,7 +507,8 @@ $("loading").style.display="none";
 $("lesson").style.display="grid";
 render();
 
-/* Do not block lesson start on AI generation. Lessons are built locally from real-world missions. */catch(e){console.error(e);showError(e.message||"The lesson could not load.");}}
+/* Lesson starts immediately from the local mission library. */
+}catch(e){console.error(e);showError(e.message||"The lesson could not load.");}}
 load();
 </script>
 </body>
