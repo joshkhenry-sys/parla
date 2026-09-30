@@ -468,7 +468,7 @@ function renderGuided(c){
  $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
  $("submit").onclick=()=>{if(checked)return;checked=true;const builtText=built.map(x=>x.w).join(" ");const score=similarity(builtText,target);const ok=score>.86;$("feedback").textContent=ok?"Perfect. You recalled the expression.":"Close. The target was: "+target;lessonSound(ok?"correct":"wrong");xp+=ok?15:5;answers.push({type:"guided",response:builtText,expected:target,score});$("submit").textContent="Continue →";$("submit").onclick=()=>advance();toast(ok?"Nice recall.":"Good attempt.");};
 }
-let realtimeTokenPromise=null;
+let realtimeTokenPromise=null; let realtimeTokenStarted=0;
 let realtimeActive=null;
 
 function languageForRealtime(code){
@@ -479,7 +479,9 @@ function languageForRealtime(code){
 }
 
 function primeRealtimeTranscription(target){
-  if(realtimeTokenPromise)return realtimeTokenPromise;
+  const now=Date.now();
+  if(realtimeTokenPromise && now-realtimeTokenStarted<75000)return realtimeTokenPromise;
+  realtimeTokenStarted=now;
   const language=languageForRealtime(profile?.code);
   realtimeTokenPromise=fetch("/api/realtime-transcription",{
     method:"POST",
@@ -491,6 +493,7 @@ function primeRealtimeTranscription(target){
     return data.value;
   }).catch(error=>{
     realtimeTokenPromise=null;
+    realtimeTokenStarted=0;
     throw error;
   });
   return realtimeTokenPromise;
@@ -501,6 +504,7 @@ function cleanupRealtime(state){
   try{clearInterval(state.vadTimer)}catch(e){}
   try{clearTimeout(state.maxTimer)}catch(e){}
   try{clearTimeout(state.commitTimer)}catch(e){}
+  try{clearTimeout(state.connectTimer)}catch(e){}
   try{state.stream?.getTracks?.().forEach(t=>t.stop())}catch(e){}
   try{state.peer?.close?.()}catch(e){}
   try{state.audioContext?.close?.()}catch(e){}
@@ -511,8 +515,11 @@ async function realtimeSpeechRecognition(target,done){
   if(!window.RTCPeerConnection||!navigator.mediaDevices?.getUserMedia)throw new Error("Realtime voice is not supported in this browser.");
   if(realtimeActive)cleanupRealtime(realtimeActive);
 
+  // Mint the short-lived credential only when the learner actually taps Speak.
+  // Never pre-mint it when the lesson card renders; a learner may sit on this card
+  // long enough for a 120-second client secret to expire.
   const token=await primeRealtimeTranscription(target);
-  const state={peer:null,stream:null,channel:null,audioContext:null,vadTimer:null,maxTimer:null,commitTimer:null,speaking:false,committed:false,finished:false,heard:"",startedAt:performance.now()};
+  const state={peer:null,stream:null,channel:null,channelReady:false,audioContext:null,vadTimer:null,maxTimer:null,commitTimer:null,connectTimer:null,speaking:false,committed:false,finished:false,heard:"",startedAt:performance.now()};
   realtimeActive=state;
 
   const finish=(heard,errorMessage)=>{
@@ -557,6 +564,10 @@ async function realtimeSpeechRecognition(target,done){
     });
 
     state.channel=peer.createDataChannel("oai-events");
+    state.channel.addEventListener("open",()=>{
+      state.channelReady=true;
+      $("voiceStatus").textContent="Listening…";
+    });
     state.channel.addEventListener("message",({data})=>{
       let event;
       try{event=JSON.parse(data)}catch(e){return}
@@ -609,6 +620,9 @@ async function realtimeSpeechRecognition(target,done){
     }
 
     state.maxTimer=setTimeout(()=>commit(),6500);
+    state.connectTimer=setTimeout(()=>{
+      if(!state.channelReady && !state.finished)finish("","Voice connection took too long. Try again.");
+    },6500);
 
     const offer=await peer.createOffer();
     await peer.setLocalDescription(offer);
