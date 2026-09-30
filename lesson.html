@@ -165,7 +165,25 @@ function renderScene(c){
  let mode="full";
  document.querySelectorAll(".training-choice").forEach(btn=>btn.onclick=()=>{document.querySelectorAll(".training-choice").forEach(x=>x.classList.remove("selected"));btn.classList.add("selected");mode=btn.dataset.mode;});
  $("hearScene").onclick=()=>speak(dialogue.map(d=>d.text||"").join(" "),profile.code,$("hearScene"));
- $("next").onclick=()=>{generated.trainingMode=mode;xp+=3;advance();};
+ $("next").onclick=()=>{
+   generated.trainingMode=mode;
+   const cards=generated.cards||[];
+   const rank={
+     full:["scene","teach","check","guided","vocab","teach","check","listen","fill","vocab","teach","challenge","guided","speak","conversation"],
+     words:["scene","vocab","teach","vocab","teach","check","guided","check","fill","challenge","speak","conversation"],
+     listen:["scene","listen","teach","listen","vocab","fill","check","listen","challenge","speak","conversation"],
+     speak:["scene","teach","speak","guided","check","teach","speak","listen","challenge","fill","conversation"]
+   }[mode]||[];
+   if(mode!=="full"){
+     cards.sort((a,b)=>{
+       const ai=rank.indexOf(a.type),bi=rank.indexOf(b.type);
+       return (ai<0?999:ai)-(bi<0?999:bi);
+     });
+     generated.cards=cards;
+   }
+   xp+=3;
+   advance();
+ };
 }
 function renderTeach(c){
  const body='<div class="lesson-task-label">ONE USEFUL THING</div>'+
