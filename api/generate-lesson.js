@@ -140,7 +140,7 @@ Rules:
 
     parsed.language.code=code;
     parsed.xp=Math.max(30,Math.min(80,Number(parsed.xp)||50));
-    return res.status(200).json(parsed);
+    return res.status(200).json({title:parsed.title,topic:parsed.topic,content:parsed});
   }catch(e){
     return res.status(500).json({error:e.name==="AbortError"?"Lesson generation timed out":e.message});
   }
