@@ -185,6 +185,11 @@ function renderScene(c){
    advance();
  };
 }
+function advance(){
+  index++;
+  voice=null;
+  render();
+}
 function renderTeach(c){
  const body='<div class="lesson-task-label">ONE USEFUL THING</div>'+
    '<div class="phrase">'+esc(c.phrase)+'</div>'+
