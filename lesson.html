@@ -315,15 +315,15 @@ function lessonSound(kind){
   const gain=ctx.createGain();
   gain.gain.setValueAtTime(0.0001,now);
   gain.connect(ctx.destination);
-  const notes=kind==="correct"?[523.25,659.25,783.99]:kind==="wrong"?[196,155.56]:[440];
+  const notes=kind==="correct"?[880,1174.66]:kind==="wrong"?[220,164.81]:[660];
   notes.forEach((freq,i)=>{
    const osc=ctx.createOscillator();
-   osc.type=kind==="wrong"?"sine":"sine";
+   osc.type="sine";
    osc.frequency.setValueAtTime(freq,now+i*.075);
    const t=now+i*.075;
    gain.gain.setValueAtTime(0.0001,t);
-   gain.gain.exponentialRampToValueAtTime(kind==="wrong"?.055:.075,t+.014);
-   gain.gain.exponentialRampToValueAtTime(0.0001,t+.24);
+   gain.gain.exponentialRampToValueAtTime(kind==="wrong"?.05:.11,t+.012);
+   gain.gain.exponentialRampToValueAtTime(0.0001,t+(kind==="correct"?.16:.20));
    osc.connect(gain);osc.start(t);osc.stop(t+.18);
   });
   setTimeout(()=>ctx.close().catch(()=>{}),700);
@@ -622,12 +622,12 @@ function buildFallbackLesson(){
   cards.push({type:"teach",...p1,exampleMeaning:p1.meaning});
   cards.push({type:"check",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.example,p2.example,"I don't know.","No, gracias."]),answer:p1.example,feedback:"Correct. You matched the language to the situation."});
   cards.push({type:"guided",...p1,prompt:"Build the expression you just learned.",meaning:p1.meaning,expected:p1.phrase,answer:p1.phrase});
-  cards.push({type:"vocab",word:sceneVocab[0]?.[0]||p1.phrase,meaning:sceneVocab[0]?.[1]||p1.meaning,choices:shuffle([sceneVocab[0]?.[1]||p1.meaning,sceneVocab[1]?.[1]||p2.meaning,sceneVocab[2]?.[1]||p3.meaning,"Something else"])});
+  cards.push({type:"vocab",word:sceneVocab[0]?.[0]||p1.phrase,meaning:sceneVocab[0]?.[1]||p1.meaning,choices:shuffle([sceneVocab[0]?.[1]||p1.meaning,sceneVocab[1]?.[1]||p2.meaning,sceneVocab[2]?.[1]||p3.meaning,"to wait"])});
   cards.push({type:"teach",...p2,exampleMeaning:p2.meaning});
   cards.push({type:"check",...p2,prompt:"What would you say here?",options:shuffle([p2.example,p1.example,"Maybe later.","I already did."]),answer:p2.example,feedback:"Good. That response fits the moment."});
   cards.push({type:"listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,p1.phrase,p3.phrase,"No sé."]),answer:p2.phrase,audioText:p2.phrase});
   cards.push({type:"fill",phrase:p2.phrase,prompt:"Complete the idea with the phrase you just learned.",before:p2.meaning+" →",after:"",options:shuffle([p2.phrase,p1.phrase,p3.phrase,"No sé."]),answer:p2.phrase});
-  cards.push({type:"vocab",word:sceneVocab[1]?.[0]||p2.phrase,meaning:sceneVocab[1]?.[1]||p2.meaning,choices:shuffle([sceneVocab[1]?.[1]||p2.meaning,sceneVocab[0]?.[1]||p1.meaning,sceneVocab[2]?.[1]||p3.meaning,"Something else"])});
+  cards.push({type:"vocab",word:sceneVocab[1]?.[0]||p2.phrase,meaning:sceneVocab[1]?.[1]||p2.meaning,choices:shuffle([sceneVocab[1]?.[1]||p2.meaning,sceneVocab[0]?.[1]||p1.meaning,sceneVocab[2]?.[1]||p3.meaning,"to wait"])});
   cards.push({type:"teach",...p3,exampleMeaning:p3.meaning});
   cards.push({type:"challenge",...p3,prompt:"The situation changes. Which response works now?",options:shuffle([p3.example,p1.example,p2.example,"I need more information."]),answer:p3.example,feedback:"That choice fits the new moment."});
   cards.push({type:"guided",...p3,prompt:"Build the final expression from memory.",meaning:p3.meaning,expected:p3.phrase,answer:p3.phrase});
