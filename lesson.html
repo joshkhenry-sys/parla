@@ -190,7 +190,7 @@ function primeSpeech(text,lang){
   if(speechCache.has(key))return;
   speechCache.set(key,"loading");
   const controller=new AbortController();
-  const timer=setTimeout(()=>controller.abort(),4500);
+  const timer=setTimeout(()=>controller.abort(),6500);
   fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:phrase,language:locale}),signal:controller.signal})
     .then(async res=>{clearTimeout(timer);if(!res.ok)throw new Error("TTS failed");const bytes=await res.arrayBuffer();if(!bytes.byteLength)throw new Error("Empty TTS");return speechAudioContext.decodeAudioData(bytes.slice(0));})
     .then(buffer=>speechCache.set(key,buffer))
@@ -468,6 +468,12 @@ function renderGuided(c){
  $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
  $("submit").onclick=()=>{if(checked)return;checked=true;const builtText=built.map(x=>x.w).join(" ");const score=similarity(builtText,target);const ok=score>.86;$("feedback").textContent=ok?"Perfect. You recalled the expression.":"Close. The target was: "+target;lessonSound(ok?"correct":"wrong");xp+=ok?15:5;answers.push({type:"guided",response:builtText,expected:target,score});$("submit").textContent="Continue →";$("submit").onclick=()=>advance();toast(ok?"Nice recall.":"Good attempt.");};
 }
+async function fetchWithTimeout(url,options={},ms=6500){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),ms);
+  try{return await fetch(url,{...options,signal:controller.signal})}
+  finally{clearTimeout(timer)}
+}
 let realtimeTokenPromise=null; let realtimeTokenStarted=0;
 let realtimeActive=null;
 
@@ -548,7 +554,7 @@ async function realtimeSpeechRecognition(target,done){
       if(state.channel?.readyState==="open"){
         state.channel.send(JSON.stringify({type:"input_audio_buffer.commit"}));
         $("voiceStatus").textContent=state.heard?"Finishing…":"I didn't catch anything yet…";
-        state.commitTimer=setTimeout(()=>finish(state.heard,"I couldn't get a clear transcript. Try again."),1800);
+        state.commitTimer=setTimeout(()=>finish(state.heard,"I couldn't get a clear transcript. Try again."),3500);
       }else{
         // The learner can finish speaking before the WebRTC data channel finishes opening.
         // Wait briefly instead of treating that normal race as a voice failure.
@@ -629,7 +635,7 @@ async function realtimeSpeechRecognition(target,done){
     state.maxTimer=setTimeout(()=>commit(),6500);
     state.connectTimer=setTimeout(()=>{
       if(!state.channelReady && !state.finished)finish("","Voice connection took too long. Try again.");
-    },8500);
+    },12000);
 
     const offer=await peer.createOffer();
     await peer.setLocalDescription(offer);
