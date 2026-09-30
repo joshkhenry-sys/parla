@@ -503,7 +503,50 @@ function renderSpeak(c){
 }
 function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{if(voice?.text){$("input").value=voice.text;$("voiceStatus").textContent="Heard: "+voice.text;}});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
 function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
-async function sendConversation(){const input=$("input").value.trim()||voice?.text||"";if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}const c=generated.cards[index],topic=baseLesson?.topic||"Everyday life";conversation.push({role:"user",content:input});$("input").value="";drawChat();$("send").disabled=true;$("voiceStatus").textContent="Thinking…";try{const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:levelName(),goal:profile.goal||"Real conversation",topic,messages:conversation})});const data=await res.json();if(!res.ok)throw new Error(data.error||"Conversation failed.");conversation.push({role:"assistant",content:data.text});answers.push({type:"conversation",user:input,assistant:data.text});xp+=20;drawChat();voice=null;if(answers.filter(a=>a.type==="conversation").length>=2){$("send").textContent="Finish lesson";$("send").onclick=finish;toast("You kept the conversation going.");}$("voiceStatus").textContent="Good. Keep the interaction natural."; }catch(e){$("voiceStatus").textContent=e.message||"The conversation couldn't continue. Try again."}finally{$("send").disabled=false;}}
+async function sendConversation(){
+  const button=$("send");
+  const input=$("input").value.trim()||voice?.text||"";
+  if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}
+  const topic=baseLesson?.topic||"Everyday life";
+  conversation.push({role:"user",content:input});
+  $("input").value="";
+  drawChat();
+  button.disabled=true;
+  $("voiceStatus").textContent="Thinking…";
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),15000);
+    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:levelName(),goal:profile.goal||"Real conversation",topic,messages:conversation}),signal:controller.signal});
+    clearTimeout(timeout);
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(data.error||"Conversation failed.");
+    conversation.push({role:"assistant",content:String(data.text||"Let's keep going.")});
+    answers.push({type:"conversation",user:input,assistant:data.text});
+    xp+=20;
+    drawChat();
+    voice=null;
+    const turns=answers.filter(a=>a.type==="conversation").length;
+    if(turns>=2){
+      button.textContent="Finish lesson";
+      button.onclick=finish;
+      $("voiceStatus").textContent="You kept the conversation going. Finish when you're ready.";
+      toast("Conversation complete.");
+    }else{
+      button.textContent="Send →";
+      button.onclick=sendConversation;
+      $("voiceStatus").textContent="Good. Keep the interaction natural.";
+    }
+  }catch(e){
+    if(e.name==="AbortError"){
+      $("voiceStatus").textContent="The conversation took too long. Try sending a shorter response.";
+    }else{
+      $("voiceStatus").textContent=e.message||"The conversation couldn't continue. Try again.";
+    }
+    button.onclick=sendConversation;
+  }finally{
+    button.disabled=false;
+  }
+}
 async function finish(){if($("card").dataset.done)return;$("card").dataset.done="1";try{if(user&&baseLesson?.id){await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{generated_lesson:generated,answers}});await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,level:profile.level}});}}catch(e){console.error("Nahtive completion save failed:",e)}$("card").innerHTML='<section class="card complete"><h2>Lesson complete</h2><p class="sub">You learned first, practiced with support, and then used the language in a real interaction.</p><div class="xp">'+xp+' XP earned</div><div class="skill-summary"><div><strong>Situation</strong><span>'+esc(generated?.scene?.setting||"Real life")+'</span></div><div><strong>Speaking</strong><span>Attempt recorded</span></div><div><strong>Next</strong><span>Keep building the skill</span></div></div><div class="actions" style="justify-content:center"><a class="primary" href="dashboard.html" style="text-decoration:none">Continue learning →</a></div></section>';$("card").querySelector(".complete").style.display="block";$("stage").textContent="Complete";$("fill").style.width="100%";}
 function generatedLessonMatchesLevel(lesson){const level=profile?.level||"A1";if(!["B1","B2","B2+","C1","C2"].includes(level))return true;const text=JSON.stringify(lesson?.cards||[]).toLowerCase();const basic=/\\b(hello|hi|hola|hey|bonjour|hallo|ciao|oi|good morning|good afternoon|buenos días|buenas)\\b/i;return !basic.test(text)}
 function buildFallbackLesson(){
@@ -618,6 +661,8 @@ function buildFallbackLesson(){
   const cards=[];
   const p1=phrases[0],p2=phrases[1],p3=phrases[2];
 
+  // Keep the final moments reliable: no fake "question 15", and no broken card
+  // that asks for a response but has no valid answer path.
   cards.push({type:"scene",context:mission.moment,dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),goal:mission.goal});
   cards.push({type:"teach",...p1,exampleMeaning:p1.meaning});
   cards.push({type:"check",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.example,p2.example,"I don't know.","No, gracias."]),answer:p1.example,feedback:"Correct. You matched the language to the situation."});
@@ -632,7 +677,7 @@ function buildFallbackLesson(){
   cards.push({type:"challenge",...p3,prompt:"The situation changes. Which response works now?",options:shuffle([p3.example,p1.example,p2.example,"I need more information."]),answer:p3.example,feedback:"That choice fits the new moment."});
   cards.push({type:"guided",...p3,prompt:"Build the final expression from memory.",meaning:p3.meaning,expected:p3.phrase,answer:p3.phrase});
   cards.push({type:"speak",...p3,meaning:p3.meaning,prompt:"Say it yourself. Nahtive checks what it actually hears.",expected:p3.phrase,answer:p3.phrase});
-  cards.push({type:"conversation",prompt:"Now finish the interaction in your own words. Don't copy the lesson.",phrase:mission.goal,expected:"",answer:"",feedback:"Keep the conversation moving."});
+  cards.push({type:"conversation",prompt:"Now finish the interaction in your own words. Don't copy the lesson.",phrase:"Respond naturally to the other person.",expected:"",answer:"",feedback:"Keep the conversation moving."});
 
   generated={
     title:(["B2","B2+","C1","C2"].includes(level)?level+" · "+mission.setting:mission.setting),
