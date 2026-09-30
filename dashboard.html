@@ -132,37 +132,57 @@
     }
 
     async function loadSavedLessons(learnerLanguageId, languageName) {
-      const card = document.querySelector(".recommended");
-      const title = document.getElementById("recommendedTitle");
-      const copy = document.getElementById("recommendedCopy");
-      const meta = document.querySelector(".lesson-meta");
-      const button = document.getElementById("startLessonButton");
-      const { data: lessons, error } = await supabaseClient
-        .from("lessons")
-        .select("id,title,topic,level,content,created_at")
-        .eq("learner_language_id", learnerLanguageId)
-        .order("created_at", { ascending: false })
-        .limit(12);
-      if (error) { console.error("Could not load lessons:", error); return; }
-      if (!lessons || !lessons.length) {
-        title.textContent = "Your first scene is ready.";
-        copy.textContent = "Nahtive will build your next lesson around real situations, useful language, and the things you need to say.";
-        if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>Nahtive scene</span>";
-        button.innerHTML = "Start scene <span>→</span>";
-        return;
-      }
-      const completedResult = await supabaseClient
-        .from("lesson_attempts")
-        .select("lesson_id")
-        .in("lesson_id", lessons.map(row => row.id));
-      const completedIds = new Set((completedResult.data || []).map(row => row.lesson_id));
-      const lesson = lessons.find(row => !completedIds.has(row.id)) || lessons[lessons.length - 1];
-      title.textContent = lesson.title || "Continue learning";
-      copy.textContent = lesson.topic ? "Continue with " + lesson.topic + " and put it into conversation." : "Pick up where you left off.";
-      if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(lesson.level || "Scene")+"</span>";
-      button.innerHTML = "Continue <span>→</span>";
-      button.onclick = () => { sessionStorage.setItem("Nahtive_lesson_id", lesson.id); window.location.href = "lesson.html?id=" + encodeURIComponent(lesson.id); };
-    }
+  const title = document.getElementById("recommendedTitle");
+  const copy = document.getElementById("recommendedCopy");
+  const meta = document.querySelector(".lesson-meta");
+  const button = document.getElementById("startLessonButton");
+
+  const { data: lessons, error } = await supabaseClient
+    .from("lessons")
+    .select("id,title,topic,level,content,created_at,curriculum_node_id,curriculum_nodes(sequence_number,stage_name,focus)")
+    .eq("learner_language_id", learnerLanguageId)
+    .limit(120);
+
+  if (error) {
+    console.error("Could not load lessons:", error);
+    return;
+  }
+
+  if (!lessons || !lessons.length) {
+    title.textContent = "Your first scene is ready.";
+    copy.textContent = "Nahtive will build your next lesson around a real situation and the things you need to say.";
+    if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>Core path</span>";
+    button.innerHTML = "Start scene <span>→</span>";
+    button.onclick = () => { window.location.href = "lesson.html"; };
+    return;
+  }
+
+  const completedResult = await supabaseClient
+    .from("lesson_attempts")
+    .select("lesson_id")
+    .in("lesson_id", lessons.map(row => row.id));
+
+  const completedIds = new Set((completedResult.data || []).map(row => row.lesson_id));
+
+  lessons.sort((a,b) => {
+    const as = Number(a.curriculum_nodes?.sequence_number || 9999);
+    const bs = Number(b.curriculum_nodes?.sequence_number || 9999);
+    return as - bs || new Date(a.created_at) - new Date(b.created_at);
+  });
+
+  const lesson = lessons.find(row => !completedIds.has(row.id)) || lessons[lessons.length - 1];
+  const stage = lesson.curriculum_nodes?.stage_name || "Core path";
+  const focus = lesson.curriculum_nodes?.focus || "Real conversation";
+
+  title.textContent = lesson.title || "Continue learning";
+  copy.textContent = focus + " — then use it in a real interaction.";
+  if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(stage)+"</span>";
+  button.innerHTML = completedIds.has(lesson.id) ? "Review scene <span>→</span>" : "Continue <span>→</span>";
+  button.onclick = () => {
+    sessionStorage.setItem("Nahtive_lesson_id", lesson.id);
+    window.location.href = "lesson.html?id=" + encodeURIComponent(lesson.id);
+  };
+}
 
     async function addLanguage(languageName, button) {
       if (!languageName || !button) return;
