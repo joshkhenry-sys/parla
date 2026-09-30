@@ -454,28 +454,23 @@ async function transcribeRecording(blob,target,done){try{
 }catch(e){voice=null;$("voiceStatus").textContent="I couldn't process that recording. Try again.";}}
 
 function speechButton(target,done){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR){ legacySpeechRecognition(SR,target,done); return; }
   const preferredTypes=["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"];
   const canRecord=window.MediaRecorder&&preferredTypes.some(t=>MediaRecorder.isTypeSupported?.(t));
   if(canRecord&&navigator.mediaDevices?.getUserMedia){
     let recorder=null,chunks=[],stream=null,timer=null;
     const type=preferredTypes.find(t=>MediaRecorder.isTypeSupported?.(t))||"";
     navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}}).then(s=>{
-      stream=s;recorder=new MediaRecorder(stream,type?{mimeType:type}:undefined);
-      $("voice").disabled=true;$("voice").textContent="Stop";$("voiceStatus").textContent="Listening…";
+      stream=s; recorder=new MediaRecorder(stream,type?{mimeType:type}:undefined);
+      $("voice").disabled=true; $("voice").textContent="Stop"; $("voiceStatus").textContent="Listening…";
       recorder.ondataavailable=e=>{if(e.data?.size)chunks.push(e.data)};
-      recorder.onerror=()=>{$("voice").disabled=false;$("voice").textContent="Speak it";stream.getTracks().forEach(t=>t.stop());$("voiceStatus").textContent="I couldn't record that. Try again.";};
-      recorder.onstop=async()=>{clearTimeout(timer);stream.getTracks().forEach(t=>t.stop());$("voice").textContent="Speak it";const blob=new Blob(chunks,{type:recorder.mimeType||type||"audio/webm"});await transcribeRecording(blob,target,done);$("voice").disabled=false;};
-      recorder.start(100);
-      timer=setTimeout(()=>{if(recorder?.state==="recording")recorder.stop()},12000);
-    }).catch(()=>{
-      $("voice").disabled=false;
-      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(SR){legacySpeechRecognition(SR,target,done)}else{$("voiceStatus").textContent="Microphone access isn't available. Check your browser permission and try again.";}
-    });
+      recorder.onerror=()=>{clearTimeout(timer);$("voice").disabled=false;$("voice").textContent="Speak it";stream.getTracks().forEach(t=>t.stop());$("voiceStatus").textContent="I couldn't record that. Try again."};
+      recorder.onstop=async()=>{clearTimeout(timer);stream.getTracks().forEach(t=>t.stop());$("voice").textContent="Speak it";const blob=new Blob(chunks,{type:recorder.mimeType||type||"audio/webm"});await transcribeRecording(blob,target,done);$("voice").disabled=false};
+      recorder.start(80); timer=setTimeout(()=>{if(recorder?.state==="recording")recorder.stop()},7000);
+    }).catch(()=>{$("voice").disabled=false;$("voice").textContent="Speak it";$("voiceStatus").textContent="Microphone access isn't available. Check your browser permission and try again."});
     return;
   }
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(SR){legacySpeechRecognition(SR,target,done);return}
   $("voiceStatus").textContent="Microphone recording isn't available here. Check your browser permission and try again.";
 }
 function legacySpeechRecognition(SR,target,done){
