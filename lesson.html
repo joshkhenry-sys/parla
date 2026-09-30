@@ -133,7 +133,7 @@ function visualForSetting(setting){
  else if(key.includes("weekend")){icon="○";label="Weekend plans"}
  return '<div class="scene-visual" aria-hidden="true"><div class="visual-orbit"></div><div class="visual-icon">'+icon+'</div><div class="visual-label">'+esc(label)+'</div></div>';
 }
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];document.querySelectorAll(".map-node").forEach((n,i)=>n.classList.toggle("active",i<=Math.min(5,Math.floor(index/3))));$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
+function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];document.querySelectorAll(".map-node").forEach((n,i)=>n.classList.toggle("active",i<=Math.min(5,Math.floor(index/3))));$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="vocab")renderVocab(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
 function sceneIllustration(setting){
  const k=String(setting||"").toLowerCase();
@@ -239,6 +239,15 @@ function renderListen(c){
  shell("Listen","Train your ear before you look for the words.",body,'<div class="actions"><button class="secondary" id="play">▶ Play</button><button class="primary" id="next" disabled>Continue →</button></div>');
  $("play").onclick=()=>speak(c.audioText||c.phrase,profile.code,$("play"));
  document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.9;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");$("feedback").textContent=ok?"You heard it correctly.":"Close. Play it again and listen for the key phrase.";lessonSound(ok?"correct":"wrong");xp+=ok?10:4;answers.push({type:"listen",choice,correct:ok});$("next").disabled=false;});
+ $("next").onclick=()=>advance();
+}
+function renderVocab(c){
+ let answered=false;
+ const choices=c.choices||[];
+ const body='<div class="lesson-task-label">VOCAB</div><div class="vocab-hero"><div class="vocab-word">'+esc(c.word)+'</div><button class="secondary" id="hearWord">▶ Hear</button></div><div class="task-question">What does <strong>'+esc(c.word)+'</strong> mean?</div><div class="options">'+choices.map((o,i)=>'<button class="option" data-i="'+i+'"><span class="choice-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div><div class="notice" id="feedback">Choose an answer.</div>';
+ shell("Know the word","Learn a small word in context, then use it.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
+ $("hearWord").onclick=()=>speak(c.word,profile.code,$("hearWord"));
+ document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=choices[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.meaning);document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");$("feedback").textContent=ok?"Correct.":"The meaning is: "+c.meaning;xp+=ok?8:3;$("next").disabled=false;});
  $("next").onclick=()=>advance();
 }
 function renderFill(c){
