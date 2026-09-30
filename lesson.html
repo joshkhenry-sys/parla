@@ -24,7 +24,7 @@
 <div id="lesson" class="lesson" style="display:none">
 <div class="lesson-header">
   <div class="lesson-head-copy">
-    <div class="eyebrow">LIVE SCENE</div>
+    <div class="eyebrow"><span id="language">Language</span> · LIVE SCENE</div>
     <div class="lesson-title-row"><h1 id="title">Lesson</h1><span class="level-chip" id="levelChip">A1</span></div>
     <p id="intro"></p>
   </div>
@@ -47,20 +47,6 @@
   <div class="lesson-toast" id="toast" role="status" aria-live="polite"></div>
 </main>
 </div>
-<aside class="context">
-<div class="eyebrow" id="language">Language</div>
-<h1 id="title">Lesson</h1>
-<p id="intro"></p>
-<div class="scene"><strong id="setting"></strong><span id="moment"></span><br><span id="role"></span></div>
-</aside>
-<main class="main">
-<div class="stage" id="stage">Getting started</div>
-<div class="bar"><div class="fill" id="fill"></div></div>
-<div id="card"></div>
-<div class="lesson-toast" id="toast" role="status" aria-live="polite"></div>
-</main>
-</div>
-</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
@@ -70,88 +56,69 @@ let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],con
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
-async function speak(text,lang,button){
- if(!text)return false;
- const targetLang=lang||profile?.code||"en-US";
- const targetButton=button||document.activeElement?.closest?.("#hear,#hearExample");
- const original=targetButton?.textContent;
- if(targetButton){targetButton.disabled=true;targetButton.textContent="Loading audio…";}
- try{
-   if(activeAudio){activeAudio.pause();activeAudio.src="";activeAudio=null}
-   const controller=new AbortController();
-   const timeout=setTimeout(()=>controller.abort(),10000);
-   const res=await fetch("/api/speak",{
-     method:"POST",
-     headers:{"Content-Type":"application/json"},
-     body:JSON.stringify({text:String(text).slice(0,1200),language:targetLang}),
-     signal:controller.signal
-   });
-   clearTimeout(timeout);
-   if(!res.ok)throw new Error("TTS request failed: "+res.status);
-   const blob=await res.blob();
-   if(!blob.size)throw new Error("Empty audio response");
-   const url=URL.createObjectURL(blob);
-   const audio=new Audio(url);
-   activeAudio=audio;
-   audio.preload="auto";
-   if(targetButton)targetButton.textContent="Playing…";
-   await new Promise((resolve,reject)=>{
-     let settled=false;
-     const done=(fn)=>{if(settled)return;settled=true;clearTimeout(timer);fn()};
-     const timer=setTimeout(()=>done(()=>reject(new Error("Audio playback timed out."))),12000);
-     audio.onended=()=>done(resolve);
-     audio.onerror=()=>done(()=>reject(new Error("Audio playback failed.")));
-     audio.play().catch(err=>done(()=>reject(err)));
-   });
-   URL.revokeObjectURL(url);
-   if(activeAudio===audio)activeAudio=null;
-   return true;
- }catch(e){
-   console.warn("Nahtive AI voice unavailable:",e);
-   try{
-     if("speechSynthesis"in window){
-       speechSynthesis.cancel();
-       const u=new SpeechSynthesisUtterance(String(text));
-       u.lang=targetLang;
-       u.rate=.9;
-       u.pitch=1;
-       const voices=speechSynthesis.getVoices();
-       const base=targetLang.split("-")[0].toLowerCase();
-       const match=voices.find(v=>v.lang?.toLowerCase().startsWith(base));
-       if(match)u.voice=match;
-       speechSynthesis.resume();
-       speechSynthesis.speak(u);
-       return true;
-     }
-   }catch(fallbackError){console.warn("Nahtive browser voice unavailable:",fallbackError)}
-   toast("Audio is unavailable right now. Try again.");
-   return false;
- }finally{
-   if(targetButton){targetButton.disabled=false;targetButton.textContent=original||"Hear it";}
- }
+
+function speak(text,lang,button){
+  if(!text||!("speechSynthesis" in window)){toast("Audio isn't available in this browser.");return false}
+
+  const synth=window.speechSynthesis;
+  synth.cancel();
+
+  const original=button?.textContent;
+  if(button){button.disabled=true;button.textContent="Playing…";}
+
+  const u=new SpeechSynthesisUtterance(String(text).slice(0,700));
+  u.lang=lang||profile?.code||"en-US";
+  u.rate=.98;
+  u.pitch=1;
+
+  // Do not wait for voices to load or search the voice list.
+  // Waiting for voices is what made short examples feel slow.
+  u.onend=()=>{
+    if(button){button.disabled=false;button.textContent=original||"Listen";}
+    if(activeAudio===u)activeAudio=null;
+  };
+  u.onerror=()=>{
+    if(button){button.disabled=false;button.textContent=original||"Listen";}
+    if(activeAudio===u)activeAudio=null;
+  };
+
+  activeAudio=u;
+  synth.speak(u);
+  return true;
 }
 
 function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();}
 function similarity(a,b){a=normalize(a);b=normalize(b);if(!a||!b)return 0;if(a===b)return 1;const A=[...a],B=[...b],d=Array.from({length:A.length+1},(_,i)=>i);for(let j=1;j<=B.length;j++){let p=d[0];d[0]=j;for(let i=1;i<=A.length;i++){const old=d[i],cost=A[i-1]===B[j-1]?0:1;d[i]=Math.min(d[i]+1,d[i-1]+1,p+cost);p=old}}return Math.max(0,1-d[A.length]/Math.max(A.length,B.length));}
 function detected(text){const code=(profile?.code||"").toLowerCase().split("-")[0];const r={ar:/[\u0600-\u06ff]/,pl:/[ąćęłńóśźż]/i,nl:/\b(ik|je|het|een|van|voor|wat|wil|kan|niet|goed|de)\b/i,es:/\b(que|como|quiero|puedo|para|por|una|uno|el|la|me|te|donde|bien)\b/i,en:/\b(i|you|the|a|what|can|get|for|me|is|want)\b/i};return code==="ar"?r.ar.test(text):r[code]?r[code].test(text):true;}
 function levelName(){return profile?.level||"A1";}
-function stageName(card){return ({teach:"Learn",check:"Choose",guided:"Build",challenge:"React",speak:"Say it",conversation:"Talk"})[card.type]||"Learn";}
+function stageName(card){return ({scene:"Scene",teach:"Learn",check:"Choose",guided:"Try it",challenge:"Twist",speak:"Say it",conversation:"Talk"})[card.type]||"Learn";}
 function toast(message){const t=$("toast");if(!t)return;t.textContent=message;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),1500);}
 function advance(){index++;render();window.scrollTo({top:0,behavior:"smooth"});}
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
+function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
+function renderScene(c){
+  const dialogue=Array.isArray(c.dialogue)?c.dialogue:[];
+  const body='<div class="lesson-task-label">THE MOMENT</div>'+
+    (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
+    '<div class="mini-dialogue">'+dialogue.map(d=>'<div class="dialogue-line"><strong>'+esc(d.speaker||"")+'</strong><span>'+esc(d.text||"")+'</span></div>').join("")+'</div>'+
+    '<div class="scene-goal"><strong>Your goal</strong><br>'+esc(c.goal||generated?.scene?.goal||"Handle the situation naturally.")+'</div>'+
+    '<div class="listen-row"><button class="secondary" id="hearScene">Listen to the scene</button></div>';
+  shell("You're in it","Don't study the language yet. First understand what is happening and what you need to accomplish.",body,'<div class="actions"><button class="primary" id="next">Start →</button></div>');
+  $("hearScene").onclick=()=>speak(dialogue.map(d=>d.text||"").join(" "),profile.code,$("hearScene"));
+  $("next").onclick=()=>{xp+=3;advance();};
+}
 function renderTeach(c){
- const body='<div class="lesson-task-label">Learn the expression</div>'+
+ const body='<div class="lesson-task-label">ONE USEFUL THING</div>'+
    '<div class="phrase">'+esc(c.phrase)+'</div>'+
    '<div class="meaning">'+esc(c.meaning)+'</div>'+
-   '<div class="pron"><strong>How it sounds</strong><br>'+esc(c.pronunciation)+(c.ipa?' · '+esc(c.ipa):'')+'</div>'+
-   '<div class="usage"><strong>When a native speaker uses it</strong><br>'+esc(c.usage)+'</div>'+
-   '<div class="example"><strong>Natural example</strong><br>'+esc(c.example)+(c.exampleMeaning?'<br><span class="example-explanation">'+esc(c.exampleMeaning)+'</span>':'')+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Hear phrase</button><button class="secondary" id="hearExample">Hear example</button></div>';
- shell("Learn this","First understand it. Then you will choose it, build it, and say it.",body,'<div class="actions"><div class="notice">First understand it. Then we will ask you to use it.</div><button class="primary" id="next">I understand →</button></div>');
- $("hear").onclick=()=>speak(c.phrase,profile.code); $("hearExample").onclick=()=>speak(c.example,profile.code);
- $("next").onclick=()=>{lessonSound("click");xp+=5;toast("Got it. Now use it.");advance();};
+   '<div class="usage"><strong>Use it when</strong><br>'+esc(c.usage)+'</div>'+
+   '<div class="example"><strong>In this scene</strong><br>'+esc(c.example)+(c.exampleMeaning?'<br><span class="example-explanation">'+esc(c.exampleMeaning)+'</span>':'')+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>';
+ shell("Learn this","One expression. One job. Then you use it immediately.",body,'<div class="actions"><button class="primary" id="next">Got it →</button></div>');
+ $("hear").onclick=()=>speak(c.example||c.phrase,profile.code,$("hear"));
+ $("next").onclick=()=>{xp+=5;advance();};
 }
+
 function lessonSound(kind){
  try{
   const C=window.AudioContext||window.webkitAudioContext;
@@ -179,13 +146,13 @@ function renderCheck(c){
  const body='<div class="lesson-task-label">SEE IT · HEAR IT · USE IT</div>'+
    '<div class="phrase">'+esc(phrase)+'</div>'+
    '<div class="pron"><strong>How to say it</strong><br>'+esc(c.pronunciation||phrase)+(c.ipa?' · '+esc(c.ipa):'')+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Hear it</button><button class="secondary" id="hearExample">Hear example</button></div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
    (c.example?'<div class="example"><strong>In a real conversation</strong><br>'+esc(c.example)+'</div>':'')+
    '<div class="task-question">'+esc(c.prompt||"Which line would you actually say here?")+'</div>'+
    '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'">'+esc(o)+'</button>').join("")+'</div>'+
    '<div class="notice feedback" id="feedback">Listen to the expression. Then choose the line you would actually say.</div>';
  shell("Use it","See the language, hear the pronunciation, and choose the response that works in the scene.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
- $("hear").onclick=()=>speak(phrase,profile.code); $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
+ $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
  document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");lessonSound(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"Good. That is the natural choice for this situation."):(c.feedback||"Not quite. Listen again and notice which response fits the scene.");$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
  $("next").onclick=()=>{lessonSound("click");toast("Good. Now use it.");advance();};
 }
@@ -222,8 +189,8 @@ function renderGuided(c){
  };
  const body='<div class="lesson-task-label">BUILD IT · YOUR TURN</div>'+
    '<div class="phrase compact">'+esc(phrase)+'</div>'+
-   '<div class="pron"><strong>Hear the model</strong><br>'+esc(c.pronunciation||phrase)+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Hear it</button><button class="secondary" id="hearExample">Hear example</button></div>'+
+   '<div class="pron"><strong>Say this idea</strong><br>'+esc(c.meaning||c.prompt||"Use the expression naturally.")+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
    '<div class="task-question">'+esc(c.prompt||"Build the response you would actually say.")+'</div>'+
    (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
    '<div class="build-zone" id="built"><span class="tile-placeholder">Tap the words to build the response.</span></div>'+
@@ -250,8 +217,7 @@ function renderGuided(c){
    built.splice(i,1);
    renderTiles();
  };
- $("hear").onclick=()=>speak(phrase,profile.code);
- $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
+ $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
  $("voice").onclick=()=>speechButton(target,()=>{});
  $("submit").onclick=()=>{
    const typed=$("input").value.trim();
@@ -269,179 +235,241 @@ function renderGuided(c){
    toast(ok?"Nice. Now make it yours.":"Good attempt.");
  };
 }function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
-function renderSpeak(c){const body='<div class="lesson-task-label">Say it naturally</div><div class="phrase">'+esc(c.phrase||"")+'</div><div class="meaning">'+esc(c.prompt)+'</div><div class="listen-row"><button class="secondary" id="hear">Hear it</button></div><textarea class="input" id="input" placeholder="Type it if you prefer…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak it</button></div><div class="notice" id="voiceStatus">Speaking is practice, not a gate. You can type and continue.</div>';shell("Now say it","You have already learned the language. Now put it in your mouth.",body,'<div class="actions"><div class="notice">Aim for natural rhythm, not perfection.</div><button class="primary" id="next">Continue →</button></div>');$("hear").onclick=()=>speak(c.phrase,profile.code);$("voice").onclick=()=>speechButton(c.phrase,()=>{});$("next").onclick=()=>{const v=$("input").value.trim()||voice?.text||"";answers.push({type:"speak",response:v,voice});xp+=v?15:5;toast(v?"You used it — nice.":"Keep practicing.");advance();};}
+function renderSpeak(c){
+ const target=String(c.phrase||c.expected||"").trim();
+ const body='<div class="lesson-task-label">SPEAKING CHECK</div>'+
+   '<div class="phrase">'+esc(target)+'</div>'+
+   '<div class="meaning">'+esc(c.meaning||c.prompt||"Say the expression naturally in the situation.")+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Listen once</button></div>'+
+   '<textarea class="input" id="input" placeholder="Type only if you cannot use your microphone…"></textarea>'+
+   '<div class="listen-row"><button class="secondary" id="voice">Speak it</button></div>'+
+   '<div class="notice" id="voiceStatus">Your first attempt is practice. Parla will check what it heard before giving credit.</div>'+
+   '<div class="notice feedback" id="feedback"></div>';
+ shell("Say it for real","You learned the expression. Now produce it without copying the answer from the screen.",body,'<div class="actions"><div class="notice">You need a real speaking attempt before continuing.</div><button class="primary" id="next" disabled>Continue →</button></div>');
+ $("hear").onclick=()=>speak(target,profile.code,$("hear"));
+ $("voice").onclick=()=>{
+   speechButton(target,()=>{
+     const heard=voice?.text||"";
+     const score=voice?.score||similarity(heard,target);
+     const languageOk=voice?.detected!==false;
+     const good=languageOk && score>=.72;
+     $("feedback").textContent=good
+       ? "Good. Parla heard the target expression clearly."
+       : languageOk
+         ? "Not quite yet. Try once more and focus on the words you just learned."
+         : "Parla could not verify the target language. Try again.";
+     $("voiceStatus").textContent=heard?"Heard: "+heard:"Try again.";
+     if(good){
+       xp+=15;
+       answers.push({type:"speak",response:heard,expected:target,score,voice,passed:true});
+       $("next").disabled=false;
+       $("next").textContent="Continue →";
+       toast("Speaking check passed.");
+     } else {
+       answers.push({type:"speak",response:heard,expected:target,score,voice,passed:false});
+       voice=null;
+       $("next").disabled=true;
+       toast("Try it again.");
+     }
+   });
+ };
+ $("next").onclick=()=>advance();
+}
 function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
 function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
 async function sendConversation(){const input=$("input").value.trim()||voice?.text||"";if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}const c=generated.cards[index],topic=baseLesson?.topic||"Everyday life";conversation.push({role:"user",content:input});$("input").value="";drawChat();$("send").disabled=true;$("voiceStatus").textContent="Thinking…";try{const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:levelName(),goal:profile.goal||"Real conversation",topic,messages:conversation})});const data=await res.json();if(!res.ok)throw new Error(data.error||"Conversation failed.");conversation.push({role:"assistant",content:data.text});answers.push({type:"conversation",user:input,assistant:data.text});xp+=20;drawChat();voice=null;if(answers.filter(a=>a.type==="conversation").length>=2){$("send").textContent="Finish lesson";$("send").onclick=finish;toast("You kept the conversation going.");}$("voiceStatus").textContent="Good. Keep the interaction natural."; }catch(e){$("voiceStatus").textContent=e.message||"The conversation couldn't continue. Try again."}finally{$("send").disabled=false;}}
 async function finish(){if($("card").dataset.done)return;$("card").dataset.done="1";try{if(user&&baseLesson?.id){await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{generated_lesson:generated,answers}});await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,level:profile.level}});}}catch(e){console.error("Nahtive completion save failed:",e)}$("card").innerHTML='<section class="card complete"><h2>Lesson complete</h2><p class="sub">You learned first, practiced with support, and then used the language in a real interaction.</p><div class="xp">'+xp+' XP earned</div><div class="actions" style="justify-content:center"><a class="primary" href="dashboard.html" style="text-decoration:none">Continue learning →</a></div></section>';$("card").querySelector(".complete").style.display="block";$("stage").textContent="Complete";$("fill").style.width="100%";}
 function generatedLessonMatchesLevel(lesson){const level=profile?.level||"A1";if(!["B1","B2","B2+","C1","C2"].includes(level))return true;const text=JSON.stringify(lesson?.cards||[]).toLowerCase();const basic=/\\b(hello|hi|hola|hey|bonjour|hallo|ciao|oi|good morning|good afternoon|buenos días|buenas)\\b/i;return !basic.test(text)}
 function buildFallbackLesson(){
- const seed=baseLesson?.content&&typeof baseLesson.content==="object"?baseLesson.content:{};
- const level=profile?.level||"A1";
- const code=(profile?.code||"").toLowerCase().split("-")[0];
- const topic=String(baseLesson?.topic||seed.topic||"Everyday conversation");
- const scenario=seed.scene&&typeof seed.scene==="object"?seed.scene:{};
+  const level=profile?.level||"A1";
+  const code=(profile?.code||"").toLowerCase().split("-")[0];
+  const topic=String(baseLesson?.topic||"Everyday life");
 
- const contextual={
-  es:{
-   a0:[
-    {phrase:"Hola.",meaning:"Hi / Hello.",pronunciation:"OH-lah",usage:"Use this simple greeting when you meet someone.",example:"Hola.",exampleMeaning:"A basic greeting."},
-    {phrase:"Sí.",meaning:"Yes.",pronunciation:"see",usage:"Use this to answer yes.",example:"Sí.",exampleMeaning:"A simple yes."},
-    {phrase:"Gracias.",meaning:"Thank you.",pronunciation:"GRAH-syahs",usage:"Use this when someone helps you or gives you something.",example:"Gracias.",exampleMeaning:"A basic way to say thank you."}
-   ],
-   beginner:[
-    {phrase:"Quiero pedirte algo.",meaning:"I want to ask you something.",pronunciation:"KYEH-roh peh-DEER-teh AHL-goh",usage:"Use this when you want to introduce a request in a direct but natural way.",example:"Quiero pedirte algo. ¿Tienes un minuto?",exampleMeaning:"“I want to ask you something. Do you have a minute?”"},
-    {phrase:"¿Me puedes explicar cómo funciona?",meaning:"Can you explain how this works?",pronunciation:"meh PWEH-des eks-plee-KAR KOH-moh foon-SYOH-nah",usage:"Use this when you need someone to explain a process, rule, or situation.",example:"¿Me puedes explicar cómo funciona este sistema?",exampleMeaning:"“Can you explain how this system works?”"},
-    {phrase:"Vale, déjame pensarlo.",meaning:"Okay, let me think about it.",pronunciation:"BAH-leh, DEH-hah-meh pen-SAR-loh",usage:"Use this when you want a moment to consider something before answering.",example:"Vale, déjame pensarlo y te digo mañana.",exampleMeaning:"“Okay, let me think about it and I'll tell you tomorrow.”"}
-   ],
-   intermediate:[
-    {phrase:"A ver si lo entiendo bien.",meaning:"Let me make sure I understand.",pronunciation:"ah BEHR see loh en-TYEN-doh BYEN",usage:"Use this to confirm that you understood what someone just explained. It often introduces a quick summary or clarification.",example:"A ver si lo entiendo bien. ¿Entonces tengo que pagar el viernes?",exampleMeaning:"“Let me make sure I understand. So I have to pay on Friday?”"},
-    {phrase:"No estoy del todo convencido.",meaning:"I'm not completely convinced.",pronunciation:"noh es-TOY del TOH-doh kon-ben-SEE-doh",usage:"Use this when you have doubts about an idea or proposal without rejecting it outright.",example:"No estoy del todo convencido. ¿Podemos pensarlo un poco más?",exampleMeaning:"“I'm not completely convinced. Can we think about it a little more?”"},
-    {phrase:"¿Qué te parece si lo hacemos de otra manera?",meaning:"What do you think if we do it another way?",pronunciation:"keh teh pah-REH-seh see loh ah-SEH-mohs deh OH-trah mah-NEH-rah",usage:"Use this to suggest an alternative in a collaborative, non-confrontational way.",example:"¿Qué te parece si lo hacemos de otra manera?",exampleMeaning:"“What if we did it another way?”"}
-   ],
-   advanced:[
-    {phrase:"No es que esté en desacuerdo, pero creo que estamos pasando por alto algo importante.",meaning:"It's not that I disagree, but I think we're overlooking something important.",pronunciation:"noh es keh es-TEH en deh-sah-KWEHR-doh, PEH-roh KREH-oh keh es-TAH-mohs pah-SAHN-doh por AHL-toh AL-goh eem-por-TAHN-teh",usage:"Use this to disagree carefully while making it clear that your concern is about something being overlooked.",example:"No es que esté en desacuerdo, pero creo que estamos pasando por alto un detalle importante.",exampleMeaning:"“It's not that I disagree, but I think we're overlooking an important detail.”"},
-    {phrase:"Entiendo lo que planteas; lo que me preocupa son las consecuencias a largo plazo.",meaning:"I understand your point; what concerns me are the long-term consequences.",pronunciation:"en-TYEN-doh loh keh plan-TEH-ahs; loh keh meh proh-oh-KOO-pah son las kon-seh-KWEN-syahs ah LAR-goh PLAH-soh",usage:"Use this when you want to acknowledge someone's idea before explaining your concern.",example:"Entiendo lo que planteas, pero me preocupan las consecuencias a largo plazo.",exampleMeaning:"“I understand your point, but I'm concerned about the long-term consequences.”"},
-    {phrase:"Si queremos que esto funcione, tendremos que encontrar un punto medio.",meaning:"If we want this to work, we'll have to find a middle ground.",pronunciation:"see keh-REH-mohs keh ES-toh foon-SYOH-neh, ten-DREH-mohs keh en-kon-TRAR oon POON-toh MEH-dyoh",usage:"Use this when a situation requires compromise and neither side is likely to get everything it wants.",example:"Si queremos que esto funcione, tendremos que encontrar un punto medio.",exampleMeaning:"“If we want this to work, we'll have to find a middle ground.”"}
-   ]
-  },
-  fr:{
-   a0:[
-    {phrase:"Bonjour.",meaning:"Hello.",pronunciation:"bohn-ZHOOR",usage:"Use this simple greeting when you meet someone.",example:"Bonjour.",exampleMeaning:"A basic greeting."},
-    {phrase:"Oui.",meaning:"Yes.",pronunciation:"wee",usage:"Use this to answer yes.",example:"Oui.",exampleMeaning:"A simple yes."},
-    {phrase:"Merci.",meaning:"Thank you.",pronunciation:"mehr-SEE",usage:"Use this when someone helps you or gives you something.",example:"Merci.",exampleMeaning:"A basic way to say thank you."}
-   ],
-   beginner:[
-    {phrase:"Je voudrais te demander quelque chose.",meaning:"I would like to ask you something.",pronunciation:"zhuh voo-DRAY tuh duh-mahn-DAY kel-kuh SHOHZ",usage:"Use this when you want to introduce a request or question in a natural, polite way.",example:"Je voudrais te demander quelque chose. Tu as une minute ?",exampleMeaning:"“I would like to ask you something. Do you have a minute?”"},
-    {phrase:"Tu peux m'expliquer comment ça marche ?",meaning:"Can you explain how this works?",pronunciation:"too puh mex-plee-KAY koh-MAHN sah marsh",usage:"Use this when you need someone to explain a process or situation.",example:"Tu peux m'expliquer comment ça marche ?",exampleMeaning:"“Can you explain how this works?”"},
-    {phrase:"D'accord, laisse-moi réfléchir.",meaning:"Okay, let me think about it.",pronunciation:"dah-KOR, less-MWA ray-fleh-SHEER",usage:"Use this when you want a moment to consider something before answering.",example:"D'accord, laisse-moi réfléchir et je te dis demain.",exampleMeaning:"“Okay, let me think about it and I'll tell you tomorrow.”"}
-   ],
-   intermediate:[
-    {phrase:"Si je comprends bien...",meaning:"Let me make sure I understand.",pronunciation:"see zhuh kohm-PRAHN byan",usage:"Use this to confirm that you understood what someone just explained, often before summarizing it.",example:"Si je comprends bien, tu veux partir vendredi ?",exampleMeaning:"“Let me make sure I understand. You want to leave Friday?”"},
-    {phrase:"Je ne suis pas complètement convaincu.",meaning:"I'm not completely convinced.",pronunciation:"zhuh nuh swee pah kohm-pleht-MAHN kohn-vahn-KOO",usage:"Use this when you have doubts about an idea without completely rejecting it.",example:"Je ne suis pas complètement convaincu. On peut regarder une autre option ?",exampleMeaning:"“I'm not completely convinced. Can we look at another option?”"},
-    {phrase:"Et si on essayait de faire autrement ?",meaning:"What if we tried doing it another way?",pronunciation:"ay see ohn ess-ay-YAY duh fair oh-truh-MAHN",usage:"Use this to suggest an alternative in a collaborative way.",example:"Et si on essayait de faire autrement ?",exampleMeaning:"“What if we tried doing it another way?”"}
-   ],
-   advanced:[
-    {phrase:"Ce n'est pas que je ne sois pas d'accord, mais je pense qu'on passe à côté de quelque chose d'important.",meaning:"It's not that I disagree, but I think we're overlooking something important.",pronunciation:"suh nay pah kuh zhuh nuh swah pah dah-KOR, may zhuh pahns kohn pahs ah koh-TAY duh kel-kuh SHOZ dahm-por-TAHN",usage:"Use this to disagree carefully while pointing out an overlooked issue.",example:"Ce n'est pas que je ne sois pas d'accord, mais je pense qu'on passe à côté d'un détail important.",exampleMeaning:"“It's not that I disagree, but I think we're overlooking an important detail.”"},
-    {phrase:"Je comprends ton point de vue ; ce qui m'inquiète, ce sont les conséquences à long terme.",meaning:"I understand your point; what concerns me are the long-term consequences.",pronunciation:"zhuh kohm-PRAHN tohn pwan duh VYUH; suh kee man-kee-ET, suh sohn lay kohn-say-KAHNS ah lohn TERM",usage:"Use this to acknowledge someone's reasoning before explaining your concern.",example:"Je comprends ton point de vue, mais ce qui m'inquiète, ce sont les conséquences à long terme.",exampleMeaning:"“I understand your point, but I'm concerned about the long-term consequences.”"},
-    {phrase:"Si on veut que ça fonctionne, il va falloir trouver un compromis.",meaning:"If we want this to work, we'll have to find a compromise.",pronunciation:"see ohn vuh kuh sah fohnk-SYON, eel vah fah-LWAR troo-VAY uhn kohm-proh-MEE",usage:"Use this when both sides need to compromise for a situation to work.",example:"Si on veut que ça fonctionne, il va falloir trouver un compromis.",exampleMeaning:"“If we want this to work, we'll have to find a compromise.”"}
-   ]
-  },
-  nl:{
-   a0:[
-    {phrase:"Hoi.",meaning:"Hi.",pronunciation:"hoy",usage:"Use this simple greeting in everyday situations.",example:"Hoi.",exampleMeaning:"A basic greeting."},
-    {phrase:"Ja.",meaning:"Yes.",pronunciation:"yah",usage:"Use this to answer yes.",example:"Ja.",exampleMeaning:"A simple yes."},
-    {phrase:"Dank je.",meaning:"Thank you.",pronunciation:"dahnk yuh",usage:"Use this when someone helps you or gives you something.",example:"Dank je.",exampleMeaning:"A basic thank-you expression."}
-   ],
-   beginner:[
-    {phrase:"Ik wil je iets vragen.",meaning:"I want to ask you something.",pronunciation:"ik vil yuh iets VRAH-khun",usage:"Use this to introduce a request or question naturally.",example:"Ik wil je iets vragen. Heb je even tijd?",exampleMeaning:"“I want to ask you something. Do you have a minute?”"},
-    {phrase:"Kun je uitleggen hoe dit werkt?",meaning:"Can you explain how this works?",pronunciation:"kun yuh OYT-lay-ghun hoo dit werkt",usage:"Use this when you need someone to explain a process or situation.",example:"Kun je uitleggen hoe dit systeem werkt?",exampleMeaning:"“Can you explain how this system works?”"},
-    {phrase:"Oké, laat me er even over nadenken.",meaning:"Okay, let me think about it.",pronunciation:"oh-KAY, laat muh ur AY-vun OH-vur NAH-dun-kun",usage:"Use this when you want a moment to consider something before answering.",example:"Oké, laat me er even over nadenken.",exampleMeaning:"“Okay, let me think about it.”"}
-   ],
-   intermediate:[
-    {phrase:"Als ik het goed begrijp...",meaning:"Let me make sure I understand.",pronunciation:"als ik ut khoot buh-GRYPE",usage:"Use this to check that you understood what someone just explained.",example:"Als ik het goed begrijp, moet ik vrijdag betalen?",exampleMeaning:"“If I understand correctly, do I have to pay Friday?”"},
-    {phrase:"Ik ben nog niet helemaal overtuigd.",meaning:"I'm not completely convinced.",pronunciation:"ik ben nokh neet hay-MAHL oh-ver-TOWT",usage:"Use this when you still have doubts about an idea or proposal.",example:"Ik ben nog niet helemaal overtuigd. Kunnen we een andere optie bekijken?",exampleMeaning:"“I'm not completely convinced. Can we look at another option?”"},
-    {phrase:"Wat als we het op een andere manier proberen?",meaning:"What if we tried doing it another way?",pronunciation:"vat als vuh ut op un AN-druh mah-NEER proh-BAY-run",usage:"Use this to suggest an alternative without sounding confrontational.",example:"Wat als we het op een andere manier proberen?",exampleMeaning:"“What if we tried doing it another way?”"}
-   ],
-   advanced:[
-    {phrase:"Niet dat ik het oneens ben, maar volgens mij zien we iets belangrijks over het hoofd.",meaning:"It's not that I disagree, but I think we're overlooking something important.",pronunciation:"neet dat ik ut oh-NAYNS ben, mar fol-GUNS may zeen vuh iets buh-LANG-rikes OH-vur ut hoft",usage:"Use this to disagree carefully while pointing out something that may have been missed.",example:"Niet dat ik het oneens ben, maar volgens mij zien we een belangrijk detail over het hoofd.",exampleMeaning:"“It's not that I disagree, but I think we're overlooking an important detail.”"},
-    {phrase:"Ik begrijp wat je bedoelt; waar ik me zorgen over maak, zijn de gevolgen op lange termijn.",meaning:"I understand your point; what concerns me are the long-term consequences.",pronunciation:"ik buh-GRYPE vat yuh buh-DOOLT; var ik muh ZOR-ghun OH-vur make, zyn duh guh-VOL-ghun op LANG-uh termyn",usage:"Use this to acknowledge someone's reasoning before explaining your concern.",example:"Ik begrijp wat je bedoelt, maar ik maak me zorgen over de gevolgen op lange termijn.",exampleMeaning:"“I understand your point, but I'm concerned about the long-term consequences.”"},
-    {phrase:"Als we willen dat dit werkt, zullen we een middenweg moeten vinden.",meaning:"If we want this to work, we'll have to find a middle ground.",pronunciation:"als vuh VIL-un dat dit werkt, ZUL-un vuh un MID-un-vaykh moht-un VIND-un",usage:"Use this when both sides need to compromise for the situation to work.",example:"Als we willen dat dit werkt, zullen we een middenweg moeten vinden.",exampleMeaning:"“If we want this to work, we'll have to find a middle ground.”"}
-   ]
-  },
-  pl:{
-   a0:[
-    {phrase:"Cześć.",meaning:"Hi.",pronunciation:"cheshch",usage:"Use this simple greeting in everyday situations.",example:"Cześć.",exampleMeaning:"A basic greeting."},
-    {phrase:"Tak.",meaning:"Yes.",pronunciation:"tahk",usage:"Use this to answer yes.",example:"Tak.",exampleMeaning:"A simple yes."},
-    {phrase:"Dziękuję.",meaning:"Thank you.",pronunciation:"jen-KOO-yeh",usage:"Use this when someone helps you or gives you something.",example:"Dziękuję.",exampleMeaning:"A basic way to say thank you."}
-   ],
-   beginner:[
-    {phrase:"Chciałbym o coś zapytać.",meaning:"I would like to ask you something.",pronunciation:"khchyaw-BYM oh kosh ZAH-py-tatch",usage:"Use this to introduce a question or request in a natural, polite way.",example:"Chciałbym o coś zapytać. Masz chwilę?",exampleMeaning:"“I would like to ask you something. Do you have a minute?”"},
-    {phrase:"Czy możesz mi wyjaśnić, jak to działa?",meaning:"Can you explain how this works?",pronunciation:"chih MOH-zhesh mee vyah-SHNITCH yak toh DJAH-wah",usage:"Use this when you need someone to explain a process, rule, or situation.",example:"Czy możesz mi wyjaśnić, jak to działa?",exampleMeaning:"“Can you explain how this works?”"},
-    {phrase:"Dobrze, daj mi chwilę, żebym się zastanowił.",meaning:"Okay, give me a moment to think about it.",pronunciation:"DOH-bzhe dai mee FHVEE-leh ZHEH-bym shyeh zah-stah-NOH-veew",usage:"Use this when you need a moment before answering or deciding.",example:"Dobrze, daj mi chwilę, żebym się zastanowił.",exampleMeaning:"“Okay, give me a moment to think about it.”"}
-   ],
-   intermediate:[
-    {phrase:"Jeśli dobrze rozumiem...",meaning:"Let me make sure I understand.",pronunciation:"YESH-lee DOH-bzhe roh-ZOO-myem",usage:"Use this to confirm that you understood what someone just explained.",example:"Jeśli dobrze rozumiem, mamy zacząć w piątek?",exampleMeaning:"“If I understand correctly, are we supposed to start on Friday?”"},
-    {phrase:"Nie jestem do końca przekonany.",meaning:"I'm not completely convinced.",pronunciation:"nyeh YES-tem doh KOHN-tsah psheh-koh-NAH-nih",usage:"Use this when you have doubts about an idea without rejecting it outright.",example:"Nie jestem do końca przekonany. Możemy rozważyć inną opcję?",exampleMeaning:"“I'm not completely convinced. Can we consider another option?”"},
-    {phrase:"A gdybyśmy spróbowali zrobić to inaczej?",meaning:"What if we tried doing it another way?",pronunciation:"ah gdih-BIH-shmih sproo-BOH-vah-lee ZROH-bitch toh ee-NAH-chey",usage:"Use this to suggest an alternative in a collaborative, non-confrontational way.",example:"A gdybyśmy spróbowali zrobić to inaczej?",exampleMeaning:"“What if we tried doing it another way?”"}
-   ],
-   advanced:[
-    {phrase:"Nie chodzi o to, że się z tobą nie zgadzam, ale mam wrażenie, że pomijamy coś istotnego.",meaning:"It's not that I disagree with you, but I feel we're overlooking something important.",pronunciation:"nyeh HOD-zhee oh toh zheh shyeh z toh-BOH nyeh ZGA-dzam AH-leh mam VRAH-zheh-nyeh zheh poh-mee-YAH-mih tsosh ee-STOT-neh-goh",usage:"Use this to disagree carefully while keeping the conversation constructive.",example:"Nie chodzi o to, że się z tobą nie zgadzam, ale mam wrażenie, że pomijamy ważny szczegół.",exampleMeaning:"“It's not that I disagree with you, but I feel we're overlooking an important detail.”"},
-    {phrase:"Rozumiem, co masz na myśli, ale martwią mnie długoterminowe konsekwencje.",meaning:"I understand your point, but the long-term consequences concern me.",pronunciation:"roh-ZOO-myem tso mash nah MIH-shlee AH-leh MAR-tvyom nyeh dwoog-oh-teer-MOH-veh kohn-seh-KVEN-tsyeh",usage:"Use this to acknowledge someone's reasoning before explaining your concern.",example:"Rozumiem, co masz na myśli, ale martwią mnie długoterminowe konsekwencje.",exampleMeaning:"“I understand your point, but the long-term consequences concern me.”"},
-    {phrase:"Jeśli chcemy, żeby to zadziałało, musimy znaleźć kompromis.",meaning:"If we want this to work, we'll have to find a compromise.",pronunciation:"YESH-lee HTEH-mih ZHEH-bih toh zah-DJAH-wah-oh MOO-sih-mih ZNAH-lehzh KOHM-proh-mees",usage:"Use this when both sides need to compromise for the situation to work.",example:"Jeśli chcemy, żeby to zadziałało, musimy znaleźć kompromis.",exampleMeaning:"“If we want this to work, we'll have to find a compromise.”"}
-   ]
-  },
-  ar:{
-   a0:[
-    {phrase:"مرحبًا.",meaning:"Hello.",pronunciation:"mar-ha-ban",usage:"Use this simple greeting when you meet someone.",example:"مرحبًا.",exampleMeaning:"A basic greeting."},
-    {phrase:"نعم.",meaning:"Yes.",pronunciation:"na-am",usage:"Use this to answer yes.",example:"نعم.",exampleMeaning:"A simple yes."},
-    {phrase:"شكرًا.",meaning:"Thank you.",pronunciation:"shuk-ran",usage:"Use this when someone helps you or gives you something.",example:"شكرًا.",exampleMeaning:"A basic way to say thank you."}
-   ],
-   beginner:[
-    {phrase:"أريد أن أسألك شيئًا.",meaning:"I want to ask you something.",pronunciation:"u-reed an as-a-lak shay-an",usage:"Use this when you want to introduce a question or request naturally.",example:"أريد أن أسألك شيئًا. هل لديك دقيقة؟",exampleMeaning:"“I want to ask you something. Do you have a minute?”"},
-    {phrase:"هل يمكنك أن تشرح لي كيف يعمل هذا؟",meaning:"Can you explain how this works?",pronunciation:"hal yum-ki-nu-ka an tash-ra-ha lee kay-fa ya-mal ha-tha",usage:"Use this when you need someone to explain a process or situation.",example:"هل يمكنك أن تشرح لي كيف يعمل هذا؟",exampleMeaning:"“Can you explain how this works?”"},
-    {phrase:"حسنًا، دعني أفكر في الأمر.",meaning:"Okay, let me think about it.",pronunciation:"ha-san-an, da-nee af-ak-ker fee al-amr",usage:"Use this when you need a moment before answering or deciding.",example:"حسنًا، دعني أفكر في الأمر وأخبرك غدًا.",exampleMeaning:"“Okay, let me think about it and I'll tell you tomorrow.”"}
-   ],
-   intermediate:[
-    {phrase:"دعني أتأكد أنني فهمت بشكل صحيح.",meaning:"Let me make sure I understand.",pronunciation:"da-nee a-ta-ak-kad an-na-nee fa-himt bi-shakl sa-heeh",usage:"Use this to check your understanding before responding.",example:"دعني أتأكد أنني فهمت بشكل صحيح. تقصد أننا نبدأ يوم الجمعة؟",exampleMeaning:"“Let me make sure I understand. You mean we start Friday?”"},
-    {phrase:"لست مقتنعًا تمامًا.",meaning:"I'm not completely convinced.",pronunciation:"las-tu muq-ta-na-an ta-ma-man",usage:"Use this when you have doubts without completely rejecting an idea.",example:"لست مقتنعًا تمامًا. هل يمكننا التفكير في خيار آخر؟",exampleMeaning:"“I'm not completely convinced. Can we consider another option?”"},
-    {phrase:"ما رأيك أن نجرب طريقة أخرى؟",meaning:"What if we tried another way?",pronunciation:"ma ra-yu-ka an nu-jar-rib ta-ree-qa ukhra",usage:"Use this to suggest an alternative without sounding confrontational.",example:"ما رأيك أن نجرب طريقة أخرى؟",exampleMeaning:"“What if we tried another way?”"}
-   ],
-   advanced:[
-    {phrase:"ليس الأمر أنني أختلف معك، لكن أعتقد أننا نتجاهل شيئًا مهمًا.",meaning:"It's not that I disagree with you, but I think we're overlooking something important.",pronunciation:"lay-sa al-amr an-na-nee akh-ta-li-fu ma-ak, la-kin a-ta-qi-du an-na-na na-ta-ja-hal shay-an mu-him-man",usage:"Use this to disagree carefully while keeping the conversation constructive.",example:"ليس الأمر أنني أختلف معك، لكن أعتقد أننا نتجاهل نقطة مهمة.",exampleMeaning:"“It's not that I disagree with you, but I think we're overlooking an important point.”"},
-    {phrase:"أفهم وجهة نظرك، لكن ما يقلقني هو التأثير على المدى الطويل.",meaning:"I understand your point, but what concerns me is the long-term impact.",pronunciation:"af-ham wij-hat na-za-rik, la-kin ma yu-laq-qi-nee hu-wa at-ta-theer a-la al-ma-da at-ta-weel",usage:"Use this to acknowledge someone's reasoning before explaining your concern.",example:"أفهم وجهة نظرك، لكن ما يقلقني هو التأثير على المدى الطويل.",exampleMeaning:"“I understand your point, but what concerns me is the long-term impact.”"},
-    {phrase:"إذا أردنا أن ينجح هذا، فعلينا أن نجد حلًا وسطًا.",meaning:"If we want this to work, we'll have to find a middle ground.",pronunciation:"i-tha a-rad-na an yan-jah ha-tha, fa-a-lay-na an naj-id hal-an wa-sa-tan",usage:"Use this when both sides need to compromise.",example:"إذا أردنا أن ينجح هذا، فعلينا أن نجد حلًا وسطًا.",exampleMeaning:"“If we want this to work, we'll have to find a middle ground.”"}
-   ]
-  },
-  en:{
-   a0:[
-    {phrase:"Hi.",meaning:"Hello.",pronunciation:"hi",usage:"Use this simple greeting in everyday situations.",example:"Hi.",exampleMeaning:"A basic greeting."},
-    {phrase:"Yes.",meaning:"Yes.",pronunciation:"yes",usage:"Use this to answer yes.",example:"Yes.",exampleMeaning:"A simple yes."},
-    {phrase:"Thanks.",meaning:"Thank you.",pronunciation:"thanks",usage:"Use this when someone helps you or gives you something.",example:"Thanks.",exampleMeaning:"A basic thank-you expression."}
-   ],
-   beginner:[
-    {phrase:"I'd like to ask you something.",meaning:"I want to ask you something.",pronunciation:"ayd like tuh ask yuh SUM-thing",usage:"Use this to introduce a request or question naturally.",example:"I'd like to ask you something. Do you have a minute?",exampleMeaning:"A polite, natural way to start a question."},
-    {phrase:"Could you explain how this works?",meaning:"Can you explain how this works?",pronunciation:"kud yuh ex-PLAYN how this works",usage:"Use this when you need an explanation of a process or situation.",example:"Could you explain how this works?",exampleMeaning:"A direct but polite request for an explanation."},
-    {phrase:"Okay, let me think about it.",meaning:"Give me a moment to consider it.",pronunciation:"oh-KAY, let me THINK uh-bout it",usage:"Use this when you do not want to answer immediately.",example:"Okay, let me think about it and get back to you.",exampleMeaning:"A natural way to ask for time before deciding."}
-   ],
-   intermediate:[
-    {phrase:"Let me make sure I understand.",meaning:"I want to confirm that I understood you correctly.",pronunciation:"let me make shore eye un-der-STAND",usage:"Use this before checking or summarizing what someone just told you.",example:"Let me make sure I understand. You're saying the deadline is Friday?",exampleMeaning:"You are checking your understanding, not asking for a definition."},
-    {phrase:"I'm not completely convinced.",meaning:"I still have some doubts.",pronunciation:"I'm not kum-PLEET-lee kun-VINST",usage:"Use this to express doubt without saying that you completely reject an idea.",example:"I'm not completely convinced. Could we look at another option?",exampleMeaning:"A softer way to say you are not persuaded yet."},
-    {phrase:"What if we tried doing it another way?",meaning:"I want to suggest a different approach.",pronunciation:"what if we tried DOO-ing it uh-NUH-ther way",usage:"Use this to suggest an alternative without sounding confrontational.",example:"What if we tried doing it another way?",exampleMeaning:"A collaborative way to propose a different solution."}
-   ],
-   advanced:[
-    {phrase:"It's not that I disagree, but I think we're overlooking something important.",meaning:"I don't necessarily reject your idea; I think we're missing an important point.",pronunciation:"it's not that eye dis-uh-GREE, but I think we're oh-ver-LOOK-ing something im-POR-tant",usage:"Use this to disagree carefully while keeping the conversation constructive.",example:"It's not that I disagree, but I think we're overlooking an important detail.",exampleMeaning:"You soften disagreement before raising a concern."},
-    {phrase:"I see what you're getting at; what concerns me is the long-term impact.",meaning:"I understand your point, but I'm worried about what it could cause later.",pronunciation:"eye see what yer GET-ing at; what kun-SERNZ me is the long-term IM-pact",usage:"Use this when you want to acknowledge someone's reasoning before explaining your concern.",example:"I see what you're getting at, but what concerns me is the long-term impact.",exampleMeaning:"You show understanding before introducing a concern."},
-    {phrase:"If we want this to work, we're going to have to find some middle ground.",meaning:"Both sides will need to compromise for this to work.",pronunciation:"if we want this tuh work, we're gonna hafta find some MID-ul ground",usage:"Use this when a disagreement requires compromise.",example:"If we want this to work, we're going to have to find some middle ground.",exampleMeaning:"You are saying that neither side can get everything it wants."}
-   ]
+  const spanishMissions=[
+    {setting:"Coffee shop",moment:"You're late for work. The barista is waiting for your order.",role:"You're ordering quickly.",goal:"Order a drink, customize it, and react when something is unavailable.",
+      lines:[["Barista","¿Qué te preparo?"],["You","You need to order and make one small change."]],
+      p:[
+        ["Quiero un café con leche.","I want a coffee with milk.","KYEH-roh oon kah-FEH kon LEH-cheh","Use it to place a simple order."],
+        ["¿Tienes leche de avena?","Do you have oat milk?","TYEH-nes LEH-cheh deh ah-BEH-nah","Use it to check whether something is available."],
+        ["Está bien.","That's fine / Okay.","es-TAH byen","Use it when you accept an alternative."]
+      ]},
+    {setting:"Taco shop",moment:"The line is moving fast. You know exactly what you want.",role:"You're ordering lunch.",goal:"Order food, leave something out, and pay naturally.",
+      lines:[["Cashier","¿Qué te pongo?"],["You","Order your tacos and customize them."]],
+      p:[
+        ["Me pones unos tacos de asada.","Can I get some carne asada tacos?","meh POH-nes OO-nos TAH-kos deh ah-SAH-dah","A casual way to order at a counter."],
+        ["Sin cebolla, por favor.","No onion, please.","seen seh-BOH-yah por fah-BOR","Add this when you want something left out."],
+        ["¿Cuánto es?","How much is it?","KWAN-toh es","Use it when you're ready to pay."]
+      ]},
+    {setting:"Grocery store",moment:"You can't find what you need and an employee walks by.",role:"You're looking for one item.",goal:"Ask for directions, confirm what you heard, and close the interaction.",
+      lines:[["Employee","¿Te puedo ayudar?"],["You","Ask where the item is."]],
+      p:[
+        ["¿Dónde está la leche?","Where is the milk?","DON-deh es-TAH lah LEH-cheh","Ask where you can find something."],
+        ["¿Por aquí?","Around here?","por ah-KEE","Quickly check that you understood the direction."],
+        ["Gracias, ya la encontré.","Thanks, I found it.","GRAH-syahs yah lah en-kon-TREH","Close the interaction naturally."]
+      ]},
+    {setting:"Apartment viewing",moment:"You like the apartment, but you need one practical detail before deciding.",role:"You're viewing an apartment.",goal:"Ask a question, clarify the answer, and avoid sounding scripted.",
+      lines:[["Leasing agent","¿Qué te parece el departamento?"],["You","You like it, but you have a question."]],
+      p:[
+        ["Me gusta, pero tengo una pregunta.","I like it, but I have a question.","meh GOOS-tah PEH-roh TEN-goh OO-nah preh-GOON-tah","Use it to react positively before asking for something."],
+        ["¿Está incluido el estacionamiento?","Is parking included?","es-TAH een-kloo-EE-doh el es-tah-syo-nah-MYEN-toh","Ask whether something is included."],
+        ["Déjame pensarlo.","Let me think about it.","DEH-hah-meh pen-SAR-loh","Use it when you need time before deciding."]
+      ]},
+    {setting:"First day at work",moment:"A coworker is showing you how something works.",role:"You're learning the ropes.",goal:"Ask for clarification and show that you understand.",
+      lines:[["Coworker","¿Entiendes cómo funciona?"],["You","Ask one question, then confirm what you learned."]],
+      p:[
+        ["¿Me puedes explicar?","Can you explain it to me?","meh PWEH-des eks-plee-KAR","Ask for a quick explanation."],
+        ["¿Cómo funciona esto?","How does this work?","KOH-moh foon-SYOH-nah ES-toh","Ask how a process or thing works."],
+        ["Ah, ya entiendo.","Ah, I understand now.","ah yah en-TYEN-doh","Use it when the explanation clicks."]
+      ]},
+    {setting:"Getting directions",moment:"You're downtown and your phone is almost dead.",role:"You're asking someone nearby for help.",goal:"Ask where something is and make sure you're going the right way.",
+      lines:[["Local","¿Buscas algo?"],["You","Ask for a place and confirm the direction."]],
+      p:[
+        ["¿Cómo llego al centro?","How do I get downtown?","KOH-moh YEH-goh al SEN-troh","Ask how to get somewhere."],
+        ["¿Está lejos?","Is it far?","es-TAH LEH-hos","Check the distance."],
+        ["Entonces voy por aquí.","So I'll go this way.","en-TON-ses boy por ah-KEE","Confirm the route before you leave."]
+      ]},
+    {setting:"Restaurant",moment:"The waiter asks if you're ready, but you need another minute.",role:"You're deciding what to order.",goal:"Buy time, ask a question, and then make your choice.",
+      lines:[["Waiter","¿Ya saben qué quieren?"],["You","You need another minute."]],
+      p:[
+        ["Todavía no.","Not yet.","toh-dah-BEE-ah noh","Say this when you aren't ready."],
+        ["¿Qué me recomiendas?","What do you recommend?","keh meh reh-koh-MYEN-dahs","Ask for a recommendation."],
+        ["Creo que voy a pedir esto.","I think I'll order this.","KREH-oh keh boy ah peh-DEER ES-toh","Use it when you've made your choice."]
+      ]},
+    {setting:"Making weekend plans",moment:"A friend suggests an activity, but you're not sure yet.",role:"You're deciding what to do.",goal:"React naturally, ask a follow-up, and make a plan.",
+      lines:[["Friend","¿Quieres ir el sábado?"],["You","Respond naturally and keep the conversation going."]],
+      p:[
+        ["Puede ser.","Could be / Maybe.","PWEH-deh ser","A natural way to stay open without committing."],
+        ["¿A qué hora?","What time?","ah keh OH-rah","Ask for the key detail."],
+        ["Sí, me parece bien.","Yeah, that works for me.","see meh pah-REH-seh byen","Accept the plan naturally."]
+      ]}
+  ];
+
+  const generic={
+    fr:[["Je voudrais ça.","I'd like this.","zhuh voo-DRAY sah"],["Tu peux m'aider ?","Can you help me?","too puh meh-DAY"],["D'accord.","Okay.","dah-KOR"]],
+    nl:[["Ik wil dit.","I want this.","ik vil dit"],["Kun je me helpen?","Can you help me?","kun yuh muh HEL-pen"],["Dat is goed.","That's fine.","dat is khoot"]],
+    pl:[["Poproszę to.","I'll have this, please.","poh-PROH-sheh toh"],["Możesz mi pomóc?","Can you help me?","MOH-zhesh mee pomoots"],["Dobrze.","Okay.","DOH-bzheh"]],
+    ar:[["أريد هذا.","I want this.","u-reed ha-tha"],["هل يمكنك مساعدتي؟","Can you help me?","hal yum-ki-nu-ka mu-sa-a-da-tee"],["حسنًا.","Okay.","ha-sa-nan"]],
+    en:[["I'd like this.","I'd like this.","ayd like this"],["Could you help me?","Could you help me?","kud yuh help me"],["That works.","That's fine.","that works"]]
+  };
+
+  const makePhrase=(x)=>({phrase:x[0],meaning:x[1],pronunciation:x[2],usage:x[3]||"Use this naturally in the situation.",example:x[0]});
+  let mission;
+
+  if(code==="es"){
+    mission=spanishMissions[Math.floor(Math.random()*spanishMissions.length)];
+  }else{
+    const ps=generic[code]||generic.en;
+    mission={
+      setting:"Everyday situation",
+      moment:"Someone asks you something and you need to respond naturally.",
+      role:"You're handling a real-life interaction.",
+      goal:"Understand the situation, choose useful language, and respond.",
+      lines:[["Other person","What do you need?"],["You","Respond naturally."]],
+      p:ps.map(x=>x)
+    };
   }
- };
- const bank=contextual[code]||contextual.pl;
- const tier=level==="A0"?"a0":(["A1","A2"].includes(level)?"beginner":(["B1","B2"].includes(level)?"intermediate":"advanced"));
- const lessons=bank[tier];
- const primary=lessons[0],second=lessons[1]||primary,third=lessons[2]||primary;
- const makeTeach=p=>({type:"teach",phrase:p.phrase,pronunciation:p.pronunciation,ipa:"",meaning:p.meaning,usage:p.usage,example:p.example,exampleMeaning:p.exampleMeaning,prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""});
- const makeCheck=(p,others)=>({type:"check",phrase:p.phrase,pronunciation:p.pronunciation,example:p.example,prompt:"Which line would you actually say in this situation?",options:[p.example,others[0]?.example||p.example,"That doesn't fit what we're talking about."],answer:p.example,feedback:"Good. That response uses the expression naturally in the situation."});
- const cards=[
-  makeTeach(primary),
-  makeCheck(primary,[second]),
-  {type:"guided",phrase:primary.phrase,pronunciation:primary.pronunciation,example:primary.example,prompt:"Use this expression to respond to the situation in your own words.",context:primary.meaning,expected:primary.phrase,answer:primary.phrase,feedback:"Good. You are producing the expression instead of only recognizing it."},
-  makeTeach(second),
-  makeCheck(second,[primary]),
-  {type:"guided",phrase:second.phrase,pronunciation:second.pronunciation,example:second.example,prompt:"Change one detail in the situation and use this expression naturally.",context:second.meaning,expected:second.phrase,answer:second.phrase,feedback:"Nice. You adapted the expression to the situation."},
-  makeTeach(third),
-  makeCheck(third,[second]),
-  {type:"guided",phrase:third.phrase,pronunciation:third.pronunciation,example:third.example,prompt:"Build your own response using this expression.",context:third.meaning,expected:third.phrase,answer:third.phrase,feedback:"Good. You are moving from recognition to production."},
-  {type:"challenge",phrase:third.phrase,pronunciation:third.pronunciation,example:third.example,prompt:"The situation changes. Which line would you actually say now?",options:[third.example,second.example,primary.example],answer:third.example,feedback:"Good. The choice fits the situation and tone."},
-  {type:"speak",phrase:third.phrase,pronunciation:third.pronunciation,meaning:third.meaning,prompt:"Say the expression naturally, then continue the thought if you can.",expected:third.phrase,answer:third.phrase,feedback:"Good. Now use it without the script."},
-  {type:"conversation",phrase:"Now the other person responds and the situation moves forward.",prompt:"Respond naturally in the target language and keep the scene moving.",expected:"",answer:"",feedback:"Keep the interaction going.",instructions:"Respond naturally.",followUp:""}
- ];
- generated={
-  title:(["B2+","C1","C2"].includes(level)?level+" · Nuance in real conversation":level+" · "+topic),
-  intro:"A level-matched lesson built around a real situation. Learn the language first, then use it with less support.",
-  scene:{setting:scenario.setting||topic,moment:scenario.moment||"The situation changes and you need to respond naturally.",learnerRole:scenario.learnerRole||"You are handling the interaction.",goal:scenario.goal||"Choose language that fits the meaning, relationship, and tone."},
-  cards
- };
+
+  const phrases=mission.p.map((x,i)=>{
+    const p=makePhrase(x);
+    p.id=i+1;
+    return p;
+  });
+
+  const shuffle=(arr)=>[...arr].sort(()=>Math.random()-.5);
+  const cards=[];
+
+  cards.push({
+    type:"scene",
+    context:mission.moment,
+    dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),
+    goal:mission.goal
+  });
+
+  cards.push({
+    type:"teach",...phrases[0],
+    exampleMeaning:phrases[0].meaning
+  });
+
+  cards.push({
+    type:"check",...phrases[0],
+    prompt:"What would you say here?",
+    options:shuffle([phrases[0].example,phrases[1].example,"I don't know."]),
+    answer:phrases[0].example,
+    feedback:"Exactly. Now use it instead of just recognizing it."
+  });
+
+  cards.push({
+    type:"guided",...phrases[0],
+    prompt:"Build the expression you just learned.",
+    context:phrases[0].meaning,
+    expected:phrases[0].phrase,
+    answer:phrases[0].phrase,
+    feedback:"Nice. You built the phrase. Now hear it in the situation."
+  });
+
+  cards.push({
+    type:"teach",...phrases[1],
+    exampleMeaning:phrases[1].meaning
+  });
+
+  cards.push({
+    type:"check",...phrases[1],
+    prompt:"Which response fits the situation?",
+    options:shuffle([phrases[1].example,phrases[0].example,"Maybe later."]),
+    answer:phrases[1].example,
+    feedback:"Good. You picked the response that actually fits."
+  });
+
+  cards.push({
+    type:"guided",...phrases[1],
+    prompt:"Build this response, then say it out loud.",
+    context:phrases[1].meaning,
+    expected:phrases[1].phrase,
+    answer:phrases[1].phrase,
+    feedback:"Good. You're producing the language now."
+  });
+
+  cards.push({
+    type:"teach",...phrases[2],
+    exampleMeaning:phrases[2].meaning
+  });
+
+  cards.push({
+    type:"challenge",...phrases[2],
+    prompt:"The situation changes. What would you say now?",
+    options:shuffle([phrases[2].example,phrases[0].example,phrases[1].example]),
+    answer:phrases[2].example,
+    feedback:"That fits the new moment."
+  });
+
+  cards.push({
+    type:"speak",...phrases[2],
+    meaning:phrases[2].meaning,
+    prompt:"Say it yourself. Parla checks what it actually hears.",
+    expected:phrases[2].phrase,
+    answer:phrases[2].phrase
+  });
+
+  cards.push({
+    type:"conversation",
+    prompt:"Now finish the interaction in your own words. Don't worry about being perfect.",
+    phrase:mission.goal,
+    expected:"",
+    answer:"",
+    feedback:"Keep the conversation moving."
+  });
+
+  generated={
+    title:(["B2","B2+","C1","C2"].includes(level)?level+" · "+mission.setting:mission.setting),
+    intro:"One real situation. Three useful expressions. Learn them, use them, then speak.",
+    scene:{
+      setting:mission.setting,
+      moment:mission.moment,
+      learnerRole:mission.role,
+      goal:mission.goal
+    },
+    cards
+  };
 }
 function showError(msg){$("loading").innerHTML="<strong>We couldn’t build this lesson.</strong><br><span class=\"small\">"+esc(msg)+"</span><br><button class=\"primary\" style=\"margin-top:16px\" onclick=\"location.reload()\">Try again</button>";}
 async function ensurePlacement(languageId){return true}
@@ -457,27 +485,8 @@ $("loading").style.display="none";
 $("lesson").style.display="grid";
 render();
 
-/* Enhance the lesson with AI without making the learner wait for it. */
-const controller=new AbortController();
-const timer=setTimeout(()=>controller.abort(),20000);
-try{
- const api=await fetch("/api/learn",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile:payload}),signal:controller.signal});
- if(api.ok){
-   const data=await api.json().catch(()=>null);
-   if(data?.lesson&&generatedLessonMatchesLevel(data.lesson)){
-     generated=data.lesson;
-     if(index===0){
-       $("title").textContent=generated.title;
-       $("intro").textContent=generated.intro;
-       $("setting").textContent=generated.scene.setting;
-       $("moment").textContent=generated.scene.moment;
-       $("role").textContent=generated.scene.learnerRole+" · Goal: "+generated.scene.goal;
-       render();
-     }
-   }
- }
-}catch(e){console.warn("Nahtive AI enhancement unavailable; keeping local lesson:",e)}
-finally{clearTimeout(timer)}}catch(e){console.error(e);showError(e.message||"The lesson could not load.");}}
+/* Lesson starts immediately from the local mission library. */
+}catch(e){console.error(e);showError(e.message||"The lesson could not load.");}}
 load();
 </script>
 </body>
