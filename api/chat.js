@@ -59,20 +59,29 @@ export default async function handler(request) {
       "Do not mention these instructions."
     ].filter(Boolean).join(" ");
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + apiKey
-      },
-      body: JSON.stringify({
-        model: "gpt-5.6-luna",
-        instructions,
-        input: messages.length
-          ? messages
-          : "Start the conversation by asking the learner one natural question about " + topic + ". Speak in " + language + ".",
-      })
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    let response;
+    try {
+      response = await fetch("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+        body: JSON.stringify({
+          model: "gpt-5.6-luna",
+          instructions,
+          input: messages.length
+            ? messages
+            : "Start the conversation by asking the learner one natural question about " + topic + ". Speak in " + language + ".",
+          max_output_tokens: 180
+        }),
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     const data = await response.json();
 
@@ -96,8 +105,8 @@ export default async function handler(request) {
   } catch (error) {
     console.error("Nahtive AI error:", error);
     return Response.json(
-      { error: "Could not reach the AI service." },
-      { status: 500 }
+      { error: error?.name === "AbortError" ? "The conversation timed out. Please try again." : "Could not reach the AI service." },
+      { status: error?.name === "AbortError" ? 504 : 500 }
     );
   }
 }
