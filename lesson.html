@@ -417,17 +417,7 @@ function buildFallbackLesson(){
   };
 
   const makePhrase=(x)=>({phrase:x[0],meaning:x[1],pronunciation:x[2],usage:x[3]||"Use this naturally in the situation.",example:x[0]});
-  const vocabByScene={
-    "Coffee shop":[["café","coffee shop"],["leche","milk"],["avena","oats"]],
-    "Taco shop":[["asada","grilled beef"],["cebolla","onion"],["sin","without"]],
-    "Grocery store":[["dónde","where"],["pasillo","aisle"],["encontrar","to find"]],
-    "Apartment viewing":[["departamento","apartment"],["incluido","included"],["pensarlo","think about it"]],
-    "First day at work":[["explicar","to explain"],["funcionar","to work / function"],["entender","to understand"]],
-    "Getting directions":[["centro","downtown / city center"],["lejos","far"],["caminar","to walk"]],
-    "Restaurant":[["todavía","still / yet"],["recomendar","to recommend"],["pedir","to order / ask for"]],
-    "Making weekend plans":[["sábado","Saturday"],["hora","time / hour"],["parecer","to seem / to appear"]]
-  };
-  const sceneVocab=vocabByScene[mission?.setting]||[];
+
   let mission;
 
   if(code==="es"){
@@ -443,6 +433,18 @@ function buildFallbackLesson(){
       p:ps.map(x=>x)
     };
   }
+
+  const vocabByScene={
+    "Coffee shop":[["café","coffee shop"],["leche","milk"],["avena","oats"]],
+    "Taco shop":[["asada","grilled beef"],["cebolla","onion"],["sin","without"]],
+    "Grocery store":[["dónde","where"],["pasillo","aisle"],["encontrar","to find"]],
+    "Apartment viewing":[["departamento","apartment"],["incluido","included"],["pensarlo","think about it"]],
+    "First day at work":[["explicar","to explain"],["funcionar","to work / function"],["entender","to understand"]],
+    "Getting directions":[["centro","downtown / city center"],["lejos","far"],["caminar","to walk"]],
+    "Restaurant":[["todavía","still / yet"],["recomendar","to recommend"],["pedir","to order / ask for"]],
+    "Making weekend plans":[["sábado","Saturday"],["hora","time / hour"],["parecer","to seem / to appear"]]
+  };
+  const sceneVocab=vocabByScene[mission.setting]||[];
 
   const phrases=mission.p.map((x,i)=>{
     const p=makePhrase(x);
