@@ -149,7 +149,7 @@
 <script>
 const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);let currentLevelForPlacement="A0";
 const $=id=>document.getElementById(id);
-let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],conversation=[],xp=0,voice=null,conversationFailures=0;
+let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],conversation=[],conversationContext={},xp=0,voice=null,conversationFailures=0;
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
@@ -501,13 +501,22 @@ function renderSpeak(c){
  };
  $("next").onclick=()=>advance();
 }
-function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{if(voice?.text){$("input").value=voice.text;$("voiceStatus").textContent="Heard: "+voice.text;}});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
+function renderConversation(c){
+  const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">Say or type what you would actually say.</div>';
+  shell("Your turn","The exercises are over. You are now inside the situation.",body,'<div class="actions"><div class="notice">Use your own words.</div><button class="primary" id="send">Respond →</button></div>');
+  $("voice").onclick=()=>speechButton("",()=>{if(voice?.text){$("input").value=voice.text;$("voiceStatus").textContent="Heard: "+voice.text;}});
+  conversation=[];
+  conversationContext=c.conversationContext||{};
+  if(c.phrase)conversation.push({role:"assistant",content:c.phrase});
+  drawChat();
+  $("send").onclick=sendConversation;
+}
 function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
 async function sendConversation(){
   const button=$("send");
   const input=$("input").value.trim()||voice?.text||"";
   if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}
-  const topic=baseLesson?.topic||"Everyday life";
+  const topic=conversationContext.setting||baseLesson?.topic||"Everyday life";
   conversation.push({role:"user",content:input});
   $("input").value="";
   drawChat();
@@ -516,7 +525,14 @@ async function sendConversation(){
   try{
     const controller=new AbortController();
     const timeout=setTimeout(()=>controller.abort(),15000);
-    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:levelName(),goal:profile.goal||"Real conversation",topic,messages:conversation}),signal:controller.signal});
+    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+        language:profile.name,
+        level:levelName(),
+        goal:conversationContext.goal||profile.goal||"Real conversation",
+        topic,
+        context:conversationContext,
+        messages:conversation
+      }),signal:controller.signal});
     clearTimeout(timeout);
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||"Conversation failed.");
@@ -678,7 +694,24 @@ function buildFallbackLesson(){
   cards.push({type:"listen",stage:"Listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,p1.phrase,p3.phrase,missionDistractor]),answer:p2.phrase,audioText:p2.phrase});
   cards.push({type:"teach",stage:"Adapt",...p3,exampleMeaning:p3.meaning});
   cards.push({type:"speak",stage:"Speak",...p3,meaning:p3.meaning,prompt:"Say the response you would actually use here.",expected:p3.phrase,answer:p3.phrase});
-  cards.push({type:"conversation",stage:"Talk",prompt:"Now the lesson ends and the real interaction begins.",phrase:mission.lines?.[0]?.text||"Respond naturally to the other person.",expected:"",answer:"",feedback:"Keep the interaction moving."});
+  const openingLine=mission.lines?.[0]?.[1]||"What do you need?";
+  cards.push({
+    type:"conversation",
+    stage:"Talk",
+    prompt:"No more exercise. Handle the situation.",
+    phrase:openingLine,
+    expected:"",
+    answer:"",
+    feedback:"Keep the interaction moving.",
+    conversationContext:{
+      setting:mission.setting,
+      moment:mission.moment,
+      role:mission.role,
+      goal:mission.goal,
+      openingLine,
+      targetPhrases:phrases.map(p=>({phrase:p.phrase,meaning:p.meaning}))
+    }
+  });
 
   generated={
     title:(["B2","B2+","C1","C2"].includes(level)?level+" · "+mission.setting:mission.setting),
