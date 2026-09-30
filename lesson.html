@@ -923,7 +923,7 @@ async function sendConversation(){
   let usedFallback=false;
   try{
     const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),9000);
+    const timeout=setTimeout(()=>controller.abort(),14500);
     const res=await fetch("/api/chat",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
