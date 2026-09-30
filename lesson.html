@@ -136,7 +136,7 @@
   <div class="scene-role"><span class="role-pulse"></span><span id="role"></span></div>
 </div>
 <div class="lesson-progress lesson-progress-clean">
-  <div class="progress-top"><span id="stage">Mission</span><strong id="progressCount">1 / 13</strong></div>
+  <div class="progress-top"><span id="stage">Mission</span><strong id="progressCount">1 / 15</strong></div>
   <div class="progress-track"><div class="fill" id="fill"></div></div>
 </div>
 <main class="main">
@@ -153,35 +153,78 @@ let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],con
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
+const speechCache=new Map();
 
-function speak(text,lang,button){
-  if(!text||!("speechSynthesis" in window)){toast("Audio isn't available in this browser.");return false}
+function setAudioButton(button,label,disabled=false){
+  if(!button)return;
+  button.disabled=disabled;
+  button.textContent=label;
+}
 
-  const synth=window.speechSynthesis;
-  synth.cancel();
+async function speak(text,lang,button){
+  const phrase=String(text||"").trim().slice(0,1200);
+  if(!phrase){toast("Nothing to play.");return false;}
+  const locale=lang||profile?.code||"en-US";
+  const original=button?.dataset.originalLabel||button?.textContent||"Listen";
+  if(button)button.dataset.originalLabel=original;
 
-  const original=button?.textContent;
-  if(button){button.disabled=true;button.textContent="Playing…";}
+  if(activeAudio){
+    try{activeAudio.pause();activeAudio.currentTime=0;}catch(e){}
+    activeAudio=null;
+  }
+  if("speechSynthesis" in window)window.speechSynthesis.cancel();
 
-  const u=new SpeechSynthesisUtterance(String(text).slice(0,700));
-  u.lang=lang||profile?.code||"en-US";
-  u.rate=.98;
-  u.pitch=1;
+  setAudioButton(button,"Loading…",true);
 
-  // Do not wait for voices to load or search the voice list.
-  // Waiting for voices is what made short examples feel slow.
-  u.onend=()=>{
-    if(button){button.disabled=false;button.textContent=original||"Listen";}
-    if(activeAudio===u)activeAudio=null;
-  };
-  u.onerror=()=>{
-    if(button){button.disabled=false;button.textContent=original||"Listen";}
-    if(activeAudio===u)activeAudio=null;
-  };
-
-  activeAudio=u;
-  synth.speak(u);
-  return true;
+  try{
+    const key=locale+"|"+phrase;
+    let url=speechCache.get(key);
+    if(!url){
+      const res=await fetch("/api/speak",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({text:phrase,language:locale})
+      });
+      if(!res.ok){
+        const data=await res.json().catch(()=>({}));
+        throw new Error(data.error||"Natural voice is unavailable.");
+      }
+      const blob=await res.blob();
+      if(!blob.size)throw new Error("Empty audio response.");
+      url=URL.createObjectURL(blob);
+      speechCache.set(key,url);
+    }
+    const audio=new Audio(url);
+    audio.preload="auto";
+    activeAudio=audio;
+    audio.onended=()=>{
+      if(button)setAudioButton(button,original,false);
+      if(activeAudio===audio)activeAudio=null;
+    };
+    audio.onerror=()=>{
+      if(button)setAudioButton(button,original,false);
+      if(activeAudio===audio)activeAudio=null;
+    };
+    await audio.play();
+    return true;
+  }catch(error){
+    if("speechSynthesis" in window){
+      try{
+        const u=new SpeechSynthesisUtterance(phrase);
+        u.lang=locale;
+        u.rate=.96;
+        u.pitch=1;
+        u.onend=()=>setAudioButton(button,original,false);
+        u.onerror=()=>setAudioButton(button,original,false);
+        activeAudio=u;
+        window.speechSynthesis.speak(u);
+        return true;
+      }catch(e){}
+    }
+    setAudioButton(button,original,false);
+    toast(error.message||"Audio isn't available right now.");
+    return false;
+  }
 }
 
 function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();}
@@ -272,14 +315,14 @@ function lessonSound(kind){
   const gain=ctx.createGain();
   gain.gain.setValueAtTime(0.0001,now);
   gain.connect(ctx.destination);
-  const notes=kind==="correct"?[392,523.25,659.25]:kind==="wrong"?[174.61,146.83]:[329.63];
+  const notes=kind==="correct"?[523.25,659.25,783.99]:kind==="wrong"?[196,155.56]:[440];
   notes.forEach((freq,i)=>{
    const osc=ctx.createOscillator();
    osc.type=kind==="wrong"?"sine":"sine";
    osc.frequency.setValueAtTime(freq,now+i*.075);
    const t=now+i*.075;
    gain.gain.setValueAtTime(0.0001,t);
-   gain.gain.exponentialRampToValueAtTime(kind==="wrong"?.065:.085,t+.014);
+   gain.gain.exponentialRampToValueAtTime(kind==="wrong"?.055:.075,t+.014);
    gain.gain.exponentialRampToValueAtTime(0.0001,t+.24);
    osc.connect(gain);osc.start(t);osc.stop(t+.18);
   });
@@ -380,7 +423,7 @@ async function transcribeRecording(blob,target,done){try{
       const score=similarity(heard,target||"");
       voice={text:heard,confidence:1,detected:true,score,language:profile?.code||"en-US"};
       $("input").value=heard;
-      $("voiceStatus").textContent=ok?"I heard: "+heard:"I heard something, but it doesn't look like the target language yet.";
+      $("voiceStatus").textContent=heard?"I heard: "+heard:"No clear speech was detected. Try again.";
       done();
     }catch(e){voice=null;$("voiceStatus").textContent=e.message||"I couldn't process that recording. Try again.";}
   };
@@ -440,9 +483,7 @@ function renderSpeak(c){
      const good=score>=.72;
      $("feedback").textContent=good
        ? "Good. Nahtive heard the target expression clearly."
-       : languageOk
-         ? "Not quite yet. Listen once, then try again."
-         : "Not close enough yet. Nahtive heard: "+(heard||"nothing")+" — try saying the target again.";
+       : "Not close enough yet. Nahtive heard: "+(heard||"nothing")+" — try saying the target again.";
      $("voiceStatus").textContent=heard?"Heard: "+heard:"Try again.";
      if(good){
        xp+=15;
@@ -460,7 +501,7 @@ function renderSpeak(c){
  };
  $("next").onclick=()=>advance();
 }
-function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
+function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{if(voice?.text){$("input").value=voice.text;$("voiceStatus").textContent="Heard: "+voice.text;}});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
 function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
 async function sendConversation(){const input=$("input").value.trim()||voice?.text||"";if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}const c=generated.cards[index],topic=baseLesson?.topic||"Everyday life";conversation.push({role:"user",content:input});$("input").value="";drawChat();$("send").disabled=true;$("voiceStatus").textContent="Thinking…";try{const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:levelName(),goal:profile.goal||"Real conversation",topic,messages:conversation})});const data=await res.json();if(!res.ok)throw new Error(data.error||"Conversation failed.");conversation.push({role:"assistant",content:data.text});answers.push({type:"conversation",user:input,assistant:data.text});xp+=20;drawChat();voice=null;if(answers.filter(a=>a.type==="conversation").length>=2){$("send").textContent="Finish lesson";$("send").onclick=finish;toast("You kept the conversation going.");}$("voiceStatus").textContent="Good. Keep the interaction natural."; }catch(e){$("voiceStatus").textContent=e.message||"The conversation couldn't continue. Try again."}finally{$("send").disabled=false;}}
 async function finish(){if($("card").dataset.done)return;$("card").dataset.done="1";try{if(user&&baseLesson?.id){await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{generated_lesson:generated,answers}});await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,level:profile.level}});}}catch(e){console.error("Nahtive completion save failed:",e)}$("card").innerHTML='<section class="card complete"><h2>Lesson complete</h2><p class="sub">You learned first, practiced with support, and then used the language in a real interaction.</p><div class="xp">'+xp+' XP earned</div><div class="skill-summary"><div><strong>Situation</strong><span>'+esc(generated?.scene?.setting||"Real life")+'</span></div><div><strong>Speaking</strong><span>Attempt recorded</span></div><div><strong>Next</strong><span>Keep building the skill</span></div></div><div class="actions" style="justify-content:center"><a class="primary" href="dashboard.html" style="text-decoration:none">Continue learning →</a></div></section>';$("card").querySelector(".complete").style.display="block";$("stage").textContent="Complete";$("fill").style.width="100%";}
@@ -579,16 +620,16 @@ function buildFallbackLesson(){
 
   cards.push({type:"scene",context:mission.moment,dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),goal:mission.goal});
   cards.push({type:"teach",...p1,exampleMeaning:p1.meaning});
-  cards.push({type:"check",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.example,p2.example,"I don't know."]),answer:p1.example,feedback:"Correct. You matched the language to the situation."});
+  cards.push({type:"check",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.example,p2.example,"I don't know.","No, gracias."]),answer:p1.example,feedback:"Correct. You matched the language to the situation."});
   cards.push({type:"guided",...p1,prompt:"Build the expression you just learned.",meaning:p1.meaning,expected:p1.phrase,answer:p1.phrase});
-  cards.push({type:"vocab",word:sceneVocab[0]?.[0]||p1.phrase,meaning:sceneVocab[0]?.[1]||p1.meaning,choices:shuffle([sceneVocab[0]?.[1]||p1.meaning,sceneVocab[1]?.[1]||p2.meaning,sceneVocab[2]?.[1]||p3.meaning])});
+  cards.push({type:"vocab",word:sceneVocab[0]?.[0]||p1.phrase,meaning:sceneVocab[0]?.[1]||p1.meaning,choices:shuffle([sceneVocab[0]?.[1]||p1.meaning,sceneVocab[1]?.[1]||p2.meaning,sceneVocab[2]?.[1]||p3.meaning,"Something else"])});
   cards.push({type:"teach",...p2,exampleMeaning:p2.meaning});
-  cards.push({type:"check",...p2,prompt:"What would you say here?",options:shuffle([p2.example,p1.example,"Maybe later."]),answer:p2.example,feedback:"Good. That response fits the moment."});
-  cards.push({type:"listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,p1.phrase,p3.phrase]),answer:p2.phrase,audioText:p2.phrase});
-  cards.push({type:"fill",phrase:p2.phrase,prompt:"Complete the idea with the phrase you just learned.",before:p2.meaning+" →",after:"",options:shuffle([p2.phrase,p1.phrase,p3.phrase]),answer:p2.phrase});
-  cards.push({type:"vocab",word:sceneVocab[1]?.[0]||p2.phrase,meaning:sceneVocab[1]?.[1]||p2.meaning,choices:shuffle([sceneVocab[1]?.[1]||p2.meaning,sceneVocab[0]?.[1]||p1.meaning,sceneVocab[2]?.[1]||p3.meaning])});
+  cards.push({type:"check",...p2,prompt:"What would you say here?",options:shuffle([p2.example,p1.example,"Maybe later.","I already did."]),answer:p2.example,feedback:"Good. That response fits the moment."});
+  cards.push({type:"listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,p1.phrase,p3.phrase,"No sé."]),answer:p2.phrase,audioText:p2.phrase});
+  cards.push({type:"fill",phrase:p2.phrase,prompt:"Complete the idea with the phrase you just learned.",before:p2.meaning+" →",after:"",options:shuffle([p2.phrase,p1.phrase,p3.phrase,"No sé."]),answer:p2.phrase});
+  cards.push({type:"vocab",word:sceneVocab[1]?.[0]||p2.phrase,meaning:sceneVocab[1]?.[1]||p2.meaning,choices:shuffle([sceneVocab[1]?.[1]||p2.meaning,sceneVocab[0]?.[1]||p1.meaning,sceneVocab[2]?.[1]||p3.meaning,"Something else"])});
   cards.push({type:"teach",...p3,exampleMeaning:p3.meaning});
-  cards.push({type:"challenge",...p3,prompt:"The situation changes. Which response works now?",options:shuffle([p3.example,p1.example,p2.example]),answer:p3.example,feedback:"That choice fits the new moment."});
+  cards.push({type:"challenge",...p3,prompt:"The situation changes. Which response works now?",options:shuffle([p3.example,p1.example,p2.example,"I need more information."]),answer:p3.example,feedback:"That choice fits the new moment."});
   cards.push({type:"guided",...p3,prompt:"Build the final expression from memory.",meaning:p3.meaning,expected:p3.phrase,answer:p3.phrase});
   cards.push({type:"speak",...p3,meaning:p3.meaning,prompt:"Say it yourself. Nahtive checks what it actually hears.",expected:p3.phrase,answer:p3.phrase});
   cards.push({type:"conversation",prompt:"Now finish the interaction in your own words. Don't copy the lesson.",phrase:mission.goal,expected:"",answer:"",feedback:"Keep the conversation moving."});
