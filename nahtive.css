@@ -793,3 +793,69 @@ body.dashboard-page .quick-card::before{
 body.dashboard-page .quick-card:hover{
   color:#303936!important;
 }
+
+/* DASHBOARD CONTRAST — dark text on cream, deep green for active states */
+body.dashboard-page{
+  --ink:#18211e;
+  --muted:#4b5651;
+  color:#18211e!important;
+}
+body.dashboard-page .recommended,
+body.dashboard-page .progress-card,
+body.dashboard-page .language-switcher-card,
+body.dashboard-page .activity-card{
+  color:#18211e!important;
+  border:1px solid #9fa39b!important;
+}
+body.dashboard-page .recommended h2,
+body.dashboard-page .recommended p,
+body.dashboard-page .recommended-label,
+body.dashboard-page .recommended-time,
+body.dashboard-page .lesson-meta,
+body.dashboard-page .card-label,
+body.dashboard-page .language-name,
+body.dashboard-page .progress-number,
+body.dashboard-page .progress-description,
+body.dashboard-page .section-title,
+body.dashboard-page .quick-card h3,
+body.dashboard-page .quick-card p,
+body.dashboard-page .quick-number,
+body.dashboard-page .quick-arrow,
+body.dashboard-page .activity-title,
+body.dashboard-page .activity-subtitle{
+  color:#18211e!important;
+}
+body.dashboard-page .recommended .recommended-label,
+body.dashboard-page .recommended .recommended-time,
+body.dashboard-page .recommended .lesson-meta,
+body.dashboard-page .progress-description,
+body.dashboard-page .quick-number,
+body.dashboard-page .activity-subtitle{
+  color:#4b5651!important;
+}
+body.dashboard-page .progress-bar{
+  background:#d5d5cc!important;
+}
+body.dashboard-page .progress-fill{
+  background:#3f572f!important;
+}
+body.dashboard-page .dashboard-language-link{
+  color:#18211e!important;
+  background:#fffdf7!important;
+  border:1px solid #9fa39b!important;
+}
+body.dashboard-page .dashboard-language-link:hover{
+  color:#18211e!important;
+  background:#e7eddc!important;
+  border-color:#3f572f!important;
+}
+body.dashboard-page .dashboard-language-link.current{
+  background:#3f572f!important;
+  color:#fff!important;
+  border-color:#3f572f!important;
+}
+body.dashboard-page .primary-button{
+  background:#18211e!important;
+  color:#fff!important;
+  border-color:#18211e!important;
+}
