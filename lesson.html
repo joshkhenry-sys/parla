@@ -189,8 +189,10 @@ function primeSpeech(text,lang){
   const key=locale+"|"+phrase;
   if(speechCache.has(key))return;
   speechCache.set(key,"loading");
-  fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:phrase,language:locale})})
-    .then(async res=>{if(!res.ok)throw new Error("TTS failed");const bytes=await res.arrayBuffer();if(!bytes.byteLength)throw new Error("Empty TTS");return speechAudioContext.decodeAudioData(bytes.slice(0));})
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),4500);
+  fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:phrase,language:locale}),signal:controller.signal})
+    .then(async res=>{clearTimeout(timer);if(!res.ok)throw new Error("TTS failed");const bytes=await res.arrayBuffer();if(!bytes.byteLength)throw new Error("Empty TTS");return speechAudioContext.decodeAudioData(bytes.slice(0));})
     .then(buffer=>speechCache.set(key,buffer))
     .catch(()=>speechCache.delete(key));
 }
@@ -226,11 +228,19 @@ async function speak(text,lang,button){
         buffer=null;
       }
       if(!buffer){
-        const res=await fetch("/api/speak",{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({text:phrase,language:locale})
-        });
+        const controller=new AbortController();
+        const timer=setTimeout(()=>controller.abort(),2500);
+        let res;
+        try{
+          res=await fetch("/api/speak",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({text:phrase,language:locale}),
+            signal:controller.signal
+          });
+        }finally{
+          clearTimeout(timer);
+        }
         if(!res.ok){
           const data=await res.json().catch(()=>({}));
           throw new Error(data.error||"Natural voice is unavailable.");
