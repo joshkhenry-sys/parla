@@ -256,33 +256,6 @@ function drawChat(){
  $("chat").scrollTop=$("chat").scrollHeight;
 }
 
-function localReply(c,input,turn){
- const setting=c.setting.toLowerCase();
- if(profile.code.toLowerCase().startsWith("fr")){
-   if(setting.includes("café"))return turn===1?"Bien sûr. Vous voulez du lait d'avoine ?":turn===2?"Parfait. Je vous prépare ça.":"Voilà, c'est prêt.";
-   if(setting.includes("snack"))return turn===1?"Bien sûr. Avec ou sans oignons ?":turn===2?"Parfait. Je vous mets ça.":"Ça fait huit euros.";
-   if(setting.includes("épicerie"))return turn===1?"Oui, c'est au fond, à droite.":turn===2?"Oui, dans ce rayon.":"Avec plaisir.";
-   if(setting.includes("appartement"))return turn===1?"Oui, le parking est compris.":turn===2?"Bien sûr, je peux vous montrer.":"Prenez votre temps.";
-   if(setting.includes("travail"))return turn===1?"Bien sûr. Cliquez d'abord ici.":turn===2?"Exactement. À vous d'essayer.":"Oui, c'est ça.";
-   if(setting.includes("chemin"))return turn===1?"Continuez tout droit et tournez à gauche.":turn===2?"Non, c'est tout près.":"Oui, vous êtes sur le bon chemin.";
-   if(setting.includes("restaurant"))return turn===1?"Bien sûr, prenez votre temps.":turn===2?"Je peux vous conseiller le plat du jour.":"Parfait.";
-   return turn===1?"Oui, pourquoi pas. Tu veux faire quoi ?":turn===2?"Ça me va.":"Parfait.";
- }
- if(profile.code.toLowerCase().startsWith("es")){
- const setting=c.setting.toLowerCase();
- if(profile.code.toLowerCase().startsWith("es")){
-   if(setting.includes("coffee"))return turn===1?"Claro. ¿Quieres leche de avena?":turn===2?"Perfecto. Te lo preparo así.":"Listo. Aquí tienes.";
-   if(setting.includes("taco"))return turn===1?"Claro. ¿Los quieres sin cebolla?":turn===2?"Perfecto. Son esos dos tacos.":"Son ocho dólares.";
-   if(setting.includes("grocery"))return turn===1?"Sí, está al fondo, a la derecha.":turn===2?"Sí, por ese pasillo.":"De nada.";
-   if(setting.includes("apartment"))return turn===1?"Sí, el estacionamiento está incluido.":turn===2?"Claro, te enseño dónde está.":"Tómate tu tiempo.";
-   if(setting.includes("work"))return turn===1?"Claro. Primero haces clic aquí.":turn===2?"Exacto. Ahora inténtalo tú.":"Sí, así es.";
-   if(setting.includes("direction"))return turn===1?"Sigue derecho dos cuadras y gira a la izquierda.":turn===2?"No, está cerca.":"Sí, vas bien.";
-   if(setting.includes("restaurant"))return turn===1?"Claro, tómate tu tiempo.":turn===2?"Puedo recomendarte la sopa.":"Perfecto.";
-   return turn===1?"Sí, podemos hacerlo. ¿Qué quieres hacer?":turn===2?"Me parece bien.":"Perfecto, quedamos así.";
- }
- return turn===1?"Sure. That works. What would you like to do next?":turn===2?"Sounds good. Let me know what you decide.":"Perfect. That works for me.";
-}
-
 async function sendTalk(){
  const input=$("input").value.trim();
  if(!input){$("status").textContent="Say or type something first.";return}
