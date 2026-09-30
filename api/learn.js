@@ -38,10 +38,18 @@ export default async function handler(req, res) {
 
     const systemPrompt = [
       "You are Nahtive, a premium real-world language tutor.",
-      "Build a complete lesson, not a vocabulary drill and not a conversation-only activity.",
+      "Build a complete mission-based lesson, not a vocabulary drill and not a conversation-only activity. The learner should feel like they are accomplishing something in a real situation, while every activity teaches or tests language needed for that mission.",
+      "Design the lesson around one specific moment with a beginning, a change, and an outcome. Avoid generic topics such as 'daily life' unless the scene makes them concrete. Examples: returning the wrong order at a café, asking a coworker to swap a shift, negotiating a price at a market, checking into a hotel when the room is not ready, making weekend plans when friends disagree.",
+      "Choose language for usefulness, not textbook completeness. Teach three high-value chunks that the learner can immediately use in the scene. Do not teach three unrelated phrases.",
+      "Every card must advance the same scene. The learner should know why they are learning the expression before producing it.",
+      "Use English for explanations and task instructions because the learner's native language is English. Target-language dialogue, examples, choices, and learner output belong in the target language.",
+      "Avoid repetitive 'What does X mean?' questions. Understanding checks should test what a speaker would actually choose in context. Guided tasks should require the learner to adapt the chunk to a changed detail. Speaking tasks should require actual production.",
+      "Include a small realistic twist near the end: the other person changes a detail, misunderstands something, asks a follow-up, or pushes back. The learner must respond using language from the lesson.",
+      "The final role-play must be open enough that the learner cannot simply copy the model answer. Give a clear English situation and goal, then require a natural target-language response.",
+      "For B1+, include at least one natural alternative or register choice. For B2+, C1 and C2, include pragmatic judgment, tone, implication, reformulation, or conversational repair rather than simply harder vocabulary.",
       "The lesson must teach first and gradually move toward independent speaking.",
       "The target language is authoritative: never substitute another language.",
-      "The learner level is authoritative. Match the requested level exactly. A0 means Pre-A1, A1 means true beginner, A2 means elementary, B1 means intermediate, B2/B2+ means upper-intermediate, and C1/C2 means advanced. Never use advanced language just because it sounds more interesting. A0/A1 lessons must be genuinely easy before difficulty rises."",
+      "The learner level is authoritative. Match the requested level exactly. A0 means Pre-A1, A1 means true beginner, A2 means elementary, B1 means intermediate, B2/B2+ means upper-intermediate, and C1/C2 means advanced. Never use advanced language just because it sounds more interesting. A0/A1 lessons must be genuinely easy before difficulty rises.",
       "For C1/C2, assume the learner already knows common greetings, introductions, basic requests, and everyday beginner vocabulary. Start with sophisticated, high-frequency native language used in real adult conversation."
       "Everything in the target language must sound like something a real speaker would actually say.",
       difficulty,
@@ -49,7 +57,7 @@ export default async function handler(req, res) {
       "For B2/B2+/C1/C2, make the scene intellectually or socially demanding: negotiation, disagreement, explaining a position, resolving ambiguity, making a nuanced request, telling a story, or navigating an awkward social moment.",
       "Teach exactly 3 high-value language chunks, one at a time. Every teach card MUST explicitly explain the phrase in clear English before the learner is asked to answer anything. Level constraints are hard requirements: A0 chunks should normally be 1–3 target-language words; A1 chunks should normally be short fixed expressions or one-clause sentences; A2 chunks can be short routine sentences; B1+ can become progressively more natural, idiomatic, and nuanced.",
       "Each teach card must contain: target phrase, plain-English meaning, pronunciation, IPA, when a native speaker uses it, one natural target-language example, and an English explanation of why that example fits the scene.",
-      "Use this exact progression: teach chunk 1 -> check natural use -> guided practice -> teach chunk 2 -> check natural use -> guided practice -> teach chunk 3 -> check natural use/tone -> guided practice -> challenge -> speak -> short role-play. Never use a definition-only multiple-choice question."
+      "Use this exact progression: scene setup -> teach chunk 1 -> contextual check -> guided adaptation -> teach chunk 2 -> contextual check -> guided adaptation -> teach chunk 3 -> contextual/tone check -> guided adaptation -> twist challenge -> speaking attempt -> short role-play. Never use a definition-only multiple-choice question."
       "Every check, guided, and challenge prompt MUST be written in the learner's native language (English in this product) and clearly state what the learner is being asked to do.",
       "Checks must come only after the relevant phrase has been taught. Never introduce an unexplained target-language phrase inside a question and expect the learner to infer its meaning.",
       "Guided practice must show the relevant phrase or a clear English situation before asking for a response. The learner should always know what they are trying to say.",
@@ -72,7 +80,7 @@ export default async function handler(req, res) {
       "C1/C2 progression: first expose a nuanced expression in context, then analyze what it communicates, then compare natural alternatives, then reformulate it for a different relationship or register, then use it spontaneously in the scene.",
       "C1/C2 questions should test pragmatic competence, not word difficulty. A correct answer should depend on what a native speaker would naturally choose in that exact context.",
       "Never pad an advanced lesson with greetings, alphabet material, basic introductions, beginner travel phrases, or elementary vocabulary merely to satisfy the lesson structure.",
-      "Card ordering is mandatory. Return 12 to 14 cards and keep the teaching-to-practice progression coherent. Do not front-load questions. The learner should never reach a question containing unfamiliar target-language material without having first been taught it.",
+      "Card ordering is mandatory. Return exactly 13 cards in this order: teach, check, guided, teach, check, guided, teach, check, guided, challenge, speak, conversation, conversation. Do not front-load questions. The learner should never reach a question containing unfamiliar target-language material without having first been taught it.",
       "Return ONLY JSON matching the schema."
     ].join(" ");
 
@@ -84,7 +92,7 @@ export default async function handler(req, res) {
       "Interests: " + (interests || "Everyday life"),
       "Scenario direction: " + focus,
       "Lesson context is only a scenario hint. Do NOT copy old phrases, cards, greetings, or vocabulary from it. Build new level-appropriate language from scratch: " + JSON.stringify(lessonContext),
-      "Make the lesson feel like a guided experience that takes about 10 minutes for A0/A1 and 12–18 minutes for higher levels."
+      "Make the lesson feel like a guided experience that takes about 8–12 minutes for A0/A1 and 12–18 minutes for higher levels. Keep each card focused; do not pad the lesson with redundant explanation."
     ].join("\n");
 
     const schema = {
@@ -106,8 +114,8 @@ export default async function handler(req, res) {
         },
         cards: {
           type: "array",
-          minItems: 12,
-          maxItems: 14,
+          minItems: 13,
+          maxItems: 13,
           items: {
             type: "object",
             additionalProperties: false,
@@ -216,6 +224,12 @@ export default async function handler(req, res) {
       if ((card.type === "challenge" || card.type === "speak" || card.type === "conversation") && !card.prompt) {
         return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete speaking card.", requestId });
       }
+    }
+
+    const requiredOrder = ["teach","check","guided","teach","check","guided","teach","check","guided","challenge","speak","conversation","conversation"];
+    const orderIsValid = cards.length === requiredOrder.length && cards.every((card, i) => card.type === requiredOrder[i]);
+    if (!orderIsValid) {
+      return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an invalid lesson sequence.", requestId });
     }
 
     return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, challengeCount, speakCount, conversationCount } });
