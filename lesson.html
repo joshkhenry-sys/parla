@@ -4,489 +4,373 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nahtive — Lesson</title>
-
-
-<link rel="stylesheet" href="nahtive.css"><style>
-.build-zone{min-height:58px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:18px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(255,255,255,.035);margin:14px 0}
-.tile-placeholder{color:rgba(255,255,255,.42);font-size:14px}
-.tile-bank{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0 16px}
-.word-tile{appearance:none;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.07);color:inherit;border-radius:14px;padding:11px 14px;font:inherit;cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease}
-.word-tile:hover:not(:disabled){transform:translateY(-2px);border-color:rgba(255,255,255,.32);background:rgba(255,255,255,.11)}
-.word-tile:disabled{opacity:.28;cursor:default}
-.word-tile.picked{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3)}
-.compact-input{margin-top:4px}
-.lesson-score{font-size:12px;letter-spacing:2px;opacity:.75;margin-left:10px}
-</style></head>
+<link rel="stylesheet" href="nahtive.css">
+<style>
+*{font-family:var(--font),Arial,sans-serif!important}
+.lesson{max-width:980px;margin:0 auto}
+.lesson-header{padding:28px 0 20px}
+.lesson-header h1{font-size:clamp(32px,5vw,48px);line-height:1.05;margin:8px 0}
+.lesson-header p{font-size:17px;color:var(--muted);margin:0}
+.lesson-progress{margin:4px 0 28px}
+.progress-top{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--muted)}
+.progress-track{height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.progress-track .fill{height:100%;background:var(--accent);border-radius:99px;transition:width .25s ease}
+.lesson-card{max-width:820px;margin:auto;padding:38px;border:1px solid var(--line);border-radius:24px;background:var(--surface)}
+.kicker{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:18px}
+.phrase{font-size:clamp(34px,6vw,56px);font-weight:700;line-height:1.08;letter-spacing:-.04em;margin:0 0 10px}
+.meaning{font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 22px}
+.question{font-size:26px;line-height:1.35;font-weight:650;margin:0 0 20px}
+.options{display:grid;gap:10px}
+.option{width:100%;min-height:64px;text-align:left;padding:15px 18px;border:1px solid var(--line);border-radius:15px;background:var(--surface2);color:var(--text);font-size:17px;display:flex;align-items:center;gap:13px;cursor:pointer}
+.option:hover{border-color:var(--accent)}
+.option.correct{border-color:var(--accent);background:rgba(184,243,107,.09)}
+.option.wrong{border-color:#d56b6b}
+.letter{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.06);font-size:12px;font-weight:800;flex:none}
+.feedback{margin-top:14px;color:var(--muted);font-size:14px;line-height:1.5}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
+.primary,.secondary{min-height:50px;padding:12px 20px}
+.scene-text{font-size:22px;line-height:1.45;margin:0 0 10px}
+.scene-goal{color:var(--muted);font-size:16px;line-height:1.55}
+.speak-box{text-align:center;padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--surface2)}
+.speak-target{font-size:30px;font-weight:700;margin:8px 0 6px}
+.speak-meaning{color:var(--muted);font-size:16px}
+.speak-button{margin-top:20px;min-width:150px;min-height:56px}
+.status{min-height:24px;margin-top:14px;color:var(--muted);font-size:14px}
+.live-goal{font-size:17px;line-height:1.5;margin-bottom:20px}
+.chat{display:grid;gap:9px;margin-bottom:18px;max-height:360px;overflow:auto}
+.bubble{padding:12px 14px;border-radius:14px;background:var(--surface2);line-height:1.5}
+.bubble.you{background:rgba(184,243,107,.08)}
+.bubble-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.input{width:100%;min-height:52px;resize:none}
+.scene-wrap{padding:4px 0}
+.complete{text-align:center}
+.complete h2{font-size:34px;margin:0 0 10px}
+.xp{font-size:22px;font-weight:700;margin:18px 0}
+@media(max-width:600px){
+ .lesson-card{padding:26px 20px;border-radius:20px}
+ .phrase{font-size:40px}
+ .meaning{font-size:18px}
+ .question{font-size:23px}
+ .scene-text{font-size:20px}
+}
+</style>
+</head>
 <body>
 <div class="shell">
 <nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
-<div id="loading" class="loading">Building your lesson…<br><span id="loadingDetail" class="small">Creating the scene and lesson steps.</span></div>
+<div id="loading" class="loading">Loading lesson…</div>
 <div id="lesson" class="lesson" style="display:none">
-<div class="lesson-header">
-  <div class="lesson-head-copy">
-    <div class="eyebrow"><span id="language">Language</span> · LIVE SCENE</div>
-    <div class="lesson-title-row"><h1 id="title">Lesson</h1><span class="level-chip" id="levelChip">A1</span></div>
-    <p id="intro"></p>
-  </div>
-  <div class="lesson-energy">
-    <span class="energy-dot"></span><span id="xpMini">0 XP</span>
-  </div>
-</div>
-<div class="lesson-scene">
-  <div class="scene-kicker">YOU'RE HERE</div>
-  <strong id="setting"></strong>
-  <span id="moment"></span>
-  <div class="scene-role"><span class="role-pulse"></span><span id="role"></span></div>
-</div>
+<header class="lesson-header">
+<div class="eyebrow"><span id="language">Language</span> · LIVE LESSON</div>
+<h1 id="title">Lesson</h1>
+<p id="intro">Learn it. Use it. Then talk.</p>
+</header>
 <div class="lesson-progress">
-  <div class="progress-top"><span id="stage">Getting started</span><strong id="progressCount">1 / 12</strong></div>
-  <div class="progress-track"><div class="fill" id="fill"></div></div>
+<div class="progress-top"><span id="stage">Situation</span><strong id="count">1 / 8</strong></div>
+<div class="progress-track"><div class="fill" id="fill"></div></div>
 </div>
-<main class="main">
-  <div id="card"></div>
-  <div class="lesson-toast" id="toast" role="status" aria-live="polite"></div>
-</main>
+<main id="card"></main>
+</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
-const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);let currentLevelForPlacement="A0";
+"use strict";
+const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
-let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],conversation=[],xp=0,voice=null;
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+let user=null,profile=null,baseLesson=null,lesson=null,index=0,xp=0,answers=[],conversation=[],recognition=null;
 
-function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
-let activeAudio=null;
+const missions={
+"Coffee shop":{
+setting:"Coffee shop",moment:"You're ordering quickly before work.",goal:"Order a drink, make a change, and react naturally.",
+phrases:[["Quiero un café con leche.","I want a coffee with milk."],["¿Tienes leche de avena?","Do you have oat milk?"],["Está bien.","That's fine / Okay."]],
+choices:["¿Cuánto cuesta?","¿Qué me recomiendas?","¿Me lo puedes preparar para llevar?"],
+opening:"¿Qué te preparo?"
+},
+"Taco shop":{
+setting:"Taco shop",moment:"The line is moving fast and you know what you want.",goal:"Order food, customize it, and pay naturally.",
+phrases:[["Me pones unos tacos de asada.","Can I get some carne asada tacos?"],["Sin cebolla, por favor.","No onion, please."],["¿Cuánto es?","How much is it?"]],
+choices:["¿Me das una botella de agua?","¿Qué tienen hoy?","¿Cuánto cuesta?"],
+opening:"¿Qué te pongo?"
+},
+"Grocery store":{
+setting:"Grocery store",moment:"You can't find what you need and an employee walks by.",goal:"Ask for help, confirm the direction, and close the interaction.",
+phrases:[["¿Dónde está la leche?","Where is the milk?"],["¿Por aquí?","Around here?"],["Gracias, ya la encontré.","Thanks, I found it."]],
+choices:["¿Cuánto cuesta?","¿Tienen otra marca?","¿En qué pasillo está?"],
+opening:"¿Te puedo ayudar?"
+},
+"Apartment viewing":{
+setting:"Apartment viewing",moment:"You like the apartment but need one practical detail.",goal:"Ask a useful question and keep the conversation natural.",
+phrases:[["Me gusta, pero tengo una pregunta.","I like it, but I have a question."],["¿Está incluido el estacionamiento?","Is parking included?"],["Déjame pensarlo.","Let me think about it."]],
+choices:["¿Cuándo puedo mudarme?","¿Cuánto es el depósito?","¿Dónde está la oficina?"],
+opening:"¿Qué te parece el departamento?"
+},
+"First day at work":{
+setting:"First day at work",moment:"A coworker is showing you how something works.",goal:"Ask for clarification and show that you understand.",
+phrases:[["¿Me puedes explicar?","Can you explain it to me?"],["¿Cómo funciona esto?","How does this work?"],["Ah, ya entiendo.","Ah, I understand now."]],
+choices:["¿Dónde está la oficina?","¿Lo hago así?","¿Cómo funciona esto?"],
+opening:"¿Entiendes cómo funciona?"
+},
+"Getting directions":{
+setting:"Getting directions",moment:"Your phone is almost dead and you need directions.",goal:"Ask where something is and confirm the route.",
+phrases:[["¿Cómo llego al centro?","How do I get downtown?"],["¿Está lejos?","Is it far?"],["Entonces voy por aquí.","So I'll go this way."]],
+choices:["¿Cuánto tarda?","¿Por dónde voy?","¿Está lejos?"],
+opening:"¿Buscas algo?"
+},
+"Restaurant":{
+setting:"Restaurant",moment:"The waiter asks if you're ready, but you need another minute.",goal:"Buy time, ask a question, then make your choice.",
+phrases:[["Todavía no.","Not yet."],["¿Qué me recomiendas?","What do you recommend?"],["Creo que voy a pedir esto.","I think I'll order this."]],
+choices:["¿Cuánto cuesta?","¿Me das otro minuto?","¿Qué me recomiendas?"],
+opening:"¿Ya saben qué quieren?"
+},
+"Making weekend plans":{
+setting:"Making weekend plans",moment:"A friend suggests an activity, but you're not sure yet.",goal:"React naturally, ask a follow-up, and make a plan.",
+phrases:[["Puede ser.","Could be / Maybe."],["¿A qué hora?","What time?"],["Sí, me parece bien.","Yeah, that works for me."]],
+choices:["¿Dónde nos vemos?","¿Qué quieres hacer?","¿A qué hora?"],
+opening:"¿Quieres ir el sábado?"
+}
+};
 
-function speak(text,lang,button){
-  if(!text||!("speechSynthesis" in window)){toast("Audio isn't available in this browser.");return false}
-
-  const synth=window.speechSynthesis;
-  synth.cancel();
-
-  const original=button?.textContent;
-  if(button){button.disabled=true;button.textContent="Playing…";}
-
-  const u=new SpeechSynthesisUtterance(String(text).slice(0,700));
-  u.lang=lang||profile?.code||"en-US";
-  u.rate=.98;
-  u.pitch=1;
-
-  // Do not wait for voices to load or search the voice list.
-  // Waiting for voices is what made short examples feel slow.
-  u.onend=()=>{
-    if(button){button.disabled=false;button.textContent=original||"Listen";}
-    if(activeAudio===u)activeAudio=null;
-  };
-  u.onerror=()=>{
-    if(button){button.disabled=false;button.textContent=original||"Listen";}
-    if(activeAudio===u)activeAudio=null;
-  };
-
-  activeAudio=u;
-  synth.speak(u);
-  return true;
+function browserSpeak(text){
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(String(text||""));
+ u.lang=profile?.code||"en-US";
+ u.rate=.95;
+ speechSynthesis.speak(u);
 }
 
-function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();}
-function similarity(a,b){a=normalize(a);b=normalize(b);if(!a||!b)return 0;if(a===b)return 1;const A=[...a],B=[...b],d=Array.from({length:A.length+1},(_,i)=>i);for(let j=1;j<=B.length;j++){let p=d[0];d[0]=j;for(let i=1;i<=A.length;i++){const old=d[i],cost=A[i-1]===B[j-1]?0:1;d[i]=Math.min(d[i]+1,d[i-1]+1,p+cost);p=old}}return Math.max(0,1-d[A.length]/Math.max(A.length,B.length));}
-function detected(text){const code=(profile?.code||"").toLowerCase().split("-")[0];const r={ar:/[\u0600-\u06ff]/,pl:/[ąćęłńóśźż]/i,nl:/\b(ik|je|het|een|van|voor|wat|wil|kan|niet|goed|de)\b/i,es:/\b(que|como|quiero|puedo|para|por|una|uno|el|la|me|te|donde|bien)\b/i,en:/\b(i|you|the|a|what|can|get|for|me|is|want)\b/i};return code==="ar"?r.ar.test(text):r[code]?r[code].test(text):true;}
-function levelName(){return profile?.level||"A1";}
-function stageName(card){return ({scene:"Scene",teach:"Learn",check:"Choose",guided:"Try it",challenge:"Twist",speak:"Say it",conversation:"Talk"})[card.type]||"Learn";}
-function toast(message){const t=$("toast");if(!t)return;t.textContent=message;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),1500);}
-function advance(){index++;render();window.scrollTo({top:0,behavior:"smooth"});}
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
-function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
+function stopRecognition(){
+ if(recognition){try{recognition.stop()}catch(e){} recognition=null}
+}
+
+function startRecognition(expected,done){
+ stopRecognition();
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){done("");return}
+ const r=new SR();
+ recognition=r;
+ r.lang=profile?.code||"en-US";
+ r.continuous=false;
+ r.interimResults=false;
+ r.maxAlternatives=3;
+ r.onresult=e=>{
+   const text=Array.from(e.results).map(x=>x[0]?.transcript||"").join(" ").trim();
+   recognition=null;
+   done(text);
+ };
+ r.onerror=()=>{recognition=null;done("")};
+ r.onend=()=>{if(recognition===r)recognition=null};
+ r.start();
+}
+
+function similarity(a,b){
+ const clean=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\u0600-\u06ff ]/g," ").replace(/\s+/g," ").trim();
+ const A=clean(a).split(" ").filter(Boolean),B=clean(b).split(" ").filter(Boolean);
+ if(!A.length||!B.length)return 0;
+ const set=new Set(B);return A.filter(x=>set.has(x)).length/Math.max(A.length,B.length);
+}
+
+function render(){
+ const cards=lesson.cards;
+ if(index>=cards.length){finish();return}
+ $("stage").textContent=cards[index].stage;
+ $("count").textContent=(index+1)+" / "+cards.length;
+ $("fill").style.width=((index+1)/cards.length*100)+"%";
+ const c=cards[index];
+ if(c.type==="scene")renderScene(c);
+ else if(c.type==="teach")renderTeach(c);
+ else if(c.type==="check")renderCheck(c);
+ else if(c.type==="speak")renderSpeak(c);
+ else renderTalk(c);
+}
+
+function frame(body,action){
+ $("card").innerHTML='<section class="lesson-card">'+body+(action?'<div class="actions">'+action+'</div>':'')+'</section>';
+}
+
 function renderScene(c){
-  const dialogue=Array.isArray(c.dialogue)?c.dialogue:[];
-  const body='<div class="lesson-task-label">THE MOMENT</div>'+
-    (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
-    '<div class="mini-dialogue">'+dialogue.map(d=>'<div class="dialogue-line"><strong>'+esc(d.speaker||"")+'</strong><span>'+esc(d.text||"")+'</span></div>').join("")+'</div>'+
-    '<div class="scene-goal"><strong>Your goal</strong><br>'+esc(c.goal||generated?.scene?.goal||"Handle the situation naturally.")+'</div>'+
-    '<div class="listen-row"><button class="secondary" id="hearScene">Listen to the scene</button></div>';
-  shell("You're in it","Don't study the language yet. First understand what is happening and what you need to accomplish.",body,'<div class="actions"><button class="primary" id="next">Start →</button></div>');
-  $("hearScene").onclick=()=>speak(dialogue.map(d=>d.text||"").join(" "),profile.code,$("hearScene"));
-  $("next").onclick=()=>{xp+=3;advance();};
-}
-function renderTeach(c){
- const body='<div class="lesson-task-label">ONE USEFUL THING</div>'+
-   '<div class="phrase">'+esc(c.phrase)+'</div>'+
-   '<div class="meaning">'+esc(c.meaning)+'</div>'+
-   '<div class="usage"><strong>Use it when</strong><br>'+esc(c.usage)+'</div>'+
-   '<div class="example"><strong>In this scene</strong><br>'+esc(c.example)+(c.exampleMeaning?'<br><span class="example-explanation">'+esc(c.exampleMeaning)+'</span>':'')+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>';
- shell("Learn this","One expression. One job. Then you use it immediately.",body,'<div class="actions"><button class="primary" id="next">Got it →</button></div>');
- $("hear").onclick=()=>speak(c.example||c.phrase,profile.code,$("hear"));
- $("next").onclick=()=>{xp+=5;advance();};
+ frame('<div class="kicker">Situation</div><div class="scene-wrap"><p class="scene-text">'+esc(c.setting)+'</p><p class="scene-goal">'+esc(c.moment)+'</p><p class="scene-goal">'+esc(c.goal)+'</p></div>','<button class="primary" id="next">Start →</button>');
+ $("next").onclick=()=>{index++;render()};
 }
 
-function lessonSound(kind){
- try{
-  const C=window.AudioContext||window.webkitAudioContext;
-  if(!C)return;
-  const ctx=new C(),now=ctx.currentTime;
-  const gain=ctx.createGain();
-  gain.gain.setValueAtTime(0.0001,now);
-  gain.connect(ctx.destination);
-  const notes=kind==="correct"?[392,523.25,659.25]:kind==="wrong"?[174.61,146.83]:[329.63];
-  notes.forEach((freq,i)=>{
-   const osc=ctx.createOscillator();
-   osc.type=kind==="wrong"?"sine":"sine";
-   osc.frequency.setValueAtTime(freq,now+i*.075);
-   const t=now+i*.075;
-   gain.gain.setValueAtTime(0.0001,t);
-   gain.gain.exponentialRampToValueAtTime(kind==="wrong"?.065:.085,t+.014);
-   gain.gain.exponentialRampToValueAtTime(0.0001,t+.24);
-   osc.connect(gain);osc.start(t);osc.stop(t+.18);
-  });
-  setTimeout(()=>ctx.close().catch(()=>{}),700);
- }catch(e){}
+function renderTeach(c){
+ frame('<div class="kicker">Learn</div><p class="phrase">'+esc(c.phrase)+'</p><p class="meaning">'+esc(c.meaning)+'</p><button class="secondary" id="listen">Listen</button>','<button class="primary" id="next">Got it →</button>');
+ $("listen").onclick=()=>browserSpeak(c.phrase);
+ browserSpeak(c.phrase);
+ $("next").onclick=()=>{xp+=5;index++;render()};
 }
+
 function renderCheck(c){
- let answered=false; const phrase=c.phrase||"";
- const body='<div class="lesson-task-label">SEE IT · HEAR IT · USE IT</div>'+
-   '<div class="phrase">'+esc(phrase)+'</div>'+
-   '<div class="pron"><strong>How to say it</strong><br>'+esc(c.pronunciation||phrase)+(c.ipa?' · '+esc(c.ipa):'')+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
-   (c.example?'<div class="example"><strong>In a real conversation</strong><br>'+esc(c.example)+'</div>':'')+
-   '<div class="task-question">'+esc(c.prompt||"Which line would you actually say here?")+'</div>'+
-   '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'">'+esc(o)+'</button>').join("")+'</div>'+
-   '<div class="notice feedback" id="feedback">Listen to the expression. Then choose the line you would actually say.</div>';
- shell("Use it","See the language, hear the pronunciation, and choose the response that works in the scene.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
- $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
- document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");lessonSound(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"Good. That is the natural choice for this situation."):(c.feedback||"Not quite. Listen again and notice which response fits the scene.");$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
- $("next").onclick=()=>{lessonSound("click");toast("Good. Now use it.");advance();};
-}
-function renderChallenge(c){
- const options=Array.isArray(c.options)&&c.options.length?c.options:[c.expected||c.answer||"Try your own response.","Ask for clarification.","Change the situation."];
- const body='<div class="lesson-task-label">One step harder</div>'+(c.phrase?'<div class="phrase compact">'+esc(c.phrase)+'</div>':'')+'<div class="task-question">'+esc(c.prompt)+'</div><div class="options">'+options.map((o,i)=>'<button class="option" data-i="'+i+'">'+esc(o)+'</button>').join("")+'</div><div class="notice" id="feedback" style="margin-top:14px"></div>';
- shell("Challenge","The support is lighter now. Pick the response that sounds right for the moment.",body,'<div class="actions"><div class="notice">Think about meaning, tone, and what would actually work here.</div><button class="primary" id="next" disabled>Continue →</button></div>');
+ const opts=[c.answer,...c.distractors].sort(()=>Math.random()-.5);
+ frame('<div class="kicker">Choose</div><p class="question">'+esc(c.prompt)+'</p><div class="options">'+opts.map((o,i)=>'<button class="option" data-value="'+esc(o)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div><div class="feedback" id="feedback"></div>','<button class="primary" id="next" disabled>Continue →</button>');
  let answered=false;
- document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{
-   if(answered)return; answered=true;
-   const choice=c.options?.[Number(b.dataset.i)]||b.textContent.trim();
-   const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;
+ document.querySelectorAll(".option").forEach(btn=>btn.onclick=()=>{
+   if(answered)return;
+   answered=true;
+   const ok=similarity(btn.dataset.value,c.answer)>.8;
+   btn.classList.add(ok?"correct":"wrong");
    document.querySelectorAll(".option").forEach(x=>x.disabled=true);
-   b.classList.add(ok?"correct":"wrong");
-   $("feedback").textContent=ok?(c.feedback||"That fits the situation."):(c.feedback||("Not quite. A more natural choice is: "+(c.answer||c.expected||"the first option.")));
-   answers.push({type:"challenge",prompt:c.prompt,choice,correct:ok});
-   xp+=ok?12:5; $("next").disabled=false; lessonSound(ok?"correct":"wrong");
-   toast(ok?"Nice choice.":"Good attempt — notice the difference.");
+   $("feedback").textContent=ok?"That fits the situation.":"Not quite. Think about what you need to say here.";
+   $("next").disabled=false;
+   xp+=ok?8:2;
+   answers.push({type:"check",choice:btn.dataset.value,correct:ok});
  });
- $("next").onclick=()=>advance();
+ $("next").onclick=()=>{index++;render()};
 }
-function renderGuided(c){
- const phrase=c.phrase||"";
- const target=c.expected||c.answer||phrase;
- const words=target.trim().split(/\\s+/).filter(Boolean);
- const shuffled=[...words].sort(()=>Math.random()-.5);
- let built=[];
- const renderTiles=()=>{
-   const picked=$("built"),bank=$("tileBank"),submit=$("submit");
-   if(!picked||!bank)return;
-   picked.innerHTML=built.length?built.map((x,i)=>'<button type="button" class="word-tile picked" data-built="'+i+'">'+esc(x.w)+'</button>').join(""):'<span class="tile-placeholder">Tap the words to build your response.</span>';
-   bank.innerHTML=shuffled.map((w,i)=>{const used=built.some(x=>x.i===i);return '<button type="button" class="word-tile" data-word="'+i+'" '+(used?'disabled':'')+'>'+esc(w)+'</button>';}).join("");
-   if(submit)submit.disabled=built.length!==words.length;
- };
- const body='<div class="lesson-task-label">BUILD IT · YOUR TURN</div>'+
-   '<div class="phrase compact">'+esc(phrase)+'</div>'+
-   '<div class="pron"><strong>Say this idea</strong><br>'+esc(c.meaning||c.prompt||"Use the expression naturally.")+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
-   '<div class="task-question">'+esc(c.prompt||"Build the response you would actually say.")+'</div>'+
-   (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
-   '<div class="build-zone" id="built"><span class="tile-placeholder">Tap the words to build the response.</span></div>'+
-   '<div class="tile-bank" id="tileBank"></div>'+
-   '<textarea class="input compact-input" id="input" placeholder="Or type your own response…"></textarea>'+
-   '<div class="listen-row"><button class="secondary" id="voice">Speak your answer</button></div>'+
-   '<div class="notice" id="voiceStatus">Build the response first. Then try saying it yourself.</div>'+
-   '<div class="notice feedback" id="feedback"></div>';
- shell("Build it","Put the words together. You can then type or say your own version.",body,'<div class="actions"><button class="primary" id="submit" disabled>Check response →</button></div>');
- renderTiles();
- $("tileBank").onclick=e=>{
-   const b=e.target.closest(".word-tile");
-   if(!b||b.disabled)return;
-   const i=Number(b.dataset.word);
-   if(!Number.isInteger(i)||built.some(x=>x.i===i))return;
-   built.push({i,w:shuffled[i]});
-   renderTiles();
- };
- $("built").onclick=e=>{
-   const b=e.target.closest(".word-tile");
-   if(!b)return;
-   const i=Number(b.dataset.built);
-   if(!Number.isInteger(i)||!built[i])return;
-   built.splice(i,1);
-   renderTiles();
- };
- $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
- $("voice").onclick=()=>speechButton(target,()=>{});
- $("submit").onclick=()=>{
-   const typed=$("input").value.trim();
-   const builtText=built.map(x=>x.w).join(" ");
-   const v=typed||builtText||voice?.text||"";
-   if(!v){$("feedback").textContent="Build, type, or say your response first.";return}
-   const score=similarity(v,target);
-   const ok=score>.72;
-   answers.push({type:"guided",prompt:c.prompt,response:v,expected:target,score,voice});
-   $("feedback").textContent=ok?(c.feedback||"That works in the scene."):"Close. Try the order again, then say it yourself.";
-   lessonSound(ok?"correct":"wrong");
-   xp+=ok?15:6;
-   $("submit").textContent="Continue →";
-   $("submit").onclick=()=>advance();
-   toast(ok?"Nice. Now make it yours.":"Good attempt.");
- };
-}function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
+
 function renderSpeak(c){
- const target=String(c.phrase||c.expected||"").trim();
- const body='<div class="lesson-task-label">SPEAKING CHECK</div>'+
-   '<div class="phrase">'+esc(target)+'</div>'+
-   '<div class="meaning">'+esc(c.meaning||c.prompt||"Say the expression naturally in the situation.")+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Listen once</button></div>'+
-   '<textarea class="input" id="input" placeholder="Type only if you cannot use your microphone…"></textarea>'+
-   '<div class="listen-row"><button class="secondary" id="voice">Speak it</button></div>'+
-   '<div class="notice" id="voiceStatus">Your first attempt is practice. Parla will check what it heard before giving credit.</div>'+
-   '<div class="notice feedback" id="feedback"></div>';
- shell("Say it for real","You learned the expression. Now produce it without copying the answer from the screen.",body,'<div class="actions"><div class="notice">You need a real speaking attempt before continuing.</div><button class="primary" id="next" disabled>Continue →</button></div>');
- $("hear").onclick=()=>speak(target,profile.code,$("hear"));
- $("voice").onclick=()=>{
-   speechButton(target,()=>{
-     const heard=voice?.text||"";
-     const score=voice?.score||similarity(heard,target);
-     const languageOk=voice?.detected!==false;
-     const good=languageOk && score>=.72;
-     $("feedback").textContent=good
-       ? "Good. Parla heard the target expression clearly."
-       : languageOk
-         ? "Not quite yet. Try once more and focus on the words you just learned."
-         : "Parla could not verify the target language. Try again.";
-     $("voiceStatus").textContent=heard?"Heard: "+heard:"Try again.";
-     if(good){
-       xp+=15;
-       answers.push({type:"speak",response:heard,expected:target,score,voice,passed:true});
+ frame('<div class="kicker">Your turn</div><div class="speak-box"><div class="speak-target">'+esc(c.phrase)+'</div><div class="speak-meaning">'+esc(c.meaning)+'</div><button class="primary speak-button" id="speak">Speak</button><div class="status" id="status">Say the phrase naturally.</div></div>','<button class="primary" id="next" disabled>Continue →</button>');
+ $("speak").onclick=()=>{
+   $("status").textContent="Listening…";
+   $("speak").disabled=true;
+   startRecognition(c.phrase,text=>{
+     if(!text){$("status").textContent="I didn't catch that. Try again.";$("speak").disabled=false;return}
+     const score=similarity(text,c.phrase);
+     answers.push({type:"speak",expected:c.phrase,heard:text,score});
+     if(score>=.7){
+       $("status").textContent="Heard: "+text;
+       xp+=12;
        $("next").disabled=false;
-       $("next").textContent="Continue →";
-       toast("Speaking check passed.");
-     } else {
-       answers.push({type:"speak",response:heard,expected:target,score,voice,passed:false});
-       voice=null;
-       $("next").disabled=true;
-       toast("Try it again.");
+       setTimeout(()=>{index++;render()},450);
+     }else{
+       $("status").textContent="Heard: "+text+" — try it once more.";
+       $("speak").disabled=false;
      }
    });
  };
- $("next").onclick=()=>advance();
 }
-function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
-function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
-async function sendConversation(){const input=$("input").value.trim()||voice?.text||"";if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}const c=generated.cards[index],topic=baseLesson?.topic||"Everyday life";conversation.push({role:"user",content:input});$("input").value="";drawChat();$("send").disabled=true;$("voiceStatus").textContent="Thinking…";try{const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:levelName(),goal:profile.goal||"Real conversation",topic,messages:conversation})});const data=await res.json();if(!res.ok)throw new Error(data.error||"Conversation failed.");conversation.push({role:"assistant",content:data.text});answers.push({type:"conversation",user:input,assistant:data.text});xp+=20;drawChat();voice=null;if(answers.filter(a=>a.type==="conversation").length>=2){$("send").textContent="Finish lesson";$("send").onclick=finish;toast("You kept the conversation going.");}$("voiceStatus").textContent="Good. Keep the interaction natural."; }catch(e){$("voiceStatus").textContent=e.message||"The conversation couldn't continue. Try again."}finally{$("send").disabled=false;}}
-async function finish(){if($("card").dataset.done)return;$("card").dataset.done="1";try{if(user&&baseLesson?.id){await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{generated_lesson:generated,answers}});await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,level:profile.level}});}}catch(e){console.error("Nahtive completion save failed:",e)}$("card").innerHTML='<section class="card complete"><h2>Lesson complete</h2><p class="sub">You learned first, practiced with support, and then used the language in a real interaction.</p><div class="xp">'+xp+' XP earned</div><div class="actions" style="justify-content:center"><a class="primary" href="dashboard.html" style="text-decoration:none">Continue learning →</a></div></section>';$("card").querySelector(".complete").style.display="block";$("stage").textContent="Complete";$("fill").style.width="100%";}
-function generatedLessonMatchesLevel(lesson){const level=profile?.level||"A1";if(!["B1","B2","B2+","C1","C2"].includes(level))return true;const text=JSON.stringify(lesson?.cards||[]).toLowerCase();const basic=/\\b(hello|hi|hola|hey|bonjour|hallo|ciao|oi|good morning|good afternoon|buenos días|buenas)\\b/i;return !basic.test(text)}
-function buildFallbackLesson(){
-  const level=profile?.level||"A1";
-  const code=(profile?.code||"").toLowerCase().split("-")[0];
-  const topic=String(baseLesson?.topic||"Everyday life");
 
-  const spanishMissions=[
-    {setting:"Coffee shop",moment:"You're late for work. The barista is waiting for your order.",role:"You're ordering quickly.",goal:"Order a drink, customize it, and react when something is unavailable.",
-      lines:[["Barista","¿Qué te preparo?"],["You","You need to order and make one small change."]],
-      p:[
-        ["Quiero un café con leche.","I want a coffee with milk.","KYEH-roh oon kah-FEH kon LEH-cheh","Use it to place a simple order."],
-        ["¿Tienes leche de avena?","Do you have oat milk?","TYEH-nes LEH-cheh deh ah-BEH-nah","Use it to check whether something is available."],
-        ["Está bien.","That's fine / Okay.","es-TAH byen","Use it when you accept an alternative."]
-      ]},
-    {setting:"Taco shop",moment:"The line is moving fast. You know exactly what you want.",role:"You're ordering lunch.",goal:"Order food, leave something out, and pay naturally.",
-      lines:[["Cashier","¿Qué te pongo?"],["You","Order your tacos and customize them."]],
-      p:[
-        ["Me pones unos tacos de asada.","Can I get some carne asada tacos?","meh POH-nes OO-nos TAH-kos deh ah-SAH-dah","A casual way to order at a counter."],
-        ["Sin cebolla, por favor.","No onion, please.","seen seh-BOH-yah por fah-BOR","Add this when you want something left out."],
-        ["¿Cuánto es?","How much is it?","KWAN-toh es","Use it when you're ready to pay."]
-      ]},
-    {setting:"Grocery store",moment:"You can't find what you need and an employee walks by.",role:"You're looking for one item.",goal:"Ask for directions, confirm what you heard, and close the interaction.",
-      lines:[["Employee","¿Te puedo ayudar?"],["You","Ask where the item is."]],
-      p:[
-        ["¿Dónde está la leche?","Where is the milk?","DON-deh es-TAH lah LEH-cheh","Ask where you can find something."],
-        ["¿Por aquí?","Around here?","por ah-KEE","Quickly check that you understood the direction."],
-        ["Gracias, ya la encontré.","Thanks, I found it.","GRAH-syahs yah lah en-kon-TREH","Close the interaction naturally."]
-      ]},
-    {setting:"Apartment viewing",moment:"You like the apartment, but you need one practical detail before deciding.",role:"You're viewing an apartment.",goal:"Ask a question, clarify the answer, and avoid sounding scripted.",
-      lines:[["Leasing agent","¿Qué te parece el departamento?"],["You","You like it, but you have a question."]],
-      p:[
-        ["Me gusta, pero tengo una pregunta.","I like it, but I have a question.","meh GOOS-tah PEH-roh TEN-goh OO-nah preh-GOON-tah","Use it to react positively before asking for something."],
-        ["¿Está incluido el estacionamiento?","Is parking included?","es-TAH een-kloo-EE-doh el es-tah-syo-nah-MYEN-toh","Ask whether something is included."],
-        ["Déjame pensarlo.","Let me think about it.","DEH-hah-meh pen-SAR-loh","Use it when you need time before deciding."]
-      ]},
-    {setting:"First day at work",moment:"A coworker is showing you how something works.",role:"You're learning the ropes.",goal:"Ask for clarification and show that you understand.",
-      lines:[["Coworker","¿Entiendes cómo funciona?"],["You","Ask one question, then confirm what you learned."]],
-      p:[
-        ["¿Me puedes explicar?","Can you explain it to me?","meh PWEH-des eks-plee-KAR","Ask for a quick explanation."],
-        ["¿Cómo funciona esto?","How does this work?","KOH-moh foon-SYOH-nah ES-toh","Ask how a process or thing works."],
-        ["Ah, ya entiendo.","Ah, I understand now.","ah yah en-TYEN-doh","Use it when the explanation clicks."]
-      ]},
-    {setting:"Getting directions",moment:"You're downtown and your phone is almost dead.",role:"You're asking someone nearby for help.",goal:"Ask where something is and make sure you're going the right way.",
-      lines:[["Local","¿Buscas algo?"],["You","Ask for a place and confirm the direction."]],
-      p:[
-        ["¿Cómo llego al centro?","How do I get downtown?","KOH-moh YEH-goh al SEN-troh","Ask how to get somewhere."],
-        ["¿Está lejos?","Is it far?","es-TAH LEH-hos","Check the distance."],
-        ["Entonces voy por aquí.","So I'll go this way.","en-TON-ses boy por ah-KEE","Confirm the route before you leave."]
-      ]},
-    {setting:"Restaurant",moment:"The waiter asks if you're ready, but you need another minute.",role:"You're deciding what to order.",goal:"Buy time, ask a question, and then make your choice.",
-      lines:[["Waiter","¿Ya saben qué quieren?"],["You","You need another minute."]],
-      p:[
-        ["Todavía no.","Not yet.","toh-dah-BEE-ah noh","Say this when you aren't ready."],
-        ["¿Qué me recomiendas?","What do you recommend?","keh meh reh-koh-MYEN-dahs","Ask for a recommendation."],
-        ["Creo que voy a pedir esto.","I think I'll order this.","KREH-oh keh boy ah peh-DEER ES-toh","Use it when you've made your choice."]
-      ]},
-    {setting:"Making weekend plans",moment:"A friend suggests an activity, but you're not sure yet.",role:"You're deciding what to do.",goal:"React naturally, ask a follow-up, and make a plan.",
-      lines:[["Friend","¿Quieres ir el sábado?"],["You","Respond naturally and keep the conversation going."]],
-      p:[
-        ["Puede ser.","Could be / Maybe.","PWEH-deh ser","A natural way to stay open without committing."],
-        ["¿A qué hora?","What time?","ah keh OH-rah","Ask for the key detail."],
-        ["Sí, me parece bien.","Yeah, that works for me.","see meh pah-REH-seh byen","Accept the plan naturally."]
-      ]}
-  ];
-
-  const generic={
-    fr:[["Je voudrais ça.","I'd like this.","zhuh voo-DRAY sah"],["Tu peux m'aider ?","Can you help me?","too puh meh-DAY"],["D'accord.","Okay.","dah-KOR"]],
-    nl:[["Ik wil dit.","I want this.","ik vil dit"],["Kun je me helpen?","Can you help me?","kun yuh muh HEL-pen"],["Dat is goed.","That's fine.","dat is khoot"]],
-    pl:[["Poproszę to.","I'll have this, please.","poh-PROH-sheh toh"],["Możesz mi pomóc?","Can you help me?","MOH-zhesh mee pomoots"],["Dobrze.","Okay.","DOH-bzheh"]],
-    ar:[["أريد هذا.","I want this.","u-reed ha-tha"],["هل يمكنك مساعدتي؟","Can you help me?","hal yum-ki-nu-ka mu-sa-a-da-tee"],["حسنًا.","Okay.","ha-sa-nan"]],
-    en:[["I'd like this.","I'd like this.","ayd like this"],["Could you help me?","Could you help me?","kud yuh help me"],["That works.","That's fine.","that works"]]
-  };
-
-  const makePhrase=(x)=>({phrase:x[0],meaning:x[1],pronunciation:x[2],usage:x[3]||"Use this naturally in the situation.",example:x[0]});
-  let mission;
-
-  if(code==="es"){
-    mission=spanishMissions[Math.floor(Math.random()*spanishMissions.length)];
-  }else{
-    const ps=generic[code]||generic.en;
-    mission={
-      setting:"Everyday situation",
-      moment:"Someone asks you something and you need to respond naturally.",
-      role:"You're handling a real-life interaction.",
-      goal:"Understand the situation, choose useful language, and respond.",
-      lines:[["Other person","What do you need?"],["You","Respond naturally."]],
-      p:ps.map(x=>x)
-    };
-  }
-
-  const phrases=mission.p.map((x,i)=>{
-    const p=makePhrase(x);
-    p.id=i+1;
-    return p;
-  });
-
-  const shuffle=(arr)=>[...arr].sort(()=>Math.random()-.5);
-  const cards=[];
-
-  cards.push({
-    type:"scene",
-    context:mission.moment,
-    dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),
-    goal:mission.goal
-  });
-
-  cards.push({
-    type:"teach",...phrases[0],
-    exampleMeaning:phrases[0].meaning
-  });
-
-  cards.push({
-    type:"check",...phrases[0],
-    prompt:"What would you say here?",
-    options:shuffle([phrases[0].example,phrases[1].example,"I don't know."]),
-    answer:phrases[0].example,
-    feedback:"Exactly. Now use it instead of just recognizing it."
-  });
-
-  cards.push({
-    type:"guided",...phrases[0],
-    prompt:"Build the expression you just learned.",
-    context:phrases[0].meaning,
-    expected:phrases[0].phrase,
-    answer:phrases[0].phrase,
-    feedback:"Nice. You built the phrase. Now hear it in the situation."
-  });
-
-  cards.push({
-    type:"teach",...phrases[1],
-    exampleMeaning:phrases[1].meaning
-  });
-
-  cards.push({
-    type:"check",...phrases[1],
-    prompt:"Which response fits the situation?",
-    options:shuffle([phrases[1].example,phrases[0].example,"Maybe later."]),
-    answer:phrases[1].example,
-    feedback:"Good. You picked the response that actually fits."
-  });
-
-  cards.push({
-    type:"guided",...phrases[1],
-    prompt:"Build this response, then say it out loud.",
-    context:phrases[1].meaning,
-    expected:phrases[1].phrase,
-    answer:phrases[1].phrase,
-    feedback:"Good. You're producing the language now."
-  });
-
-  cards.push({
-    type:"teach",...phrases[2],
-    exampleMeaning:phrases[2].meaning
-  });
-
-  cards.push({
-    type:"challenge",...phrases[2],
-    prompt:"The situation changes. What would you say now?",
-    options:shuffle([phrases[2].example,phrases[0].example,phrases[1].example]),
-    answer:phrases[2].example,
-    feedback:"That fits the new moment."
-  });
-
-  cards.push({
-    type:"speak",...phrases[2],
-    meaning:phrases[2].meaning,
-    prompt:"Say it yourself. Parla checks what it actually hears.",
-    expected:phrases[2].phrase,
-    answer:phrases[2].phrase
-  });
-
-  cards.push({
-    type:"conversation",
-    prompt:"Now finish the interaction in your own words. Don't worry about being perfect.",
-    phrase:mission.goal,
-    expected:"",
-    answer:"",
-    feedback:"Keep the conversation moving."
-  });
-
-  generated={
-    title:(["B2","B2+","C1","C2"].includes(level)?level+" · "+mission.setting:mission.setting),
-    intro:"One real situation. Three useful expressions. Learn them, use them, then speak.",
-    scene:{
-      setting:mission.setting,
-      moment:mission.moment,
-      learnerRole:mission.role,
-      goal:mission.goal
-    },
-    cards
-  };
+function renderTalk(c){
+ frame('<div class="kicker">Talk</div><p class="live-goal">'+esc(c.goal)+'</p><div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Say what you would actually say…"></textarea><div class="actions"><button class="secondary" id="voice">Speak</button><button class="primary" id="send">Respond →</button></div><div class="feedback" id="status">The other person is waiting.</div>');
+ conversation=[{role:"assistant",content:c.opening}];
+ drawChat();
+ browserSpeak(c.opening);
+ $("voice").onclick=()=>{
+   $("status").textContent="Listening…";
+   startRecognition("",text=>{if(text){$("input").value=text;$("status").textContent="Heard: "+text}else $("status").textContent="Try again.";});
+ };
+ $("send").onclick=sendTalk;
 }
-function showError(msg){$("loading").innerHTML="<strong>We couldn’t build this lesson.</strong><br><span class=\"small\">"+esc(msg)+"</span><br><button class=\"primary\" style=\"margin-top:16px\" onclick=\"location.reload()\">Try again</button>";}
-async function ensurePlacement(languageId){return true}
-async function load(){try{const {data,error}=await client.auth.getUser();if(error||!data?.user){location.href="login.html";return}user=data.user;const params=new URLSearchParams(location.search),requested=params.get("id"),saved=localStorage.getItem("Nahtive_current_learner_language");let q=client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id);const {data:langs,error:langErr}=await q;if(langErr)throw langErr;if(!langs?.length){location.href="onboarding.html";return}const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];const placementResult=await client.from("learner_events").select("event_data").eq("user_id",user.id).eq("learner_language_id",current.id).eq("event_type","placement_completed").order("created_at",{ascending:false}).limit(1).maybeSingle();if(placementResult.error)throw placementResult.error;currentLevelForPlacement=current.level||"A0";if(requested){const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,learner_languages(id,user_id,level,languages(name,code))").eq("id",requested).maybeSingle();if(r.error)throw r.error;if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("That lesson isn't part of your learning path.");baseLesson=r.data}else{const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,learner_languages(id,user_id,level,languages(name,code))").eq("learner_language_id",current.id).eq("level",current.level).order("created_at",{ascending:true}).limit(50);if(r.error)throw r.error;if(r.data?.length){const a=await client.from("lesson_attempts").select("lesson_id").in("lesson_id",r.data.map(x=>x.id));const done=new Set((a.data||[]).map(x=>x.lesson_id));baseLesson=r.data.find(x=>!done.has(x.id))||r.data[0];}else{baseLesson={id:null,title:"Nahtive scene",topic:"Everyday life",level:current.level,content:{},learner_language_id:current.id,learner_languages:{id:current.id,user_id:user.id,level:current.level,languages:current.languages}};}}const linked=baseLesson.learner_languages;const placementReady=await ensurePlacement(baseLesson.learner_language_id);if(!placementReady)return;const authoritativeLevel=String(current.level||linked.level||baseLesson.level||"A0");profile={id:baseLesson.learner_language_id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:authoritativeLevel,goal:"Real conversation"};localStorage.setItem("Nahtive_current_learner_language",profile.id);const payload={...profile,targetLanguage:profile.name,nativeLanguage:"English",lessonContext:{title:baseLesson.title,topic:baseLesson.topic,level:profile.level,scene:baseLesson.content?.scene||null}};/* Render a guaranteed local lesson first. AI enhancement happens after the learner can already start. */
-buildFallbackLesson();
-$("language").textContent=profile.name+" · "+profile.level;
-$("title").textContent=generated.title;
-$("intro").textContent=generated.intro;
-$("setting").textContent=generated.scene.setting;
-$("moment").textContent=generated.scene.moment;
-$("role").textContent=generated.scene.learnerRole+" · Goal: "+generated.scene.goal;
-$("loading").style.display="none";
-$("lesson").style.display="grid";
-render();
 
-/* Lesson starts immediately from the local mission library. */
-}catch(e){console.error(e);showError(e.message||"The lesson could not load.");}}
+function drawChat(){
+ $("chat").innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="bubble-label">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");
+ $("chat").scrollTop=$("chat").scrollHeight;
+}
+
+function localReply(c,input,turn){
+ const setting=c.setting.toLowerCase();
+ if(profile.code.toLowerCase().startsWith("es")){
+   if(setting.includes("coffee"))return turn===1?"Claro. ¿Quieres leche de avena?":turn===2?"Perfecto. Te lo preparo así.":"Listo. Aquí tienes.";
+   if(setting.includes("taco"))return turn===1?"Claro. ¿Los quieres sin cebolla?":turn===2?"Perfecto. Son esos dos tacos.":"Son ocho dólares.";
+   if(setting.includes("grocery"))return turn===1?"Sí, está al fondo, a la derecha.":turn===2?"Sí, por ese pasillo.":"De nada.";
+   if(setting.includes("apartment"))return turn===1?"Sí, el estacionamiento está incluido.":turn===2?"Claro, te enseño dónde está.":"Tómate tu tiempo.";
+   if(setting.includes("work"))return turn===1?"Claro. Primero haces clic aquí.":turn===2?"Exacto. Ahora inténtalo tú.":"Sí, así es.";
+   if(setting.includes("direction"))return turn===1?"Sigue derecho dos cuadras y gira a la izquierda.":turn===2?"No, está cerca.":"Sí, vas bien.";
+   if(setting.includes("restaurant"))return turn===1?"Claro, tómate tu tiempo.":turn===2?"Puedo recomendarte la sopa.":"Perfecto.";
+   return turn===1?"Sí, podemos hacerlo. ¿Qué quieres hacer?":turn===2?"Me parece bien.":"Perfecto, quedamos así.";
+ }
+ return turn===1?"Sure. That works. What would you like to do next?":turn===2?"Sounds good. Let me know what you decide.":"Perfect. That works for me.";
+}
+
+async function sendTalk(){
+ const input=$("input").value.trim();
+ if(!input){$("status").textContent="Say or type something first.";return}
+ const c=lesson.cards[index];
+ const turn=conversation.filter(x=>x.role==="user").length+1;
+ conversation.push({role:"user",content:input});
+ $("input").value="";
+ drawChat();
+ $("send").disabled=true;
+ let reply="";
+ try{
+   const controller=new AbortController();
+   const timer=setTimeout(()=>controller.abort(),9000);
+   const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:profile.level,goal:c.goal,topic:c.setting,context:{setting:c.setting,goal:c.goal,openingLine:c.opening},messages:conversation}),signal:controller.signal});
+   clearTimeout(timer);
+   const data=await res.json().catch(()=>({}));
+   if(!res.ok||!data.text)throw new Error("chat failed");
+   reply=String(data.text);
+ }catch(e){reply=localReply(c,input,turn)}
+ conversation.push({role:"assistant",content:reply});
+ drawChat();
+ browserSpeak(reply);
+ xp+=15;
+ if(turn>=3){
+   $("send").textContent="Finish lesson";
+   $("send").disabled=false;
+   $("send").onclick=finish;
+   $("status").textContent="You handled the situation.";
+ }else{
+   $("send").disabled=false;
+   $("send").textContent="Respond →";
+   $("status").textContent="Keep the conversation moving.";
+ }
+}
+
+async function finish(){
+ try{
+   if(user&&baseLesson?.id)await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{answers,xp}});
+ }catch(e){console.error("lesson save failed",e)}
+ $("stage").textContent="Complete";
+ $("count").textContent="";
+ $("fill").style.width="100%";
+ $("card").innerHTML='<section class="lesson-card complete"><div class="kicker">Complete</div><h2>Lesson complete</h2><p class="meaning">You learned the language, used it, and handled a real interaction.</p><div class="xp">'+xp+' XP</div><a class="primary" href="dashboard.html" style="display:inline-flex;text-decoration:none">Continue learning →</a></section>';
+}
+
+async function load(){
+ try{
+   const auth=await client.auth.getUser();
+   if(auth.error||!auth.data?.user){location.href="login.html";return}
+   user=auth.data.user;
+   const saved=localStorage.getItem("Nahtive_current_learner_language");
+   const {data:langs,error}=await client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id);
+   if(error)throw error;
+   if(!langs?.length){location.href="onboarding.html";return}
+   const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];
+   const params=new URLSearchParams(location.search);
+   const requested=params.get("id");
+   if(requested){
+     const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,learner_languages(id,user_id,level,languages(name,code))").eq("id",requested).maybeSingle();
+     if(r.error)throw r.error;
+     if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("This lesson is not available.");
+     baseLesson=r.data;
+   }else{
+     baseLesson={id:null,title:"Live lesson",topic:"Everyday life",level:current.level,learner_languages:{id:current.id,user_id:user.id,level:current.level,languages:current.languages}};
+   }
+   const linked=baseLesson.learner_languages;
+   profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(current.level||linked.level||"A1")};
+   const key=String(baseLesson.topic||"");
+   let mission=missions[key]||missions["First day at work"];
+   if(!missions[key]){
+     const keys=Object.keys(missions);
+     mission=missions[keys[Math.floor(Math.random()*keys.length)]];
+   }
+   const p=mission.phrases;
+   lesson={
+     setting:mission.setting,moment:mission.moment,goal:mission.goal,opening:mission.opening,
+     cards:[
+       {type:"scene",stage:"Situation",setting:mission.setting,moment:mission.moment,goal:mission.goal},
+       {type:"teach",stage:"Learn",phrase:p[0][0],meaning:p[0][1]},
+       {type:"check",stage:"Recognize",prompt:"What would you say here?",answer:p[0][0],distractors:mission.choices},
+       {type:"teach",stage:"Learn",phrase:p[1][0],meaning:p[1][1]},
+       {type:"check",stage:"Recognize",prompt:"Which response fits this moment?",answer:p[1][0],distractors:mission.choices},
+       {type:"speak",stage:"Speak",phrase:p[2][0],meaning:p[2][1]},
+       {type:"teach",stage:"Adapt",phrase:p[2][0],meaning:p[2][1]},
+       {type:"talk",stage:"Talk",setting:mission.setting,goal:mission.goal,opening:mission.opening}
+     ]
+   };
+   $("language").textContent=profile.name+" · "+profile.level;
+   $("title").textContent=mission.setting;
+   $("loading").style.display="none";
+   $("lesson").style.display="block";
+   render();
+ }catch(e){
+   console.error("Nahtive lesson load failed:",e);
+   $("loading").innerHTML='<strong>We couldn’t load this lesson.</strong><br><span class="small">'+esc(e?.message||"Please try again.")+'</span><br><button class="primary" style="margin-top:16px" onclick="location.reload()">Try again</button>';
+ }
+}
 load();
 </script>
 </body>
