@@ -135,21 +135,32 @@ function visualForSetting(setting){
 }
 function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
+function sceneIllustration(setting){
+ const k=String(setting||"").toLowerCase();
+ let cls="generic",title=setting||"Real life";
+ if(k.includes("coffee")){cls="coffee";title="Coffee shop"}else if(k.includes("taco")){cls="taco";title="Taco shop"}else if(k.includes("grocery")){cls="grocery";title="Grocery store"}else if(k.includes("apartment")){cls="home";title="Apartment"}else if(k.includes("work")){cls="work";title="First day at work"}else if(k.includes("direction")){cls="street";title="Getting around"}else if(k.includes("restaurant")){cls="restaurant";title="Restaurant"}else if(k.includes("weekend")){cls="weekend";title="Weekend plans"}
+ return '<div class="scene-art '+cls+'"><div class="art-sun"></div><div class="art-shape one"></div><div class="art-shape two"></div><div class="art-shape three"></div><div class="art-ground"></div><div class="art-caption">'+esc(title)+'</div></div>';
+}
 function renderScene(c){
  const dialogue=Array.isArray(c.dialogue)?c.dialogue:[];
- const body='<div class="scene-layout">'+visualForSetting(generated?.scene?.setting)+
-   '<div class="scene-content"><div class="lesson-task-label">REAL WORLD SCENE</div>'+
-   (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
-   '<div class="mini-dialogue">'+dialogue.map(d=>'<div class="dialogue-line"><strong>'+esc(d.speaker||"")+'</strong><span>'+esc(d.text||"")+'</span></div>').join("")+'</div>'+
-   '<div class="scene-goal"><strong>Your mission</strong><br>'+esc(c.goal||generated?.scene?.goal||"Handle the situation naturally.")+'</div></div></div>'+
-   '<div class="choice-prompt">What do you want to practice first?</div>'+
-   '<div class="mode-choices"><button class="mode-choice" data-mode="learn"><strong>Learn</strong><span>Understand the key language.</span></button><button class="mode-choice" data-mode="practice"><strong>Practice</strong><span>Choose and build responses.</span></button><button class="mode-choice" data-mode="speak"><strong>Speak</strong><span>Say it yourself.</span></button></div>'+
-   '<div class="listen-row"><button class="secondary" id="hearScene">Listen to the scene</button></div>';
- shell("You're in it","Start with the situation. Then Parla gives you several ways to practice the same language.",body,'<div class="actions"><button class="primary" id="next">Start mission →</button></div>');
- let mode="learn";
- document.querySelectorAll(".mode-choice").forEach(b=>b.onclick=()=>{document.querySelectorAll(".mode-choice").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");mode=b.dataset.mode;});
+ const body='<div class="hero-scene">'+sceneIllustration(generated?.scene?.setting)+
+ '<div class="scene-copy"><div class="lesson-task-label">TODAY’S MISSION</div>'+
+ '<div class="scene-location">'+esc(generated?.scene?.setting||"Real life")+'</div>'+
+ '<p class="scene-moment">'+esc(c.context||generated?.scene?.moment||"A real-world situation.")+'</p>'+
+ '<div class="scene-dialogue-preview">'+dialogue.map(d=>'<div class="dialogue-line"><strong>'+esc(d.speaker||"")+'</strong><span>'+esc(d.text||"")+'</span></div>').join("")+'</div>'+
+ '<div class="scene-goal"><span class="goal-label">MISSION</span><strong>'+esc(c.goal||generated?.scene?.goal||"Handle the situation naturally.")+'</strong></div></div></div>'+
+ '<div class="lesson-choice-heading"><span>Choose how you want to train</span><small>You can change this later.</small></div>'+
+ '<div class="training-choices">'+
+ '<button class="training-choice selected" data-mode="full"><span class="training-icon">✦</span><strong>Full lesson</strong><small>Learn, practice, listen & speak</small></button>'+
+ '<button class="training-choice" data-mode="words"><span class="training-icon">Aa</span><strong>Words first</strong><small>Build vocabulary before the scene</small></button>'+
+ '<button class="training-choice" data-mode="listen"><span class="training-icon">)))</span><strong>Listening</strong><small>Train your ear with less text</small></button>'+
+ '<button class="training-choice" data-mode="speak"><span class="training-icon">◉</span><strong>Speaking</strong><small>Get to the microphone faster</small></button></div>'+
+ '<div class="listen-row"><button class="secondary" id="hearScene">▶ Hear the scene</button></div>';
+ shell("You’re here","Parla puts you inside one useful situation. Learn the language, make decisions, and then use it.",body,'<div class="actions"><button class="primary" id="next">Start mission →</button></div>');
+ let mode="full";
+ document.querySelectorAll(".training-choice").forEach(btn=>btn.onclick=()=>{document.querySelectorAll(".training-choice").forEach(x=>x.classList.remove("selected"));btn.classList.add("selected");mode=btn.dataset.mode;});
  $("hearScene").onclick=()=>speak(dialogue.map(d=>d.text||"").join(" "),profile.code,$("hearScene"));
- $("next").onclick=()=>{xp+=3;advance();};
+ $("next").onclick=()=>{generated.trainingMode=mode;xp+=3;advance();};
 }
 function renderTeach(c){
  const body='<div class="lesson-task-label">ONE USEFUL THING</div>'+
