@@ -107,14 +107,18 @@ function buildLessonFromContent(baseLesson){
  const scene=data.scene||{};
  const dialogue=Array.isArray(data.dialogue)?data.dialogue:[];
  const lang=data.language||{};
+ const phrases=Array.isArray(data.phrases)?data.phrases:[];
  const nativeLine=dialogue.find(x=>String(x.speaker||"").toLowerCase()==="native")?.text||"";
  const learnerLines=dialogue.filter(x=>String(x.speaker||"").toLowerCase()==="learner").map(x=>String(x.text||"")).filter(Boolean);
- const phrase=String(lang.phrase||nativeLine||learnerLines[0]||"").trim();
- const meaning=String(lang.meaning||lang.usage||"").trim();
- const second=learnerLines[0]&&learnerLines[0]!==phrase?learnerLines[0]:"";
+ const phrase=String(phrases[0]?.target||lang.phrase||nativeLine||learnerLines[0]||"").trim();
+ const meaning=String(phrases[0]?.meaning||lang.meaning||lang.usage||"").trim();
+ const second=String(phrases[1]?.target||learnerLines[0]||"").trim();
+ const secondMeaning=String(phrases[1]?.meaning||"Use this naturally in the situation.");
+ const third=String(phrases[2]?.target||learnerLines[1]||phrase).trim();
+ const thirdMeaning=String(phrases[2]?.meaning||"Use this naturally in the final exchange.");
  const secondNative=dialogue.filter(x=>String(x.speaker||"").toLowerCase()==="native").map(x=>String(x.text||"")).find(x=>x!==nativeLine)||"";
  const secondMeaning=secondNative?"Use this naturally in the situation.":"Use this naturally in the situation.";
- const pool=[...new Set(dialogue.map(x=>String(x.text||"").trim()).filter(Boolean))];
+ const pool=[...new Set([...phrases.map(x=>String(x?.target||"").trim()),...dialogue.map(x=>String(x.text||"").trim())].filter(Boolean))];
  const distractors=pool.filter(x=>x!==phrase&&x!==second).slice(0,3);
  while(distractors.length<3)distractors.push(["Thanks, that's all.","Maybe later.","I'm not sure."][distractors.length]);
  const setting=String(scene.place||baseLesson.topic||"Everyday situation");
@@ -127,7 +131,7 @@ function buildLessonFromContent(baseLesson){
    {type:"teach",stage:"Use",phrase:second||phrase,meaning:second?secondMeaning:"Now use the expression yourself in the same situation."},
    {type:"check",stage:"Adapt",prompt:"What would you say to keep the exchange moving?",answer:second||phrase,distractors:second?[phrase,...distractors.slice(0,2)]:distractors},
    {type:"speak",stage:"Speak",phrase:second||phrase,meaning:second?"Say it naturally, without translating first.":"Say the phrase naturally."},
-   {type:"teach",stage:"Adapt",phrase:phrase,meaning:"You will meet this expression again in a different context."},
+   {type:"teach",stage:"Adapt",phrase:third,meaning:thirdMeaning},
    {type:"talk",stage:"Talk",setting,goal,opening:nativeLine||phrase}
  ];
  return {
