@@ -32,6 +32,7 @@ export default async function handler(request) {
       ? body.interests.filter(item => typeof item === "string").slice(0, 8).join(", ")
       : "";
     const topic = typeof body.topic === "string" ? body.topic.slice(0, 160) : "Everyday life";
+    const context = body.context && typeof body.context === "object" ? body.context : null;
     const messages = Array.isArray(body.messages)
       ? body.messages
           .filter(item => item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string")
@@ -50,6 +51,12 @@ export default async function handler(request) {
       "Learner goal: " + goal + ".",
       interests ? "Learner interests: " + interests + "." : "",
       "Current topic: " + topic + ".",
+      body.context ? "Scene setting: " + JSON.stringify(body.context).slice(0, 1800) + "." : "",
+      "Continue the exact scene the learner is already in. Do not restart the scenario or ask a generic question.",
+      "The learner has already practiced the target phrases. Let them use their own words now.",
+      "Respond as the other person in the scene, not as a teacher.",
+      "Make the situation react to what the learner actually says. If they ask a question, answer it. If they make a request, respond to it. If they make a mistake, prioritize meaning and keep the scene moving.",
+      "After the first learner response, introduce one small realistic development related to the scene goal so the learner has to respond again.",
       "Prioritize natural, everyday language used by real speakers.",
       "Do not turn the conversation into a grammar lecture.",
       "Do not correct every mistake or interrupt the flow.",
