@@ -56,40 +56,34 @@ let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],con
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
-let cachedVoices=[];
-function refreshVoices(){cachedVoices=window.speechSynthesis?.getVoices?.()||[];return cachedVoices}
-if("speechSynthesis" in window){
-  refreshVoices();
-  window.speechSynthesis.addEventListener?.("voiceschanged",refreshVoices);
-}
-function pickVoice(lang){
-  const voices=refreshVoices();
-  const base=String(lang||"en-US").toLowerCase().split("-")[0];
-  return voices.find(v=>v.lang?.toLowerCase()===String(lang||"").toLowerCase())
-    || voices.find(v=>v.lang?.toLowerCase().startsWith(base+"-"))
-    || voices.find(v=>v.lang?.toLowerCase().startsWith(base));
-}
+
 function speak(text,lang,button){
   if(!text||!("speechSynthesis" in window)){toast("Audio isn't available in this browser.");return false}
-  const targetLang=lang||profile?.code||"en-US";
-  if(activeAudio)window.speechSynthesis.cancel();
+
+  const synth=window.speechSynthesis;
+  synth.cancel();
+
   const original=button?.textContent;
   if(button){button.disabled=true;button.textContent="Playing…";}
+
   const u=new SpeechSynthesisUtterance(String(text).slice(0,700));
-  u.lang=targetLang;
+  u.lang=lang||profile?.code||"en-US";
   u.rate=.98;
   u.pitch=1;
-  const voices=refreshVoices();
-  const base=String(targetLang).toLowerCase().split("-")[0];
-  const voice=voices
-    .filter(v=>v.lang?.toLowerCase().startsWith(base))
-    .sort((a,b)=>((/premium|enhanced|natural/i.test(b.name)?3:0)+(!b.localService?1:0))-((/premium|enhanced|natural/i.test(a.name)?3:0)+(!a.localService?1:0)))[0]||pickVoice(targetLang);
-  if(voice)u.voice=voice;
-  u.onend=()=>{if(button){button.disabled=false;button.textContent=original||"Listen"};activeAudio=null};
-  u.onerror=()=>{if(button){button.disabled=false;button.textContent=original||"Listen"};activeAudio=null};
+
+  // Do not wait for voices to load or search the voice list.
+  // Waiting for voices is what made short examples feel slow.
+  u.onend=()=>{
+    if(button){button.disabled=false;button.textContent=original||"Listen";}
+    if(activeAudio===u)activeAudio=null;
+  };
+  u.onerror=()=>{
+    if(button){button.disabled=false;button.textContent=original||"Listen";}
+    if(activeAudio===u)activeAudio=null;
+  };
+
   activeAudio=u;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(u);
+  synth.speak(u);
   return true;
 }
 
