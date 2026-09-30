@@ -610,3 +610,119 @@ html,body,button,input,textarea,select,optgroup,option{
 *{
   font-family:inherit;
 }
+
+
+/* LESSON PALETTE — cohesive with the Nahtive home experience */
+body:has(.lesson){
+  background:#f5f2ea!important;
+  color:#303936!important;
+}
+body:has(.lesson)::before{
+  background:
+    radial-gradient(circle at 12% 12%,rgba(135,155,104,.10),transparent 24%),
+    radial-gradient(circle at 88% 18%,rgba(169,205,221,.12),transparent 24%),
+    radial-gradient(circle at 62% 92%,rgba(217,149,127,.08),transparent 22%)!important;
+  opacity:.8;
+}
+body:has(.lesson)::after{
+  background-image:radial-gradient(rgba(48,57,54,.035) .7px,transparent .7px)!important;
+}
+body:has(.lesson) nav,
+body:has(.lesson) .nav{border-bottom-color:#d9d8cf!important}
+body:has(.lesson) .nav-right,
+body:has(.lesson) .nav-right a{color:#737c76!important}
+body:has(.lesson) .lesson-head-copy>p,
+body:has(.lesson) .lesson-energy,
+body:has(.lesson) .progress-top,
+body:has(.lesson) .lesson .pron,
+body:has(.lesson) .lesson .usage,
+body:has(.lesson) .lesson .example,
+body:has(.lesson) .lesson .task-context,
+body:has(.lesson) .lesson .notice{color:#737c76!important}
+body:has(.lesson) .lesson-title-row h1,
+body:has(.lesson) .lesson-card-heading h2,
+body:has(.lesson) .lesson .phrase,
+body:has(.lesson) .lesson .task-question,
+body:has(.lesson) .lesson-scene strong,
+body:has(.lesson) .scene-role{color:#303936!important}
+body:has(.lesson) .lesson-scene{
+  background:linear-gradient(135deg,#e7eddc,#f0eee6)!important;
+  border-color:#d9d8cf!important;
+  box-shadow:0 10px 30px rgba(48,57,54,.06)!important;
+}
+body:has(.lesson) .lesson-scene:after{background:#e8d273!important;opacity:.24}
+body:has(.lesson) .lesson-scene>span:not(.scene-role){color:#737c76!important}
+body:has(.lesson) .lesson .main>.card{
+  background:#fffdf7!important;
+  border:1px solid #d9d8cf!important;
+  box-shadow:0 12px 34px rgba(48,57,54,.07)!important;
+}
+body:has(.lesson) .lesson .main>.card:before{background:#879b68!important}
+body:has(.lesson) .lesson-progress .progress-track{background:#e2e1d9!important}
+body:has(.lesson) .lesson-progress .fill{background:linear-gradient(90deg,#879b68,#a9b98d)!important}
+body:has(.lesson) .lesson .meaning{
+  background:#e7eddc!important;
+  color:#303936!important;
+  border-color:rgba(135,155,104,.22)!important;
+}
+body:has(.lesson) .lesson .usage,
+body:has(.lesson) .lesson .example{
+  background:#f0eee6!important;
+  border-color:#d9d8cf!important;
+}
+body:has(.lesson) .lesson .actions{border-top-color:#d9d8cf!important}
+body:has(.lesson) .lesson .notice{
+  background:#f5edc8!important;
+  border-color:#e4d99e!important;
+}
+body:has(.lesson) .lesson .option{
+  background:#fffdf7!important;
+  color:#303936!important;
+  border-color:#d9d8cf!important;
+  box-shadow:none!important;
+}
+body:has(.lesson) .lesson .option:hover{
+  background:#e7eddc!important;
+  border-color:#879b68!important;
+  box-shadow:0 8px 18px rgba(48,57,54,.06)!important;
+}
+body:has(.lesson) .lesson .option.correct{
+  background:#e7eddc!important;
+  border-color:#879b68!important;
+}
+body:has(.lesson) .lesson .option.wrong{
+  background:#f2ddd4!important;
+  border-color:#d9957f!important;
+}
+body:has(.lesson) .lesson .secondary{
+  background:#fffdf7!important;
+  color:#303936!important;
+  border-color:#d9d8cf!important;
+}
+body:has(.lesson) .lesson .secondary:hover{
+  background:#f0eee6!important;
+  border-color:#879b68!important;
+  color:#596b43!important;
+}
+body:has(.lesson) .lesson .primary,
+body:has(.lesson) .lesson .continue-btn,
+body:has(.lesson) .lesson .continue-button{
+  background:#303936!important;
+  color:#fffdf7!important;
+  box-shadow:0 4px 0 #596b43!important;
+}
+body:has(.lesson) .lesson .lesson-task-label,
+body:has(.lesson) .level-chip{
+  color:#596b43!important;
+  background:#e7eddc!important;
+  border-color:rgba(135,155,104,.3)!important;
+}
+body:has(.lesson) .energy-dot,
+body:has(.lesson) .lesson-live-dot,
+body:has(.lesson) .role-pulse{background:#d9957f!important}
+body:has(.lesson) .lesson .complete{
+  background:linear-gradient(145deg,#e7eddc,#f5f2ea)!important;
+  color:#303936!important;
+}
+body:has(.lesson) .lesson .complete h2{color:#303936!important}
+body:has(.lesson) .lesson .complete .xp{color:#596b43!important}
