@@ -131,11 +131,89 @@
       el.textContent = streak === 0 ? "0 day streak" : streak + (streak === 1 ? " day" : " days") + " streak";
     }
 
-    async function loadSavedLessons(learnerLanguageId, languageName) {
+    async function generateNextCurriculumLesson(learnerLanguageId, languageName, level, existingLessons) {
+  const { data: nodes, error: nodeError } = await supabaseClient
+    .from("curriculum_nodes")
+    .select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band")
+    .order("sequence_number", { ascending: true })
+    .limit(100);
+  if (nodeError) throw nodeError;
+
+  const levelRank = { A0:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
+  const targetRank = levelRank[level] ?? 1;
+  const levelMatches = node => {
+    const band = String(node.level_band || "");
+    if (band === "C1/C2") return level === "C1" || level === "C2";
+    return band === level || (level === "A0" && band === "A1");
+  };
+
+  const { data: attempts } = await supabaseClient
+    .from("lesson_attempts")
+    .select("lesson_id")
+    .in("lesson_id", (existingLessons || []).map(x => x.id));
+
+  const completed = new Set((attempts || []).map(x => x.lesson_id));
+  const usable = (nodes || []).filter(node => {
+    const related = (existingLessons || []).filter(x => x.curriculum_node_id === node.id && x.level === level);
+    return related.length === 0 || related.some(x => !completed.has(x.id)) ? levelMatches(node) : false;
+  });
+
+  if (!usable.length) return null;
+
+  usable.sort((a,b) => {
+    const ar = Math.abs((levelRank[a.level_band] ?? (a.level_band === "C1/C2" ? 6 : 1)) - targetRank);
+    const br = Math.abs((levelRank[b.level_band] ?? (b.level_band === "C1/C2" ? 6 : 1)) - targetRank);
+    return ar - br || a.sequence_number - b.sequence_number;
+  });
+
+  const node = usable[0];
+  const response = await fetch("/api/generate-lesson", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      language:languageName,
+      code:window.Nahtive_language_code || undefined,
+      level,
+      node
+    })
+  });
+  const generated = await response.json().catch(() => ({}));
+  if (!response.ok || !generated.title || !generated.content) {
+    throw new Error(generated.error || "Could not generate the next lesson.");
+  }
+
+  const payload = generated.content;
+  const { data: saved, error: saveError } = await supabaseClient
+    .from("lessons")
+    .insert({
+      learner_language_id: learnerLanguageId,
+      curriculum_node_id: node.id,
+      title:generated.title,
+      topic:generated.topic || node.title,
+      level,
+      content:payload
+    })
+    .select("id,title,topic,level,content,created_at,curriculum_node_id,curriculum_nodes(sequence_number,stage_name,focus)")
+    .single();
+
+  if (saveError) throw saveError;
+  return saved;
+}
+
+async function loadSavedLessons(learnerLanguageId, languageName) {
   const title = document.getElementById("recommendedTitle");
   const copy = document.getElementById("recommendedCopy");
   const meta = document.querySelector(".lesson-meta");
   const button = document.getElementById("startLessonButton");
+
+  const { data: learner } = await supabaseClient
+    .from("learner_languages")
+    .select("level,languages(name,code)")
+    .eq("id", learnerLanguageId)
+    .maybeSingle();
+
+  const learnerLevel = learner?.level || document.getElementById("dashboardLevel")?.textContent || "A1";
+  window.Nahtive_language_code = learner?.languages?.code || "en-US";
 
   const { data: lessons, error } = await supabaseClient
     .from("lessons")
@@ -148,27 +226,16 @@
     return;
   }
 
-  if (!lessons || !lessons.length) {
-    title.textContent = "Your first scene is ready.";
-    copy.textContent = "Nahtive will build your next lesson around a real situation and the things you need to say.";
-    if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>Core path</span>";
-    button.innerHTML = "Start scene <span>→</span>";
-    button.onclick = () => { window.location.href = "lesson.html"; };
-    return;
-  }
+  let allLessons = lessons || [];
+  const levelRank = { A0:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
+  const targetRank = levelRank[learnerLevel] ?? 1;
 
-  const completedResult = await supabaseClient
-    .from("lesson_attempts")
-    .select("lesson_id")
-    .in("lesson_id", lessons.map(row => row.id));
-
+  const completedResult = allLessons.length
+    ? await supabaseClient.from("lesson_attempts").select("lesson_id").in("lesson_id", allLessons.map(row => row.id))
+    : {data:[]};
   const completedIds = new Set((completedResult.data || []).map(row => row.lesson_id));
 
-  const levelRank = { A0:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
-  const currentLevel = document.getElementById("dashboardLevel")?.textContent || "A1";
-  const targetRank = levelRank[currentLevel] ?? 1;
-
-  lessons.sort((a,b) => {
+  allLessons.sort((a,b) => {
     const ar = Math.abs((levelRank[a.level] ?? 1) - targetRank);
     const br = Math.abs((levelRank[b.level] ?? 1) - targetRank);
     if (ar !== br) return ar - br;
@@ -177,10 +244,35 @@
     return as - bs || new Date(a.created_at) - new Date(b.created_at);
   });
 
-  const lesson = lessons.find(row => !completedIds.has(row.id)) || lessons[0];
+  let lesson = allLessons.find(row => row.level === learnerLevel && !completedIds.has(row.id));
+  if (!lesson) {
+    lesson = allLessons.find(row => !completedIds.has(row.id));
+  }
+
+  if (!lesson) {
+    try {
+      button.disabled = true;
+      button.textContent = "Building…";
+      lesson = await generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons);
+      if (lesson) allLessons.push(lesson);
+    } catch (generationError) {
+      console.error("Could not generate next lesson:", generationError);
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  if (!lesson) {
+    title.textContent = "Your next scene is being prepared.";
+    copy.textContent = "The core path is ready. Nahtive will create the next language-specific lesson when you start.";
+    if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>Core path</span>";
+    button.innerHTML = "Open learning path <span>→</span>";
+    button.onclick = () => { window.location.href = "lesson.html"; };
+    return;
+  }
+
   const stage = lesson.curriculum_nodes?.stage_name || "Core path";
   const focus = lesson.curriculum_nodes?.focus || "Real conversation";
-
   title.textContent = lesson.title || "Continue learning";
   copy.textContent = focus + " — then use it in a real interaction.";
   if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(stage)+"</span>";
