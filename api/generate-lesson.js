@@ -5,7 +5,7 @@ export default async function handler(req,res){
   if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Missing OPENAI_API_KEY"});
 
   try{
-    const {language,code,level,node}=req.body||{};
+    const {language,code,level,node,memory=[]}=req.body||{};
     if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation){
       return res.status(400).json({error:"Missing lesson generation inputs"});
     }
@@ -21,7 +21,7 @@ Scenario: ${node.situation}
 Learning focus: ${node.focus}
 
 Nahtive teaches through one continuous real-world interaction, not a worksheet.
-The learner should enter a believable situation, hear useful language, understand it, recognize it, say it, adapt it, and then handle the situation in conversation.
+The learner should enter a believable situation, hear useful language, understand it, recognize it, say it, adapt it, and then handle the situation in conversation.\n\nAdaptive memory: If prior weak phrases or pronunciation/recognition misses are provided below, recycle one or two naturally inside this new situation. Do not announce the review. Do not repeat the old lesson verbatim.\n${JSON.stringify(Array.isArray(memory)?memory.slice(0,8):[])}
 
 Rules:
 - Write all target-language learner/native dialogue and phrases in the TARGET LANGUAGE.
