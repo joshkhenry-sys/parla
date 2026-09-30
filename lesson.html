@@ -136,7 +136,7 @@
   <div class="scene-role"><span class="role-pulse"></span><span id="role"></span></div>
 </div>
 <div class="lesson-progress lesson-progress-clean">
-  <div class="progress-top"><span id="stage">Mission</span><strong id="progressCount">1 / 15</strong></div>
+  <div class="progress-top"><span id="stage">Mission</span><strong id="progressCount">Moment 1 of 8</strong></div>
   <div class="progress-track"><div class="fill" id="fill"></div></div>
 </div>
 <main class="main">
@@ -231,7 +231,7 @@ function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replac
 function similarity(a,b){a=normalize(a);b=normalize(b);if(!a||!b)return 0;if(a===b)return 1;const A=[...a],B=[...b],d=Array.from({length:A.length+1},(_,i)=>i);for(let j=1;j<=B.length;j++){let p=d[0];d[0]=j;for(let i=1;i<=A.length;i++){const old=d[i],cost=A[i-1]===B[j-1]?0:1;d[i]=Math.min(d[i]+1,d[i-1]+1,p+cost);p=old}}return Math.max(0,1-d[A.length]/Math.max(A.length,B.length));}
 function detected(text){const code=(profile?.code||"").toLowerCase().split("-")[0];const r={ar:/[\u0600-\u06ff]/,pl:/[ąćęłńóśźż]/i,nl:/\b(ik|je|het|een|van|voor|wat|wil|kan|niet|goed|de)\b/i,es:/\b(que|como|quiero|puedo|para|por|una|uno|el|la|me|te|donde|bien)\b/i,en:/\b(i|you|the|a|what|can|get|for|me|is|want)\b/i};return code==="ar"?r.ar.test(text):r[code]?r[code].test(text):true;}
 function levelName(){return profile?.level||"A1";}
-function stageName(card){return ({scene:"Scene",teach:"Learn",check:"Choose",guided:"Build",listen:"Listen",fill:"Complete",challenge:"Challenge",speak:"Speak",conversation:"Talk"})[card.type]||"Learn";}
+function stageName(card){return card.stage||({scene:"Situation",teach:"Learn",check:"Recognize",guided:"Use",listen:"Listen",fill:"Complete",challenge:"Challenge",speak:"Speak",conversation:"Talk"})[card.type]||"Learn";}
 function visualForSetting(setting){
  const key=String(setting||"").toLowerCase();
  let icon="◌", label=setting||"Real life";
@@ -244,7 +244,7 @@ function visualForSetting(setting){
  else if(key.includes("weekend")){icon="○";label="Weekend plans"}
  return '<div class="scene-visual" aria-hidden="true"><div class="visual-orbit"></div><div class="visual-icon">'+icon+'</div><div class="visual-label">'+esc(label)+'</div></div>';
 }
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];document.querySelectorAll(".map-node").forEach((n,i)=>n.classList.toggle("active",i<=Math.min(5,Math.floor(index/3))));$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="vocab")renderVocab(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
+function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent="Moment "+(index+1)+" of "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="vocab")renderVocab(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
 function sceneIllustration(setting){
  const k=String(setting||"").toLowerCase();
@@ -660,28 +660,24 @@ function buildFallbackLesson(){
   const shuffle=(arr)=>[...arr].sort(()=>Math.random()-.5);
   const cards=[];
   const p1=phrases[0],p2=phrases[1],p3=phrases[2];
-
-  // Keep the final moments reliable: no fake "question 15", and no broken card
-  // that asks for a response but has no valid answer path.
-  cards.push({type:"scene",context:mission.moment,dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),goal:mission.goal});
-  cards.push({type:"teach",...p1,exampleMeaning:p1.meaning});
-  cards.push({type:"check",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.example,p2.example,"I don't know.","No, gracias."]),answer:p1.example,feedback:"Correct. You matched the language to the situation."});
-  cards.push({type:"guided",...p1,prompt:"Build the expression you just learned.",meaning:p1.meaning,expected:p1.phrase,answer:p1.phrase});
-  cards.push({type:"vocab",word:sceneVocab[0]?.[0]||p1.phrase,meaning:sceneVocab[0]?.[1]||p1.meaning,choices:shuffle([sceneVocab[0]?.[1]||p1.meaning,sceneVocab[1]?.[1]||p2.meaning,sceneVocab[2]?.[1]||p3.meaning,"to wait"])});
-  cards.push({type:"teach",...p2,exampleMeaning:p2.meaning});
-  cards.push({type:"check",...p2,prompt:"What would you say here?",options:shuffle([p2.example,p1.example,"Maybe later.","I already did."]),answer:p2.example,feedback:"Good. That response fits the moment."});
-  cards.push({type:"listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,p1.phrase,p3.phrase,"No sé."]),answer:p2.phrase,audioText:p2.phrase});
-  cards.push({type:"fill",phrase:p2.phrase,prompt:"Complete the idea with the phrase you just learned.",before:p2.meaning+" →",after:"",options:shuffle([p2.phrase,p1.phrase,p3.phrase,"No sé."]),answer:p2.phrase});
-  cards.push({type:"vocab",word:sceneVocab[1]?.[0]||p2.phrase,meaning:sceneVocab[1]?.[1]||p2.meaning,choices:shuffle([sceneVocab[1]?.[1]||p2.meaning,sceneVocab[0]?.[1]||p1.meaning,sceneVocab[2]?.[1]||p3.meaning,"to wait"])});
-  cards.push({type:"teach",...p3,exampleMeaning:p3.meaning});
-  cards.push({type:"challenge",...p3,prompt:"The situation changes. Which response works now?",options:shuffle([p3.example,p1.example,p2.example,"I need more information."]),answer:p3.example,feedback:"That choice fits the new moment."});
-  cards.push({type:"guided",...p3,prompt:"Build the final expression from memory.",meaning:p3.meaning,expected:p3.phrase,answer:p3.phrase});
-  cards.push({type:"speak",...p3,meaning:p3.meaning,prompt:"Say it yourself. Nahtive checks what it actually hears.",expected:p3.phrase,answer:p3.phrase});
-  cards.push({type:"conversation",prompt:"Now finish the interaction in your own words. Don't copy the lesson.",phrase:"Respond naturally to the other person.",expected:"",answer:"",feedback:"Keep the conversation moving."});
+  const missionDistractor={
+    "Coffee shop":"¿Qué me recomiendas?","Taco shop":"¿Qué tienen hoy?","Grocery store":"¿Cuánto cuesta?",
+    "Apartment viewing":"¿Cuándo puedo mudarme?","First day at work":"¿Dónde está la oficina?","Getting directions":"¿Dónde está el baño?",
+    "Restaurant":"¿Tienen una mesa?","Making weekend plans":"No estoy seguro todavía."
+  }[mission.setting]||"No estoy seguro todavía.";
+  // Eight meaningful moments. The learning work is still real, but the learner sees one coherent arc.
+  cards.push({type:"scene",stage:"Situation",context:mission.moment,dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),goal:mission.goal});
+  cards.push({type:"teach",stage:"Learn",...p1,exampleMeaning:p1.meaning});
+  cards.push({type:"check",stage:"Recognize",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.example,p2.example,p3.example,missionDistractor]),answer:p1.example,feedback:"Exactly. You recognized the expression that belongs in this moment."});
+  cards.push({type:"guided",stage:"Use",...p2,prompt:"Build the response you would use here.",meaning:p2.meaning,expected:p2.phrase,answer:p2.phrase});
+  cards.push({type:"listen",stage:"Listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,p1.phrase,p3.phrase,missionDistractor]),answer:p2.phrase,audioText:p2.phrase});
+  cards.push({type:"teach",stage:"Adapt",...p3,exampleMeaning:p3.meaning});
+  cards.push({type:"speak",stage:"Speak",...p3,meaning:p3.meaning,prompt:"Say the response you would actually use here.",expected:p3.phrase,answer:p3.phrase});
+  cards.push({type:"conversation",stage:"Talk",prompt:"Now the lesson ends and the real interaction begins.",phrase:mission.lines?.[0]?.text||"Respond naturally to the other person.",expected:"",answer:"",feedback:"Keep the interaction moving."});
 
   generated={
     title:(["B2","B2+","C1","C2"].includes(level)?level+" · "+mission.setting:mission.setting),
-    intro:"Learn it. Recognize it. Build it. Hear it. Say it. Then use it.",
+    intro:"Step into a real situation. Learn what you need, use it, then have the conversation.",
     scene:{setting:mission.setting,moment:mission.moment,learnerRole:mission.role,goal:mission.goal},
     cards
   };
