@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       "For B2/B2+/C1/C2, make the scene intellectually or socially demanding: negotiation, disagreement, explaining a position, resolving ambiguity, making a nuanced request, telling a story, or navigating an awkward social moment.",
       "Teach exactly 3 high-value language chunks, one at a time. Every teach card MUST explicitly explain the phrase in clear English before the learner is asked to answer anything. Level constraints are hard requirements: A0 chunks should normally be 1–3 target-language words; A1 chunks should normally be short fixed expressions or one-clause sentences; A2 chunks can be short routine sentences; B1+ can become progressively more natural, idiomatic, and nuanced.",
       "Each teach card must contain: target phrase, plain-English meaning, pronunciation, IPA, when a native speaker uses it, one natural target-language example, and an English explanation of why that example fits the scene.",
-      "Use this exact progression: scene setup -> teach chunk 1 -> contextual check -> guided adaptation -> teach chunk 2 -> contextual check -> guided adaptation -> teach chunk 3 -> contextual/tone check -> guided adaptation -> twist challenge -> speaking attempt -> short role-play. Never use a definition-only multiple-choice question."
+      "Use this exact progression: scene -> teach chunk 1 -> contextual choice -> guided response -> teach chunk 2 -> contextual choice -> guided response -> teach chunk 3 -> twist challenge -> speaking attempt -> short role-play turn -> final role-play turn. The learner should enter the situation before being taught language. Never use a definition-only multiple-choice question."
       "Every check, guided, and challenge prompt MUST be written in the learner's native language (English in this product) and clearly state what the learner is being asked to do.",
       "Checks must come only after the relevant phrase has been taught. Never introduce an unexplained target-language phrase inside a question and expect the learner to infer its meaning.",
       "Guided practice must show the relevant phrase or a clear English situation before asking for a response. The learner should always know what they are trying to say.",
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       "C1/C2 progression: first expose a nuanced expression in context, then analyze what it communicates, then compare natural alternatives, then reformulate it for a different relationship or register, then use it spontaneously in the scene.",
       "C1/C2 questions should test pragmatic competence, not word difficulty. A correct answer should depend on what a native speaker would naturally choose in that exact context.",
       "Never pad an advanced lesson with greetings, alphabet material, basic introductions, beginner travel phrases, or elementary vocabulary merely to satisfy the lesson structure.",
-      "Card ordering is mandatory. Return exactly 13 cards in this order: teach, check, guided, teach, check, guided, teach, check, guided, challenge, speak, conversation, conversation. Do not front-load questions. The learner should never reach a question containing unfamiliar target-language material without having first been taught it.",
+      "Card ordering is mandatory. Return exactly 12 cards in this order: scene, teach, check, guided, teach, check, guided, teach, challenge, speak, conversation, conversation. Do not front-load questions. The first card must make the learner feel like they have entered a real situation, not opened a textbook.",
       "Return ONLY JSON matching the schema."
     ].join(" ");
 
@@ -92,7 +92,7 @@ export default async function handler(req, res) {
       "Interests: " + (interests || "Everyday life"),
       "Scenario direction: " + focus,
       "Lesson context is only a scenario hint. Do NOT copy old phrases, cards, greetings, or vocabulary from it. Build new level-appropriate language from scratch: " + JSON.stringify(lessonContext),
-      "Make the lesson feel like a guided experience that takes about 8–12 minutes for A0/A1 and 12–18 minutes for higher levels. Keep each card focused; do not pad the lesson with redundant explanation."
+      "Make the lesson feel like a guided real-world experience that takes about 6–10 minutes for A0/A1 and 10–15 minutes for higher levels. Keep each card focused. Do not pad the lesson with redundant explanation, pronunciation text, or multiple audio buttons."
     ].join("\n");
 
     const schema = {
@@ -114,13 +114,13 @@ export default async function handler(req, res) {
         },
         cards: {
           type: "array",
-          minItems: 13,
-          maxItems: 13,
+          minItems: 12,
+          maxItems: 12,
           items: {
             type: "object",
             additionalProperties: false,
             properties: {
-              type: { type: "string", enum: ["teach","check","guided","challenge","speak","conversation"] },
+              type: { type: "string", enum: ["scene","teach","check","guided","challenge","speak","conversation"] },
               phrase: { type: "string" },
               pronunciation: { type: "string" },
               ipa: { type: "string" },
@@ -133,9 +133,12 @@ export default async function handler(req, res) {
               feedback: { type: "string" },
               instructions: { type: "string" },
               expected: { type: "string" },
-              followUp: { type: "string" }
+              followUp: { type: "string" },
+              context: { type: "string" },
+              goal: { type: "string" },
+              dialogue: { type: "array", items: { type: "object", additionalProperties: false, properties: { speaker: {type:"string"}, text: {type:"string"} }, required:["speaker","text"] } }
             },
-            required: ["type","phrase","pronunciation","ipa","meaning","usage","example","prompt","options","answer","feedback","instructions","expected","followUp"]
+            required: ["type","phrase","pronunciation","ipa","meaning","usage","example","prompt","options","answer","feedback","instructions","expected","followUp","context","goal","dialogue"]
           }
         }
       },
@@ -200,19 +203,23 @@ export default async function handler(req, res) {
     const basicGreetingPattern = /^(hola|hello|hi|buenos d[ií]as|buenas|hey|bonjour|hallo|ciao|oi|ol[aá])\b/i;
     const advancedTeachIsTooBasic = ["B1","B2","B2+","C1","C2"].includes(level) && cards.some(c => c.type === "teach" && basicGreetingPattern.test(String(c.phrase || "").trim()));
 
-    const hasLearning = teachCount === 3 && checkCount >= 3;
+    const hasLearning = teachCount === 3 && checkCount >= 2;
     const challengeCount = cards.filter(c => c.type === "challenge").length;
+    const sceneCount = cards.filter(c => c.type === "scene").length;
     const hasPractice = guidedCount >= 2;
     const hasChallenge = challengeCount >= 1;
     const hasSpeaking = speakCount >= 1;
     const hasConversation = conversationCount >= 1;
 
-    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || !hasLearning || !hasPractice || !hasChallenge || !hasSpeaking || !hasConversation || advancedTeachIsTooBasic || levelContentTooHard) {
+    if (!lesson.title || !lesson.intro || !lesson.scene?.setting || sceneCount !== 1 || !hasLearning || !hasPractice || !hasChallenge || !hasSpeaking || !hasConversation || advancedTeachIsTooBasic || levelContentTooHard) {
       return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete lesson structure.", requestId });
     }
 
     for (const card of cards) {
-      if (card.type === "teach" && (!card.phrase || !card.meaning || !card.pronunciation || !card.ipa || !card.usage || !card.example)) {
+      if (card.type === "scene" && (!Array.isArray(card.dialogue) || card.dialogue.length < 2 || !card.goal)) {
+        return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete scene card.", requestId });
+      }
+      if (card.type === "teach" && (!card.phrase || !card.meaning || !card.usage || !card.example)) {
         return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an incomplete teaching card.", requestId });
       }
       if (card.type === "check" && (!card.prompt || !Array.isArray(card.options) || card.options.length < 2 || !card.answer)) {
@@ -226,13 +233,13 @@ export default async function handler(req, res) {
       }
     }
 
-    const requiredOrder = ["teach","check","guided","teach","check","guided","teach","check","guided","challenge","speak","conversation","conversation"];
+    const requiredOrder = ["scene","teach","check","guided","teach","check","guided","teach","challenge","speak","conversation","conversation"];
     const orderIsValid = cards.length === requiredOrder.length && cards.every((card, i) => card.type === requiredOrder[i]);
     if (!orderIsValid) {
       return res.status(200).json({ lesson: null, degraded: true, error: "The AI returned an invalid lesson sequence.", requestId });
     }
 
-    return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, challengeCount, speakCount, conversationCount } });
+    return res.status(200).json({ lesson, meta: { level, types, teachCount, checkCount, guidedCount, challengeCount, speakCount, conversationCount, sceneCount } });
   } catch (error) {
     console.error("Nahtive lesson generation error:", error);
     if (error?.name === "AbortError") return res.status(200).json({ lesson: null, degraded: true, error: "AI generation timed out; local lesson fallback is active." });
