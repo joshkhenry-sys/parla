@@ -17,6 +17,8 @@ export default async function handler(request) {
       return Response.json({ error: "Text is required." }, { status: 400 });
     }
 
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
     const response = await fetch("https://api.openai.com/v1/audio/speech", {
       method: "POST",
       headers: {
@@ -35,8 +37,10 @@ export default async function handler(request) {
           "Do not sound like a narrator, voice assistant, audiobook, pronunciation recording, or teacher reading a script. " +
           "Do not over-enunciate individual words. Let the sentence breathe and feel spontaneous. " +
           "Target language and locale: " + language + "."
-      })
+      }),
+      signal: controller.signal
     });
+    clearTimeout(timer);
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
@@ -56,6 +60,8 @@ export default async function handler(request) {
     });
   } catch (error) {
     console.error("Nahtive TTS error:", error);
-    return Response.json({ error: "Could not generate speech." }, { status: 500 });
+    return Response.json({
+      error: error?.name === "AbortError" ? "Speech generation timed out." : "Could not generate speech."
+    }, { status: 504 });
   }
 }
