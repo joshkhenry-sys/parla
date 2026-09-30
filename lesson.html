@@ -310,13 +310,13 @@ async function transcribeRecording(blob,target,done){try{
       const dataUrl=String(reader.result||"");
       const audio=dataUrl.split(",")[1];
       if(!audio)throw new Error("No audio captured.");
-      const res=await fetch("/api/transcribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({audio,mimeType:blob.type||"audio/webm",language:profile?.code||"en-US"})});
+      const res=await fetch("/api/transcribe",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({audio,mimeType:blob.type||"audio/webm",language:profile?.code||"en-US",target:target||""})});
       const data=await res.json();
       if(!res.ok)throw new Error(data.error||"Transcription failed.");
       const heard=String(data.text||"").trim();
       if(!heard)throw new Error("No speech was detected.");
-      const ok=detected(heard),score=similarity(heard,target||"");
-      voice={text:heard,confidence:1,detected:ok,score};
+      const score=similarity(heard,target||"");
+      voice={text:heard,confidence:1,detected:true,score,language:profile?.code||"en-US"};
       $("input").value=heard;
       $("voiceStatus").textContent=ok?"I heard: "+heard:"I heard something, but it doesn't look like the target language yet.";
       done();
@@ -375,13 +375,12 @@ function renderSpeak(c){
    speechButton(target,()=>{
      const heard=voice?.text||"";
      const score=voice?.score||similarity(heard,target);
-     const languageOk=voice?.detected!==false;
-     const good=languageOk && score>=.72;
+     const good=score>=.72;
      $("feedback").textContent=good
        ? "Good. Nahtive heard the target expression clearly."
        : languageOk
          ? "Not quite yet. Listen once, then try again."
-         : "Nahtive could not verify the target language. Try again.";
+         : "Not close enough yet. Nahtive heard: "+(heard||"nothing")+" — try saying the target again.";
      $("voiceStatus").textContent=heard?"Heard: "+heard:"Try again.";
      if(good){
        xp+=15;
