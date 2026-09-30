@@ -116,8 +116,6 @@ function buildLessonFromContent(baseLesson){
  const secondMeaning=String(phrases[1]?.meaning||"Use this naturally in the situation.");
  const third=String(phrases[2]?.target||learnerLines[1]||phrase).trim();
  const thirdMeaning=String(phrases[2]?.meaning||"Use this naturally in the final exchange.");
- const secondNative=dialogue.filter(x=>String(x.speaker||"").toLowerCase()==="native").map(x=>String(x.text||"")).find(x=>x!==nativeLine)||"";
- const secondMeaning=secondNative?"Use this naturally in the situation.":"Use this naturally in the situation.";
  const pool=[...new Set([...phrases.map(x=>String(x?.target||"").trim()),...dialogue.map(x=>String(x.text||"").trim())].filter(Boolean))];
  const distractors=pool.filter(x=>x!==phrase&&x!==second).slice(0,3);
  while(distractors.length<3)distractors.push(["Thanks, that's all.","Maybe later.","I'm not sure."][distractors.length]);
