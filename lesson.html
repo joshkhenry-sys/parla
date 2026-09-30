@@ -474,13 +474,82 @@ function speechButton(target,done){
   $("voiceStatus").textContent="Microphone recording isn't available here. Check your browser permission and try again.";
 }
 function legacySpeechRecognition(SR,target,done){
-  const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;
-  r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};
-  r.onresult=e=>{const heard=e.results[0][0].transcript,score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:true,score,language:profile?.code||"en-US"};$("input").value=heard;$("voiceStatus").textContent="I heard: "+heard;done();};
-  r.onerror=e=>{$("voiceStatus").textContent=e.error==="not-allowed"?"Microphone permission was blocked. Allow microphone access and try again.":"I couldn't hear that. Try again.";voice=null};
-  r.onend=()=>{$("voice").disabled=false};
-  try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Try again.";}
+  const r=new SR();
+  r.lang=profile?.code||"en-US";
+  r.interimResults=true;
+  r.maxAlternatives=1;
+  r.continuous=false;
+  let finalText="";
+  let finished=false;
+  let finishTimer=null;
+
+  const finish=()=>{
+    if(finished)return;
+    finished=true;
+    if(finishTimer)clearTimeout(finishTimer);
+    try{r.stop()}catch(e){}
+    const heard=String(finalText||"").trim();
+    if(!heard){
+      $("voiceStatus").textContent="I couldn't catch that. Try again.";
+      $("voice").disabled=false;
+      $("voice").textContent="Speak it";
+      voice=null;
+      return;
+    }
+    const score=similarity(heard,target||"");
+    voice={text:heard,confidence:1,detected:true,score,language:profile?.code||"en-US"};
+    $("input").value=heard;
+    $("voiceStatus").textContent="Heard: "+heard;
+    $("voice").disabled=false;
+    $("voice").textContent="Speak again";
+    done();
+  };
+
+  r.onstart=()=>{
+    $("voice").disabled=true;
+    $("voice").textContent="Listening…";
+    $("voiceStatus").textContent="Listening…";
+  };
+  r.onresult=e=>{
+    let interim="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const text=String(e.results[i][0]?.transcript||"").trim();
+      if(e.results[i].isFinal)finalText+=(finalText?" ":"")+text;
+      else interim+=(interim?" ":"")+text;
+    }
+    if(interim)$("voiceStatus").textContent="Hearing: "+interim;
+    if(finalText){
+      // Give the browser a tiny settle window, then score immediately.
+      finishTimer=setTimeout(finish,80);
+    }
+  };
+  r.onerror=e=>{
+    if(finished)return;
+    if(e.error==="no-speech"){
+      $("voiceStatus").textContent="I didn't catch anything. Try again.";
+    }else if(e.error==="not-allowed"){
+      $("voiceStatus").textContent="Microphone permission was blocked. Allow microphone access and try again.";
+    }else{
+      $("voiceStatus").textContent="I couldn't hear that. Try again.";
+    }
+    $("voice").disabled=false;
+    $("voice").textContent="Speak it";
+    voice=null;
+  };
+  r.onend=()=>{
+    if(!finished&&finalText)finish();
+    else if(!finished){
+      $("voice").disabled=false;
+      $("voice").textContent="Speak it";
+    }
+  };
+  try{r.start()}catch(e){
+    $("voice").disabled=false;
+    $("voice").textContent="Speak it";
+    $("voiceStatus").textContent="Voice input is busy. Try again.";
+  }
 }
+
 function renderSpeak(c){
  const target=String(c.phrase||c.expected||"").trim();
  const body='<div class="lesson-task-label">SPEAKING CHECK</div>'+
