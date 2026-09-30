@@ -132,6 +132,17 @@ opening:"¿Quieres ir el sábado?"
 }
 };
 
+const frenchMissions={
+"Coffee shop":{setting:"Café",moment:"Tu commandes rapidement avant d'aller au travail.",goal:"Commander une boisson, faire une modification et réagir naturellement.",phrases:[["Je voudrais un café au lait.","I would like a café au lait."],["Vous avez du lait d'avoine ?","Do you have oat milk?"],["Ça marche.","That works / Okay."]],choices:["Combien ça coûte ?","Qu'est-ce que vous me conseillez ?","Je peux l'avoir à emporter ?"],opening:"Qu'est-ce que je vous sers ?"},
+"Taco shop":{setting:"Snack",moment:"La file avance vite et tu sais déjà ce que tu veux.",goal:"Commander, personnaliser ta commande et payer naturellement.",phrases:[["Je vais prendre un sandwich.","I'll have a sandwich."],["Sans oignons, s'il vous plaît.","No onions, please."],["Ça fait combien ?","How much is it?"]],choices:["Vous avez de l'eau ?","Qu'est-ce que vous avez aujourd'hui ?","Ça coûte combien ?"],opening:"Qu'est-ce que vous prenez ?"},
+"Grocery store":{setting:"Épicerie",moment:"Tu ne trouves pas ce qu'il te faut et un employé passe près de toi.",goal:"Demander de l'aide, confirmer la direction et terminer naturellement.",phrases:[["Où est le lait ?","Where is the milk?"],["Par ici ?","Around here?"],["Merci, je l'ai trouvé.","Thanks, I found it."]],choices:["C'est combien ?","Vous avez une autre marque ?","C'est dans quel rayon ?"],opening:"Je peux vous aider ?"},
+"Apartment viewing":{setting:"Visite d'appartement",moment:"L'appartement te plaît, mais tu veux vérifier un détail pratique.",goal:"Poser une question utile et garder une conversation naturelle.",phrases:[["J'aime bien, mais j'ai une question.","I like it, but I have a question."],["Le parking est compris ?","Is parking included?"],["Je vais y réfléchir.","I'll think about it."]],choices:["Quand est-ce que je peux emménager ?","Il faut combien pour le dépôt ?","Où est le bureau ?"],opening:"Qu'est-ce que vous en pensez ?"},
+"First day at work":{setting:"Premier jour au travail",moment:"Un collègue te montre comment quelque chose fonctionne.",goal:"Demander une explication et montrer que tu as compris.",phrases:[["Vous pouvez m'expliquer ?","Can you explain it to me?"],["Comment ça marche ?","How does this work?"],["Ah, je comprends.","Ah, I understand."]],choices:["Où est le bureau ?","Je le fais comme ça ?","Comment ça marche ?"],opening:"Vous comprenez comment ça marche ?"},
+"Getting directions":{setting:"Demander son chemin",moment:"Ton téléphone est presque déchargé et tu dois trouver ton chemin.",goal:"Demander où se trouve un endroit et confirmer l'itinéraire.",phrases:[["Comment je vais au centre-ville ?","How do I get downtown?"],["C'est loin ?","Is it far?"],["Alors, je passe par ici.","So, I'll go this way."]],choices:["Ça prend combien de temps ?","Je dois passer par où ?","C'est loin ?"],opening:"Vous cherchez quelque chose ?"},
+"Restaurant":{setting:"Restaurant",moment:"Le serveur te demande si tu es prêt, mais tu as encore besoin d'une minute.",goal:"Gagner du temps, poser une question, puis choisir.",phrases:[["Pas encore.","Not yet."],["Qu'est-ce que vous me conseillez ?","What do you recommend?"],["Je pense que je vais prendre ça.","I think I'll order this."]],choices:["C'est combien ?","Vous pouvez me laisser une minute ?","Qu'est-ce que vous conseillez ?"],opening:"Vous êtes prêts ?"},
+"Making weekend plans":{setting:"Préparer le week-end",moment:"Un ami propose une activité, mais tu n'es pas encore sûr.",goal:"Réagir naturellement, poser une question et faire un plan.",phrases:[["Pourquoi pas.","Could be / Why not."],["À quelle heure ?","What time?"],["Oui, ça me va.","Yeah, that works for me."]],choices:["On se retrouve où ?","Tu veux faire quoi ?","À quelle heure ?"],opening:"Tu veux sortir samedi ?"}
+};
+
 function browserSpeak(text){
  if(!("speechSynthesis" in window))return;
  speechSynthesis.cancel();
@@ -342,9 +353,11 @@ async function load(){
    const linked=baseLesson.learner_languages;
    profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(current.level||linked.level||"A1")};
    const key=String(baseLesson.topic||"");
-   let mission=missions[key]||missions["First day at work"];
+   const code=String(profile.code||"en").toLowerCase().split("-")[0];
+   const missionSet=code==="fr"?frenchMissions:missions;
+   let mission=missionSet[key]||missionSet["First day at work"];
    if(!missions[key]){
-     const keys=Object.keys(missions);
+     const keys=Object.keys(missionSet);
      mission=missions[keys[Math.floor(Math.random()*keys.length)]];
    }
    const p=mission.phrases;
