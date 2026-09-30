@@ -39,7 +39,7 @@
   <div class="scene-role"><span class="role-pulse"></span><span id="role"></span></div>
 </div>
 <div class="lesson-progress">
-  <div class="progress-top"><span id="stage">Getting started</span><strong id="progressCount">1 / 12</strong></div>
+  <div class="progress-top"><span id="stage">Getting started</span><strong id="progressCount">1 / 11</strong></div>
   <div class="progress-track"><div class="fill" id="fill"></div></div>
 </div>
 <main class="main">
@@ -70,88 +70,71 @@ let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],con
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
-async function speak(text,lang,button){
- if(!text)return false;
- const targetLang=lang||profile?.code||"en-US";
- const targetButton=button||document.activeElement?.closest?.("#hear,#hearExample");
- const original=targetButton?.textContent;
- if(targetButton){targetButton.disabled=true;targetButton.textContent="Loading audio…";}
- try{
-   if(activeAudio){activeAudio.pause();activeAudio.src="";activeAudio=null}
-   const controller=new AbortController();
-   const timeout=setTimeout(()=>controller.abort(),10000);
-   const res=await fetch("/api/speak",{
-     method:"POST",
-     headers:{"Content-Type":"application/json"},
-     body:JSON.stringify({text:String(text).slice(0,1200),language:targetLang}),
-     signal:controller.signal
-   });
-   clearTimeout(timeout);
-   if(!res.ok)throw new Error("TTS request failed: "+res.status);
-   const blob=await res.blob();
-   if(!blob.size)throw new Error("Empty audio response");
-   const url=URL.createObjectURL(blob);
-   const audio=new Audio(url);
-   activeAudio=audio;
-   audio.preload="auto";
-   if(targetButton)targetButton.textContent="Playing…";
-   await new Promise((resolve,reject)=>{
-     let settled=false;
-     const done=(fn)=>{if(settled)return;settled=true;clearTimeout(timer);fn()};
-     const timer=setTimeout(()=>done(()=>reject(new Error("Audio playback timed out."))),12000);
-     audio.onended=()=>done(resolve);
-     audio.onerror=()=>done(()=>reject(new Error("Audio playback failed.")));
-     audio.play().catch(err=>done(()=>reject(err)));
-   });
-   URL.revokeObjectURL(url);
-   if(activeAudio===audio)activeAudio=null;
-   return true;
- }catch(e){
-   console.warn("Nahtive AI voice unavailable:",e);
-   try{
-     if("speechSynthesis"in window){
-       speechSynthesis.cancel();
-       const u=new SpeechSynthesisUtterance(String(text));
-       u.lang=targetLang;
-       u.rate=.9;
-       u.pitch=1;
-       const voices=speechSynthesis.getVoices();
-       const base=targetLang.split("-")[0].toLowerCase();
-       const match=voices.find(v=>v.lang?.toLowerCase().startsWith(base));
-       if(match)u.voice=match;
-       speechSynthesis.resume();
-       speechSynthesis.speak(u);
-       return true;
-     }
-   }catch(fallbackError){console.warn("Nahtive browser voice unavailable:",fallbackError)}
-   toast("Audio is unavailable right now. Try again.");
-   return false;
- }finally{
-   if(targetButton){targetButton.disabled=false;targetButton.textContent=original||"Hear it";}
- }
+let cachedVoices=[];
+function refreshVoices(){cachedVoices=window.speechSynthesis?.getVoices?.()||[];return cachedVoices}
+if("speechSynthesis" in window){
+  refreshVoices();
+  window.speechSynthesis.addEventListener?.("voiceschanged",refreshVoices);
+}
+function pickVoice(lang){
+  const voices=refreshVoices();
+  const base=String(lang||"en-US").toLowerCase().split("-")[0];
+  return voices.find(v=>v.lang?.toLowerCase()===String(lang||"").toLowerCase())
+    || voices.find(v=>v.lang?.toLowerCase().startsWith(base+"-"))
+    || voices.find(v=>v.lang?.toLowerCase().startsWith(base));
+}
+function speak(text,lang,button){
+  if(!text||!("speechSynthesis" in window)){toast("Audio isn't available in this browser.");return false}
+  const targetLang=lang||profile?.code||"en-US";
+  if(activeAudio)window.speechSynthesis.cancel();
+  const original=button?.textContent;
+  if(button){button.disabled=true;button.textContent="Playing…";}
+  const u=new SpeechSynthesisUtterance(String(text).slice(0,700));
+  u.lang=targetLang;
+  u.rate=.9;
+  u.pitch=1;
+  const voice=pickVoice(targetLang);
+  if(voice)u.voice=voice;
+  u.onend=()=>{if(button){button.disabled=false;button.textContent=original||"Listen"};activeAudio=null};
+  u.onerror=()=>{if(button){button.disabled=false;button.textContent=original||"Listen"};activeAudio=null};
+  activeAudio=u;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(u);
+  return true;
 }
 
 function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();}
 function similarity(a,b){a=normalize(a);b=normalize(b);if(!a||!b)return 0;if(a===b)return 1;const A=[...a],B=[...b],d=Array.from({length:A.length+1},(_,i)=>i);for(let j=1;j<=B.length;j++){let p=d[0];d[0]=j;for(let i=1;i<=A.length;i++){const old=d[i],cost=A[i-1]===B[j-1]?0:1;d[i]=Math.min(d[i]+1,d[i-1]+1,p+cost);p=old}}return Math.max(0,1-d[A.length]/Math.max(A.length,B.length));}
 function detected(text){const code=(profile?.code||"").toLowerCase().split("-")[0];const r={ar:/[\u0600-\u06ff]/,pl:/[ąćęłńóśźż]/i,nl:/\b(ik|je|het|een|van|voor|wat|wil|kan|niet|goed|de)\b/i,es:/\b(que|como|quiero|puedo|para|por|una|uno|el|la|me|te|donde|bien)\b/i,en:/\b(i|you|the|a|what|can|get|for|me|is|want)\b/i};return code==="ar"?r.ar.test(text):r[code]?r[code].test(text):true;}
 function levelName(){return profile?.level||"A1";}
-function stageName(card){return ({teach:"Learn",check:"Choose",guided:"Build",challenge:"React",speak:"Say it",conversation:"Talk"})[card.type]||"Learn";}
+function stageName(card){return ({scene:"Scene",teach:"Learn",check:"Choose",guided:"Try it",challenge:"Twist",speak:"Say it",conversation:"Talk"})[card.type]||"Learn";}
 function toast(message){const t=$("toast");if(!t)return;t.textContent=message;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),1500);}
 function advance(){index++;render();window.scrollTo({top:0,behavior:"smooth"});}
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
+function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
+function renderScene(c){
+  const dialogue=Array.isArray(c.dialogue)?c.dialogue:[];
+  const body='<div class="lesson-task-label">THE MOMENT</div>'+
+    (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
+    '<div class="mini-dialogue">'+dialogue.map(d=>'<div class="dialogue-line"><strong>'+esc(d.speaker||"")+'</strong><span>'+esc(d.text||"")+'</span></div>').join("")+'</div>'+
+    '<div class="scene-goal"><strong>Your goal</strong><br>'+esc(c.goal||generated?.scene?.goal||"Handle the situation naturally.")+'</div>'+
+    '<div class="listen-row"><button class="secondary" id="hearScene">Listen to the scene</button></div>';
+  shell("You're in it","Don't study the language yet. First understand what is happening and what you need to accomplish.",body,'<div class="actions"><button class="primary" id="next">Start →</button></div>');
+  $("hearScene").onclick=()=>speak(dialogue.map(d=>d.text||"").join(" "),profile.code,$("hearScene"));
+  $("next").onclick=()=>{xp+=3;advance();};
+}
 function renderTeach(c){
- const body='<div class="lesson-task-label">Learn the expression</div>'+
+ const body='<div class="lesson-task-label">ONE USEFUL THING</div>'+
    '<div class="phrase">'+esc(c.phrase)+'</div>'+
    '<div class="meaning">'+esc(c.meaning)+'</div>'+
-   '<div class="pron"><strong>How it sounds</strong><br>'+esc(c.pronunciation)+(c.ipa?' · '+esc(c.ipa):'')+'</div>'+
-   '<div class="usage"><strong>When a native speaker uses it</strong><br>'+esc(c.usage)+'</div>'+
-   '<div class="example"><strong>Natural example</strong><br>'+esc(c.example)+(c.exampleMeaning?'<br><span class="example-explanation">'+esc(c.exampleMeaning)+'</span>':'')+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Hear phrase</button><button class="secondary" id="hearExample">Hear example</button></div>';
- shell("Learn this","First understand it. Then you will choose it, build it, and say it.",body,'<div class="actions"><div class="notice">First understand it. Then we will ask you to use it.</div><button class="primary" id="next">I understand →</button></div>');
- $("hear").onclick=()=>speak(c.phrase,profile.code); $("hearExample").onclick=()=>speak(c.example,profile.code);
- $("next").onclick=()=>{lessonSound("click");xp+=5;toast("Got it. Now use it.");advance();};
+   '<div class="usage"><strong>Use it when</strong><br>'+esc(c.usage)+'</div>'+
+   '<div class="example"><strong>In this scene</strong><br>'+esc(c.example)+(c.exampleMeaning?'<br><span class="example-explanation">'+esc(c.exampleMeaning)+'</span>':'')+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>';
+ shell("Learn this","One expression. One job. Then you use it immediately.",body,'<div class="actions"><button class="primary" id="next">Got it →</button></div>');
+ $("hear").onclick=()=>speak(c.example||c.phrase,profile.code,$("hear"));
+ $("next").onclick=()=>{xp+=5;advance();};
 }
+
 function lessonSound(kind){
  try{
   const C=window.AudioContext||window.webkitAudioContext;
@@ -179,13 +162,13 @@ function renderCheck(c){
  const body='<div class="lesson-task-label">SEE IT · HEAR IT · USE IT</div>'+
    '<div class="phrase">'+esc(phrase)+'</div>'+
    '<div class="pron"><strong>How to say it</strong><br>'+esc(c.pronunciation||phrase)+(c.ipa?' · '+esc(c.ipa):'')+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Hear it</button><button class="secondary" id="hearExample">Hear example</button></div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
    (c.example?'<div class="example"><strong>In a real conversation</strong><br>'+esc(c.example)+'</div>':'')+
    '<div class="task-question">'+esc(c.prompt||"Which line would you actually say here?")+'</div>'+
    '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'">'+esc(o)+'</button>').join("")+'</div>'+
    '<div class="notice feedback" id="feedback">Listen to the expression. Then choose the line you would actually say.</div>';
  shell("Use it","See the language, hear the pronunciation, and choose the response that works in the scene.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
- $("hear").onclick=()=>speak(phrase,profile.code); $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
+ $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
  document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");lessonSound(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"Good. That is the natural choice for this situation."):(c.feedback||"Not quite. Listen again and notice which response fits the scene.");$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
  $("next").onclick=()=>{lessonSound("click");toast("Good. Now use it.");advance();};
 }
@@ -222,8 +205,8 @@ function renderGuided(c){
  };
  const body='<div class="lesson-task-label">BUILD IT · YOUR TURN</div>'+
    '<div class="phrase compact">'+esc(phrase)+'</div>'+
-   '<div class="pron"><strong>Hear the model</strong><br>'+esc(c.pronunciation||phrase)+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Hear it</button><button class="secondary" id="hearExample">Hear example</button></div>'+
+   '<div class="pron"><strong>Say this idea</strong><br>'+esc(c.meaning||c.prompt||"Use the expression naturally.")+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
    '<div class="task-question">'+esc(c.prompt||"Build the response you would actually say.")+'</div>'+
    (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
    '<div class="build-zone" id="built"><span class="tile-placeholder">Tap the words to build the response.</span></div>'+
@@ -274,13 +257,13 @@ function renderSpeak(c){
  const body='<div class="lesson-task-label">SPEAKING CHECK</div>'+
    '<div class="phrase">'+esc(target)+'</div>'+
    '<div class="meaning">'+esc(c.meaning||c.prompt||"Say the expression naturally in the situation.")+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Hear a native model</button></div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Listen once</button></div>'+
    '<textarea class="input" id="input" placeholder="Type only if you cannot use your microphone…"></textarea>'+
    '<div class="listen-row"><button class="secondary" id="voice">Speak it</button></div>'+
    '<div class="notice" id="voiceStatus">Your first attempt is practice. Parla will check what it heard before giving credit.</div>'+
    '<div class="notice feedback" id="feedback"></div>';
  shell("Say it for real","You learned the expression. Now produce it without copying the answer from the screen.",body,'<div class="actions"><div class="notice">You need a real speaking attempt before continuing.</div><button class="primary" id="next" disabled>Continue →</button></div>');
- $("hear").onclick=()=>speak(target,profile.code);
+ $("hear").onclick=()=>speak(target,profile.code,$("hear"));
  $("voice").onclick=()=>{
    speechButton(target,()=>{
      const heard=voice?.text||"";
@@ -520,4 +503,23 @@ finally{clearTimeout(timer)}}catch(e){console.error(e);showError(e.message||"The
 load();
 </script>
 </body>
-</html>
+</html  const makeTeach=p=>({type:"teach",phrase:p.phrase,pronunciation:p.pronunciation,ipa:"",meaning:p.meaning,usage:p.usage,example:p.example,exampleMeaning:p.exampleMeaning,prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""});
+  const makeCheck=(p,others)=>({type:"check",phrase:p.phrase,pronunciation:p.pronunciation,example:p.example,prompt:"Someone says something that creates this moment. Which response fits best?",options:[p.example,others[0]?.example||p.example,"That doesn't fit the situation."],answer:p.example,feedback:"That fits the moment."});
+  const cards=[
+   {type:"scene",phrase:"",pronunciation:"",ipa:"",meaning:"",usage:"",example:"",prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:"",context:""+(scenario.moment||"The situation starts now."),goal:scenario.goal||"Handle the situation naturally.",dialogue:[
+     {speaker:"Other person",text:scenario.moment||"Something just happened. You need to respond."},
+     {speaker:"You",text:"Your turn is coming. Pay attention to what the situation requires."}
+   ]},
+   makeTeach(primary),
+   makeCheck(primary,[second]),
+   {type:"guided",phrase:primary.phrase,pronunciation:primary.pronunciation,example:primary.example,prompt:"Respond to the moment using the expression. Change one detail if you can.",context:primary.meaning,expected:primary.phrase,answer:primary.phrase,feedback:"Good. You used it for the actual situation."},
+   makeTeach(second),
+   makeCheck(second,[primary]),
+   {type:"guided",phrase:second.phrase,pronunciation:second.pronunciation,example:second.example,prompt:"The situation moves forward. Use this expression to respond.",context:second.meaning,expected:second.phrase,answer:second.phrase,feedback:"Good. Keep the scene moving."},
+   makeTeach(third),
+   {type:"challenge",phrase:third.phrase,pronunciation:third.pronunciation,example:third.example,prompt:"The other person changes one detail. Which response now sounds most natural?",options:[third.example,second.example,primary.example],answer:third.example,feedback:"That response fits the new situation."},
+   {type:"speak",phrase:third.phrase,pronunciation:third.pronunciation,meaning:third.meaning,prompt:"Say it naturally. Don't read the English meaning aloud.",expected:third.phrase,answer:third.phrase,feedback:"Good. Now use it in the conversation."},
+   {type:"conversation",phrase:"The situation continues. Respond naturally.",prompt:"Respond in the target language and keep the scene moving.",expected:"",answer:"",feedback:"Keep going.",instructions:"Respond naturally.",followUp:""},
+   {type:"conversation",phrase:"The other person reacts. Handle the final turn.",prompt:"Answer naturally without translating word-for-word.",expected:"",answer:"",feedback:"Finish the interaction naturally.",instructions:"Respond naturally.",followUp:""}
+  ];
+>
