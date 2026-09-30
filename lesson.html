@@ -512,24 +512,4 @@ render();
 load();
 </script>
 </body>
-</html  const makeTeach=p=>({type:"teach",phrase:p.phrase,pronunciation:p.pronunciation,ipa:"",meaning:p.meaning,usage:p.usage,example:p.example,exampleMeaning:p.exampleMeaning,prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""});
-  const makeCheck=(p,others)=>({type:"check",phrase:p.phrase,pronunciation:p.pronunciation,example:p.example,prompt:"Someone says something that creates this moment. Which response fits best?",options:[p.example,others[0]?.example||p.example,"That doesn't fit the situation."],answer:p.example,feedback:"That fits the moment."});
-  const cards=[
-   {type:"scene",phrase:"",pronunciation:"",ipa:"",meaning:"",usage:"",example:"",prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:"",context:scenario.moment||"The situation starts now.",goal:scenario.goal||"Handle the situation naturally.",dialogue:
-     (mission?.dialogue||[
-       {speaker:"Other person",text:scenario.moment||"Something just happened. You need to respond."},
-       {speaker:"You",text:"Your turn is coming. Pay attention to what the situation requires."}
-     ])},
-   makeTeach(primary),
-   makeCheck(primary,[second]),
-   {type:"guided",phrase:primary.phrase,pronunciation:primary.pronunciation,example:primary.example,prompt:"Respond to the moment using the expression. Change one detail if you can.",context:primary.meaning,expected:primary.phrase,answer:primary.phrase,feedback:"Good. You used it for the actual situation."},
-   makeTeach(second),
-   makeCheck(second,[primary]),
-   {type:"guided",phrase:second.phrase,pronunciation:second.pronunciation,example:second.example,prompt:"The situation moves forward. Use this expression to respond.",context:second.meaning,expected:second.phrase,answer:second.phrase,feedback:"Good. Keep the scene moving."},
-   makeTeach(third),
-   {type:"challenge",phrase:third.phrase,pronunciation:third.pronunciation,example:third.example,prompt:"The other person changes one detail. Which response now sounds most natural?",options:[third.example,second.example,primary.example],answer:third.example,feedback:"That response fits the new situation."},
-   {type:"speak",phrase:third.phrase,pronunciation:third.pronunciation,meaning:third.meaning,prompt:"Say it naturally. Don't read the English meaning aloud.",expected:third.phrase,answer:third.phrase,feedback:"Good. Now use it in the conversation."},
-   {type:"conversation",phrase:"The situation continues. Respond naturally.",prompt:"Respond in the target language and keep the scene moving.",expected:"",answer:"",feedback:"Keep going.",instructions:"Respond naturally.",followUp:""},
-   {type:"conversation",phrase:"The other person reacts. Handle the final turn.",prompt:"Answer naturally without translating word-for-word.",expected:"",answer:"",feedback:"Finish the interaction naturally.",instructions:"Respond naturally.",followUp:""}
-  ];
->
+</html>
