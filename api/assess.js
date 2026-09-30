@@ -41,11 +41,6 @@ Do not reduce the assessment to English translations. The target language must p
   if(expectedLevels.some(level=>counts[level]!==4)) return res.status(502).json({error:"Assessment level distribution was invalid"});
   const types=["reading","listening","grammar","production"];
   for(const level of expectedLevels){ const rows=parsed.questions.filter(q=>q.level===level); if(types.some(type=>rows.filter(q=>q.type===type).length!==1)) return res.status(502).json({error:"Assessment task distribution was invalid"}); }
-  const types=["reading","listening","grammar","production"];
-  for(const level of expectedLevels){
-    const levelQuestions=parsed.questions.filter(q=>q.level===level);
-    if(types.some(type=>levelQuestions.filter(q=>q.type===type).length!==1)) return res.status(502).json({error:"Assessment task distribution was invalid"});
-  }
   return res.status(200).json(parsed);
  }catch(e){return res.status(500).json({error:e.name==="AbortError"?"Assessment timed out":e.message})}
 }
