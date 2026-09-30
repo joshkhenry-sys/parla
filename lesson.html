@@ -102,79 +102,44 @@ const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 let user=null,profile=null,baseLesson=null,lesson=null,index=0,xp=0,answers=[],conversation=[],recognition=null;
 
-const missions={
-"Coffee shop":{
-setting:"Coffee shop",moment:"You're ordering quickly before work.",goal:"Order a drink, make a change, and react naturally.",
-phrases:[["Quiero un café con leche.","I want a coffee with milk."],["¿Tienes leche de avena?","Do you have oat milk?"],["Está bien.","That's fine / Okay."]],
-choices:["¿Cuánto cuesta?","¿Qué me recomiendas?","¿Me lo puedes preparar para llevar?"],
-opening:"¿Qué te preparo?"
-},
-"Taco shop":{
-setting:"Taco shop",moment:"The line is moving fast and you know what you want.",goal:"Order food, customize it, and pay naturally.",
-phrases:[["Me pones unos tacos de asada.","Can I get some carne asada tacos?"],["Sin cebolla, por favor.","No onion, please."],["¿Cuánto es?","How much is it?"]],
-choices:["¿Me das una botella de agua?","¿Qué tienen hoy?","¿Cuánto cuesta?"],
-opening:"¿Qué te pongo?"
-},
-"Grocery store":{
-setting:"Grocery store",moment:"You can't find what you need and an employee walks by.",goal:"Ask for help, confirm the direction, and close the interaction.",
-phrases:[["¿Dónde está la leche?","Where is the milk?"],["¿Por aquí?","Around here?"],["Gracias, ya la encontré.","Thanks, I found it."]],
-choices:["¿Cuánto cuesta?","¿Tienen otra marca?","¿En qué pasillo está?"],
-opening:"¿Te puedo ayudar?"
-},
-"Apartment viewing":{
-setting:"Apartment viewing",moment:"You like the apartment but need one practical detail.",goal:"Ask a useful question and keep the conversation natural.",
-phrases:[["Me gusta, pero tengo una pregunta.","I like it, but I have a question."],["¿Está incluido el estacionamiento?","Is parking included?"],["Déjame pensarlo.","Let me think about it."]],
-choices:["¿Cuándo puedo mudarme?","¿Cuánto es el depósito?","¿Dónde está la oficina?"],
-opening:"¿Qué te parece el departamento?"
-},
-"First day at work":{
-setting:"First day at work",moment:"A coworker is showing you how something works.",goal:"Ask for clarification and show that you understand.",
-phrases:[["¿Me puedes explicar?","Can you explain it to me?"],["¿Cómo funciona esto?","How does this work?"],["Ah, ya entiendo.","Ah, I understand now."]],
-choices:["¿Dónde está la oficina?","¿Lo hago así?","¿Cómo funciona esto?"],
-opening:"¿Entiendes cómo funciona?"
-},
-"Getting directions":{
-setting:"Getting directions",moment:"Your phone is almost dead and you need directions.",goal:"Ask where something is and confirm the route.",
-phrases:[["¿Cómo llego al centro?","How do I get downtown?"],["¿Está lejos?","Is it far?"],["Entonces voy por aquí.","So I'll go this way."]],
-choices:["¿Cuánto tarda?","¿Por dónde voy?","¿Está lejos?"],
-opening:"¿Buscas algo?"
-},
-"Restaurant":{
-setting:"Restaurant",moment:"The waiter asks if you're ready, but you need another minute.",goal:"Buy time, ask a question, then make your choice.",
-phrases:[["Todavía no.","Not yet."],["¿Qué me recomiendas?","What do you recommend?"],["Creo que voy a pedir esto.","I think I'll order this."]],
-choices:["¿Cuánto cuesta?","¿Me das otro minuto?","¿Qué me recomiendas?"],
-opening:"¿Ya saben qué quieren?"
-},
-"Making weekend plans":{
-setting:"Making weekend plans",moment:"A friend suggests an activity, but you're not sure yet.",goal:"React naturally, ask a follow-up, and make a plan.",
-phrases:[["Puede ser.","Could be / Maybe."],["¿A qué hora?","What time?"],["Sí, me parece bien.","Yeah, that works for me."]],
-choices:["¿Dónde nos vemos?","¿Qué quieres hacer?","¿A qué hora?"],
-opening:"¿Quieres ir el sábado?"
-}
-};
-
-const frenchMissions={
-"Coffee shop":{setting:"Café",moment:"Tu commandes rapidement avant d'aller au travail.",goal:"Commander une boisson, faire une modification et réagir naturellement.",phrases:[["Je voudrais un café au lait.","I would like a café au lait."],["Vous avez du lait d'avoine ?","Do you have oat milk?"],["Ça marche.","That works / Okay."]],choices:["Combien ça coûte ?","Qu'est-ce que vous me conseillez ?","Je peux l'avoir à emporter ?"],opening:"Qu'est-ce que je vous sers ?"},
-"Taco shop":{setting:"Snack",moment:"La file avance vite et tu sais déjà ce que tu veux.",goal:"Commander, personnaliser ta commande et payer naturellement.",phrases:[["Je vais prendre un sandwich.","I'll have a sandwich."],["Sans oignons, s'il vous plaît.","No onions, please."],["Ça fait combien ?","How much is it?"]],choices:["Vous avez de l'eau ?","Qu'est-ce que vous avez aujourd'hui ?","Ça coûte combien ?"],opening:"Qu'est-ce que vous prenez ?"},
-"Grocery store":{setting:"Épicerie",moment:"Tu ne trouves pas ce qu'il te faut et un employé passe près de toi.",goal:"Demander de l'aide, confirmer la direction et terminer naturellement.",phrases:[["Où est le lait ?","Where is the milk?"],["Par ici ?","Around here?"],["Merci, je l'ai trouvé.","Thanks, I found it."]],choices:["C'est combien ?","Vous avez une autre marque ?","C'est dans quel rayon ?"],opening:"Je peux vous aider ?"},
-"Apartment viewing":{setting:"Visite d'appartement",moment:"L'appartement te plaît, mais tu veux vérifier un détail pratique.",goal:"Poser une question utile et garder une conversation naturelle.",phrases:[["J'aime bien, mais j'ai une question.","I like it, but I have a question."],["Le parking est compris ?","Is parking included?"],["Je vais y réfléchir.","I'll think about it."]],choices:["Quand est-ce que je peux emménager ?","Il faut combien pour le dépôt ?","Où est le bureau ?"],opening:"Qu'est-ce que vous en pensez ?"},
-"First day at work":{setting:"Premier jour au travail",moment:"Un collègue te montre comment quelque chose fonctionne.",goal:"Demander une explication et montrer que tu as compris.",phrases:[["Vous pouvez m'expliquer ?","Can you explain it to me?"],["Comment ça marche ?","How does this work?"],["Ah, je comprends.","Ah, I understand."]],choices:["Où est le bureau ?","Je le fais comme ça ?","Comment ça marche ?"],opening:"Vous comprenez comment ça marche ?"},
-"Getting directions":{setting:"Demander son chemin",moment:"Ton téléphone est presque déchargé et tu dois trouver ton chemin.",goal:"Demander où se trouve un endroit et confirmer l'itinéraire.",phrases:[["Comment je vais au centre-ville ?","How do I get downtown?"],["C'est loin ?","Is it far?"],["Alors, je passe par ici.","So, I'll go this way."]],choices:["Ça prend combien de temps ?","Je dois passer par où ?","C'est loin ?"],opening:"Vous cherchez quelque chose ?"},
-"Restaurant":{setting:"Restaurant",moment:"Le serveur te demande si tu es prêt, mais tu as encore besoin d'une minute.",goal:"Gagner du temps, poser une question, puis choisir.",phrases:[["Pas encore.","Not yet."],["Qu'est-ce que vous me conseillez ?","What do you recommend?"],["Je pense que je vais prendre ça.","I think I'll order this."]],choices:["C'est combien ?","Vous pouvez me laisser une minute ?","Qu'est-ce que vous conseillez ?"],opening:"Vous êtes prêts ?"},
-"Making weekend plans":{setting:"Préparer le week-end",moment:"Un ami propose une activité, mais tu n'es pas encore sûr.",goal:"Réagir naturellement, poser une question et faire un plan.",phrases:[["Pourquoi pas.","Could be / Why not."],["À quelle heure ?","What time?"],["Oui, ça me va.","Yeah, that works for me."]],choices:["On se retrouve où ?","Tu veux faire quoi ?","À quelle heure ?"],opening:"Tu veux sortir samedi ?"}
-};
-
-function browserSpeak(text){
- if(!("speechSynthesis" in window))return;
- speechSynthesis.cancel();
- const u=new SpeechSynthesisUtterance(String(text||""));
- u.lang=profile?.code||"en-US";
- u.rate=.95;
- speechSynthesis.speak(u);
+function buildLessonFromContent(baseLesson){
+ const data=baseLesson?.content&&typeof baseLesson.content==="object"?baseLesson.content:{};
+ const scene=data.scene||{};
+ const dialogue=Array.isArray(data.dialogue)?data.dialogue:[];
+ const lang=data.language||{};
+ const nativeLine=dialogue.find(x=>String(x.speaker||"").toLowerCase()==="native")?.text||"";
+ const learnerLines=dialogue.filter(x=>String(x.speaker||"").toLowerCase()==="learner").map(x=>String(x.text||"")).filter(Boolean);
+ const phrase=String(lang.phrase||nativeLine||learnerLines[0]||"").trim();
+ const meaning=String(lang.meaning||lang.usage||"").trim();
+ const second=learnerLines[0]&&learnerLines[0]!==phrase?learnerLines[0]:"";
+ const secondMeaning=String(learnerLines[0]===second?(dialogue.find(x=>String(x.speaker||"").toLowerCase()==="native"&&x.text!==nativeLine)?.text||"Use this naturally in the situation.":"Use this naturally in the situation.").trim();
+ const pool=[...new Set(dialogue.map(x=>String(x.text||"").trim()).filter(Boolean))];
+ const distractors=pool.filter(x=>x!==phrase&&x!==second).slice(0,3);
+ while(distractors.length<3)distractors.push(["Thanks, that's all.","Maybe later.","I'm not sure."][distractors.length]);
+ const setting=String(scene.place||baseLesson.topic||"Everyday situation");
+ const moment=String(scene.situation||scene.time||"A real-world interaction.");
+ const goal=String(scene.mission||"Handle the interaction naturally.");
+ const cards=[
+   {type:"scene",stage:"Situation",setting,moment,goal},
+   {type:"teach",stage:"Learn",phrase,meaning:meaning||"A natural expression used in this situation."},
+   {type:"check",stage:"Recognize",prompt:"Which phrase fits this moment?",answer:phrase,distractors},
+   {type:"teach",stage:"Use",phrase:second||phrase,meaning:second?secondMeaning:"Now use the expression yourself in the same situation."},
+   {type:"check",stage:"Adapt",prompt:"What would you say to keep the exchange moving?",answer:second||phrase,distractors:second?[phrase,...distractors.slice(0,2)]:distractors},
+   {type:"speak",stage:"Speak",phrase:second||phrase,meaning:second?"Say it naturally, without translating first.":"Say the phrase naturally."},
+   {type:"teach",stage:"Adapt",phrase:phrase,meaning:"You will meet this expression again in a different context."},
+   {type:"talk",stage:"Talk",setting,goal,opening:nativeLine||phrase}
+ ];
+ return {
+   setting,moment,goal,opening:nativeLine||phrase,
+   cards:cards.filter(card=>card.phrase||card.type==="scene"||card.type==="check"||card.type==="talk")
+ };
 }
 
-function stopRecognition(){
- if(recognition){try{recognition.stop()}catch(e){} recognition=null}
+function localReply(c,input,turn){
+ const lines=Array.isArray(baseLesson?.content?.dialogue)?baseLesson.content.dialogue:[];
+ const native=lines.filter(x=>String(x.speaker||"").toLowerCase()==="native").map(x=>String(x.text||"")).filter(Boolean);
+ if(native.length)return native[Math.min(turn-1,native.length-1)];
+ return "That makes sense. Tell me a little more.";
 }
 
 function startRecognition(expected,done){
@@ -371,6 +336,7 @@ async function load(){
    ]);
    if(sessionResult.error||!sessionResult.data?.session?.user){location.href="login.html";return}
    user=sessionResult.data.session.user;
+
    const saved=localStorage.getItem("Nahtive_current_learner_language");
    const langsResult=await Promise.race([
      client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id),
@@ -379,43 +345,54 @@ async function load(){
    const {data:langs,error}=langsResult;
    if(error)throw error;
    if(!langs?.length){location.href="onboarding.html";return}
+
    const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];
+   localStorage.setItem("Nahtive_current_learner_language",current.id);
+
    const params=new URLSearchParams(location.search);
    const requested=params.get("id");
    if(requested){
-     const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,learner_languages(id,user_id,level,languages(name,code))").eq("id",requested).maybeSingle();
+     const r=await client.from("lessons")
+       .select("id,title,topic,level,content,learner_language_id,curriculum_node_id,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)")
+       .eq("id",requested).maybeSingle();
      if(r.error)throw r.error;
      if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("This lesson is not available.");
      baseLesson=r.data;
    }else{
-     baseLesson={id:null,title:"Live lesson",topic:"Everyday life",level:current.level,learner_languages:{id:current.id,user_id:user.id,level:current.level,languages:current.languages}};
+     const r=await client.from("lessons")
+       .select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)")
+       .eq("learner_language_id",current.id)
+       .order("created_at",{ascending:true})
+       .limit(120);
+     if(r.error)throw r.error;
+     const lessons=Array.isArray(r.data)?r.data:[];
+     if(!lessons.length)throw new Error("No lessons are available for this language yet.");
+     const ids=lessons.map(x=>x.id);
+     const attempts=await client.from("lesson_attempts").select("lesson_id").in("lesson_id",ids);
+     const completed=new Set((attempts.data||[]).map(x=>x.lesson_id));
+     const ordered=lessons.slice().sort((a,b)=>{
+       const as=Number(a.curriculum_nodes?.sequence_number||9999),bs=Number(b.curriculum_nodes?.sequence_number||9999);
+       return as-bs||new Date(a.created_at)-new Date(b.created_at);
+     });
+     baseLesson=ordered.find(x=>!completed.has(x.id))||ordered[ordered.length-1];
    }
+
    const linked=baseLesson.learner_languages;
-   profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(current.level||linked.level||"A1")};
-   const key=String(baseLesson.topic||"");
-   const code=String(profile.code||"en").toLowerCase().split("-")[0];
-   const missionSet=code==="fr"?frenchMissions:missions;
-   let mission=missionSet[key]||missionSet["First day at work"];
-   if(!missionSet[key]){
-     const keys=Object.keys(missionSet);
-     mission=missionSet[keys[Math.floor(Math.random()*keys.length)]];
-   }
-   const p=mission.phrases;
-   lesson={
-     setting:mission.setting,moment:mission.moment,goal:mission.goal,opening:mission.opening,
-     cards:[
-       {type:"scene",stage:"Situation",setting:mission.setting,moment:mission.moment,goal:mission.goal},
-       {type:"teach",stage:"Learn",phrase:p[0][0],meaning:p[0][1]},
-       {type:"check",stage:"Recognize",prompt:"What would you say here?",answer:p[0][0],distractors:mission.choices},
-       {type:"teach",stage:"Learn",phrase:p[1][0],meaning:p[1][1]},
-       {type:"check",stage:"Recognize",prompt:"Which response fits this moment?",answer:p[1][0],distractors:mission.choices},
-       {type:"speak",stage:"Speak",phrase:p[2][0],meaning:p[2][1]},
-       {type:"teach",stage:"Adapt",phrase:p[2][0],meaning:p[2][1]},
-       {type:"talk",stage:"Talk",setting:mission.setting,goal:mission.goal,opening:mission.opening}
-     ]
+   profile={
+     id:linked.id,
+     name:linked.languages?.name||"Language",
+     code:linked.languages?.code||"en-US",
+     level:String(baseLesson.level||linked.level||"A1")
    };
+   lesson=buildLessonFromContent(baseLesson);
+
+   if(!lesson?.cards?.length)throw new Error("This lesson has no usable learning content yet.");
+
    $("language").textContent=profile.name+" · "+profile.level;
-   $("title").textContent=mission.setting;
+   $("title").textContent=baseLesson.title||lesson.setting||"Lesson";
+   $("intro").textContent=baseLesson.curriculum_nodes?.stage_name
+     ? baseLesson.curriculum_nodes.stage_name+" · "+(baseLesson.curriculum_nodes.focus||"Real conversation")
+     : "Learn it. Use it. Then talk.";
    $("loading").style.display="none";
    $("lesson").style.display="block";
    render();
