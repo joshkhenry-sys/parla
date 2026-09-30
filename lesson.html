@@ -77,9 +77,13 @@ function speak(text,lang,button){
   if(button){button.disabled=true;button.textContent="Playing…";}
   const u=new SpeechSynthesisUtterance(String(text).slice(0,700));
   u.lang=targetLang;
-  u.rate=.9;
+  u.rate=.98;
   u.pitch=1;
-  const voice=pickVoice(targetLang);
+  const voices=refreshVoices();
+  const base=String(targetLang).toLowerCase().split("-")[0];
+  const voice=voices
+    .filter(v=>v.lang?.toLowerCase().startsWith(base))
+    .sort((a,b)=>((/premium|enhanced|natural/i.test(b.name)?3:0)+(!b.localService?1:0))-((/premium|enhanced|natural/i.test(a.name)?3:0)+(!a.localService?1:0)))[0]||pickVoice(targetLang);
   if(voice)u.voice=voice;
   u.onend=()=>{if(button){button.disabled=false;button.textContent=original||"Listen"};activeAudio=null};
   u.onerror=()=>{if(button){button.disabled=false;button.textContent=original||"Listen"};activeAudio=null};
@@ -289,6 +293,45 @@ function buildFallbackLesson(){
  const topic=String(baseLesson?.topic||seed.topic||"Everyday conversation");
  const scenario=seed.scene&&typeof seed.scene==="object"?seed.scene:{};
 
+ const missions={
+  es:[
+   {setting:"A taco shop in Denver",moment:"The line is moving fast. You know what you want, but you need to customize the order.",learnerRole:"You're ordering lunch.",goal:"Order naturally, make one change, and respond to the cashier.",
+    dialogue:[{speaker:"Cashier",text:"¿Qué te pongo?"},{speaker:"You",text:"You need to order and ask for one change."}],
+    phrases:[
+      {phrase:"Me pones unos tacos de...",meaning:"Can I get some tacos with...",pronunciation:"meh POH-nes OO-nos TAH-kos deh",usage:"A casual, natural way to order at a counter.",example:"Me pones unos tacos de asada, por favor?"},
+      {phrase:"Sin cebolla, por favor.",meaning:"No onion, please.",pronunciation:"seen seh-BOH-yah por fah-BOR",usage:"Put this after an order when you want something left out.",example:"Dos de asada, sin cebolla, por favor."},
+      {phrase:"¿Cuánto es?",meaning:"How much is it?",pronunciation:"KWAN-toh es",usage:"Use this when you are ready to pay.",example:"Perfecto. ¿Cuánto es?"}
+    ]},
+   {setting:"A coffee shop before work",moment:"You are running late. The person ahead of you is still ordering, and you need something quick.",learnerRole:"You're grabbing coffee.",goal:"Order quickly, customize it, and react naturally if something is unavailable.",
+    dialogue:[{speaker:"Barista",text:"Hola. ¿Qué te preparo?"},{speaker:"You",text:"Order your drink and be ready for a small change."}],
+    phrases:[
+      {phrase:"Quiero un...",meaning:"I want a...",pronunciation:"KYEH-roh oon",usage:"A simple direct way to order.",example:"Quiero un café con leche, por favor."},
+      {phrase:"¿Tienes...?",meaning:"Do you have...?",pronunciation:"TYEH-nes",usage:"Ask whether something is available.",example:"¿Tienes leche de avena?"},
+      {phrase:"Está bien.",meaning:"That's fine / Okay.",pronunciation:"es-TAH BYEN",usage:"A natural response when you accept an alternative.",example:"¿No queda leche de avena? Está bien, con leche normal."}
+    ]},
+   {setting:"A small apartment showing",moment:"You like the place, but you notice one thing you need to ask about before deciding.",learnerRole:"You're viewing an apartment.",goal:"Ask a practical question, clarify the answer, and respond without sounding scripted.",
+    dialogue:[{speaker:"Leasing agent",text:"¿Qué te parece el departamento?"},{speaker:"You",text:"You like it, but you need to ask about one detail."}],
+    phrases:[
+      {phrase:"Me gusta, pero...",meaning:"I like it, but...",pronunciation:"meh GOOS-tah PEH-roh",usage:"A natural way to give a positive reaction before raising a concern.",example:"Me gusta, pero tengo una pregunta."},
+      {phrase:"¿Está incluido...?",meaning:"Is ... included?",pronunciation:"es-TAH een-kloo-EE-doh",usage:"Ask whether something is included in the price.",example:"¿Está incluido el estacionamiento?"},
+      {phrase:"Déjame pensarlo.",meaning:"Let me think about it.",pronunciation:"DEH-hah-meh pen-SAR-loh",usage:"Use this when you need time instead of giving an immediate answer.",example:"Me gusta. Déjame pensarlo y te aviso."}
+    ]},
+   {setting:"A grocery store",moment:"You can't find one item and spot an employee nearby.",learnerRole:"You're looking for something.",goal:"Ask where it is, understand the answer, and keep the interaction moving.",
+    dialogue:[{speaker:"Employee",text:"¿Te puedo ayudar?"},{speaker:"You",text:"Ask where the item is and follow up if needed."}],
+    phrases:[
+      {phrase:"¿Dónde está...?",meaning:"Where is...?",pronunciation:"DON-deh es-TAH",usage:"Ask where you can find something.",example:"¿Dónde está la leche?"},
+      {phrase:"¿Por aquí?",meaning:"Around here?",pronunciation:"por ah-KEE",usage:"A quick way to check that you understood the direction.",example:"¿Por aquí?"},
+      {phrase:"Gracias, ya lo encontré.",meaning:"Thanks, I found it.",pronunciation:"GRAH-syahs yah loh en-kon-TREH",usage:"Close the interaction naturally after finding what you need.",example:"Gracias, ya lo encontré."}
+    ]}
+  ]
+ };
+ const missionList=missions[code]||[];
+ const missionIndex=Math.abs(String(baseLesson?.id||topic).split("").reduce((n,ch)=>n+ch.charCodeAt(0),0))%Math.max(missionList.length,1);
+ const mission=missionList[missionIndex];
+ if(mission){
+   scenario.setting=mission.setting; scenario.moment=mission.moment; scenario.learnerRole=mission.learnerRole; scenario.goal=mission.goal;
+   seed.scene={setting:mission.setting,moment:mission.moment,learnerRole:mission.learnerRole,goal:mission.goal};
+ }
  const contextual={
   es:{
    a0:[
@@ -426,7 +469,7 @@ function buildFallbackLesson(){
  const bank=contextual[code]||contextual.pl;
  const tier=level==="A0"?"a0":(["A1","A2"].includes(level)?"beginner":(["B1","B2"].includes(level)?"intermediate":"advanced"));
  const lessons=bank[tier];
- const primary=lessons[0],second=lessons[1]||primary,third=lessons[2]||primary;
+ const primary=mission?.phrases?.[0]||lessons[0],second=mission?.phrases?.[1]||lessons[1]||primary,third=mission?.phrases?.[2]||lessons[2]||primary;
  const makeTeach=p=>({type:"teach",phrase:p.phrase,pronunciation:p.pronunciation,ipa:"",meaning:p.meaning,usage:p.usage,example:p.example,exampleMeaning:p.exampleMeaning,prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""});
  const makeCheck=(p,others)=>({type:"check",phrase:p.phrase,pronunciation:p.pronunciation,example:p.example,prompt:"Which line would you actually say in this situation?",options:[p.example,others[0]?.example||p.example,"That doesn't fit what we're talking about."],answer:p.example,feedback:"Good. That response uses the expression naturally in the situation."});
  const cards=[
@@ -464,37 +507,18 @@ $("loading").style.display="none";
 $("lesson").style.display="grid";
 render();
 
-/* Enhance the lesson with AI without making the learner wait for it. */
-const controller=new AbortController();
-const timer=setTimeout(()=>controller.abort(),20000);
-try{
- const api=await fetch("/api/learn",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile:payload}),signal:controller.signal});
- if(api.ok){
-   const data=await api.json().catch(()=>null);
-   if(data?.lesson&&generatedLessonMatchesLevel(data.lesson)){
-     generated=data.lesson;
-     if(index===0){
-       $("title").textContent=generated.title;
-       $("intro").textContent=generated.intro;
-       $("setting").textContent=generated.scene.setting;
-       $("moment").textContent=generated.scene.moment;
-       $("role").textContent=generated.scene.learnerRole+" · Goal: "+generated.scene.goal;
-       render();
-     }
-   }
- }
-}catch(e){console.warn("Nahtive AI enhancement unavailable; keeping local lesson:",e)}
-finally{clearTimeout(timer)}}catch(e){console.error(e);showError(e.message||"The lesson could not load.");}}
+/* Do not block lesson start on AI generation. Lessons are built locally from real-world missions. */catch(e){console.error(e);showError(e.message||"The lesson could not load.");}}
 load();
 </script>
 </body>
 </html  const makeTeach=p=>({type:"teach",phrase:p.phrase,pronunciation:p.pronunciation,ipa:"",meaning:p.meaning,usage:p.usage,example:p.example,exampleMeaning:p.exampleMeaning,prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:""});
   const makeCheck=(p,others)=>({type:"check",phrase:p.phrase,pronunciation:p.pronunciation,example:p.example,prompt:"Someone says something that creates this moment. Which response fits best?",options:[p.example,others[0]?.example||p.example,"That doesn't fit the situation."],answer:p.example,feedback:"That fits the moment."});
   const cards=[
-   {type:"scene",phrase:"",pronunciation:"",ipa:"",meaning:"",usage:"",example:"",prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:"",context:""+(scenario.moment||"The situation starts now."),goal:scenario.goal||"Handle the situation naturally.",dialogue:[
-     {speaker:"Other person",text:scenario.moment||"Something just happened. You need to respond."},
-     {speaker:"You",text:"Your turn is coming. Pay attention to what the situation requires."}
-   ]},
+   {type:"scene",phrase:"",pronunciation:"",ipa:"",meaning:"",usage:"",example:"",prompt:"",options:[],answer:"",feedback:"",instructions:"",expected:"",followUp:"",context:scenario.moment||"The situation starts now.",goal:scenario.goal||"Handle the situation naturally.",dialogue:
+     (mission?.dialogue||[
+       {speaker:"Other person",text:scenario.moment||"Something just happened. You need to respond."},
+       {speaker:"You",text:"Your turn is coming. Pay attention to what the situation requires."}
+     ])},
    makeTeach(primary),
    makeCheck(primary,[second]),
    {type:"guided",phrase:primary.phrase,pronunciation:primary.pronunciation,example:primary.example,prompt:"Respond to the moment using the expression. Change one detail if you can.",context:primary.meaning,expected:primary.phrase,answer:primary.phrase,feedback:"Good. You used it for the actual situation."},
