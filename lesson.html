@@ -269,7 +269,46 @@ function renderGuided(c){
    toast(ok?"Nice. Now make it yours.":"Good attempt.");
  };
 }function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
-function renderSpeak(c){const body='<div class="lesson-task-label">Say it naturally</div><div class="phrase">'+esc(c.phrase||"")+'</div><div class="meaning">'+esc(c.prompt)+'</div><div class="listen-row"><button class="secondary" id="hear">Hear it</button></div><textarea class="input" id="input" placeholder="Type it if you prefer…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak it</button></div><div class="notice" id="voiceStatus">Speaking is practice, not a gate. You can type and continue.</div>';shell("Now say it","You have already learned the language. Now put it in your mouth.",body,'<div class="actions"><div class="notice">Aim for natural rhythm, not perfection.</div><button class="primary" id="next">Continue →</button></div>');$("hear").onclick=()=>speak(c.phrase,profile.code);$("voice").onclick=()=>speechButton(c.phrase,()=>{});$("next").onclick=()=>{const v=$("input").value.trim()||voice?.text||"";answers.push({type:"speak",response:v,voice});xp+=v?15:5;toast(v?"You used it — nice.":"Keep practicing.");advance();};}
+function renderSpeak(c){
+ const target=String(c.phrase||c.expected||"").trim();
+ const body='<div class="lesson-task-label">SPEAKING CHECK</div>'+
+   '<div class="phrase">'+esc(target)+'</div>'+
+   '<div class="meaning">'+esc(c.meaning||c.prompt||"Say the expression naturally in the situation.")+'</div>'+
+   '<div class="listen-row"><button class="secondary" id="hear">Hear a native model</button></div>'+
+   '<textarea class="input" id="input" placeholder="Type only if you cannot use your microphone…"></textarea>'+
+   '<div class="listen-row"><button class="secondary" id="voice">Speak it</button></div>'+
+   '<div class="notice" id="voiceStatus">Your first attempt is practice. Parla will check what it heard before giving credit.</div>'+
+   '<div class="notice feedback" id="feedback"></div>';
+ shell("Say it for real","You learned the expression. Now produce it without copying the answer from the screen.",body,'<div class="actions"><div class="notice">You need a real speaking attempt before continuing.</div><button class="primary" id="next" disabled>Continue →</button></div>');
+ $("hear").onclick=()=>speak(target,profile.code);
+ $("voice").onclick=()=>{
+   speechButton(target,()=>{
+     const heard=voice?.text||"";
+     const score=voice?.score||similarity(heard,target);
+     const languageOk=voice?.detected!==false;
+     const good=languageOk && score>=.72;
+     $("feedback").textContent=good
+       ? "Good. Parla heard the target expression clearly."
+       : languageOk
+         ? "Not quite yet. Try once more and focus on the words you just learned."
+         : "Parla could not verify the target language. Try again.";
+     $("voiceStatus").textContent=heard?"Heard: "+heard:"Try again.";
+     if(good){
+       xp+=15;
+       answers.push({type:"speak",response:heard,expected:target,score,voice,passed:true});
+       $("next").disabled=false;
+       $("next").textContent="Continue →";
+       toast("Speaking check passed.");
+     } else {
+       answers.push({type:"speak",response:heard,expected:target,score,voice,passed:false});
+       voice=null;
+       $("next").disabled=true;
+       toast("Try it again.");
+     }
+   });
+ };
+ $("next").onclick=()=>advance();
+}
 function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
 function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
 async function sendConversation(){const input=$("input").value.trim()||voice?.text||"";if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}const c=generated.cards[index],topic=baseLesson?.topic||"Everyday life";conversation.push({role:"user",content:input});$("input").value="";drawChat();$("send").disabled=true;$("voiceStatus").textContent="Thinking…";try{const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:levelName(),goal:profile.goal||"Real conversation",topic,messages:conversation})});const data=await res.json();if(!res.ok)throw new Error(data.error||"Conversation failed.");conversation.push({role:"assistant",content:data.text});answers.push({type:"conversation",user:input,assistant:data.text});xp+=20;drawChat();voice=null;if(answers.filter(a=>a.type==="conversation").length>=2){$("send").textContent="Finish lesson";$("send").onclick=finish;toast("You kept the conversation going.");}$("voiceStatus").textContent="Good. Keep the interaction natural."; }catch(e){$("voiceStatus").textContent=e.message||"The conversation couldn't continue. Try again."}finally{$("send").disabled=false;}}
