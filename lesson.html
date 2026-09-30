@@ -356,9 +356,7 @@ function buildFallbackLesson(){
   let mission;
 
   if(code==="es"){
-    const seed=String(baseLesson?.id||topic);
-    const n=[...seed].reduce((sum,ch)=>sum+ch.charCodeAt(0),0);
-    mission=spanishMissions[n%spanishMissions.length];
+    mission=spanishMissions[Math.floor(Math.random()*spanishMissions.length)];
   }else{
     const ps=generic[code]||generic.en;
     mission={
