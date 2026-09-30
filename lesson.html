@@ -130,6 +130,26 @@
 .live-targets>span{width:100%;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800}
 .live-target{padding:7px 10px;border-radius:999px;background:rgba(184,243,107,.06);border:1px solid rgba(184,243,107,.16);color:var(--text);font-size:12px}
 @media(max-width:600px){.live-scene-place{display:none}.live-response-row{align-items:stretch;flex-direction:column}.live-response-row .secondary{width:100%}}
+</style><style id="nahtive-kiss-lesson">
+.lesson-card-live{padding:34px 38px 28px!important}
+.lesson-card-live>.sub,.lesson-card-top,.lesson-card-heading,.lesson-step-arrow{display:none!important}
+.simple-lesson{max-width:760px}
+.simple-label{font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:20px}
+.simple-phrase{font-size:clamp(38px,6vw,58px);line-height:1.08;font-weight:700;letter-spacing:-.04em;color:var(--text);margin-bottom:12px}
+.simple-meaning{font-size:20px;line-height:1.5;color:var(--muted);margin-bottom:24px}
+.simple-listen{min-height:46px!important;padding:11px 17px!important;font-size:14px!important}
+.simple-question{font-size:26px;line-height:1.35;font-weight:600;color:var(--text);margin-bottom:22px}
+.simple-options{margin-top:0!important;gap:10px!important}
+.simple-options .option{min-height:66px!important;font-size:17px!important;padding:16px 18px!important}
+.simple-actions{margin-top:24px!important;padding-top:20px!important}
+.simple-lesson .notice{margin-top:16px}
+@media(max-width:600px){
+ .lesson-card-live{padding:28px 22px 24px!important}
+ .simple-phrase{font-size:40px}
+ .simple-meaning{font-size:18px}
+ .simple-question{font-size:23px}
+ .simple-options{grid-template-columns:1fr!important}
+}
 </style></head>
 <body>
 <div class="shell">
@@ -358,13 +378,14 @@ function advance(){
   render();
 }
 function renderTeach(c){
- const body='<div class="lesson-task-label">LEARN ONE PHRASE</div>'+
-   '<div class="phrase lesson-focus-phrase">'+esc(c.phrase)+'</div>'+
-   '<div class="meaning lesson-focus-meaning">'+esc(c.meaning)+'</div>'+
-   '<div class="example lesson-focus-example"><span>IN THIS SITUATION</span><strong>'+esc(c.example||c.phrase)+'</strong></div>'+
-   '<div class="listen-row"><button class="secondary lesson-listen-btn" id="hear">Listen</button></div>';
- shell("Learn this","Understand it. Hear it. Then use it.",body,'<div class="actions"><button class="primary" id="next">I understand →</button></div>');
- primeSpeech(c.example||c.phrase,profile.code); $("hear").onclick=()=>speak(c.example||c.phrase,profile.code,$("hear"));
+ const body='<div class="simple-lesson">'+
+   '<div class="simple-label">LEARN</div>'+
+   '<div class="simple-phrase">'+esc(c.phrase||"")+'</div>'+
+   '<div class="simple-meaning">'+esc(c.meaning||"")+'</div>'+
+   '<button class="simple-listen secondary" id="hear">Listen</button>'+
+   '</div>';
+ shell("", "", body,'<div class="actions simple-actions"><button class="primary" id="next">Got it →</button></div>');
+ primeSpeech(c.phrase,profile.code); $("hear").onclick=()=>speak(c.phrase,profile.code,$("hear"));
  $("next").onclick=()=>{xp+=5;advance();};
 }
 
@@ -392,17 +413,14 @@ function lessonSound(kind){
 }
 function renderCheck(c){
  let answered=false;
- const body='<div class="lesson-task-label">CHOOSE THE RIGHT MOVE</div>'+
-   '<div class="phrase compact">'+esc(c.phrase||"")+'</div>'+
-   '<div class="meaning">'+esc(c.meaning||"")+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
-   '<div class="task-question">'+esc(c.prompt||"Which response fits?")+'</div>'+
-   '<div class="choice-hint">There can be several words you know. Pick the one that fits <strong>this moment</strong>.</div>'+
-   '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'"><span class="choice-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div>'+
-   '<div class="notice feedback" id="feedback">Choose an answer to continue.</div>';
- shell("Your turn","Recognition comes before production. Choose the response a native speaker would use here.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
- $("hear").onclick=()=>speak(c.example||c.phrase,profile.code,$("hear"));
- document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");lessonSound(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"Correct. That is the response that fits the situation."):"Not quite. Read the meaning again, then notice what the other person is asking for.";$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
+ const body='<div class="simple-lesson">'+
+   '<div class="simple-label">CHOOSE</div>'+
+   '<div class="simple-question">'+esc(c.prompt||"What would you say?")+'</div>'+
+   '<div class="options simple-options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'"><span class="choice-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div>'+
+   '<div class="notice feedback" id="feedback">Choose the response that fits.</div>'+
+   '</div>';
+ shell("", "", body,'<div class="actions simple-actions"><button class="primary" id="next" disabled>Continue →</button></div>');
+ document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");lessonSound(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"That fits."):(c.feedback||"Not quite. Think about what you need in this moment.");$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
  $("next").onclick=()=>advance();
 }
 function renderChallenge(c){
@@ -1081,17 +1099,22 @@ function buildFallbackLesson(){
   const shuffle=(arr)=>[...arr].sort(()=>Math.random()-.5);
   const cards=[];
   const p1=phrases[0],p2=phrases[1],p3=phrases[2];
-  const missionDistractor={
-    "Coffee shop":"¿Qué me recomiendas?","Taco shop":"¿Qué tienen hoy?","Grocery store":"¿Cuánto cuesta?",
-    "Apartment viewing":"¿Cuándo puedo mudarme?","First day at work":"¿Dónde está la oficina?","Getting directions":"¿Dónde está el baño?",
-    "Restaurant":"¿Tienen una mesa?","Making weekend plans":"No estoy seguro todavía."
-  }[mission.setting]||"No estoy seguro todavía.";
+  const contextualDistractors={
+    "Coffee shop":["¿Me lo puedes preparar para llevar?","¿Cuánto cuesta?","¿Qué me recomiendas?"],
+    "Taco shop":["¿Cuánto es?","¿Me das una botella de agua?","¿Qué tienen hoy?"],
+    "Grocery store":["¿En qué pasillo está?","¿Cuánto cuesta?","¿Tienen otra marca?"],
+    "Apartment viewing":["¿Está incluido el estacionamiento?","¿Cuándo puedo mudarme?","¿Cuánto es el depósito?"],
+    "First day at work":["¿Cómo funciona esto?","¿Dónde está la oficina?","¿Lo hago así?"],
+    "Getting directions":["¿Está lejos?","¿Por dónde voy?","¿Cuánto tarda?"],
+    "Restaurant":["¿Qué me recomiendas?","¿Cuánto cuesta?","¿Me das otro minuto?"],
+    "Making weekend plans":["¿A qué hora?","¿Qué quieres hacer?","¿Dónde nos vemos?"]
+  }[mission.setting]||["¿Qué quieres decir?","¿Dónde está?","¿Cuánto cuesta?"];
   // Eight meaningful moments. The learning work is still real, but the learner sees one coherent arc.
   cards.push({type:"scene",stage:"Situation",context:mission.moment,dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),goal:mission.goal});
   cards.push({type:"teach",stage:"Learn",...p1,exampleMeaning:p1.meaning});
-  cards.push({type:"check",stage:"Recognize",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.example,p2.example,p3.example,missionDistractor]),answer:p1.example,feedback:"Exactly. You recognized the expression that belongs in this moment."});
+  cards.push({type:"check",stage:"Recognize",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.phrase,...contextualDistractors]),answer:p1.phrase,feedback:"That fits the situation."});
   cards.push({type:"guided",stage:"Use",...p2,prompt:"Build the response you would use here.",meaning:p2.meaning,expected:p2.phrase,answer:p2.phrase});
-  cards.push({type:"listen",stage:"Listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,p1.phrase,p3.phrase,missionDistractor]),answer:p2.phrase,audioText:p2.phrase});
+  cards.push({type:"listen",stage:"Listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,...contextualDistractors]),answer:p2.phrase,audioText:p2.phrase});
   cards.push({type:"teach",stage:"Adapt",...p3,exampleMeaning:p3.meaning});
   cards.push({type:"speak",stage:"Speak",...p3,meaning:p3.meaning,prompt:"Say the response you would actually use here.",expected:p3.phrase,answer:p3.phrase});
   const openingLine=mission.lines?.[0]?.[1]||"What do you need?";
@@ -1115,7 +1138,7 @@ function buildFallbackLesson(){
 
   generated={
     title:(["B2","B2+","C1","C2"].includes(level)?level+" · "+mission.setting:mission.setting),
-    intro:"Step into a real situation. Learn what you need, use it, then have the conversation.",
+    intro:"Learn it. Use it. Then talk.",
     scene:{setting:mission.setting,moment:mission.moment,learnerRole:mission.role,goal:mission.goal},
     cards
   };
