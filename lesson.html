@@ -166,6 +166,7 @@ let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],con
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
+let speechAudioContext=null;
 const speechCache=new Map();
 
 function setAudioButton(button,label,disabled=false){
@@ -182,62 +183,71 @@ async function speak(text,lang,button){
   if(button)button.dataset.originalLabel=original;
 
   if(activeAudio){
-    try{activeAudio.pause();activeAudio.currentTime=0;}catch(e){}
+    try{activeAudio.stop?.();activeAudio.pause?.();activeAudio.currentTime=0;}catch(e){}
     activeAudio=null;
   }
   if("speechSynthesis" in window)window.speechSynthesis.cancel();
-
   setAudioButton(button,"Loading…",true);
 
+  // Create/resume the audio context immediately from the user's click.
+  // This avoids Safari/mobile autoplay blocking after the TTS request finishes.
   try{
-    const key=locale+"|"+phrase;
-    let url=speechCache.get(key);
-    if(!url){
-      const res=await fetch("/api/speak",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({text:phrase,language:locale})
-      });
-      if(!res.ok){
-        const data=await res.json().catch(()=>({}));
-        throw new Error(data.error||"Natural voice is unavailable.");
+    const C=window.AudioContext||window.webkitAudioContext;
+    if(C){
+      speechAudioContext=speechAudioContext||new C();
+      if(speechAudioContext.state==="suspended")await speechAudioContext.resume();
+
+      const key=locale+"|"+phrase;
+      let buffer=speechCache.get(key);
+      if(!buffer){
+        const res=await fetch("/api/speak",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({text:phrase,language:locale})
+        });
+        if(!res.ok){
+          const data=await res.json().catch(()=>({}));
+          throw new Error(data.error||"Natural voice is unavailable.");
+        }
+        const bytes=await res.arrayBuffer();
+        if(!bytes.byteLength)throw new Error("Empty audio response.");
+        buffer=await speechAudioContext.decodeAudioData(bytes.slice(0));
+        speechCache.set(key,buffer);
       }
-      const blob=await res.blob();
-      if(!blob.size)throw new Error("Empty audio response.");
-      url=URL.createObjectURL(blob);
-      speechCache.set(key,url);
+
+      const source=speechAudioContext.createBufferSource();
+      source.buffer=buffer;
+      source.connect(speechAudioContext.destination);
+      activeAudio=source;
+      source.onended=()=>{
+        if(button)setAudioButton(button,original,false);
+        if(activeAudio===source)activeAudio=null;
+      };
+      source.start(0);
+      return true;
     }
-    const audio=new Audio(url);
-    audio.preload="auto";
-    activeAudio=audio;
-    audio.onended=()=>{
-      if(button)setAudioButton(button,original,false);
-      if(activeAudio===audio)activeAudio=null;
-    };
-    audio.onerror=()=>{
-      if(button)setAudioButton(button,original,false);
-      if(activeAudio===audio)activeAudio=null;
-    };
-    await audio.play();
-    return true;
   }catch(error){
-    if("speechSynthesis" in window){
-      try{
-        const u=new SpeechSynthesisUtterance(phrase);
-        u.lang=locale;
-        u.rate=.96;
-        u.pitch=1;
-        u.onend=()=>setAudioButton(button,original,false);
-        u.onerror=()=>setAudioButton(button,original,false);
-        activeAudio=u;
-        window.speechSynthesis.speak(u);
-        return true;
-      }catch(e){}
-    }
-    setAudioButton(button,original,false);
-    toast(error.message||"Audio isn't available right now.");
-    return false;
+    console.warn("Nahtive TTS playback failed:",error);
   }
+
+  // Last-resort browser voice. This also keeps lessons usable if the TTS API is down.
+  try{
+    if("speechSynthesis" in window){
+      const u=new SpeechSynthesisUtterance(phrase);
+      u.lang=locale;
+      u.rate=.96;
+      u.pitch=1;
+      u.onend=()=>setAudioButton(button,original,false);
+      u.onerror=()=>setAudioButton(button,original,false);
+      activeAudio=u;
+      window.speechSynthesis.speak(u);
+      return true;
+    }
+  }catch(e){}
+
+  setAudioButton(button,original,false);
+  toast("Audio isn't available right now. Try Listen again.");
+  return false;
 }
 
 function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^\p{L}\p{N} ]/gu," ").replace(/\s+/g," ").trim();}
