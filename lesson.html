@@ -67,7 +67,7 @@
   <span id="moment"></span>
   <div class="scene-role"><span class="role-pulse"></span><span id="role"></span></div>
 </div>
-<div class="lesson-progress">
+<div class="lesson-map" id="lessonMap"><div class="map-node active"><span>1</span><small>Scene</small></div><i></i><div class="map-node"><span>2</span><small>Learn</small></div><i></i><div class="map-node"><span>3</span><small>Practice</small></div><i></i><div class="map-node"><span>4</span><small>Listen</small></div><i></i><div class="map-node"><span>5</span><small>Speak</small></div><i></i><div class="map-node"><span>6</span><small>Talk</small></div></div><div class="lesson-progress">
   <div class="progress-top"><span id="stage">Getting started</span><strong id="progressCount">1 / 13</strong></div>
   <div class="progress-track"><div class="fill" id="fill"></div></div>
 </div>
@@ -133,7 +133,7 @@ function visualForSetting(setting){
  else if(key.includes("weekend")){icon="○";label="Weekend plans"}
  return '<div class="scene-visual" aria-hidden="true"><div class="visual-orbit"></div><div class="visual-icon">'+icon+'</div><div class="visual-label">'+esc(label)+'</div></div>';
 }
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
+function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];document.querySelectorAll(".map-node").forEach((n,i)=>n.classList.toggle("active",i<=Math.min(5,Math.floor(index/3))));$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
 function sceneIllustration(setting){
  const k=String(setting||"").toLowerCase();
