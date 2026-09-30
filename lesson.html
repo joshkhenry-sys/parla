@@ -75,6 +75,10 @@
 .lesson-focus-example span{font-size:10px!important;letter-spacing:.13em!important}
 .lesson-focus-example strong{display:block!important;font-size:20px!important;line-height:1.5!important;margin-top:7px!important;font-weight:600!important}
 .lesson-listen-btn{font-size:15px!important;padding:13px 18px!important}
+.lesson-pronunciation{margin-top:22px;padding:17px 19px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.035)}
+.lesson-pronunciation span{display:block;font-size:10px;letter-spacing:.14em;color:var(--muted);font-weight:800}
+.lesson-pronunciation strong{display:block;margin-top:7px;font-size:18px;line-height:1.45;font-weight:600}
+.lesson-pronunciation small{display:block;margin-top:4px;color:var(--muted);font-size:14px;font-style:italic}
 .lesson-card-live .meaning{font-size:19px!important;line-height:1.55!important}
 .lesson-card-live .task-question{font-family:var(--font)!important;font-size:25px!important;line-height:1.35!important}
 .lesson-card-live .choice-hint{font-size:14px!important;line-height:1.5!important}
@@ -183,7 +187,7 @@ function primeSpeech(text,lang){
   if(!C)return;
   speechAudioContext=speechAudioContext||new C();
   const key=locale+"|"+phrase;
-  if(speechCache.has(key)||speechCache.get("loading"))return;
+  if(speechCache.has(key))return;
   speechCache.set(key,"loading");
   fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:phrase,language:locale})})
     .then(async res=>{if(!res.ok)throw new Error("TTS failed");const bytes=await res.arrayBuffer();if(!bytes.byteLength)throw new Error("Empty TTS");return speechAudioContext.decodeAudioData(bytes.slice(0));})
@@ -216,9 +220,10 @@ async function speak(text,lang,button){
       const key=locale+"|"+phrase;
       let buffer=speechCache.get(key);
       if(buffer==="loading"){
-        setAudioButton(button,"Preparing…",true);
-        for(let i=0;i<30 && speechCache.get(key)==="loading";i++) await new Promise(r=>setTimeout(r,100));
-        buffer=speechCache.get(key);
+        // Never make the learner wait several seconds for a preload.
+        // If natural TTS is still generating, use the instant browser voice now.
+        // The natural voice remains cached for the next tap.
+        buffer=null;
       }
       if(!buffer){
         const res=await fetch("/api/speak",{
@@ -251,7 +256,9 @@ async function speak(text,lang,button){
     console.warn("Nahtive TTS playback failed:",error);
   }
 
-  // Last-resort browser voice. This also keeps lessons usable if the TTS API is down.
+  // Instant browser voice fallback. Never leave the learner staring at a loading state.
+  // Natural TTS is preloaded in the background and will be used on the next tap.
+
   try{
     if("speechSynthesis" in window){
       const u=new SpeechSynthesisUtterance(phrase);
