@@ -25,9 +25,10 @@ export default async function handler(request) {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini-tts",
-        voice: "cedar",
+        voice: "marin",
         input: text,
         response_format: "mp3",
+        speed: 1.02,
         instructions:
           "Speak like a real person in a relaxed face-to-face conversation. " +
           "Use natural connected speech, realistic pauses, contractions where natural, subtle emphasis, and varied conversational intonation. " +
