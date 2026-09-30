@@ -18,7 +18,7 @@ export default async function handler(request) {
     }
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
+    const timer = setTimeout(() => controller.abort(), 15000);
     const response = await fetch("https://api.openai.com/v1/audio/speech", {
       method: "POST",
       headers: {
@@ -50,12 +50,15 @@ export default async function handler(request) {
       );
     }
 
-    const audio = await response.arrayBuffer();
-    return new Response(audio, {
+    // Stream the upstream audio directly to the browser instead of waiting for the
+    // entire MP3 to be generated. This removes the unnecessary "wait for the whole
+    // file" bottleneck that was causing /api/speak to show as timed out.
+    return new Response(response.body, {
       status: 200,
       headers: {
-        "Content-Type": "audio/mpeg",
-        "Cache-Control": "public, max-age=3600"
+        "Content-Type": response.headers.get("content-type") || "audio/mpeg",
+        "Cache-Control": "public, max-age=3600",
+        "Transfer-Encoding": "chunked"
       }
     });
   } catch (error) {
