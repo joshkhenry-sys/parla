@@ -77,7 +77,7 @@ export default async function handler(request) {
           "Authorization": "Bearer " + apiKey
         },
         body: JSON.stringify({
-          model: "gpt-5.6-luna",
+          model: "gpt-5.6-sol",
           instructions,
           input: messages.length
             ? messages
