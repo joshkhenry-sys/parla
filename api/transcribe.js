@@ -1,4 +1,4 @@
-const MODEL="gpt-4o-transcribe";
+const MODEL="gpt-transcribe";
 const LANGUAGE_NAMES={en:"English",es:"Spanish",fr:"French",de:"German",nl:"Dutch",pl:"Polish",ar:"Arabic",it:"Italian",pt:"Portuguese",ja:"Japanese",ko:"Korean",zh:"Chinese"};
 
 export default async function handler(req,res){
