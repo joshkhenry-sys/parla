@@ -859,3 +859,120 @@ body.dashboard-page .primary-button{
   color:#fff!important;
   border-color:#18211e!important;
 }
+
+/* DASHBOARD READABILITY — solid light surfaces, dark text only */
+body.dashboard-page,
+body.dashboard-page *{
+  color:#18211e;
+}
+body.dashboard-page .nav-right,
+body.dashboard-page .streak,
+body.dashboard-page .dashboard-hero p,
+body.dashboard-page .eyebrow,
+body.dashboard-page .section-title,
+body.dashboard-page .card-label,
+body.dashboard-page .recommended-label,
+body.dashboard-page .recommended-time,
+body.dashboard-page .lesson-meta,
+body.dashboard-page .progress-description,
+body.dashboard-page .progress-footer,
+body.dashboard-page .quick-number,
+body.dashboard-page .quick-card p,
+body.dashboard-page .activity-subtitle,
+body.dashboard-page .activity-score,
+body.dashboard-page #logoutButton{
+  color:#3f4945!important;
+}
+body.dashboard-page .recommended,
+body.dashboard-page .progress-card,
+body.dashboard-page .language-switcher-card,
+body.dashboard-page .activity-card{
+  background:#fff!important;
+  color:#18211e!important;
+}
+body.dashboard-page .recommended{
+  background:#e9efdf!important;
+}
+body.dashboard-page .recommended h2,
+body.dashboard-page .recommended-copy,
+body.dashboard-page .lesson-meta{
+  color:#18211e!important;
+}
+body.dashboard-page .recommended-copy,
+body.dashboard-page .lesson-meta,
+body.dashboard-page .recommended-label,
+body.dashboard-page .recommended-time{
+  color:#3f4945!important;
+}
+body.dashboard-page .recommended-time,
+body.dashboard-page .level{
+  background:#fff!important;
+  color:#18211e!important;
+  border-color:#a6aaa2!important;
+}
+body.dashboard-page .progress-number,
+body.dashboard-page .language-name,
+body.dashboard-page .activity-title,
+body.dashboard-page .quick-card h3{
+  color:#18211e!important;
+}
+body.dashboard-page .progress-bar{
+  background:#c9ccc5!important;
+}
+body.dashboard-page .progress-fill{
+  background:#304a25!important;
+}
+body.dashboard-page .dashboard-language-link{
+  background:#fff!important;
+  color:#18211e!important;
+  border:1px solid #a6aaa2!important;
+}
+body.dashboard-page .dashboard-language-link span,
+body.dashboard-page .dashboard-language-link .manage-button{
+  color:#18211e!important;
+}
+body.dashboard-page .dashboard-language-link:hover{
+  background:#e9efdf!important;
+  border-color:#304a25!important;
+}
+body.dashboard-page .dashboard-language-link.current{
+  background:#304a25!important;
+  color:#fff!important;
+  border-color:#304a25!important;
+}
+body.dashboard-page .dashboard-language-link.current span,
+body.dashboard-page .dashboard-language-link.current .manage-button{
+  color:#fff!important;
+}
+body.dashboard-page .primary-button{
+  background:#18211e!important;
+  color:#fff!important;
+  border-color:#18211e!important;
+}
+body.dashboard-page .primary-button span{
+  color:#fff!important;
+}
+body.dashboard-page .quick-card{
+  border:1px solid #a6aaa2!important;
+}
+body.dashboard-page .quick-card:nth-child(1){background:#e0edf2!important}
+body.dashboard-page .quick-card:nth-child(2){background:#efd9d1!important}
+body.dashboard-page .quick-card:nth-child(3){background:#e3ecd9!important}
+body.dashboard-page .quick-card:nth-child(4){background:#f2e9c2!important}
+body.dashboard-page .quick-number,
+body.dashboard-page .quick-card p,
+body.dashboard-page .quick-arrow{
+  color:#18211e!important;
+}
+body.dashboard-page .quick-arrow{
+  background:#fff!important;
+  border:1px solid #a6aaa2!important;
+}
+body.dashboard-page .activity-card{
+  border-color:#a6aaa2!important;
+}
+body.dashboard-page .activity-icon.blue,
+body.dashboard-page .activity-icon.green,
+body.dashboard-page .activity-icon.coral{
+  color:#18211e!important;
+}
