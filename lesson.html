@@ -543,13 +543,20 @@ async function realtimeSpeechRecognition(target,done){
   const commit=()=>{
     if(state.committed||state.finished)return;
     state.committed=true;
-    if(state.channel?.readyState==="open"){
-      state.channel.send(JSON.stringify({type:"input_audio_buffer.commit"}));
-      $("voiceStatus").textContent=state.heard?"Finishing…":"I didn't catch anything yet…";
-      state.commitTimer=setTimeout(()=>finish(state.heard,"I couldn't get a clear transcript. Try again."),2200);
-    }else{
-      finish("", "Voice connection closed. Try again.");
-    }
+    const sendCommit=()=>{
+      if(state.finished)return;
+      if(state.channel?.readyState==="open"){
+        state.channel.send(JSON.stringify({type:"input_audio_buffer.commit"}));
+        $("voiceStatus").textContent=state.heard?"Finishing…":"I didn't catch anything yet…";
+        state.commitTimer=setTimeout(()=>finish(state.heard,"I couldn't get a clear transcript. Try again."),1800);
+      }else{
+        // The learner can finish speaking before the WebRTC data channel finishes opening.
+        // Wait briefly instead of treating that normal race as a voice failure.
+        state.committed=false;
+        state.commitTimer=setTimeout(sendCommit,180);
+      }
+    };
+    sendCommit();
   };
 
   try{
@@ -622,7 +629,7 @@ async function realtimeSpeechRecognition(target,done){
     state.maxTimer=setTimeout(()=>commit(),6500);
     state.connectTimer=setTimeout(()=>{
       if(!state.channelReady && !state.finished)finish("","Voice connection took too long. Try again.");
-    },6500);
+    },8500);
 
     const offer=await peer.createOffer();
     await peer.setLocalDescription(offer);
