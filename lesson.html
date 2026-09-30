@@ -365,11 +365,18 @@ async function finish(){
 
 async function load(){
  try{
-   const auth=await client.auth.getUser();
-   if(auth.error||!auth.data?.user){location.href="login.html";return}
-   user=auth.data.user;
+   const sessionResult=await Promise.race([
+     client.auth.getSession(),
+     new Promise((_,reject)=>setTimeout(()=>reject(new Error("Session check timed out.")),8000))
+   ]);
+   if(sessionResult.error||!sessionResult.data?.session?.user){location.href="login.html";return}
+   user=sessionResult.data.session.user;
    const saved=localStorage.getItem("Nahtive_current_learner_language");
-   const {data:langs,error}=await client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id);
+   const langsResult=await Promise.race([
+     client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id),
+     new Promise((_,reject)=>setTimeout(()=>reject(new Error("Language data timed out.")),8000))
+   ]);
+   const {data:langs,error}=langsResult;
    if(error)throw error;
    if(!langs?.length){location.href="onboarding.html";return}
    const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];
@@ -389,9 +396,9 @@ async function load(){
    const code=String(profile.code||"en").toLowerCase().split("-")[0];
    const missionSet=code==="fr"?frenchMissions:missions;
    let mission=missionSet[key]||missionSet["First day at work"];
-   if(!missions[key]){
+   if(!missionSet[key]){
      const keys=Object.keys(missionSet);
-     mission=missions[keys[Math.floor(Math.random()*keys.length)]];
+     mission=missionSet[keys[Math.floor(Math.random()*keys.length)]];
    }
    const p=mission.phrases;
    lesson={
