@@ -164,13 +164,20 @@
 
   const completedIds = new Set((completedResult.data || []).map(row => row.lesson_id));
 
+  const levelRank = { A0:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
+  const currentLevel = document.getElementById("dashboardLevel")?.textContent || "A1";
+  const targetRank = levelRank[currentLevel] ?? 1;
+
   lessons.sort((a,b) => {
+    const ar = Math.abs((levelRank[a.level] ?? 1) - targetRank);
+    const br = Math.abs((levelRank[b.level] ?? 1) - targetRank);
+    if (ar !== br) return ar - br;
     const as = Number(a.curriculum_nodes?.sequence_number || 9999);
     const bs = Number(b.curriculum_nodes?.sequence_number || 9999);
     return as - bs || new Date(a.created_at) - new Date(b.created_at);
   });
 
-  const lesson = lessons.find(row => !completedIds.has(row.id)) || lessons[lessons.length - 1];
+  const lesson = lessons.find(row => !completedIds.has(row.id)) || lessons[0];
   const stage = lesson.curriculum_nodes?.stage_name || "Core path";
   const focus = lesson.curriculum_nodes?.focus || "Real conversation";
 
