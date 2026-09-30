@@ -175,6 +175,22 @@ function setAudioButton(button,label,disabled=false){
   button.textContent=label;
 }
 
+function primeSpeech(text,lang){
+  const phrase=String(text||"").trim().slice(0,1200);
+  const locale=lang||profile?.code||"en-US";
+  if(!phrase)return;
+  const C=window.AudioContext||window.webkitAudioContext;
+  if(!C)return;
+  speechAudioContext=speechAudioContext||new C();
+  const key=locale+"|"+phrase;
+  if(speechCache.has(key)||speechCache.get("loading"))return;
+  speechCache.set(key,"loading");
+  fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:phrase,language:locale})})
+    .then(async res=>{if(!res.ok)throw new Error("TTS failed");const bytes=await res.arrayBuffer();if(!bytes.byteLength)throw new Error("Empty TTS");return speechAudioContext.decodeAudioData(bytes.slice(0));})
+    .then(buffer=>speechCache.set(key,buffer))
+    .catch(()=>speechCache.delete(key));
+}
+
 async function speak(text,lang,button){
   const phrase=String(text||"").trim().slice(0,1200);
   if(!phrase){toast("Nothing to play.");return false;}
@@ -199,6 +215,11 @@ async function speak(text,lang,button){
 
       const key=locale+"|"+phrase;
       let buffer=speechCache.get(key);
+      if(buffer==="loading"){
+        setAudioButton(button,"Preparing…",true);
+        for(let i=0;i<30 && speechCache.get(key)==="loading";i++) await new Promise(r=>setTimeout(r,100));
+        buffer=speechCache.get(key);
+      }
       if(!buffer){
         const res=await fetch("/api/speak",{
           method:"POST",
@@ -326,7 +347,7 @@ function renderTeach(c){
    '<div class="example lesson-focus-example"><span>IN THIS SITUATION</span><strong>'+esc(c.example||c.phrase)+'</strong></div>'+
    '<div class="listen-row"><button class="secondary lesson-listen-btn" id="hear">Listen</button></div>';
  shell("Learn this","Understand it. Hear it. Then use it.",body,'<div class="actions"><button class="primary" id="next">I understand →</button></div>');
- $("hear").onclick=()=>speak(c.example||c.phrase,profile.code,$("hear"));
+ primeSpeech(c.example||c.phrase,profile.code); primeSpeech(c.example||c.phrase,profile.code); $("hear").onclick=()=>speak(c.example||c.phrase,profile.code,$("hear"));
  $("next").onclick=()=>{xp+=5;advance();};
 }
 
@@ -393,7 +414,7 @@ function renderListen(c){
    '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'"><span class="choice-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div>'+
    '<div class="notice feedback" id="feedback">Press play, listen carefully, then choose.</div>';
  shell("Listen","Train your ear before you look for the words.",body,'<div class="actions"><button class="secondary" id="play">▶ Play</button><button class="primary" id="next" disabled>Continue →</button></div>');
- $("play").onclick=()=>speak(c.audioText||c.phrase,profile.code,$("play"));
+ primeSpeech(c.audioText||c.phrase,profile.code); $("play").onclick=()=>speak(c.audioText||c.phrase,profile.code,$("play"));
  document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.9;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");$("feedback").textContent=ok?"You heard it correctly.":"Close. Play it again and listen for the key phrase.";lessonSound(ok?"correct":"wrong");xp+=ok?10:4;answers.push({type:"listen",choice,correct:ok});$("next").disabled=false;});
  $("next").onclick=()=>advance();
 }
@@ -402,7 +423,7 @@ function renderVocab(c){
  const choices=c.choices||[];
  const body='<div class="lesson-task-label">VOCAB</div><div class="vocab-hero"><div class="vocab-word">'+esc(c.word)+'</div><button class="secondary" id="hearWord">▶ Hear</button></div><div class="task-question">What does <strong>'+esc(c.word)+'</strong> mean?</div><div class="options">'+choices.map((o,i)=>'<button class="option" data-i="'+i+'"><span class="choice-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div><div class="notice" id="feedback">Choose an answer.</div>';
  shell("Know the word","Learn a small word in context, then use it.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
- $("hearWord").onclick=()=>speak(c.word,profile.code,$("hearWord"));
+ primeSpeech(c.word,profile.code); $("hearWord").onclick=()=>speak(c.word,profile.code,$("hearWord"));
  document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=choices[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.meaning);document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");$("feedback").textContent=ok?"Correct.":"The meaning is: "+c.meaning;xp+=ok?8:3;$("next").disabled=false;});
  $("next").onclick=()=>advance();
 }
