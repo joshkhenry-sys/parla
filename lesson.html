@@ -219,8 +219,7 @@ function renderGuided(c){
    built.splice(i,1);
    renderTiles();
  };
- $("hear").onclick=()=>speak(phrase,profile.code);
- $("hearExample").onclick=()=>speak(c.example||phrase,profile.code);
+ $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
  $("voice").onclick=()=>speechButton(target,()=>{});
  $("submit").onclick=()=>{
    const typed=$("input").value.trim();
