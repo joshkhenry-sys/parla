@@ -257,6 +257,8 @@
         await loadRealStreak(user.id);
         localStorage.setItem("Nahtive_current_learner_language", learnerLanguage.id);
 
+        await loadSavedLessons(learnerLanguage.id, languageName);
+
         const myLanguagesGrid = document.getElementById("myLanguagesGrid");
         if (myLanguagesGrid) {
           myLanguagesGrid.innerHTML = (learnerLanguages || []).map(language => {
