@@ -43,7 +43,7 @@ export default async function handler(req, res) {
       "Choose language for usefulness, not textbook completeness. Teach three high-value chunks that the learner can immediately use in the scene. Do not teach three unrelated phrases.",
       "Every card must advance the same scene. The learner should know why they are learning the expression before producing it.",
       "Use English for explanations and task instructions because the learner's native language is English. Target-language dialogue, examples, choices, and learner output belong in the target language.",
-      "Avoid repetitive 'What does X mean?' questions. Understanding checks should test what a speaker would actually choose in context. Guided tasks should require the learner to adapt the chunk to a changed detail. Speaking tasks should require actual production.",
+      "Avoid repetitive 'What does X mean?' questions. Every choice question must present a concrete situation and ask what the learner would actually say or choose. Never make the correct answer obvious by repeating the just-taught phrase above the choices. Distractors must be plausible responses to the same situation, differing by communicative intent, not random vocabulary. Speaking tasks should require actual production.",
       "Include a small realistic twist near the end: the other person changes a detail, misunderstands something, asks a follow-up, or pushes back. The learner must respond using language from the lesson.",
       "The final role-play must be open enough that the learner cannot simply copy the model answer. Give a clear English situation and goal, then require a natural target-language response.",
       "For B1+, include at least one natural alternative or register choice. For B2+, C1 and C2, include pragmatic judgment, tone, implication, reformulation, or conversational repair rather than simply harder vocabulary.",
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       "For B2/B2+/C1/C2, make the scene intellectually or socially demanding: negotiation, disagreement, explaining a position, resolving ambiguity, making a nuanced request, telling a story, or navigating an awkward social moment.",
       "Teach exactly 3 high-value language chunks, one at a time. Every teach card MUST explicitly explain the phrase in clear English before the learner is asked to answer anything. Level constraints are hard requirements: A0 chunks should normally be 1–3 target-language words; A1 chunks should normally be short fixed expressions or one-clause sentences; A2 chunks can be short routine sentences; B1+ can become progressively more natural, idiomatic, and nuanced.",
       "Each teach card must contain: target phrase, plain-English meaning, pronunciation, IPA, when a native speaker uses it, one natural target-language example, and an English explanation of why that example fits the scene.",
-      "Use this exact progression: scene -> teach chunk 1 -> contextual choice -> guided response -> teach chunk 2 -> contextual choice -> guided response -> teach chunk 3 -> twist challenge -> speaking attempt -> short role-play turn -> final role-play turn. The learner should enter the situation before being taught language. Never use a definition-only multiple-choice question."
+      "Use a simple progression: scene -> teach chunk 1 -> contextual choice -> guided response -> teach chunk 2 -> contextual choice -> speaking attempt -> short role-play. Keep the learner-facing UI simple. The intelligence belongs in the lesson design, not in instructional copy. Never use a definition-only multiple-choice question."
       "Every check, guided, and challenge prompt MUST be written in the learner's native language (English in this product) and clearly state what the learner is being asked to do.",
       "Checks must come only after the relevant phrase has been taught. Never introduce an unexplained target-language phrase inside a question and expect the learner to infer its meaning.",
       "Guided practice must show the relevant phrase or a clear English situation before asking for a response. The learner should always know what they are trying to say.",
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       "C1/C2 progression: first expose a nuanced expression in context, then analyze what it communicates, then compare natural alternatives, then reformulate it for a different relationship or register, then use it spontaneously in the scene.",
       "C1/C2 questions should test pragmatic competence, not word difficulty. A correct answer should depend on what a native speaker would naturally choose in that exact context.",
       "Never pad an advanced lesson with greetings, alphabet material, basic introductions, beginner travel phrases, or elementary vocabulary merely to satisfy the lesson structure.",
-      "Card ordering is mandatory. Return exactly 12 cards in this order: scene, teach, check, guided, teach, check, guided, teach, challenge, speak, conversation, conversation. Do not front-load questions. The first card must make the learner feel like they have entered a real situation, not opened a textbook.",
+      "Card ordering is mandatory. Return exactly 8 cards in this order: scene, teach, check, guided, teach, check, speak, conversation. Do not front-load questions. The first card must make the learner feel like they have entered a real situation, not opened a textbook.",
       "Return ONLY JSON matching the schema."
     ].join(" ");
 
@@ -114,8 +114,8 @@ export default async function handler(req, res) {
         },
         cards: {
           type: "array",
-          minItems: 12,
-          maxItems: 12,
+          minItems: 8,
+          maxItems: 8,
           items: {
             type: "object",
             additionalProperties: false,
