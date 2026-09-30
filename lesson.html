@@ -1112,7 +1112,7 @@ function buildFallbackLesson(){
   // Eight meaningful moments. The learning work is still real, but the learner sees one coherent arc.
   cards.push({type:"scene",stage:"Situation",context:mission.moment,dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),goal:mission.goal});
   cards.push({type:"teach",stage:"Learn",...p1,exampleMeaning:p1.meaning});
-  cards.push({type:"check",stage:"Recognize",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.phrase,...contextualDistractors]),answer:p1.phrase,feedback:"That fits the situation."});
+  cards.push({type:"check",stage:"Recognize",...p1,prompt:"What would you say in this situation?",options:shuffle([p1.phrase,...contextualDistractors]),answer:p1.phrase,feedback:"That fits the situation."});
   cards.push({type:"guided",stage:"Use",...p2,prompt:"Build the response you would use here.",meaning:p2.meaning,expected:p2.phrase,answer:p2.phrase});
   cards.push({type:"listen",stage:"Listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,...contextualDistractors]),answer:p2.phrase,audioText:p2.phrase});
   cards.push({type:"teach",stage:"Adapt",...p3,exampleMeaning:p3.meaning});
