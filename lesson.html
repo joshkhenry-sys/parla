@@ -578,6 +578,8 @@ function renderSpeak(c){
        $("next").disabled=false;
        $("next").textContent="Continue →";
        toast("Speaking check passed.");
+       // Keep the win moment short. The learner can continue immediately.
+       setTimeout(()=>{if($("next")&&!$("next").disabled)advance()},350);
      } else {
        answers.push({type:"speak",response:heard,expected:target,score,voice,passed:false});
        voice=null;
