@@ -16,6 +16,17 @@
 .word-tile.picked{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3)}
 .compact-input{margin-top:4px}
 .lesson-score{font-size:12px;letter-spacing:2px;opacity:.75;margin-left:10px}
+
+.scene-layout{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:stretch}
+.scene-visual{position:relative;min-height:220px;border-radius:22px;background:linear-gradient(145deg,#1d2940,#111827);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.visual-orbit{position:absolute;width:155px;height:155px;border:1px solid rgba(184,243,107,.18);border-radius:50%;box-shadow:0 0 0 28px rgba(184,243,107,.025),0 0 0 58px rgba(184,243,107,.018)}
+.visual-icon{position:relative;font-size:72px;font-family:var(--serif);color:var(--accent);text-shadow:0 0 35px rgba(184,243,107,.18)}
+.visual-label{position:absolute;bottom:14px;left:15px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:900;color:var(--muted)}
+.scene-content{min-width:0}.mini-dialogue{display:grid;gap:8px;margin-top:16px}.dialogue-line{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:11px 12px;border-radius:12px;background:var(--surface2);border:1px solid var(--line)}.dialogue-line strong{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}.dialogue-line span{font-size:14px;color:var(--text)}
+.scene-goal{margin-top:12px;padding:13px 14px;border-radius:14px;background:rgba(184,243,107,.07);border:1px solid rgba(184,243,107,.14);font-size:12px;color:var(--muted)}.scene-goal strong{color:var(--text)}
+.choice-prompt{margin-top:24px;font-family:var(--serif);font-size:20px;color:var(--text)}.mode-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.mode-choice{min-height:88px;text-align:left;padding:15px;border-radius:15px;background:var(--surface2);border:1px solid var(--line);color:var(--text);transition:.18s}.mode-choice strong{display:block;font-size:13px}.mode-choice span{display:block;margin-top:5px;color:var(--muted);font-size:11px;line-height:1.4}.mode-choice:hover,.mode-choice.selected{border-color:rgba(184,243,107,.45);background:rgba(184,243,107,.09);transform:translateY(-2px)}
+.choice-hint{margin-top:12px;color:var(--muted);font-size:11px}.choice-letter{width:25px;height:25px;border-radius:8px;display:inline-grid;place-items:center;background:rgba(255,255,255,.06);color:var(--accent);font-size:10px;font-weight:900;margin-right:9px;flex:none}.lesson .option{display:flex;align-items:center;gap:2px}.listen-card-visual{margin-top:18px;padding:22px;border-radius:18px;background:linear-gradient(135deg,rgba(184,243,107,.09),rgba(124,108,255,.08));border:1px solid var(--line);display:flex;align-items:center;gap:18px}.sound-ring{font-size:30px;letter-spacing:-6px;color:var(--accent);font-weight:900}.listen-card-visual strong{display:block;font-size:15px}.listen-card-visual span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.fill-sentence{margin-top:20px;padding:20px;border-radius:17px;background:var(--surface2);font-family:var(--serif);font-size:24px;line-height:1.35;color:var(--text)}.blank{display:inline-block;min-width:90px;border-bottom:2px solid var(--accent);color:var(--accent)}.guided-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+@media(max-width:650px){.scene-layout{grid-template-columns:1fr}.scene-visual{min-height:150px}.mode-choices{grid-template-columns:1fr}.dialogue-line{grid-template-columns:62px 1fr}.fill-sentence{font-size:20px}}
 </style></head>
 <body>
 <div class="shell">
@@ -39,7 +50,7 @@
   <div class="scene-role"><span class="role-pulse"></span><span id="role"></span></div>
 </div>
 <div class="lesson-progress">
-  <div class="progress-top"><span id="stage">Getting started</span><strong id="progressCount">1 / 12</strong></div>
+  <div class="progress-top"><span id="stage">Getting started</span><strong id="progressCount">1 / 13</strong></div>
   <div class="progress-track"><div class="fill" id="fill"></div></div>
 </div>
 <main class="main">
@@ -91,21 +102,36 @@ function normalize(v){return String(v||"").toLowerCase().normalize("NFD").replac
 function similarity(a,b){a=normalize(a);b=normalize(b);if(!a||!b)return 0;if(a===b)return 1;const A=[...a],B=[...b],d=Array.from({length:A.length+1},(_,i)=>i);for(let j=1;j<=B.length;j++){let p=d[0];d[0]=j;for(let i=1;i<=A.length;i++){const old=d[i],cost=A[i-1]===B[j-1]?0:1;d[i]=Math.min(d[i]+1,d[i-1]+1,p+cost);p=old}}return Math.max(0,1-d[A.length]/Math.max(A.length,B.length));}
 function detected(text){const code=(profile?.code||"").toLowerCase().split("-")[0];const r={ar:/[\u0600-\u06ff]/,pl:/[ąćęłńóśźż]/i,nl:/\b(ik|je|het|een|van|voor|wat|wil|kan|niet|goed|de)\b/i,es:/\b(que|como|quiero|puedo|para|por|una|uno|el|la|me|te|donde|bien)\b/i,en:/\b(i|you|the|a|what|can|get|for|me|is|want)\b/i};return code==="ar"?r.ar.test(text):r[code]?r[code].test(text):true;}
 function levelName(){return profile?.level||"A1";}
-function stageName(card){return ({scene:"Scene",teach:"Learn",check:"Choose",guided:"Try it",challenge:"Twist",speak:"Say it",conversation:"Talk"})[card.type]||"Learn";}
-function toast(message){const t=$("toast");if(!t)return;t.textContent=message;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),1500);}
-function advance(){index++;render();window.scrollTo({top:0,behavior:"smooth"});}
-function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
+function stageName(card){return ({scene:"Scene",teach:"Learn",check:"Choose",guided:"Build",listen:"Listen",fill:"Complete",challenge:"Challenge",speak:"Speak",conversation:"Talk"})[card.type]||"Learn";}
+function visualForSetting(setting){
+ const key=String(setting||"").toLowerCase();
+ let icon="◌", label=setting||"Real life";
+ if(key.includes("coffee")){icon="☕";label="Coffee shop"}
+ else if(key.includes("taco")||key.includes("restaurant")){icon="◒";label=setting}
+ else if(key.includes("grocery")){icon="▦";label="Grocery store"}
+ else if(key.includes("apartment")){icon="⌂";label="Apartment"}
+ else if(key.includes("work")){icon="▥";label="Work"}
+ else if(key.includes("direction")){icon="↗";label="Getting around"}
+ else if(key.includes("weekend")){icon="○";label="Weekend plans"}
+ return '<div class="scene-visual" aria-hidden="true"><div class="visual-orbit"></div><div class="visual-icon">'+icon+'</div><div class="visual-label">'+esc(label)+'</div></div>';
+}
+function render(){const cards=generated.cards||[];if(index>=cards.length){finish();return}const card=cards[index];$("stage").textContent=stageName(card);$("progressCount").textContent=(index+1)+" / "+cards.length;$("fill").style.width=((index+1)/cards.length*100)+"%";$("xpMini").textContent=xp+" XP";if(card.type==="scene")renderScene(card);else if(card.type==="teach")renderTeach(card);else if(card.type==="check")renderCheck(card);else if(card.type==="guided")renderGuided(card);else if(card.type==="listen")renderListen(card);else if(card.type==="fill")renderFill(card);else if(card.type==="challenge")renderChallenge(card);else if(card.type==="speak")renderSpeak(card);else renderConversation(card);}
 function shell(title,sub,body,actions){$("card").innerHTML='<section class="card lesson-card-live"><div class="lesson-card-top"><span class="lesson-live-dot"></span><span>IN THE MOMENT</span></div><div class="lesson-card-heading"><h2>'+esc(title)+'</h2><span class="lesson-step-arrow">↗</span></div><p class="sub">'+esc(sub||"")+'</p>'+body+actions+'</section>';requestAnimationFrame(()=>$("card").querySelector(".lesson-card-live")?.classList.add("entered"));}
 function renderScene(c){
-  const dialogue=Array.isArray(c.dialogue)?c.dialogue:[];
-  const body='<div class="lesson-task-label">THE MOMENT</div>'+
-    (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
-    '<div class="mini-dialogue">'+dialogue.map(d=>'<div class="dialogue-line"><strong>'+esc(d.speaker||"")+'</strong><span>'+esc(d.text||"")+'</span></div>').join("")+'</div>'+
-    '<div class="scene-goal"><strong>Your goal</strong><br>'+esc(c.goal||generated?.scene?.goal||"Handle the situation naturally.")+'</div>'+
-    '<div class="listen-row"><button class="secondary" id="hearScene">Listen to the scene</button></div>';
-  shell("You're in it","Don't study the language yet. First understand what is happening and what you need to accomplish.",body,'<div class="actions"><button class="primary" id="next">Start →</button></div>');
-  $("hearScene").onclick=()=>speak(dialogue.map(d=>d.text||"").join(" "),profile.code,$("hearScene"));
-  $("next").onclick=()=>{xp+=3;advance();};
+ const dialogue=Array.isArray(c.dialogue)?c.dialogue:[];
+ const body='<div class="scene-layout">'+visualForSetting(generated?.scene?.setting)+
+   '<div class="scene-content"><div class="lesson-task-label">REAL WORLD SCENE</div>'+
+   (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
+   '<div class="mini-dialogue">'+dialogue.map(d=>'<div class="dialogue-line"><strong>'+esc(d.speaker||"")+'</strong><span>'+esc(d.text||"")+'</span></div>').join("")+'</div>'+
+   '<div class="scene-goal"><strong>Your mission</strong><br>'+esc(c.goal||generated?.scene?.goal||"Handle the situation naturally.")+'</div></div></div>'+
+   '<div class="choice-prompt">What do you want to practice first?</div>'+
+   '<div class="mode-choices"><button class="mode-choice" data-mode="learn"><strong>Learn</strong><span>Understand the key language.</span></button><button class="mode-choice" data-mode="practice"><strong>Practice</strong><span>Choose and build responses.</span></button><button class="mode-choice" data-mode="speak"><strong>Speak</strong><span>Say it yourself.</span></button></div>'+
+   '<div class="listen-row"><button class="secondary" id="hearScene">Listen to the scene</button></div>';
+ shell("You're in it","Start with the situation. Then Parla gives you several ways to practice the same language.",body,'<div class="actions"><button class="primary" id="next">Start mission →</button></div>');
+ let mode="learn";
+ document.querySelectorAll(".mode-choice").forEach(b=>b.onclick=()=>{document.querySelectorAll(".mode-choice").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");mode=b.dataset.mode;});
+ $("hearScene").onclick=()=>speak(dialogue.map(d=>d.text||"").join(" "),profile.code,$("hearScene"));
+ $("next").onclick=()=>{xp+=3;advance();};
 }
 function renderTeach(c){
  const body='<div class="lesson-task-label">ONE USEFUL THING</div>'+
@@ -142,19 +168,19 @@ function lessonSound(kind){
  }catch(e){}
 }
 function renderCheck(c){
- let answered=false; const phrase=c.phrase||"";
- const body='<div class="lesson-task-label">SEE IT · HEAR IT · USE IT</div>'+
-   '<div class="phrase">'+esc(phrase)+'</div>'+
-   '<div class="pron"><strong>How to say it</strong><br>'+esc(c.pronunciation||phrase)+(c.ipa?' · '+esc(c.ipa):'')+'</div>'+
+ let answered=false;
+ const body='<div class="lesson-task-label">CHOOSE THE RIGHT MOVE</div>'+
+   '<div class="phrase compact">'+esc(c.phrase||"")+'</div>'+
+   '<div class="meaning">'+esc(c.meaning||"")+'</div>'+
    '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
-   (c.example?'<div class="example"><strong>In a real conversation</strong><br>'+esc(c.example)+'</div>':'')+
-   '<div class="task-question">'+esc(c.prompt||"Which line would you actually say here?")+'</div>'+
-   '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'">'+esc(o)+'</button>').join("")+'</div>'+
-   '<div class="notice feedback" id="feedback">Listen to the expression. Then choose the line you would actually say.</div>';
- shell("Use it","See the language, hear the pronunciation, and choose the response that works in the scene.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
- $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
- document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");lessonSound(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"Good. That is the natural choice for this situation."):(c.feedback||"Not quite. Listen again and notice which response fits the scene.");$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
- $("next").onclick=()=>{lessonSound("click");toast("Good. Now use it.");advance();};
+   '<div class="task-question">'+esc(c.prompt||"Which response fits?")+'</div>'+
+   '<div class="choice-hint">There can be several words you know. Pick the one that fits <strong>this moment</strong>.</div>'+
+   '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'"><span class="choice-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div>'+
+   '<div class="notice feedback" id="feedback">Choose an answer to continue.</div>';
+ shell("Your turn","Recognition comes before production. Choose the response a native speaker would use here.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
+ $("hear").onclick=()=>speak(c.example||c.phrase,profile.code,$("hear"));
+ document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.86;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");lessonSound(ok?"correct":"wrong");$("feedback").textContent=ok?(c.feedback||"Correct. That is the response that fits the situation."):"Not quite. Read the meaning again, then notice what the other person is asking for.";$("next").disabled=false;xp+=ok?8:3;answers.push({type:"check",prompt:c.prompt,choice,correct:ok});});
+ $("next").onclick=()=>advance();
 }
 function renderChallenge(c){
  const options=Array.isArray(c.options)&&c.options.length?c.options:[c.expected||c.answer||"Try your own response.","Ask for clarification.","Change the situation."];
@@ -174,67 +200,43 @@ function renderChallenge(c){
  });
  $("next").onclick=()=>advance();
 }
+function renderListen(c){
+ let answered=false;
+ const body='<div class="lesson-task-label">LISTEN & PICK</div>'+
+   '<div class="listen-card-visual"><div class="sound-ring">)))</div><div><strong>Listen first.</strong><span>Do not read the answer.</span></div></div>'+
+   '<div class="task-question">'+esc(c.prompt||"What did you hear?")+'</div>'+
+   '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'"><span class="choice-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div>'+
+   '<div class="notice feedback" id="feedback">Press play, listen carefully, then choose.</div>';
+ shell("Listen","Train your ear before you look for the words.",body,'<div class="actions"><button class="secondary" id="play">▶ Play</button><button class="primary" id="next" disabled>Continue →</button></div>');
+ $("play").onclick=()=>speak(c.audioText||c.phrase,profile.code,$("play"));
+ document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.9;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");$("feedback").textContent=ok?"You heard it correctly.":"Close. Play it again and listen for the key phrase.";lessonSound(ok?"correct":"wrong");xp+=ok?10:4;answers.push({type:"listen",choice,correct:ok});$("next").disabled=false;});
+ $("next").onclick=()=>advance();
+}
+function renderFill(c){
+ let submitted=false;
+ const body='<div class="lesson-task-label">COMPLETE THE LINE</div>'+
+   '<div class="task-question">'+esc(c.prompt||"Complete the sentence.")+'</div>'+
+   '<div class="fill-sentence">'+esc(c.before||"")+' <span class="blank">_____</span> '+esc(c.after||"")+'</div>'+
+   '<div class="options">'+(c.options||[]).map((o,i)=>'<button class="option" data-i="'+i+'"><span class="choice-letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div>'+
+   '<div class="notice feedback" id="feedback">Complete the thought using the language you just learned.</div>';
+ shell("Complete it","You know the phrase. Now retrieve the important part from memory.",body,'<div class="actions"><button class="primary" id="next" disabled>Continue →</button></div>');
+ document.querySelectorAll(".option").forEach(b=>b.onclick=()=>{if(submitted)return;submitted=true;const choice=c.options[Number(b.dataset.i)]||"";const ok=normalize(choice)===normalize(c.answer)||similarity(choice,c.answer||"")>.88;document.querySelectorAll(".option").forEach(x=>x.disabled=true);b.classList.add(ok?"correct":"wrong");$("feedback").textContent=ok?"Exactly. You pulled it from memory.":"Not quite. Look back at the phrase, then try again next time.";lessonSound(ok?"correct":"wrong");xp+=ok?10:4;answers.push({type:"fill",choice,correct:ok});$("next").disabled=false;});
+ $("next").onclick=()=>advance();
+}
 function renderGuided(c){
- const phrase=c.phrase||"";
- const target=c.expected||c.answer||phrase;
- const words=target.trim().split(/\\s+/).filter(Boolean);
- const shuffled=[...words].sort(()=>Math.random()-.5);
- let built=[];
- const renderTiles=()=>{
-   const picked=$("built"),bank=$("tileBank"),submit=$("submit");
-   if(!picked||!bank)return;
-   picked.innerHTML=built.length?built.map((x,i)=>'<button type="button" class="word-tile picked" data-built="'+i+'">'+esc(x.w)+'</button>').join(""):'<span class="tile-placeholder">Tap the words to build your response.</span>';
-   bank.innerHTML=shuffled.map((w,i)=>{const used=built.some(x=>x.i===i);return '<button type="button" class="word-tile" data-word="'+i+'" '+(used?'disabled':'')+'>'+esc(w)+'</button>';}).join("");
-   if(submit)submit.disabled=built.length!==words.length;
- };
- const body='<div class="lesson-task-label">BUILD IT · YOUR TURN</div>'+
-   '<div class="phrase compact">'+esc(phrase)+'</div>'+
-   '<div class="pron"><strong>Say this idea</strong><br>'+esc(c.meaning||c.prompt||"Use the expression naturally.")+'</div>'+
-   '<div class="listen-row"><button class="secondary" id="hear">Listen</button></div>'+
-   '<div class="task-question">'+esc(c.prompt||"Build the response you would actually say.")+'</div>'+
-   (c.context?'<div class="task-context">'+esc(c.context)+'</div>':'')+
-   '<div class="build-zone" id="built"><span class="tile-placeholder">Tap the words to build the response.</span></div>'+
-   '<div class="tile-bank" id="tileBank"></div>'+
-   '<textarea class="input compact-input" id="input" placeholder="Or type your own response…"></textarea>'+
-   '<div class="listen-row"><button class="secondary" id="voice">Speak your answer</button></div>'+
-   '<div class="notice" id="voiceStatus">Build the response first. Then try saying it yourself.</div>'+
-   '<div class="notice feedback" id="feedback"></div>';
- shell("Build it","Put the words together. You can then type or say your own version.",body,'<div class="actions"><button class="primary" id="submit" disabled>Check response →</button></div>');
+ const phrase=c.phrase||""; const target=c.expected||c.answer||phrase;
+ const words=target.trim().split(/\s+/).filter(Boolean); const shuffled=[...words].sort(()=>Math.random()-.5); let built=[]; let checked=false;
+ const renderTiles=()=>{const picked=$("built"),bank=$("tileBank"),submit=$("submit");if(!picked||!bank)return;picked.innerHTML=built.length?built.map((x,i)=>'<button type="button" class="word-tile picked" data-built="'+i+'">'+esc(x.w)+'</button>').join(""):'<span class="tile-placeholder">Tap words to build the response.</span>';bank.innerHTML=shuffled.map((w,i)=>{const used=built.some(x=>x.i===i);return '<button type="button" class="word-tile" data-word="'+i+'" '+(used?'disabled':'')+'>'+esc(w)+'</button>';}).join("");if(submit)submit.disabled=built.length!==words.length;};
+ const body='<div class="lesson-task-label">BUILD FROM MEMORY</div><div class="task-question">'+esc(c.prompt||"Build the response.")+'</div><div class="task-context">'+esc(c.meaning||"Put the words together.")+'</div><div class="build-zone" id="built"><span class="tile-placeholder">Tap words to build the response.</span></div><div class="tile-bank" id="tileBank"></div><div class="guided-tools"><button class="secondary" id="hint">Show hint</button><button class="secondary" id="hear">Hear it</button></div><div class="notice feedback" id="feedback">Build the phrase. You can remove a word by tapping it.</div>';
+ shell("Build it","Recall the expression instead of only recognizing it.",body,'<div class="actions"><button class="primary" id="submit" disabled>Check response →</button></div>');
  renderTiles();
- $("tileBank").onclick=e=>{
-   const b=e.target.closest(".word-tile");
-   if(!b||b.disabled)return;
-   const i=Number(b.dataset.word);
-   if(!Number.isInteger(i)||built.some(x=>x.i===i))return;
-   built.push({i,w:shuffled[i]});
-   renderTiles();
- };
- $("built").onclick=e=>{
-   const b=e.target.closest(".word-tile");
-   if(!b)return;
-   const i=Number(b.dataset.built);
-   if(!Number.isInteger(i)||!built[i])return;
-   built.splice(i,1);
-   renderTiles();
- };
+ $("tileBank").onclick=e=>{const b=e.target.closest(".word-tile");if(!b||b.disabled)return;const i=Number(b.dataset.word);if(!Number.isInteger(i)||built.some(x=>x.i===i))return;built.push({i,w:shuffled[i]});renderTiles();};
+ $("built").onclick=e=>{const b=e.target.closest(".word-tile");if(!b)return;const i=Number(b.dataset.built);if(!Number.isInteger(i)||!built[i])return;built.splice(i,1);renderTiles();};
+ $("hint").onclick=()=>{$("feedback").textContent="Hint: "+esc(c.meaning||phrase);$("hint").disabled=true;};
  $("hear").onclick=()=>speak(c.example||phrase,profile.code,$("hear"));
- $("voice").onclick=()=>speechButton(target,()=>{});
- $("submit").onclick=()=>{
-   const typed=$("input").value.trim();
-   const builtText=built.map(x=>x.w).join(" ");
-   const v=typed||builtText||voice?.text||"";
-   if(!v){$("feedback").textContent="Build, type, or say your response first.";return}
-   const score=similarity(v,target);
-   const ok=score>.72;
-   answers.push({type:"guided",prompt:c.prompt,response:v,expected:target,score,voice});
-   $("feedback").textContent=ok?(c.feedback||"That works in the scene."):"Close. Try the order again, then say it yourself.";
-   lessonSound(ok?"correct":"wrong");
-   xp+=ok?15:6;
-   $("submit").textContent="Continue →";
-   $("submit").onclick=()=>advance();
-   toast(ok?"Nice. Now make it yours.":"Good attempt.");
- };
-}function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
+ $("submit").onclick=()=>{if(checked)return;checked=true;const builtText=built.map(x=>x.w).join(" ");const score=similarity(builtText,target);const ok=score>.86;$("feedback").textContent=ok?"Perfect. You recalled the expression.":"Close. The target was: "+target;lessonSound(ok?"correct":"wrong");xp+=ok?15:5;answers.push({type:"guided",response:builtText,expected:target,score});$("submit").textContent="Continue →";$("submit").onclick=()=>advance();toast(ok?"Nice recall.":"Good attempt.");};
+}
+function speechButton(target,done){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$("voiceStatus").textContent="Voice input isn't available here. Type instead.";return}const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I couldn't verify the target language yet. You can type your answer instead.";done();};r.onerror=()=>{$("voiceStatus").textContent="I couldn't hear that. Try again or type it.";voice=null};r.onend=()=>{$("voice").disabled=false};try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Type instead.";}}
 function renderSpeak(c){
  const target=String(c.phrase||c.expected||"").trim();
  const body='<div class="lesson-task-label">SPEAKING CHECK</div>'+
@@ -377,97 +379,26 @@ function buildFallbackLesson(){
 
   const shuffle=(arr)=>[...arr].sort(()=>Math.random()-.5);
   const cards=[];
+  const p1=phrases[0],p2=phrases[1],p3=phrases[2];
 
-  cards.push({
-    type:"scene",
-    context:mission.moment,
-    dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),
-    goal:mission.goal
-  });
-
-  cards.push({
-    type:"teach",...phrases[0],
-    exampleMeaning:phrases[0].meaning
-  });
-
-  cards.push({
-    type:"check",...phrases[0],
-    prompt:"What would you say here?",
-    options:shuffle([phrases[0].example,phrases[1].example,"I don't know."]),
-    answer:phrases[0].example,
-    feedback:"Exactly. Now use it instead of just recognizing it."
-  });
-
-  cards.push({
-    type:"guided",...phrases[0],
-    prompt:"Build the expression you just learned.",
-    context:phrases[0].meaning,
-    expected:phrases[0].phrase,
-    answer:phrases[0].phrase,
-    feedback:"Nice. You built the phrase. Now hear it in the situation."
-  });
-
-  cards.push({
-    type:"teach",...phrases[1],
-    exampleMeaning:phrases[1].meaning
-  });
-
-  cards.push({
-    type:"check",...phrases[1],
-    prompt:"Which response fits the situation?",
-    options:shuffle([phrases[1].example,phrases[0].example,"Maybe later."]),
-    answer:phrases[1].example,
-    feedback:"Good. You picked the response that actually fits."
-  });
-
-  cards.push({
-    type:"guided",...phrases[1],
-    prompt:"Build this response, then say it out loud.",
-    context:phrases[1].meaning,
-    expected:phrases[1].phrase,
-    answer:phrases[1].phrase,
-    feedback:"Good. You're producing the language now."
-  });
-
-  cards.push({
-    type:"teach",...phrases[2],
-    exampleMeaning:phrases[2].meaning
-  });
-
-  cards.push({
-    type:"challenge",...phrases[2],
-    prompt:"The situation changes. What would you say now?",
-    options:shuffle([phrases[2].example,phrases[0].example,phrases[1].example]),
-    answer:phrases[2].example,
-    feedback:"That fits the new moment."
-  });
-
-  cards.push({
-    type:"speak",...phrases[2],
-    meaning:phrases[2].meaning,
-    prompt:"Say it yourself. Parla checks what it actually hears.",
-    expected:phrases[2].phrase,
-    answer:phrases[2].phrase
-  });
-
-  cards.push({
-    type:"conversation",
-    prompt:"Now finish the interaction in your own words. Don't worry about being perfect.",
-    phrase:mission.goal,
-    expected:"",
-    answer:"",
-    feedback:"Keep the conversation moving."
-  });
+  cards.push({type:"scene",context:mission.moment,dialogue:mission.lines.map(x=>({speaker:x[0],text:x[1]})),goal:mission.goal});
+  cards.push({type:"teach",...p1,exampleMeaning:p1.meaning});
+  cards.push({type:"check",...p1,prompt:"Which response fits this moment?",options:shuffle([p1.example,p2.example,"I don't know."]),answer:p1.example,feedback:"Correct. You matched the language to the situation."});
+  cards.push({type:"guided",...p1,prompt:"Build the expression you just learned.",meaning:p1.meaning,expected:p1.phrase,answer:p1.phrase});
+  cards.push({type:"teach",...p2,exampleMeaning:p2.meaning});
+  cards.push({type:"check",...p2,prompt:"What would you say here?",options:shuffle([p2.example,p1.example,"Maybe later."]),answer:p2.example,feedback:"Good. That response fits the moment."});
+  cards.push({type:"listen",phrase:p2.phrase,prompt:"Which phrase did you hear?",options:shuffle([p2.phrase,p1.phrase,p3.phrase]),answer:p2.phrase,audioText:p2.phrase});
+  cards.push({type:"fill",phrase:p2.phrase,prompt:"Complete the idea with the phrase you just learned.",before:p2.meaning+" →",after:"",options:shuffle([p2.phrase,p1.phrase,p3.phrase]),answer:p2.phrase});
+  cards.push({type:"teach",...p3,exampleMeaning:p3.meaning});
+  cards.push({type:"challenge",...p3,prompt:"The situation changes. Which response works now?",options:shuffle([p3.example,p1.example,p2.example]),answer:p3.example,feedback:"That choice fits the new moment."});
+  cards.push({type:"guided",...p3,prompt:"Build the final expression from memory.",meaning:p3.meaning,expected:p3.phrase,answer:p3.phrase});
+  cards.push({type:"speak",...p3,meaning:p3.meaning,prompt:"Say it yourself. Parla checks what it actually hears.",expected:p3.phrase,answer:p3.phrase});
+  cards.push({type:"conversation",prompt:"Now finish the interaction in your own words. Don't copy the lesson.",phrase:mission.goal,expected:"",answer:"",feedback:"Keep the conversation moving."});
 
   generated={
     title:(["B2","B2+","C1","C2"].includes(level)?level+" · "+mission.setting:mission.setting),
-    intro:"One real situation. Three useful expressions. Learn them, use them, then speak.",
-    scene:{
-      setting:mission.setting,
-      moment:mission.moment,
-      learnerRole:mission.role,
-      goal:mission.goal
-    },
+    intro:"Learn it. Recognize it. Build it. Hear it. Say it. Then use it.",
+    scene:{setting:mission.setting,moment:mission.moment,learnerRole:mission.role,goal:mission.goal},
     cards
   };
 }
