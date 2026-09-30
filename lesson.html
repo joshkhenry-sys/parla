@@ -149,7 +149,7 @@
 <script>
 const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);let currentLevelForPlacement="A0";
 const $=id=>document.getElementById(id);
-let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],conversation=[],xp=0,voice=null;
+let user=null,baseLesson=null,profile=null,generated=null,index=0,answers=[],conversation=[],xp=0,voice=null,conversationFailures=0;
 
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));}
 let activeAudio=null;
@@ -458,7 +458,7 @@ function speechButton(target,done){
 function legacySpeechRecognition(SR,target,done){
   const r=new SR();r.lang=profile.code||"en-US";r.interimResults=false;r.maxAlternatives=3;r.continuous=false;
   r.onstart=()=>{$("voice").disabled=true;$("voiceStatus").textContent="Listening…"};
-  r.onresult=e=>{const heard=e.results[0][0].transcript,ok=detected(heard),score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:ok,score};$("input").value=heard;$("voiceStatus").textContent=ok?"I heard: "+heard:"I heard something, but it doesn't look like the target language yet.";done();};
+  r.onresult=e=>{const heard=e.results[0][0].transcript,score=similarity(heard,target||"");voice={text:heard,confidence:e.results[0][0].confidence||0,detected:true,score,language:profile?.code||"en-US"};$("input").value=heard;$("voiceStatus").textContent="I heard: "+heard;done();};
   r.onerror=e=>{$("voiceStatus").textContent=e.error==="not-allowed"?"Microphone permission was blocked. Allow microphone access and try again.":"I couldn't hear that. Try again.";voice=null};
   r.onend=()=>{$("voice").disabled=false};
   try{r.start()}catch(e){$("voiceStatus").textContent="Voice input is busy. Try again.";}
@@ -537,12 +537,17 @@ async function sendConversation(){
       $("voiceStatus").textContent="Good. Keep the interaction natural.";
     }
   }catch(e){
-    if(e.name==="AbortError"){
-      $("voiceStatus").textContent="The conversation took too long. Try sending a shorter response.";
+    conversationFailures++;
+    if(conversationFailures>=2){
+      button.disabled=false;
+      button.textContent="Finish lesson";
+      button.onclick=finish;
+      $("voiceStatus").textContent="The conversation service is taking too long. Your lesson is still complete — you can finish and save your progress.";
     }else{
-      $("voiceStatus").textContent=e.message||"The conversation couldn't continue. Try again.";
+      $("voiceStatus").textContent=e.name==="AbortError"?"That took too long. Try once more.":(e.message||"The conversation couldn't continue. Try again.");
+      button.textContent="Try again";
+      button.onclick=sendConversation;
     }
-    button.onclick=sendConversation;
   }finally{
     button.disabled=false;
   }
