@@ -737,3 +737,59 @@ body:has(.lesson) .lesson .complete .xp{color:#596b43!important}
 .login-card .google-btn{background:#f0eee6!important;color:#26312d!important;border:1px solid #cfd1c9!important}
 .login-card .google-btn:hover{background:#e7eddc!important;border-color:#bfcbb2!important}
 .login-card .forgot{color:#596b43!important}
+
+
+/* FINAL DASHBOARD SURFACE — keep the lesson picker warm/light and remove legacy dark-blue bleed */
+body.dashboard-page{
+  background:#f5f2ea!important;
+  color:#303936!important;
+}
+body.dashboard-page .recommended{
+  background:#e7eddc!important;
+  color:#303936!important;
+}
+body.dashboard-page .recommended::before{
+  background:rgba(169,205,221,.35)!important;
+  opacity:1!important;
+}
+body.dashboard-page .recommended::after{
+  background:#e8d273!important;
+  opacity:.8!important;
+}
+body.dashboard-page .progress-card{
+  background:#fffdf7!important;
+  color:#303936!important;
+}
+body.dashboard-page .progress-card::before{
+  display:none!important;
+  background:none!important;
+  opacity:0!important;
+}
+body.dashboard-page .language-switcher-card,
+body.dashboard-page .activity-card{
+  background:#fffdf7!important;
+  color:#303936!important;
+}
+body.dashboard-page .dashboard-language-link{
+  background:#f0eee6!important;
+  color:#303936!important;
+  border:1px solid #d9d8cf!important;
+}
+body.dashboard-page .dashboard-language-link:hover{
+  background:#e7eddc!important;
+  color:#303936!important;
+}
+body.dashboard-page .dashboard-language-link.current{
+  background:#879b68!important;
+  color:#26312d!important;
+}
+body.dashboard-page .quick-card:nth-child(1){background:#dfeef3!important;color:#303936!important}
+body.dashboard-page .quick-card:nth-child(2){background:#f2ddd4!important;color:#303936!important}
+body.dashboard-page .quick-card:nth-child(3){background:#e7eddc!important;color:#303936!important}
+body.dashboard-page .quick-card:nth-child(4){background:#f5edc8!important;color:#303936!important}
+body.dashboard-page .quick-card::before{
+  background:rgba(135,155,104,.18)!important;
+}
+body.dashboard-page .quick-card:hover{
+  color:#303936!important;
+}
