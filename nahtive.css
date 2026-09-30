@@ -507,7 +507,7 @@ input:focus,textarea:focus,select:focus{
 :root{
  --bg:#090d16;--surface:#111827;--surface2:#182238;--surface3:#202b43;--line:rgba(255,255,255,.095);
  --text:#f5f2eb;--muted:#99a4b9;--accent:#b8f36b;--accent-2:#ff9c63;--accent-deep:#7eb63c;
- --font:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Fraunces",Georgia,serif;
+ --font:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--serif:var(--font);
  --shadow:0 30px 80px -42px rgba(0,0,0,.85);--r:24px;
 }
 html{background:var(--bg)!important}body{position:relative;isolation:isolate;background:var(--bg)!important;color:var(--text)!important;font-family:var(--font)!important}
@@ -601,3 +601,12 @@ footer{border-top:1px solid var(--line)!important;color:var(--muted)!important;b
 .lesson-progress .fill::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.28);animation:lessonProgressGlow 1.8s linear infinite}
 @keyframes lessonProgressGlow{to{transform:translateX(100%)}}
 @media(prefers-reduced-motion:reduce){.lesson .lesson-card-live,.lesson .meaning,.lesson .pron,.lesson .usage,.lesson .example,.lesson .listen-row,.lesson .task-question,.lesson .options,.lesson textarea.input,.lesson .chat,.lesson .phrase{animation:none!important;transition:none!important;opacity:1!important;transform:none!important}.lesson-live-dot,.lesson .primary::after,.lesson-progress .fill::after{animation:none!important}}
+
+
+/* GLOBAL TYPOGRAPHY — Nahtive uses one clean sans-serif system */
+html,body,button,input,textarea,select,optgroup,option{
+  font-family:var(--font)!important;
+}
+*{
+  font-family:inherit;
+}
