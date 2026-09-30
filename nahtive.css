@@ -769,9 +769,13 @@ body.dashboard-page .dashboard-language-link.current{
   color:#fff!important;
   border-color:var(--dash-green)!important;
 }
-body.dashboard-page .dashboard-language-link.current span,
-body.dashboard-page .dashboard-language-link.current .manage-button{
+body.dashboard-page .dashboard-language-link.current span{
   color:#fff!important;
+}
+body.dashboard-page .dashboard-language-link.current .manage-button{
+  background:#fffdf7!important;
+  color:var(--dash-ink)!important;
+  border-color:var(--dash-line)!important;
 }
 body.dashboard-page .primary-button{
   background:var(--dash-ink)!important;
