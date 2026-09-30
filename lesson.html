@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Parla — Lesson</title>
+<title>Nahtive — Lesson</title>
 
 
 <link rel="stylesheet" href="nahtive.css"><style>
@@ -45,10 +45,15 @@
 .vocab-hero{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:22px;padding:24px;border-radius:20px;background:linear-gradient(135deg,rgba(184,243,107,.09),rgba(124,108,255,.08));border:1px solid var(--line)}.vocab-word{font-family:var(--serif);font-size:clamp(42px,7vw,68px);letter-spacing:-.06em}.complete-mark{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:rgba(184,243,107,.12);border:1px solid rgba(184,243,107,.35);color:var(--accent);font-size:26px;font-weight:900}.skill-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:28px 0}.skill-summary>div{padding:15px;border-radius:15px;background:var(--surface2);border:1px solid var(--line);text-align:left}.skill-summary strong{display:block;font-size:11px}.skill-summary span{display:block;margin-top:4px;color:var(--muted);font-size:9px}
 @media(max-width:800px){.hero-scene{grid-template-columns:1fr}.scene-art{min-height:220px}.training-choices{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.training-choices,.skill-summary{grid-template-columns:1fr}.lesson-map i{min-width:16px}.map-node{min-width:44px}.lesson-choice-heading{display:block}.lesson-choice-heading small{display:block;margin-top:4px}}
-</style></style></head>
+.speak-recall-card{margin-top:22px;padding:26px;border-radius:20px;background:var(--surface2);border:1px solid var(--line);text-align:center}
+.speak-recall-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:900}
+.speak-recall-prompt{font-family:var(--serif);font-size:28px;line-height:1.2;margin:12px 0 20px}
+.phrase-reveal{margin-top:15px;padding:14px 16px;border-radius:12px;background:rgba(184,243,107,.08);border:1px solid rgba(184,243,107,.2);font-family:var(--serif);font-size:22px}
+
+</style></head>
 <body>
 <div class="shell">
-<nav><a class="logo" href="dashboard.html">Parla<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
+<nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
 <div id="loading" class="loading">Building your lesson…<br><span id="loadingDetail" class="small">Creating the scene and lesson steps.</span></div>
 <div id="lesson" class="lesson" style="display:none">
 <div class="lesson-header">
@@ -156,7 +161,7 @@ function renderScene(c){
  '<button class="training-choice" data-mode="listen"><span class="training-icon">)))</span><strong>Listening</strong><small>Train your ear with less text</small></button>'+
  '<button class="training-choice" data-mode="speak"><span class="training-icon">◉</span><strong>Speaking</strong><small>Get to the microphone faster</small></button></div>'+
  '<div class="listen-row"><button class="secondary" id="hearScene">▶ Hear the scene</button></div>';
- shell("You’re here","Parla puts you inside one useful situation. Learn the language, make decisions, and then use it.",body,'<div class="actions"><button class="primary" id="next">Start mission →</button></div>');
+ shell("You’re here","Nahtive puts you inside one useful situation. Learn the language, make decisions, and then use it.",body,'<div class="actions"><button class="primary" id="next">Start mission →</button></div>');
  let mode="full";
  document.querySelectorAll(".training-choice").forEach(btn=>btn.onclick=()=>{document.querySelectorAll(".training-choice").forEach(x=>x.classList.remove("selected"));btn.classList.add("selected");mode=btn.dataset.mode;});
  $("hearScene").onclick=()=>speak(dialogue.map(d=>d.text||"").join(" "),profile.code,$("hearScene"));
@@ -278,14 +283,15 @@ function speechButton(target,done){const SR=window.SpeechRecognition||window.web
 function renderSpeak(c){
  const target=String(c.phrase||c.expected||"").trim();
  const body='<div class="lesson-task-label">SPEAKING CHECK</div>'+
-   '<div class="phrase">'+esc(target)+'</div>'+
+   '<div class="speak-recall-card"><div class="speak-recall-label">SAY IT FROM MEMORY</div><div class="speak-recall-prompt">What would you say here?</div><button class="secondary" id="reveal">Reveal phrase</button><div id="revealed" class="phrase-reveal" hidden></div></div>'+
    '<div class="meaning">'+esc(c.meaning||c.prompt||"Say the expression naturally in the situation.")+'</div>'+
    '<div class="listen-row"><button class="secondary" id="hear">Listen once</button></div>'+
    '<textarea class="input" id="input" placeholder="Type only if you cannot use your microphone…"></textarea>'+
    '<div class="listen-row"><button class="secondary" id="voice">Speak it</button></div>'+
-   '<div class="notice" id="voiceStatus">Your first attempt is practice. Parla will check what it heard before giving credit.</div>'+
+   '<div class="notice" id="voiceStatus">Say your answer before revealing the phrase. Nahtive checks what it actually hears.</div>'+
    '<div class="notice feedback" id="feedback"></div>';
- shell("Say it for real","You learned the expression. Now produce it without copying the answer from the screen.",body,'<div class="actions"><div class="notice">You need a real speaking attempt before continuing.</div><button class="primary" id="next" disabled>Continue →</button></div>');
+ shell("Say it for real","This is retrieval, not imitation. Try first. Reveal the answer only if you need it.",body,'<div class="actions"><div class="notice">You need a real speaking attempt before continuing.</div><button class="primary" id="next" disabled>Continue →</button></div>');
+ $("reveal").onclick=()=>{$("revealed").hidden=false;$("revealed").textContent=target;$("reveal").disabled=true;$("reveal").textContent="Phrase revealed";};
  $("hear").onclick=()=>speak(target,profile.code,$("hear"));
  $("voice").onclick=()=>{
    speechButton(target,()=>{
@@ -294,10 +300,10 @@ function renderSpeak(c){
      const languageOk=voice?.detected!==false;
      const good=languageOk && score>=.72;
      $("feedback").textContent=good
-       ? "Good. Parla heard the target expression clearly."
+       ? "Good. Nahtive heard the target expression clearly."
        : languageOk
-         ? "Not quite yet. Try once more and focus on the words you just learned."
-         : "Parla could not verify the target language. Try again.";
+         ? "Not quite yet. Listen once, then try again."
+         : "Nahtive could not verify the target language. Try again.";
      $("voiceStatus").textContent=heard?"Heard: "+heard:"Try again.";
      if(good){
        xp+=15;
@@ -318,7 +324,7 @@ function renderSpeak(c){
 function renderConversation(c){const body='<div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Respond naturally in the target language…"></textarea><div class="listen-row"><button class="secondary" id="voice">Speak</button></div><div class="notice" id="voiceStatus">This is the first real conversation. You can type or speak.</div>';shell("Use it","The support comes off now. Respond to the situation, then keep going.",body,'<div class="actions"><div class="notice">Stay in the scene.</div><button class="primary" id="send">Send →</button></div>');$("voice").onclick=()=>speechButton("",()=>{});conversation=[];if(c.phrase)conversation.push({role:"assistant",content:c.phrase});drawChat();$("send").onclick=sendConversation;}
 function drawChat(){const box=$("chat");if(!box)return;box.innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="speaker">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");}
 async function sendConversation(){const input=$("input").value.trim()||voice?.text||"";if(!input){$("voiceStatus").textContent="Give the other person something to respond to.";return}const c=generated.cards[index],topic=baseLesson?.topic||"Everyday life";conversation.push({role:"user",content:input});$("input").value="";drawChat();$("send").disabled=true;$("voiceStatus").textContent="Thinking…";try{const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:levelName(),goal:profile.goal||"Real conversation",topic,messages:conversation})});const data=await res.json();if(!res.ok)throw new Error(data.error||"Conversation failed.");conversation.push({role:"assistant",content:data.text});answers.push({type:"conversation",user:input,assistant:data.text});xp+=20;drawChat();voice=null;if(answers.filter(a=>a.type==="conversation").length>=2){$("send").textContent="Finish lesson";$("send").onclick=finish;toast("You kept the conversation going.");}$("voiceStatus").textContent="Good. Keep the interaction natural."; }catch(e){$("voiceStatus").textContent=e.message||"The conversation couldn't continue. Try again."}finally{$("send").disabled=false;}}
-async function finish(){if($("card").dataset.done)return;$("card").dataset.done="1";try{if(user&&baseLesson?.id){await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{generated_lesson:generated,answers}});await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,level:profile.level}});}}catch(e){console.error("Nahtive completion save failed:",e)}$("card").innerHTML='<section class="card complete"><h2>Lesson complete</h2><p class="sub">You learned first, practiced with support, and then used the language in a real interaction.</p><div class="xp">'+xp+' XP earned</div><div class="actions" style="justify-content:center"><a class="primary" href="dashboard.html" style="text-decoration:none">Continue learning →</a></div></section>';$("card").querySelector(".complete").style.display="block";$("stage").textContent="Complete";$("fill").style.width="100%";}
+async function finish(){if($("card").dataset.done)return;$("card").dataset.done="1";try{if(user&&baseLesson?.id){await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{generated_lesson:generated,answers}});await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,level:profile.level}});}}catch(e){console.error("Nahtive completion save failed:",e)}$("card").innerHTML='<section class="card complete"><h2>Lesson complete</h2><p class="sub">You learned first, practiced with support, and then used the language in a real interaction.</p><div class="xp">'+xp+' XP earned</div><div class="skill-summary"><div><strong>Situation</strong><span>'+esc(generated?.scene?.setting||"Real life")+'</span></div><div><strong>Speaking</strong><span>Attempt recorded</span></div><div><strong>Next</strong><span>Keep building the skill</span></div></div><div class="actions" style="justify-content:center"><a class="primary" href="dashboard.html" style="text-decoration:none">Continue learning →</a></div></section>';$("card").querySelector(".complete").style.display="block";$("stage").textContent="Complete";$("fill").style.width="100%";}
 function generatedLessonMatchesLevel(lesson){const level=profile?.level||"A1";if(!["B1","B2","B2+","C1","C2"].includes(level))return true;const text=JSON.stringify(lesson?.cards||[]).toLowerCase();const basic=/\\b(hello|hi|hola|hey|bonjour|hallo|ciao|oi|good morning|good afternoon|buenos días|buenas)\\b/i;return !basic.test(text)}
 function buildFallbackLesson(){
   const level=profile?.level||"A1";
@@ -393,6 +399,17 @@ function buildFallbackLesson(){
   };
 
   const makePhrase=(x)=>({phrase:x[0],meaning:x[1],pronunciation:x[2],usage:x[3]||"Use this naturally in the situation.",example:x[0]});
+  const vocabByScene={
+    "Coffee shop":[["café","coffee shop"],["leche","milk"],["avena","oats"]],
+    "Taco shop":[["asada","grilled beef"],["cebolla","onion"],["sin","without"]],
+    "Grocery store":[["dónde","where"],["pasillo","aisle"],["encontrar","to find"]],
+    "Apartment viewing":[["departamento","apartment"],["incluido","included"],["pensarlo","think about it"]],
+    "First day at work":[["explicar","to explain"],["funcionar","to work / function"],["entender","to understand"]],
+    "Getting directions":[["centro","downtown / city center"],["lejos","far"],["caminar","to walk"]],
+    "Restaurant":[["todavía","still / yet"],["recomendar","to recommend"],["pedir","to order / ask for"]],
+    "Making weekend plans":[["sábado","Saturday"],["hora","time / hour"],["parecer","to seem / to appear"]]
+  };
+  const sceneVocab=vocabByScene[mission?.setting]||[];
   let mission;
 
   if(code==="es"){
@@ -432,7 +449,7 @@ function buildFallbackLesson(){
   cards.push({type:"teach",...p3,exampleMeaning:p3.meaning});
   cards.push({type:"challenge",...p3,prompt:"The situation changes. Which response works now?",options:shuffle([p3.example,p1.example,p2.example]),answer:p3.example,feedback:"That choice fits the new moment."});
   cards.push({type:"guided",...p3,prompt:"Build the final expression from memory.",meaning:p3.meaning,expected:p3.phrase,answer:p3.phrase});
-  cards.push({type:"speak",...p3,meaning:p3.meaning,prompt:"Say it yourself. Parla checks what it actually hears.",expected:p3.phrase,answer:p3.phrase});
+  cards.push({type:"speak",...p3,meaning:p3.meaning,prompt:"Say it yourself. Nahtive checks what it actually hears.",expected:p3.phrase,answer:p3.phrase});
   cards.push({type:"conversation",prompt:"Now finish the interaction in your own words. Don't copy the lesson.",phrase:mission.goal,expected:"",answer:"",feedback:"Keep the conversation moving."});
 
   generated={
