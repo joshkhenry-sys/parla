@@ -167,6 +167,21 @@
   });
 
   const node = usable[0];
+  const memoryAttempts = existingLessons.length
+    ? await supabaseClient
+        .from("lesson_attempts")
+        .select("lesson_id,score,responses,completed_at")
+        .in("lesson_id", existingLessons.map(x => x.id))
+        .order("completed_at", { ascending:false })
+        .limit(8)
+    : {data:[]};
+
+  const memory = (memoryAttempts.data || []).map(attempt => ({
+    lesson_id:attempt.lesson_id,
+    score:attempt.score,
+    responses:attempt.responses
+  }));
+
   const response = await fetch("/api/generate-lesson", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
@@ -174,7 +189,8 @@
       language:languageName,
       code:window.Nahtive_language_code || undefined,
       level,
-      node
+      node,
+      memory
     })
   });
   const generated = await response.json().catch(() => ({}));
