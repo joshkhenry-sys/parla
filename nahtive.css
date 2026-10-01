@@ -812,3 +812,7 @@ body.dashboard-page .activity-icon.green,
 body.dashboard-page .activity-icon.coral{
   color:var(--dash-ink)!important;
 }
+
+/* Nahtive lesson v2 — high contrast playful system */
+body.lesson-page{font-family:var(--font),system-ui,sans-serif!important}
+body.lesson-page *{font-family:var(--font),system-ui,sans-serif!important}
