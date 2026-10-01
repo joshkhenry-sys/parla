@@ -140,12 +140,12 @@
     .limit(100);
   if (nodeError) throw nodeError;
 
-  const levelRank = { A0:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
+  const levelRank = { A1:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
   const targetRank = levelRank[level] ?? 1;
   const levelMatches = node => {
     const band = String(node.level_band || "");
     if (band === "C1/C2") return level === "C1" || level === "C2";
-    return band === level || (level === "A0" && band === "A1");
+    return band === level || (level === "A1" && band === "A1");
   };
 
   const { data: attempts } = await supabaseClient
@@ -254,7 +254,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
   };
 
   let allLessons = (lessons || []).filter(isUsableLesson);
-  const levelRank = { A0:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
+  const levelRank = { A1:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
   const targetRank = levelRank[learnerLevel] ?? 1;
 
   const completedResult = allLessons.length
@@ -349,7 +349,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
 
         await supabaseClient.from("learner_languages").update({is_current:false}).eq("user_id",user.id);
         const { data: learnerLanguage, error: learnerError } = await supabaseClient.from("learner_languages").insert({
-          user_id:user.id, language_id:language.id, level:"A0", goal, interests, is_current:true
+          user_id:user.id, language_id:language.id, level:"A1", goal, interests, is_current:true
         }).select("id").single();
         if (learnerError) throw learnerError;
 
@@ -398,7 +398,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         }
 
         const languageName = learnerLanguage.languages?.name || "English";
-        const level = learnerLanguage.level || "A0";
+        const level = learnerLanguage.level || "A1";
 
         await loadRealStreak(user.id);
         localStorage.setItem("Nahtive_current_learner_language", learnerLanguage.id);
@@ -410,7 +410,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
           myLanguagesGrid.innerHTML = (learnerLanguages || []).map(language => {
             const name = language.languages?.name || "Language";
             const current = language.is_current;
-            return '<div class="dashboard-language-link '+(current ? 'current' : '')+'" data-language-id="'+escapeHtml(language.id)+'"><span>'+escapeHtml(name)+' · '+escapeHtml(language.level || "A0")+'</span><button type="button" class="manage-button" data-manage-id="'+escapeHtml(language.id)+'">Manage</button></div>';
+            return '<div class="dashboard-language-link '+(current ? 'current' : '')+'" data-language-id="'+escapeHtml(language.id)+'"><span>'+escapeHtml(name)+' · '+escapeHtml(language.level || "A1")+'</span><button type="button" class="manage-button" data-manage-id="'+escapeHtml(language.id)+'">Manage</button></div>';
           }).join("") || '<div style="grid-column:1/-1;color:var(--muted);font-size:14px;">No languages added yet.</div>';
         }
 
@@ -495,8 +495,8 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
             if(!lang) return;
             const hub=document.getElementById("languageHub");
             hub.classList.add("open");
-            const name=lang.languages?.name||"Language", level=lang.level||"A0";
-            hub.innerHTML="<div class='level-panel-head'><div><h3>"+escapeHtml(name)+" learning path</h3><p>Choose the level Nahtive should build lessons for. You can change it anytime.</p></div><button type='button' class='manage-button' id='closeHub'>Close</button></div><div class='level-options'>"+["A0","A1","A2","B1","B2","B2+","C1","C2"].map(l=>"<button type='button' class='level-option "+(l===level?"active":"")+"' data-level='"+l+"'>"+l+"</button>").join("")+"</div><div class='hub-actions'><a href='assessment.html?language_id="+encodeURIComponent(lang.id)+"&return=dashboard'>Retake placement</a></div>";
+            const name=lang.languages?.name||"Language", level=lang.level||"A1";
+            hub.innerHTML="<div class='level-panel-head'><div><h3>"+escapeHtml(name)+" learning path</h3><p>Choose the level Nahtive should build lessons for. You can change it anytime.</p></div><button type='button' class='manage-button' id='closeHub'>Close</button></div><div class='level-options'>"+["A1","A1","A2","B1","B2","B2+","C1","C2"].map(l=>"<button type='button' class='level-option "+(l===level?"active":"")+"' data-level='"+l+"'>"+l+"</button>").join("")+"</div><div class='hub-actions'><a href='assessment.html?language_id="+encodeURIComponent(lang.id)+"&return=dashboard'>Retake placement</a></div>";
             hub.querySelector("#closeHub").onclick=()=>hub.classList.remove("open");
             hub.querySelectorAll(".level-option").forEach(opt=>opt.onclick=async()=>{
               const newLevel=opt.dataset.level;
