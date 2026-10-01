@@ -1,126 +1,97 @@
 const MODEL="gpt-5.6-luna";
-
 const FALLBACKS={
-  es:[["Hola","Hello","Use this to greet someone.","Hola, soy Alex.","HO-la"],["Me llamo ___","My name is ___.","Use this to tell someone your name.","Me llamo Alex.","meh YAH-moh Alex"]],
-  fr:[["Bonjour","Hello.","Use this to greet someone politely.","Bonjour, je m'appelle Alex.","bohn-ZHOOR"],["Je m'appelle ___","My name is ___.","Use this to tell someone your name.","Je m'appelle Alex.","zhuh mah-PELL Alex"]],
-  pl:[["Cześć","Hi / Hello.","Use this to greet someone you know or in a casual situation.","Cześć, jestem Alex.","cheshch"],["Mam na imię ___","My name is ___.","Use this to tell someone your name.","Mam na imię Alex.","mam nah EE-myeh Alex"]],
-  pt:[["Oi","Hi / Hello.","Use this to greet someone.","Oi, eu sou o Alex.","oy"],["Eu me chamo ___","My name is ___.","Use this to tell someone your name.","Eu me chamo Alex.","eh-oo mee SHAH-moo Alex"]],
-  de:[["Hallo","Hello.","Use this to greet someone.","Hallo, ich bin Alex.","HAH-loh"],["Ich heiße ___","My name is ___.","Use this to tell someone your name.","Ich heiße Alex.","ikh HIGH-suh Alex"]],
-  it:[["Ciao","Hi / Hello.","Use this to greet someone.","Ciao, sono Alex.","CHOW"],["Mi chiamo ___","My name is ___.","Use this to tell someone your name.","Mi chiamo Alex.","mee KYAH-moh Alex"]],
-  nl:[["Hoi","Hi / Hello.","Use this to greet someone.","Hoi, ik ben Alex.","hoy"],["Ik heet ___","My name is ___.","Use this to tell someone your name.","Ik heet Alex.","ik hayt Alex"]],
-  sv:[["Hej","Hi / Hello.","Use this to greet someone.","Hej, jag heter Alex.","hey"],["Jag heter ___","My name is ___.","Use this to tell someone your name.","Jag heter Alex.","yahg HAY-ter Alex"]],
-  el:[["Γεια σου","Hi / Hello.","Use this to greet someone casually.","Γεια σου, είμαι ο Alex.","ya sou"],["Με λένε ___","My name is ___.","Use this to tell someone your name.","Με λένε Alex.","meh LEH-neh Alex"]],
-  tr:[["Merhaba","Hello.","Use this to greet someone.","Merhaba, ben Alex.","mehr-ha-ba"],["Benim adım ___","My name is ___.","Use this to tell someone your name.","Benim adım Alex.","beh-neem ah-duhm Alex"]],
-  hi:[["नमस्ते","Hello.","Use this to greet someone politely.","नमस्ते, मैं Alex हूँ।","namaste"],["मेरा नाम ___ है","My name is ___.","Use this to tell someone your name.","मेरा नाम Alex है।","mera naam Alex hai"]],
-  ja:[["こんにちは","Hello.","Use this to greet someone politely.","こんにちは、アレックスです。","konnichiwa"],["私は___です","I am ___.","Use this to introduce yourself.","私はアレックスです。","watashi wa Alex desu"]],
-  ko:[["안녕하세요","Hello.","Use this to greet someone politely.","안녕하세요, 저는 Alex예요.","annyeonghaseyo"],["저는 ___예요","I am ___.","Use this to introduce yourself.","저는 Alex예요.","jeoneun Alex-yeyo"]],
-  zh:[["你好","Hello.","Use this to greet someone.","你好，我叫 Alex。","nǐ hǎo"],["我叫 ___","My name is ___.","Use this to tell someone your name.","我叫 Alex。","wǒ jiào Alex"]],
-  ar:[["مرحبا","Hello.","Use this to greet someone.","مرحبا، أنا أليكس.","marhaban"],["اسمي ___","My name is ___.","Use this to tell someone your name.","اسمي أليكس.","ismi Alex"]]
+ es:[["Hola","Hello.","Use this to greet someone.","Hola, soy Alex.","HO-la"],["¿Cómo estás?","How are you?","Use this to ask how someone is doing.","Hola, ¿cómo estás?","KOH-moh es-TAHS"],["Estoy bien.","I'm good.","Use this to say how you are.","Estoy bien, gracias.","es-TOY byen"],["Me llamo Alex.","My name is Alex.","Use this to introduce yourself.","Hola, me llamo Alex.","meh YAH-moh"],["Mucho gusto.","Nice to meet you.","Use this after meeting someone.","Mucho gusto.","MOO-cho GOOS-toh"]],
+ fr:[["Bonjour","Hello.","Use this to greet someone.","Bonjour, je m'appelle Alex.","bohn-ZHOOR"],["Comment ça va ?","How are you?","Use this to ask how someone is doing.","Bonjour, comment ça va ?","koh-MAHN sah vah"],["Ça va bien.","I'm doing well.","Use this to answer.","Ça va bien, merci.","sah vah byen"],["Je m'appelle Alex.","My name is Alex.","Use this to introduce yourself.","Je m'appelle Alex.","zhuh mah-PELL"],["Enchanté.","Nice to meet you.","Use this after meeting someone.","Enchanté.","ahn-shahn-TAY"]],
+ de:[["Hallo","Hello.","Use this to greet someone.","Hallo, ich bin Alex.","HAH-loh"],["Wie geht's?","How are you?","Use this casually with someone.","Wie geht's dir?","vee gates"],["Mir geht's gut.","I'm good.","Use this to answer.","Mir geht's gut, danke.","meer gates goot"],["Ich heiße Alex.","My name is Alex.","Use this to introduce yourself.","Ich heiße Alex.","ikh HIGH-suh"],["Freut mich.","Nice to meet you.","Use this when meeting someone.","Freut mich.","froyt mish"]],
+ pt:[["Oi","Hi.","Use this to greet someone.","Oi, eu sou o Alex.","oy"],["Tudo bem?","How are you?","Use this casually.","Oi, tudo bem?","TOO-doh beng"],["Tudo bem.","I'm good.","Use this to answer.","Tudo bem, obrigado.","TOO-doh beng"],["Eu me chamo Alex.","My name is Alex.","Use this to introduce yourself.","Eu me chamo Alex.","eh-oo mee SHAH-moo"],["Prazer.","Nice to meet you.","Use this after meeting someone.","Prazer em conhecer você.","prah-ZEHR"]],
+ it:[["Ciao","Hi.","Use this to greet someone.","Ciao, sono Alex.","CHOW"],["Come stai?","How are you?","Use this casually.","Ciao, come stai?","KOH-meh stai"],["Sto bene.","I'm good.","Use this to answer.","Sto bene, grazie.","stoh BEH-neh"],["Mi chiamo Alex.","My name is Alex.","Use this to introduce yourself.","Mi chiamo Alex.","mee KYAH-moh"],["Piacere.","Nice to meet you.","Use this after meeting someone.","Piacere di conoscerti.","pya-CHEH-reh"]],
+ nl:[["Hoi","Hi.","Use this to greet someone.","Hoi, ik ben Alex.","hoy"],["Hoe gaat het?","How are you?","Use this to ask.","Hoe gaat het met je?","hoo gaat ut"],["Het gaat goed.","I'm good.","Use this to answer.","Het gaat goed, dank je.","het gaat goot"],["Ik heet Alex.","My name is Alex.","Use this to introduce yourself.","Ik heet Alex.","ik hayt"],["Leuk je te ontmoeten.","Nice to meet you.","Use this after meeting someone.","Leuk je te ontmoeten.","loyk yuh tuh ont-MOO-tun"]],
+ pl:[["Cześć","Hi.","Use this casually.","Cześć, jestem Alex.","cheshch"],["Jak się masz?","How are you?","Use this casually.","Cześć, jak się masz?","yak shyeh mash"],["Mam się dobrze.","I'm good.","Use this to answer.","Mam się dobrze, dzięki.","mam shyeh DOH-bzheh"],["Mam na imię Alex.","My name is Alex.","Use this to introduce yourself.","Mam na imię Alex.","mam nah EE-myeh"],["Miło mi.","Nice to meet you.","Use this after meeting someone.","Miło mi cię poznać.","MEE-woh mee"]],
+ sv:[["Hej","Hi.","Use this to greet someone.","Hej, jag heter Alex.","hey"],["Hur mår du?","How are you?","Use this casually.","Hej, hur mår du?","hoor mor doo"],["Jag mår bra.","I'm good.","Use this to answer.","Jag mår bra, tack.","yahg mor brah"],["Jag heter Alex.","My name is Alex.","Use this to introduce yourself.","Jag heter Alex.","yahg HAY-ter"],["Trevligt att träffas.","Nice to meet you.","Use this after meeting someone.","Trevligt att träffas.","TREV-lit"]],
+ tr:[["Merhaba","Hello.","Use this to greet someone.","Merhaba, ben Alex.","mehr-ha-ba"],["Nasılsın?","How are you?","Use this casually.","Merhaba, nasılsın?","NAH-suhl-suhn"],["İyiyim.","I'm good.","Use this to answer.","İyiyim, teşekkürler.","ee-YEE-yeem"],["Benim adım Alex.","My name is Alex.","Use this to introduce yourself.","Benim adım Alex.","beh-neem ah-duhm"],["Memnun oldum.","Nice to meet you.","Use this after meeting someone.","Memnun oldum.","mem-NOON old-oom"]],
+ el:[["Γεια σου","Hi.","Use this casually.","Γεια σου, είμαι ο Alex.","ya sou"],["Τι κάνεις;","How are you?","Use this casually.","Γεια σου, τι κάνεις;","tee KAH-nees"],["Είμαι καλά.","I'm good.","Use this to answer.","Είμαι καλά, ευχαριστώ.","EE-meh ka-LA"],["Με λένε Alex.","My name is Alex.","Use this to introduce yourself.","Με λένε Alex.","meh LEH-neh"],["Χάρηκα.","Nice to meet you.","Use this after meeting someone.","Χάρηκα πολύ.","HA-ree-ka"]],
+ hi:[["नमस्ते","Hello.","Use this politely.","नमस्ते, मैं Alex हूँ।","namaste"],["आप कैसे हैं?","How are you?","Use this politely.","आप कैसे हैं?","aap kaise hain"],["मैं ठीक हूँ।","I'm good.","Use this to answer.","मैं ठीक हूँ, धन्यवाद।","main theek hoon"],["मेरा नाम Alex है।","My name is Alex.","Use this to introduce yourself.","मेरा नाम Alex है।","mera naam Alex hai"],["आपसे मिलकर खुशी हुई।","Nice to meet you.","Use this after meeting someone.","आपसे मिलकर खुशी हुई।","aapse milkar khushi hui"]],
+ ja:[["こんにちは","Hello.","Use this politely.","こんにちは、アレックスです。","konnichiwa"],["元気ですか？","How are you?","Use this to ask.","元気ですか？","genki desu ka"],["元気です。","I'm good.","Use this to answer.","元気です、ありがとう。","genki desu"],["私はアレックスです。","I am Alex.","Use this to introduce yourself.","私はアレックスです。","watashi wa Alex desu"],["はじめまして。","Nice to meet you.","Use this when meeting someone.","はじめまして、よろしくお願いします。","hajimemashite"]],
+ ko:[["안녕하세요","Hello.","Use this politely.","안녕하세요, 저는 Alex예요.","annyeonghaseyo"],["어떻게 지내세요?","How are you?","Use this politely.","요즘 어떻게 지내세요?","eotteoke jinaeseyo"],["잘 지내요.","I'm doing well.","Use this to answer.","잘 지내요, 감사합니다.","jal jinaeyo"],["저는 Alex예요.","I am Alex.","Use this to introduce yourself.","저는 Alex예요.","jeoneun Alex-yeyo"],["만나서 반가워요.","Nice to meet you.","Use this after meeting someone.","만나서 반가워요.","mannaseo bangawoyo"]],
+ zh:[["你好","Hello.","Use this to greet someone.","你好，我叫 Alex。","nǐ hǎo"],["你好吗？","How are you?","Use this to ask.","你好，你好吗？","nǐ hǎo ma"],["我很好。","I'm good.","Use this to answer.","我很好，谢谢。","wǒ hěn hǎo"],["我叫 Alex。","My name is Alex.","Use this to introduce yourself.","我叫 Alex。","wǒ jiào Alex"],["很高兴认识你。","Nice to meet you.","Use this after meeting someone.","很高兴认识你。","hěn gāoxìng rènshi nǐ"]],
+ ar:[["مرحبا","Hello.","Use this to greet someone.","مرحبا، أنا أليكس.","marhaban"],["كيف حالك؟","How are you?","Use this to ask.","مرحبا، كيف حالك؟","kayfa haluk"],["أنا بخير.","I'm good.","Use this to answer.","أنا بخير، شكرا.","ana bikhayr"],["اسمي أليكس.","My name is Alex.","Use this to introduce yourself.","اسمي أليكس.","ismi Alex"],["تشرفت بلقائك.","Nice to meet you.","Use this after meeting someone.","تشرفت بلقائك.","tasharraftu biliqaik"]]
 };
-
 function fallbackLesson(language,code,level,node){
-  const rows=FALLBACKS[String(code||"").toLowerCase()]||[["Hi","Hello.","Use this to greet someone.","Hi, I'm Alex.","hi"],["My name is ___","My name is ___.","Use this to tell someone your name.","My name is Alex.","my name iz Alex"]];
-  const phrases=rows.map(([target,meaning,usage,example,pronunciation])=>({
-    target,meaning,usage,
-    breakdown:[{target,meaning}],
-    example,example_meaning:meaning,pronunciation
-  }));
-  return {
-    title:String(node?.title||"Meet someone"),
-    topic:String(node?.focus||"introductions"),
-    scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Say hello and introduce yourself."),situation:String(node?.situation||"Meet someone and start a very short conversation.")},
-    phrases,
-    dialogue:[
-      {speaker:"native",text:phrases[0].target},
-      {speaker:"learner",text:phrases[1].target},
-      {speaker:"native",text:phrases[0].target},
-      {speaker:"learner",text:phrases[1].target}
-    ]
-  };
+ const rows=FALLBACKS[String(code||"").toLowerCase()]||FALLBACKS.en||[["Hi","Hello.","Use this to greet someone.","Hi, I'm Alex.","hi"]];
+ const phrases=rows.map(([target,meaning,usage,example,pronunciation])=>({target,meaning,usage,breakdown:[{target,meaning}],example,example_meaning:meaning,pronunciation,build_target:target,build_meaning:meaning,build_words:target.split(/\s+/).filter(Boolean),distractors:[]}));
+ const fallback={en:[["Hi","Hello.","Use this to greet someone.","Hi, I'm Alex.","hi"],["How are you?","How are you?","Use this to ask how someone is doing.","How are you?","how are yoo"],["I'm good.","I'm good.","Use this to answer.","I'm good, thanks.","im good"],["My name is Alex.","My name is Alex.","Use this to introduce yourself.","My name is Alex.","my name iz"],["Nice to meet you.","Nice to meet you.","Use this after meeting someone.","Nice to meet you.","nise too meet yoo"]]};
+ const source=FALLBACKS[String(code||"").toLowerCase()]||fallback.en;
+ const ps=source.map(([target,meaning,usage,example,pronunciation])=>({target,meaning,usage,breakdown:[{target,meaning}],example,example_meaning:meaning,pronunciation,build_target:target,build_meaning:meaning,build_words:target.split(/\s+/).filter(Boolean),distractors:[]}));
+ return {title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"Everyday conversation"),scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Handle a simple real-world interaction."),situation:String(node?.situation||"Practice a short, useful interaction.")},phrases:ps,dialogue:ps.slice(0,4).map((p,i)=>({speaker:i%2?"learner":"native",text:p.target}))};
 }
-
-function jsonResponse(res,status,payload){return res.status(status).json(payload);}
-
+function jsonResponse(res,status,payload){return res.status(status).json(payload)}
 export default async function handler(req,res){
-  let language="",code="",level="",node=null;
+ let language="",code="",level="",node=null;
+ try{
+  if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
+  if(!process.env.OPENAI_API_KEY)return jsonResponse(res,500,{error:"Missing OPENAI_API_KEY"});
+  ({language,code,level,node}=req.body||{});
+  if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
+  const L=String(level).toUpperCase();
+  const rules={
+   A1:"Beginner/Basic User. Use concrete everyday situations, a small core vocabulary, very short sentences, common patterns, and heavy recycling. The learner should be able to handle simple personal needs and routine exchanges. Challenge recall and word order, not obscure vocabulary.",
+   A2:"Elementary/Basic User. Use familiar everyday situations and simple connected language. Add routine transactions, plans, preferences, past/future references and simple connectors. Keep vocabulary common and reusable.",
+   B1:"Intermediate/Independent User. Use familiar real-world topics with enough language to narrate experiences, explain reasons, compare options and maintain a conversation. Reduce scaffolding and increase variation.",
+   B2:"Upper-intermediate/Independent User. Use natural conversation, varied sentence structures, collocations, nuanced choices and less predictable situations. The learner should explain viewpoints and respond flexibly.",
+   C1:"Advanced/Proficient User. Use demanding authentic contexts, precise vocabulary, implicit meaning, register shifts, idiomatic language and complex connected speech. Avoid artificially academic wording.",
+   C2:"Mastery/Proficient User. Use subtle meaning, idiomaticity, register, humor or pragmatic nuance where appropriate. Require precise, flexible language and natural reformulation."
+  }[L]||"Match the requested CEFR level closely.";
+  const prompt=`Create one Nahtive lesson for an adult learning ${language} at CEFR ${L}.
+Curriculum sequence: ${node.sequence_number}. Situation: ${node.title}. Scenario: ${node.situation}. Focus: ${node.focus||"everyday communication"}.
+
+CEFR RULES:
+${rules}
+
+TEACHING DESIGN:
+- Create exactly 5 core phrases/sentence frames. They should form a coherent progression inside one situation.
+- Phrase 1 introduces the essential language. Later phrases reuse earlier language and add one meaningful piece.
+- Every phrase must be genuinely natural for native speakers.
+- Every phrase must include a plain English meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target.
+- For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
+- Give 3-6 plausible distractors per phrase. Distractors should be wrong or unnecessary, but relevant enough that the learner must understand the sentence. Do not make them absurd.
+- The learner should see more words than are required, and the correct words must be scrambled by the app.
+- The lesson must be challenging without assuming knowledge above ${L}.
+- Dialogue must contain exactly 4 lines: native, learner, native, learner, and must reuse the taught language.
+- Spanish must be contemporary Latin American / broadly American Spanish, never Spain-specific Spanish.
+- English is only for explanations/translations.
+
+Return JSON only.`;
+
+  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);let response;
   try{
-    if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
-    if(!process.env.OPENAI_API_KEY)return jsonResponse(res,500,{error:"Missing OPENAI_API_KEY"});
-    ({language,code,level,node}=req.body||{});
-    if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
-
-    const normalizedLevel=String(level).toUpperCase();
-    const isA0=normalizedLevel==="A0";
-    const levelRules=isA0
-      ? "A0 means absolute beginner. Assume the learner knows almost nothing. Teach only 2 very short, immediately useful phrases. Each phrase should normally be 1-6 words. Introduce no more than about 5 new lexical items total. Do not use idioms, slang, abstract vocabulary, long sentences, unexplained conjugations, complex grammar, or culturally specific shortcuts. If a phrase changes form because of gender, case, politeness, contraction, or conjugation, explain that plainly in the breakdown. The learner must know exactly what the whole phrase means before being asked to say it. Do not make the learner infer meaning from the situation."
-      : normalizedLevel==="A1"
-      ? "A1 means early beginner. Use very common everyday language and short sentences. Build from structures the learner could realistically reuse. Avoid B1+ vocabulary, idioms, slang, and complicated grammar. Explain every important new word or grammatical change in plain English."
-      : "Match "+normalizedLevel+" closely. Complexity should come from the learner's level, not from trying to sound sophisticated.";
-
-    const prompt=[
-      "You are designing one Nahtive lesson for an adult learning ",language,".\n\n",
-      "TARGET LANGUAGE: ",language," (",code,")\n",
-      "LEVEL: ",normalizedLevel,"\n",
-      "CURRICULUM: ",node.sequence_number,"/100\n",
-      "SITUATION: ",node.title,"\n",
-      "SCENARIO: ",node.situation,"\n",
-      "FOCUS: ",node.focus||"everyday conversation","\n\n",
-      "LEVEL RULES:\n",levelRules,"\n\n",
-      "THE MOST IMPORTANT RULE:\n",
-      "The learner must understand what they are saying before they are asked to produce it. Every taught phrase needs a clear natural English meaning, when a real person uses it, a word/part breakdown when useful, a natural example in the target language, and the English meaning of that example. The lesson should feel like a patient native speaker teaching one tiny useful situation, not a vocabulary test.\n\n",
-      "LANGUAGE:\n",
-      "Target-language content must be genuinely natural for native speakers. English is used for explanations and translations. Spanish must be contemporary Latin American / broadly American Spanish, never Spain-specific. Polish must explain relevant endings/case changes instead of expecting the learner to guess. French must explain contractions/articles or other changes when they matter. Never translate English literally if native speakers would phrase it differently.\n\n",
-      "PHRASES:\nReturn exactly 2. Phrase 1 is the essential phrase for the situation. Phrase 2 is a simple response, variation, or reusable sentence frame. Do not sneak extra new vocabulary into examples just to make them sound impressive.\n\n",
-      "DIALOGUE:\nReturn exactly 4 lines in this order: native, learner, native, learner. It must model the same situation using the taught language. At A0, keep every line extremely short. Do not put unexplained advanced target-language sentences into the learner's lines.\n\n",
-      "OUTPUT:\nReturn valid JSON matching the required schema only."
-    ].join("");
-
-    const controller=new AbortController();
-    const timeout=setTimeout(()=>controller.abort(),30000);
-    let response;
-    try{
-      response=await fetch("https://api.openai.com/v1/responses",{
-        method:"POST",
-        headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
-        body:JSON.stringify({
-          model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:1400,
-          text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
-            type:"object",additionalProperties:false,
-            properties:{
-              title:{type:"string"},topic:{type:"string"},
-              scene:{type:"object",additionalProperties:false,properties:{time:{type:"string"},place:{type:"string"},mission:{type:"string"},situation:{type:"string"}},required:["time","place","mission","situation"]},
-              phrases:{type:"array",minItems:2,maxItems:2,items:{type:"object",additionalProperties:false,properties:{
-                target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},
-                breakdown:{type:"array",minItems:1,maxItems:5,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
-                example:{type:"string"},example_meaning:{type:"string"},pronunciation:{type:"string"}
-              },required:["target","meaning","usage","breakdown","example","example_meaning","pronunciation"]}},
-              dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}}
-            },
-            required:["title","topic","scene","phrases","dialogue"]
-          }}}
-        }),
-        signal:controller.signal
-      });
-    }finally{clearTimeout(timeout);}
-
-    if(!response.ok){
-      console.error("OpenAI lesson generation failed:",await response.text());
-      return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
-    }
-
-    const data=await response.json();
-    const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;
-    if(!text)throw new Error("OpenAI returned no lesson text");
-    const parsed=JSON.parse(text);
-    if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==2)throw new Error("Invalid phrase count");
-    if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.example_meaning||!Array.isArray(p.breakdown)||!p.breakdown.length))throw new Error("Incomplete phrase teaching data");
-    if(!Array.isArray(parsed.dialogue)||parsed.dialogue.length!==4)throw new Error("Invalid dialogue count");
-    const expected=["native","learner","native","learner"];
-    if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]))throw new Error("Invalid dialogue order");
-
-    return jsonResponse(res,200,{title:parsed.title,topic:parsed.topic,content:parsed});
-  }catch(e){
-    console.error("Lesson generation exception:",e);
-    return jsonResponse(res,200,{title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true,error:String(e?.message||"Generation failed")});
-  }
+   response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
+    body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:2600,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
+      type:"object",additionalProperties:false,
+      properties:{
+       title:{type:"string"},topic:{type:"string"},
+       scene:{type:"object",additionalProperties:false,properties:{time:{type:"string"},place:{type:"string"},mission:{type:"string"},situation:{type:"string"}},required:["time","place","mission","situation"]},
+       phrases:{type:"array",minItems:5,maxItems:5,items:{type:"object",additionalProperties:false,properties:{
+        target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},
+        breakdown:{type:"array",minItems:1,maxItems:6,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
+        example:{type:"string"},example_meaning:{type:"string"},pronunciation:{type:"string"},
+        build_target:{type:"string"},build_meaning:{type:"string"},
+        build_words:{type:"array",minItems:1,maxItems:12,items:{type:"string"}},
+        distractors:{type:"array",minItems:3,maxItems:6,items:{type:"string"}}
+       },required:["target","meaning","usage","breakdown","example","example_meaning","pronunciation","build_target","build_meaning","build_words","distractors"]}},
+       dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}}
+      },required:["title","topic","scene","phrases","dialogue"]
+    }}}}),signal:controller.signal});
+  }finally{clearTimeout(timeout)}
+  if(!response.ok){console.error("OpenAI lesson generation failed:",await response.text());return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true})}
+  const data=await response.json();const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;if(!text)throw new Error("OpenAI returned no lesson text");
+  const parsed=JSON.parse(text);
+  if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==5)throw new Error("Invalid phrase count");
+  if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.build_target||!p.build_meaning||!Array.isArray(p.build_words)||!p.build_words.length||!Array.isArray(p.distractors)||p.distractors.length<3))throw new Error("Incomplete phrase teaching data");
+  if(!Array.isArray(parsed.dialogue)||parsed.dialogue.length!==4)throw new Error("Invalid dialogue count");
+  const expected=["native","learner","native","learner"];if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]))throw new Error("Invalid dialogue order");
+  return jsonResponse(res,200,{title:parsed.title,topic:parsed.topic,content:parsed});
+ }catch(e){
+  console.error("Lesson generation exception:",e);
+  return jsonResponse(res,200,{title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true,error:String(e?.message||"Generation failed")});
+ }
 }
