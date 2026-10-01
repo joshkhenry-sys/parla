@@ -1,1 +1,118 @@
-const MODEL="gpt-5.6-luna";\nfunction fallbackLesson(language, code, level, node){\n  const key=String(code||"en").toLowerCase();\n  const first=({\n    es:[["Hola","Hello","Use this when you greet someone."],["Me llamo ___","My name is ___","Use this to introduce yourself."],["Mucho gusto","Nice to meet you","Use this after meeting someone."]],\n    en:[["Hi","Hello","Use this to greet someone."],["My name is ___","Introduce your name","Use this to introduce yourself."],["Nice to meet you","Nice to meet you","Use this after meeting someone."]],\n    pt:[["Oi","Hi / Hello","Use this to greet someone."],["Eu me chamo ___","My name is ___","Use this to introduce yourself."],["Prazer","Nice to meet you","Use this after meeting someone."]],\n    fr:[["Bonjour","Hello","Use this to greet someone."],["Je m'appelle ___","My name is ___","Use this to introduce yourself."],["Enchanté","Nice to meet you","Use this after meeting someone."]],\n    it:[["Ciao","Hi / Hello","Use this to greet someone."],["Mi chiamo ___","My name is ___","Use this to introduce yourself."],["Piacere","Nice to meet you","Use this after meeting someone."]],\n    de:[["Hallo","Hello","Use this to greet someone."],["Ich heiße ___","My name is ___","Use this to introduce yourself."],["Freut mich","Nice to meet you","Use this after meeting someone."]],\n    nl:[["Hoi","Hi / Hello","Use this to greet someone."],["Ik heet ___","My name is ___","Use this to introduce yourself."],["Leuk je te ontmoeten","Nice to meet you","Use this after meeting someone."]],\n    pl:[["Cześć","Hi / Hello","Use this to greet someone."],["Mam na imię ___","My name is ___","Use this to introduce yourself."],["Miło mi","Nice to meet you","Use this after meeting someone."]],\n    sv:[["Hej","Hi / Hello","Use this to greet someone."],["Jag heter ___","My name is ___","Use this to introduce yourself."],["Trevligt att träffas","Nice to meet you","Use this after meeting someone."]],\n    el:[["Γεια σου","Hi / Hello","Use this to greet someone."],["Με λένε ___","My name is ___","Use this to introduce yourself."],["Χάρηκα","Nice to meet you","Use this after meeting someone."]],\n    tr:[["Merhaba","Hello","Use this to greet someone."],["Benim adım ___","My name is ___","Use this to introduce yourself."],["Memnun oldum","Nice to meet you","Use this after meeting someone."]],\n    hi:[["नमस्ते","Hello","Use this to greet someone."],["मेरा नाम ___ है","My name is ___","Use this to introduce yourself."],["आपसे मिलकर खुशी हुई","Nice to meet you","Use this after meeting someone."]],\n    ja:[["こんにちは","Hello","Use this to greet someone."],["わたしは ___ です","I am ___ / My name is ___","Use this to introduce yourself."],["はじめまして","Nice to meet you","Use this when meeting someone for the first time."]],\n    ko:[["안녕하세요","Hello","Use this to greet someone."],["저는 ___예요","I am ___ / My name is ___","Use this to introduce yourself."],["만나서 반가워요","Nice to meet you","Use this after meeting someone."]],\n    zh:[["你好","Hello","Use this to greet someone."],["我叫___","My name is ___","Use this to introduce yourself."],["很高兴认识你","Nice to meet you","Use this after meeting someone."]],\n    ar:[["مرحبًا","Hello","Use this to greet someone."],["اسمي ___","My name is ___","Use this to introduce yourself."],["تشرفت بلقائك","Nice to meet you","Use this after meeting someone."]]\n  })[key] || [["Hi","Hello","Use this to greet someone."],["My name is ___","Introduce your name","Use this to introduce yourself."],["Nice to meet you","Nice to meet you","Use this after meeting someone."]];\n\n  const phrases=first.map(([target,meaning,usage])=>({target,meaning,usage,breakdown:[{target,meaning}],example:target.replace("___","Alex"),example_meaning:meaning.replace("___","Alex"),pronunciation:""}));\n  return {title:String(node?.title||"Meet someone"),topic:String(node?.focus||"real conversation"),scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Handle the situation naturally."),situation:String(node?.situation||"Meet someone and start a short conversation.")},phrases,dialogue:[{speaker:"native",text:phrases[0].target},{speaker:"learner",text:phrases[1].target},{speaker:"native",text:phrases[2].target},{speaker:"learner",text:phrases[2].target}]};\n}\n\n\nexport default async function handler(req,res){\n  if(req.method!=="POST")return res.status(405).json({error:"Method not allowed"});\n  if(!process.env.OPENAI_API_KEY)return res.status(500).json({error:"Missing OPENAI_API_KEY"});\n\n  try{\n    const {language,code,level,node,memory=[]}=req.body||{};\n    if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation){\n      return res.status(400).json({error:"Missing lesson generation inputs"});\n    }\n\n    const isA0=String(level).toUpperCase()==="A0";\n    const isA1=String(level).toUpperCase()==="A1";\n    const phraseCount=isA0?2:3;\n    const dialogueCount=isA0?4:6;\n    const memoryItems=Array.isArray(memory)?memory.slice(0,6):[];\n\n    const levelRules=isA0\n      ?"This is A0: the learner has essentially ZERO prior knowledge. Teach as if this is their first exposure. Use only extremely common, immediately useful words and short phrases. Do NOT assume they know basic verbs, pronouns, articles, conjugations, gender, cases, word order, or polite formulas. Each new phrase must be short and understandable after the English explanation. Introduce ONE small language idea at a time. Avoid idioms, slang, abstract language, long sentences, and unnecessary grammar. Do not make the learner infer meaning from context alone. The learner should finish knowing exactly what they just said and when a real person would say it."\n      :isA1\n      ?"This is A1: use simple everyday sentences and highly common structures. You may combine a few known beginner words, but do not jump into B1-style vocabulary or grammar. Every new structure still needs a clear English explanation and practical context."\n      :"For A2/B1/B2/C1 levels, increase complexity only when appropriate to that level. Never use advanced grammar or vocabulary merely to make the lesson sound sophisticated.";\n\n    const prompt=`Create one premium Nahtive language-learning lesson for a real adult learner.\n\nTARGET LANGUAGE: ${language} (${code})\nLEARNER LEVEL: ${level}\nCURRICULUM POSITION: ${node.sequence_number}/100\nSTAGE: ${node.stage_name}\nSITUATION: ${node.title}\nSCENARIO: ${node.situation}\nFOCUS: ${node.focus}\n\nNahtive teaches people to actually understand and use another language in everyday life.\n\nLEVEL RULE:\n${levelRules}\n\nCONTENT PHILOSOPHY:\n- Teach a small core of language, not a vocabulary dump.\n- Every new target-language item must have meaning BEFORE the learner is asked to recall or say it.\n- The learner must understand what they are saying, what each important part means, and when they would naturally use it.\n- Build from recognition to recall to speaking to a tiny real exchange.\n- Natural adult language. No textbook filler.\n- Never make the learner guess the meaning of a phrase.\n- Never introduce a phrase simply because it sounds impressive.\n- If a phrase contains a contraction, inflection, case ending, article, gender marker, or other important change, explain it in the breakdown.\n\nLANGUAGE RULES:\n- All target-language phrases, examples, and dialogue must be in the TARGET LANGUAGE.\n- Meanings, usage notes, breakdowns, and example translations must be in English.\n- For Spanish, use contemporary Latin American / broadly American Spanish, never Spain-specific wording.\n- For Polish, use natural contemporary Polish and explain important case/endings in plain English.\n- For French, use natural everyday French and explain contractions/articles when relevant.\n- For Dutch, use natural everyday Dutch.\n- Do not invent words.\n- Do not translate English word-for-word if native speakers would say it differently.\n\nTEACHABLE PHRASES:\nExactly ${phraseCount}.\nFor every phrase return:\n1. target — the exact phrase the learner will say.\n2. meaning — clear natural English meaning.\n3. usage — exactly when a person would say it.\n4. breakdown — 2-5 short objects explaining the important parts. Each object has target and its English meaning.\n5. example — a short natural target-language example using the phrase or structure.\n6. example_meaning — the English translation of that example.\n7. pronunciation — an easy English-friendly pronunciation guide for A0/A1 when useful; otherwise a compact pronunciation note.\n\nFor A0:\n- Phrase 1 is the essential phrase for the situation.\n- Phrase 2 is the simplest useful response or variation.\n- Keep phrases roughly 1-6 words whenever possible.\n- Do not introduce more than 5 genuinely new lexical items across the two phrases unless absolutely necessary.\n- Prefer reusable sentence frames over isolated vocabulary.\n- The English meaning must be something the learner can immediately understand.\n- The breakdown must make it obvious what they are actually saying.\n\nDIALOGUE:\nExactly ${dialogueCount} lines.\nAlternate native / learner / native / learner${isA0?"":" / native / learner"}.\nThe dialogue is a model of the SAME situation.\nFor A0, keep every line very short and use only language that has been explicitly taught or is obvious from the situation.\nThe learner lines should demonstrate how the taught phrases are actually used.\nDo not put unexplained advanced language into learner lines.\n\nADAPTIVE MEMORY:\n${JSON.stringify(memoryItems)}\nIf memory contains a weak expression, naturally reuse at most one expression when it fits. Do not announce that you are reviewing it.\n\nBefore returning, silently check:\n- Does every phrase match the requested level?\n- Could a true A0 learner understand exactly what they are saying from the fields provided?\n- Are there any words or grammar structures that are unnecessarily advanced?\n- Does the dialogue use the taught language naturally?\n- Is the target language native-sounding?\n- Is the English explanation accurate?\nIf any answer is no, simplify and correct it.`;\n\n    const controller=new AbortController();\n    const timer=setTimeout(()=>controller.abort(),50000);\n\n    const r=await fetch("https://api.openai.com/v1/responses",{\n      method:"POST",\n      headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},\n      body:JSON.stringify({\n        model:MODEL,\n        input:prompt,\n        reasoning:{effort:"low"},\n        max_output_tokens:isA0?1500:1900,\n        text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{\n          type:"object",additionalProperties:false,\n          properties:{\n            title:{type:"string"},topic:{type:"string"},\n            scene:{type:"object",additionalProperties:false,properties:{time:{type:"string"},place:{type:"string"},mission:{type:"string"},situation:{type:"string"}},required:["time","place","mission","situation"]},\n            phrases:{type:"array",minItems:phraseCount,maxItems:phraseCount,items:{type:"object",additionalProperties:false,properties:{\n              target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},\n              breakdown:{type:"array",minItems:1,maxItems:5,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},\n              example:{type:"string"},example_meaning:{type:"string"},pronunciation:{type:"string"}\n            },required:["target","meaning","usage","breakdown","example","example_meaning","pronunciation"]}},\n            dialogue:{type:"array",minItems:dialogueCount,maxItems:dialogueCount,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}}\n          },required:["title","topic","scene","phrases","dialogue"]\n        }}}\n      }),\n      signal:controller.signal\n    });\n\n    clearTimeout(timer);\n    if(!r.ok){const body=await r.text(); console.error("Lesson generation failed:",body.slice(0,1000)); return res.status(200).json({title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});}\n    const data=await r.json();\n    const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;\n    if(!text)return res.status(200).json({title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});\n    const parsed=JSON.parse(text);\n\n    if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==phraseCount)return res.status(502).json({error:"Lesson phrase structure was invalid"});\n    if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.example_meaning||!Array.isArray(p.breakdown)||!p.breakdown.length))return res.status(502).json({error:"Lesson teaching details were incomplete"});\n    if(!Array.isArray(parsed.dialogue)||parsed.dialogue.length!==dialogueCount)return res.status(502).json({error:"Lesson dialogue structure was invalid"});\n    const expected=Array.from({length:dialogueCount},(_,i)=>i%2===0?"native":"learner");\n    if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]))return res.status(502).json({error:"Lesson dialogue order was invalid"});\n\n    return res.status(200).json({title:parsed.title,topic:parsed.topic,content:parsed});\n  }catch(e){\n    console.error("Lesson generation exception:",e);\n    return res.status(200).json({title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});\n  }\n}
+const MODEL="gpt-5.6-luna";
+
+const FALLBACKS={
+  es:[["Hola","Hello","Use this to greet someone.","Hola, soy Alex.","HO-la"],["Me llamo ___","My name is ___.","Use this to tell someone your name.","Me llamo Alex.","meh YAH-moh Alex"]],
+  fr:[["Bonjour","Hello.","Use this to greet someone politely.","Bonjour, je m'appelle Alex.","bohn-ZHOOR"],["Je m'appelle ___","My name is ___.","Use this to tell someone your name.","Je m'appelle Alex.","zhuh mah-PELL Alex"]],
+  pl:[["Cześć","Hi / Hello.","Use this to greet someone you know or in a casual situation.","Cześć, jestem Alex.","cheshch"],["Mam na imię ___","My name is ___.","Use this to tell someone your name.","Mam na imię Alex.","mam nah EE-myeh Alex"]],
+  pt:[["Oi","Hi / Hello.","Use this to greet someone.","Oi, eu sou o Alex.","oy"],["Eu me chamo ___","My name is ___.","Use this to tell someone your name.","Eu me chamo Alex.","eh-oo mee SHAH-moo Alex"]],
+  de:[["Hallo","Hello.","Use this to greet someone.","Hallo, ich bin Alex.","HAH-loh"],["Ich heiße ___","My name is ___.","Use this to tell someone your name.","Ich heiße Alex.","ikh HIGH-suh Alex"]],
+  it:[["Ciao","Hi / Hello.","Use this to greet someone.","Ciao, sono Alex.","CHOW"],["Mi chiamo ___","My name is ___.","Use this to tell someone your name.","Mi chiamo Alex.","mee KYAH-moh Alex"]],
+  nl:[["Hoi","Hi / Hello.","Use this to greet someone.","Hoi, ik ben Alex.","hoy"],["Ik heet ___","My name is ___.","Use this to tell someone your name.","Ik heet Alex.","ik hayt Alex"]]
+};
+
+function fallbackLesson(language,code,level,node){
+  const rows=FALLBACKS[String(code||"").toLowerCase()]||[["Hi","Hello.","Use this to greet someone.","Hi, I'm Alex.","hi"],["My name is ___","My name is ___.","Use this to tell someone your name.","My name is Alex.","my name iz Alex"]];
+  const phrases=rows.map(([target,meaning,usage,example,pronunciation])=>({
+    target,meaning,usage,
+    breakdown:[{target,meaning}],
+    example,example_meaning:meaning,pronunciation
+  }));
+  return {
+    title:String(node?.title||"Meet someone"),
+    topic:String(node?.focus||"introductions"),
+    scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Say hello and introduce yourself."),situation:String(node?.situation||"Meet someone and start a very short conversation.")},
+    phrases,
+    dialogue:[
+      {speaker:"native",text:phrases[0].target},
+      {speaker:"learner",text:phrases[1].target},
+      {speaker:"native",text:phrases[0].target},
+      {speaker:"learner",text:phrases[1].target}
+    ]
+  };
+}
+
+function jsonResponse(res,status,payload){return res.status(status).json(payload);}
+
+export default async function handler(req,res){
+  let language="",code="",level="",node=null;
+  try{
+    if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
+    if(!process.env.OPENAI_API_KEY)return jsonResponse(res,500,{error:"Missing OPENAI_API_KEY"});
+    ({language,code,level,node}=req.body||{});
+    if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
+
+    const normalizedLevel=String(level).toUpperCase();
+    const isA0=normalizedLevel==="A0";
+    const levelRules=isA0
+      ? "A0 means absolute beginner. Assume the learner knows almost nothing. Teach only 2 very short, immediately useful phrases. Each phrase should normally be 1-6 words. Introduce no more than about 5 new lexical items total. Do not use idioms, slang, abstract vocabulary, long sentences, unexplained conjugations, complex grammar, or culturally specific shortcuts. If a phrase changes form because of gender, case, politeness, contraction, or conjugation, explain that plainly in the breakdown. The learner must know exactly what the whole phrase means before being asked to say it. Do not make the learner infer meaning from the situation."
+      : normalizedLevel==="A1"
+      ? "A1 means early beginner. Use very common everyday language and short sentences. Build from structures the learner could realistically reuse. Avoid B1+ vocabulary, idioms, slang, and complicated grammar. Explain every important new word or grammatical change in plain English."
+      : "Match "+normalizedLevel+" closely. Complexity should come from the learner's level, not from trying to sound sophisticated.";
+
+    const prompt=[
+      "You are designing one Nahtive lesson for an adult learning ",language,".\n\n",
+      "TARGET LANGUAGE: ",language," (",code,")\n",
+      "LEVEL: ",normalizedLevel,"\n",
+      "CURRICULUM: ",node.sequence_number,"/100\n",
+      "SITUATION: ",node.title,"\n",
+      "SCENARIO: ",node.situation,"\n",
+      "FOCUS: ",node.focus||"everyday conversation","\n\n",
+      "LEVEL RULES:\n",levelRules,"\n\n",
+      "THE MOST IMPORTANT RULE:\n",
+      "The learner must understand what they are saying before they are asked to produce it. Every taught phrase needs a clear natural English meaning, when a real person uses it, a word/part breakdown when useful, a natural example in the target language, and the English meaning of that example. The lesson should feel like a patient native speaker teaching one tiny useful situation, not a vocabulary test.\n\n",
+      "LANGUAGE:\n",
+      "Target-language content must be genuinely natural for native speakers. English is used for explanations and translations. Spanish must be contemporary Latin American / broadly American Spanish, never Spain-specific. Polish must explain relevant endings/case changes instead of expecting the learner to guess. French must explain contractions/articles or other changes when they matter. Never translate English literally if native speakers would phrase it differently.\n\n",
+      "PHRASES:\nReturn exactly 2. Phrase 1 is the essential phrase for the situation. Phrase 2 is a simple response, variation, or reusable sentence frame. Do not sneak extra new vocabulary into examples just to make them sound impressive.\n\n",
+      "DIALOGUE:\nReturn exactly 4 lines in this order: native, learner, native, learner. It must model the same situation using the taught language. At A0, keep every line extremely short. Do not put unexplained advanced target-language sentences into the learner's lines.\n\n",
+      "OUTPUT:\nReturn valid JSON matching the required schema only."
+    ].join("");
+
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),30000);
+    let response;
+    try{
+      response=await fetch("https://api.openai.com/v1/responses",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
+        body:JSON.stringify({
+          model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:1400,
+          text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
+            type:"object",additionalProperties:false,
+            properties:{
+              title:{type:"string"},topic:{type:"string"},
+              scene:{type:"object",additionalProperties:false,properties:{time:{type:"string"},place:{type:"string"},mission:{type:"string"},situation:{type:"string"}},required:["time","place","mission","situation"]},
+              phrases:{type:"array",minItems:2,maxItems:2,items:{type:"object",additionalProperties:false,properties:{
+                target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},
+                breakdown:{type:"array",minItems:1,maxItems:5,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
+                example:{type:"string"},example_meaning:{type:"string"},pronunciation:{type:"string"}
+              },required:["target","meaning","usage","breakdown","example","example_meaning","pronunciation"]}},
+              dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}}
+            },
+            required:["title","topic","scene","phrases","dialogue"]
+          }}}
+        }),
+        signal:controller.signal
+      });
+    }finally{clearTimeout(timeout);}
+
+    if(!response.ok){
+      console.error("OpenAI lesson generation failed:",await response.text());
+      return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
+    }
+
+    const data=await response.json();
+    const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;
+    if(!text)throw new Error("OpenAI returned no lesson text");
+    const parsed=JSON.parse(text);
+    if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==2)throw new Error("Invalid phrase count");
+    if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.example_meaning||!Array.isArray(p.breakdown)||!p.breakdown.length))throw new Error("Incomplete phrase teaching data");
+    if(!Array.isArray(parsed.dialogue)||parsed.dialogue.length!==4)throw new Error("Invalid dialogue count");
+    const expected=["native","learner","native","learner"];
+    if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]))throw new Error("Invalid dialogue order");
+
+    return jsonResponse(res,200,{title:parsed.title,topic:parsed.topic,content:parsed});
+  }catch(e){
+    console.error("Lesson generation exception:",e);
+    return jsonResponse(res,200,{title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true,error:String(e?.message||"Generation failed")});
+  }
+}
