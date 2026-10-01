@@ -154,7 +154,7 @@
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.NAHTIVE_SITE_URL + "/" + getNextPage()
+          redirectTo: window.location.origin + "/" + getNextPage()
         }
       });
 
@@ -207,7 +207,7 @@
       const { error } = await supabaseClient.auth.resetPasswordForEmail(
         email,
         {
-          redirectTo: window.NAHTIVE_SITE_URL + "/login.html"
+          redirectTo: window.location.origin + "/login.html"
         }
       );
 
