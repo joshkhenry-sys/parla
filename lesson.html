@@ -694,9 +694,40 @@ async function load(){
           dialogue.length>=4;
       });
       if(!lessons.length) {
-        window.location.href="dashboard.html";
-        return;
-      }
+        const nodeResult=await client.from("curriculum_nodes")
+          .select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band")
+          .order("sequence_number",{ascending:true})
+          .limit(1)
+          .maybeSingle();
+        if(nodeResult.error)throw nodeResult.error;
+        if(!nodeResult.data)throw new Error("No curriculum is available yet.");
+
+        const gen=await fetch("/api/generate-lesson",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            language:current.languages?.name||"English",
+            code:current.languages?.code||"en",
+            level:current.level||"A1",
+            node:nodeResult.data,
+            memory:[]
+          })
+        });
+        const generated=await gen.json().catch(()=>({}));
+        if(!gen.ok||!generated.content)throw new Error(generated.error||"Could not build your lesson.");
+
+        const savedLesson=await client.from("lessons").insert({
+          learner_language_id:current.id,
+          curriculum_node_id:nodeResult.data.id,
+          title:generated.title||nodeResult.data.title,
+          topic:generated.topic||nodeResult.data.focus||nodeResult.data.title,
+          level:current.level||"A1",
+          content:generated.content
+        }).select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").single();
+
+        if(savedLesson.error)throw savedLesson.error;
+        baseLesson=savedLesson.data;
+      } else {
 
       const ids=lessons.map(x=>x.id);
       const attempts=await client.from("lesson_attempts").select("lesson_id").in("lesson_id",ids);
@@ -709,6 +740,7 @@ async function load(){
       });
 
       baseLesson=lessons.find(x=>!completed.has(x.id))||lessons[lessons.length-1];
+      }
     }
 
     const linked=baseLesson.learner_languages;
