@@ -243,7 +243,17 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     return;
   }
 
-  let allLessons = lessons || [];
+  // Only treat a lesson as part of the active path if it has the new teaching contract.
+  // Older rows can remain in the database, but they must not be shown as the learner's next lesson.
+  const isUsableLesson = row => {
+    const phrases = Array.isArray(row?.content?.phrases) ? row.content.phrases : [];
+    const dialogue = Array.isArray(row?.content?.dialogue) ? row.content.dialogue : [];
+    return phrases.length >= 2 &&
+      phrases.slice(0,2).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && Array.isArray(p.breakdown) && p.breakdown.length) &&
+      dialogue.length >= 4;
+  };
+
+  let allLessons = (lessons || []).filter(isUsableLesson);
   const levelRank = { A0:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
   const targetRank = levelRank[learnerLevel] ?? 1;
 
