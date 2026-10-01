@@ -123,7 +123,7 @@
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",""":"&quot;","'":"&#39;"}[m]));
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 let client=null,user=null,profile=null,baseLesson=null,lesson=null,index=0,finished=false,xp=0,answers=[],audioCtx=null;
 
 function sound(kind){
