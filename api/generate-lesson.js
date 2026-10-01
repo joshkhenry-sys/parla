@@ -17,12 +17,24 @@ const FALLBACKS={
  ar:[["مرحبا","Hello.","Use this to greet someone.","مرحبا، أنا أليكس.","marhaban"],["كيف حالك؟","How are you?","Use this to ask.","مرحبا، كيف حالك؟","kayfa haluk"],["أنا بخير.","I'm good.","Use this to answer.","أنا بخير، شكرا.","ana bikhayr"],["اسمي أليكس.","My name is Alex.","Use this to introduce yourself.","اسمي أليكس.","ismi Alex"],["تشرفت بلقائك.","Nice to meet you.","Use this after meeting someone.","تشرفت بلقائك.","tasharraftu biliqaik"]]
 };
 function fallbackLesson(language,code,level,node){
- const rows=FALLBACKS[String(code||"").toLowerCase()]||FALLBACKS.en||[["Hi","Hello.","Use this to greet someone.","Hi, I'm Alex.","hi"]];
- const phrases=rows.map(([target,meaning,usage,example,pronunciation])=>({target,meaning,usage,breakdown:[{target,meaning}],example,example_meaning:meaning,pronunciation,build_target:target,build_meaning:meaning,build_words:target.split(/\s+/).filter(Boolean),distractors:[]}));
- const fallback={en:[["Hi","Hello.","Use this to greet someone.","Hi, I'm Alex.","hi"],["How are you?","How are you?","Use this to ask how someone is doing.","How are you?","how are yoo"],["I'm good.","I'm good.","Use this to answer.","I'm good, thanks.","im good"],["My name is Alex.","My name is Alex.","Use this to introduce yourself.","My name is Alex.","my name iz"],["Nice to meet you.","Nice to meet you.","Use this after meeting someone.","Nice to meet you.","nise too meet yoo"]]};
- const source=FALLBACKS[String(code||"").toLowerCase()]||fallback.en;
- const ps=source.map(([target,meaning,usage,example,pronunciation])=>({target,meaning,usage,breakdown:[{target,meaning}],example,example_meaning:meaning,pronunciation,build_target:target,build_meaning:meaning,build_words:target.split(/\s+/).filter(Boolean),distractors:[]}));
- return {title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"Everyday conversation"),scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Handle a simple real-world interaction."),situation:String(node?.situation||"Practice a short, useful interaction.")},phrases:ps,dialogue:ps.slice(0,4).map((p,i)=>({speaker:i%2?"learner":"native",text:p.target}))};
+ const raw=String(code||"").toLowerCase();
+ const key=raw.split("-")[0];
+ const rows=FALLBACKS[raw]||FALLBACKS[key]||FALLBACKS.en;
+ const ps=rows.map(([target,meaning,usage,example,pronunciation],i)=>({
+   target,meaning,usage,
+   breakdown:[{target,meaning}],
+   example,example_meaning:meaning,pronunciation,
+   build_target:target,build_meaning:meaning,
+   build_words:target.split(/\s+/).filter(Boolean),
+   distractors:[i%2?"no":"maybe",i%3?"please":"today",i%2?"thanks":"sorry"]
+ }));
+ return {
+   title:String(node?.title||"Your first conversation"),
+   topic:String(node?.focus||"Everyday conversation"),
+   scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Handle a simple real-world interaction."),situation:String(node?.situation||"Practice a short, useful interaction.")},
+   phrases:ps,
+   dialogue:ps.slice(0,4).map((p,i)=>({speaker:i%2?"learner":"native",text:p.target}))
+ };
 }
 function jsonResponse(res,status,payload){return res.status(status).json(payload)}
 export default async function handler(req,res){
