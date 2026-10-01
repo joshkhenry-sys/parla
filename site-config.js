@@ -1,21 +1,12 @@
 (function () {
-  const CANONICAL_HOST = "www.nahtive.com";
-  const CANONICAL_URL = "https://" + CANONICAL_HOST;
-  const host = window.location.hostname;
-  const localHosts = ["localhost", "127.0.0.1", "::1"];
-
-  window.NAHTIVE_SITE_URL = CANONICAL_URL;
-
-  // Keep production on one canonical host. Preview/deployment hosts redirect
-  // here, while local development remains usable.
-  if (!localHosts.includes(host) && host !== CANONICAL_HOST) {
-    const target = CANONICAL_URL + window.location.pathname + window.location.search + window.location.hash;
-    window.location.replace(target);
-    return;
-  }
+  // Nahtive's production domain is https://www.nahtive.com.
+  // Do not force a host redirect here: authentication must be allowed to
+  // complete on the currently deployed Vercel host until the custom domain
+  // and Supabase redirect configuration are fully live.
+  window.NAHTIVE_SITE_URL = "https://www.nahtive.com";
 
   const canonical = document.createElement("link");
   canonical.rel = "canonical";
-  canonical.href = CANONICAL_URL + window.location.pathname.replace(/\\/g, "");
+  canonical.href = window.location.origin + window.location.pathname;
   document.head.appendChild(canonical);
 })();
