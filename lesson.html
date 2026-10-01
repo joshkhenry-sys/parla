@@ -146,6 +146,36 @@ function localReply(c,input,turn){
  return "That makes sense. Tell me a little more.";
 }
 
+function browserSpeak(text){
+  const value=String(text||"").trim();
+  if(!value||!("speechSynthesis" in window))return;
+  try{
+    window.speechSynthesis.cancel();
+    const utterance=new SpeechSynthesisUtterance(value);
+    const code=profile?.code||"en-US";
+    const localeMap={es:"es-MX",fr:"fr-FR",nl:"nl-NL",de:"de-DE",pt:"pt-BR",pl:"pl-PL",it:"it-IT",ar:"ar-SA",ja:"ja-JP",ko:"ko-KR",zh:"zh-CN",en:"en-US",sv:"sv-SE",el:"el-GR",tr:"tr-TR",hi:"hi-IN"};
+    utterance.lang=localeMap[code]||code||"en-US";
+    utterance.rate=0.96;
+    utterance.pitch=1;
+    utterance.volume=1;
+    window.speechSynthesis.speak(utterance);
+  }catch(error){
+    console.warn("Nahtive speech playback unavailable:",error);
+  }
+}
+
+function stopRecognition(){
+  if(recognition){
+    try{
+      recognition.onresult=null;
+      recognition.onerror=null;
+      recognition.onend=null;
+      recognition.stop();
+    }catch(error){}
+    recognition=null;
+  }
+}
+
 function startRecognition(expected,done){
  stopRecognition();
  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
