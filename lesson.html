@@ -367,7 +367,9 @@ async function load(){
         if(savedLesson.error)throw savedLesson.error;baseLesson=savedLesson.data;
       }
     }
-    const linked=baseLesson.learner_languages;profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(baseLesson.level||linked.level||"A1")};
+    const linked=baseLesson.learner_languages;
+    if(!linked?.id)throw new Error("This language is not linked to your account.");
+    profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(baseLesson.level||linked.level||"A1")};
     lesson=buildCards(baseLesson);
     $("language").textContent=profile.name+" · "+profile.level;
     $("title").textContent=lesson.title;
