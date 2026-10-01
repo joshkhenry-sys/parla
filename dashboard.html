@@ -496,7 +496,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
             const hub=document.getElementById("languageHub");
             hub.classList.add("open");
             const name=lang.languages?.name||"Language", level=lang.level||"A1";
-            hub.innerHTML="<div class='level-panel-head'><div><h3>"+escapeHtml(name)+" learning path</h3><p>Choose the level Nahtive should build lessons for. You can change it anytime.</p></div><button type='button' class='manage-button' id='closeHub'>Close</button></div><div class='level-options'>"+["A1","A1","A2","B1","B2","B2+","C1","C2"].map(l=>"<button type='button' class='level-option "+(l===level?"active":"")+"' data-level='"+l+"'>"+l+"</button>").join("")+"</div><div class='hub-actions'><a href='assessment.html?language_id="+encodeURIComponent(lang.id)+"&return=dashboard'>Retake placement</a></div>";
+            hub.innerHTML="<div class='level-panel-head'><div><h3>"+escapeHtml(name)+" learning path</h3><p>Choose the level Nahtive should build lessons for. You can change it anytime.</p></div><button type='button' class='manage-button' id='closeHub'>Close</button></div><div class='level-options'>"+["A1","A2","B1","B2","C1","C2"].map(l=>"<button type='button' class='level-option "+(l===level?"active":"")+"' data-level='"+l+"'>"+l+"</button>").join("")+"</div><div class='hub-actions'><a href='assessment.html?language_id="+encodeURIComponent(lang.id)+"&return=dashboard'>Retake placement</a></div>";
             hub.querySelector("#closeHub").onclick=()=>hub.classList.remove("open");
             hub.querySelectorAll(".level-option").forEach(opt=>opt.onclick=async()=>{
               const newLevel=opt.dataset.level;
