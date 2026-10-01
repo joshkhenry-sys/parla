@@ -41,9 +41,9 @@ export default async function handler(req,res){
  let language="",code="",level="",node=null;
  try{
   if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
-  if(!process.env.OPENAI_API_KEY)return jsonResponse(res,500,{error:"Missing OPENAI_API_KEY"});
   ({language,code,level,node}=req.body||{});
   if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
+  if(!process.env.OPENAI_API_KEY)return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
   const L=String(level).toUpperCase();
   const rules={
    A1:"Beginner/Basic User. Use concrete everyday situations, a small core vocabulary, very short sentences, common patterns, and heavy recycling. The learner should be able to handle simple personal needs and routine exchanges. Challenge recall and word order, not obscure vocabulary.",
