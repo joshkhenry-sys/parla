@@ -65,7 +65,7 @@ Return JSON only.`;
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);let response;
   try{
    response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
-    body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:2600,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
+    body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:5000,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
       type:"object",additionalProperties:false,
       properties:{
        title:{type:"string"},topic:{type:"string"},
