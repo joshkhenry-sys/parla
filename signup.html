@@ -173,7 +173,7 @@
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.NAHTIVE_SITE_URL + "/" + getNextPage()
+          redirectTo: window.location.origin + "/" + getNextPage()
         }
       });
 
@@ -227,7 +227,7 @@
             nahtive_onboarding_pending: true,
             nahtive_onboarding_profile: pendingProfile
           },
-          emailRedirectTo: window.NAHTIVE_SITE_URL + "/" + getNextPage()
+          emailRedirectTo: window.location.origin + "/" + getNextPage()
         }
       });
 
