@@ -2,403 +2,672 @@
 <html lang="en">
 <head>
   <script src="site-config.js"></script>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nahtive — Lesson</title>
-<link rel="stylesheet" href="nahtive.css">
-<style>
-*{font-family:var(--font),Arial,sans-serif!important}
-.lesson{max-width:980px;margin:0 auto}
-.lesson-header{padding:28px 0 20px}
-.lesson-header h1{font-size:clamp(32px,5vw,48px);line-height:1.05;margin:8px 0}
-.lesson-header p{font-size:17px;color:var(--muted);margin:0}
-.lesson-progress{margin:4px 0 28px}
-.progress-top{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--muted)}
-.progress-track{height:6px;border-radius:99px;background:var(--surface2);overflow:hidden}
-.progress-track .fill{height:100%;background:var(--accent);border-radius:99px;transition:width .25s ease}
-.lesson-card{max-width:820px;margin:auto;padding:38px;border:1px solid var(--line);border-radius:24px;background:var(--surface)}
-.kicker{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:18px}
-.phrase{font-size:clamp(34px,6vw,56px);font-weight:700;line-height:1.08;letter-spacing:-.04em;margin:0 0 10px}
-.meaning{font-size:20px;line-height:1.5;color:var(--muted);margin:0 0 16px}.usage,.example{padding:14px 16px;border:1px solid var(--line);border-radius:14px;margin:10px 0;line-height:1.55}.usage strong,.example strong{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;color:var(--muted)}
-.question{font-size:26px;line-height:1.35;font-weight:650;margin:0 0 20px}
-.options{display:grid;gap:10px}
-.option{width:100%;min-height:64px;text-align:left;padding:15px 18px;border:1px solid var(--line);border-radius:15px;background:var(--surface2);color:var(--text);font-size:17px;display:flex;align-items:center;gap:13px;cursor:pointer}
-.option:hover{border-color:var(--accent)}
-.option.correct{border-color:var(--accent);background:rgba(184,243,107,.09)}
-.option.wrong{border-color:#d56b6b}
-.letter{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.06);font-size:12px;font-weight:800;flex:none}
-.feedback{margin-top:14px;color:var(--muted);font-size:14px;line-height:1.5}
-.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
-.primary,.secondary{min-height:50px;padding:12px 20px}
-.scene-text{font-size:22px;line-height:1.45;margin:0 0 10px}
-.scene-goal{color:var(--muted);font-size:16px;line-height:1.55}
-.speak-box{text-align:center;padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--surface2)}
-.speak-target{font-size:30px;font-weight:700;margin:8px 0 6px}
-.speak-meaning{color:var(--muted);font-size:16px}
-.speak-button{margin-top:20px;min-width:150px;min-height:56px}
-.status{min-height:24px;margin-top:14px;color:var(--muted);font-size:14px}
-.live-goal{font-size:17px;line-height:1.5;margin-bottom:20px}
-.chat{display:grid;gap:9px;margin-bottom:18px;max-height:360px;overflow:auto}
-.bubble{padding:12px 14px;border-radius:14px;background:var(--surface2);line-height:1.5}
-.bubble.you{background:rgba(184,243,107,.08)}
-.bubble-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
-.input{width:100%;min-height:52px;resize:none}
-.scene-wrap{padding:4px 0}
-.complete{text-align:center}
-.complete h2{font-size:34px;margin:0 0 10px}
-.xp{font-size:22px;font-weight:700;margin:18px 0}
-@media(max-width:600px){
- .lesson-card{padding:26px 20px;border-radius:20px}
- .phrase{font-size:40px}
- .meaning{font-size:18px}
- .question{font-size:23px}
- .scene-text{font-size:20px}
-}
-</style>
-<style id="nahtive-readable-light-lesson">
-body:has(.lesson){background:#f6f3eb!important;color:#26312d!important}
-body:has(.lesson) .lesson-card{background:#fffefa!important;color:#26312d!important;border:1px solid #d8d8cf!important;box-shadow:0 14px 34px rgba(38,49,45,.07)!important}
-body:has(.lesson) .lesson-header h1,body:has(.lesson) .question,body:has(.lesson) .scene-text,body:has(.lesson) .phrase,body:has(.lesson) .speak-target,body:has(.lesson) .complete h2{color:#26312d!important}
-body:has(.lesson) .lesson-header p,body:has(.lesson) .meaning,body:has(.lesson) .scene-goal,body:has(.lesson) .speak-meaning,body:has(.lesson) .status,body:has(.lesson) .feedback,body:has(.lesson) .progress-top{color:#5d6863!important}
-body:has(.lesson) .kicker{color:#667b4f!important}
-body:has(.lesson) .progress-track{background:#dfdfd7!important}
-body:has(.lesson) .progress-track .fill{background:#879b68!important}
-body:has(.lesson) .option{background:#fffefa!important;color:#26312d!important;border:1px solid #cfd1c9!important;box-shadow:none!important}
-body:has(.lesson) .option:hover{background:#eef2e7!important;border-color:#879b68!important}
-body:has(.lesson) .option.correct{background:#e7eddc!important;border-color:#879b68!important}
-body:has(.lesson) .option.wrong{background:#f5dfd7!important;border-color:#d9957f!important}
-body:has(.lesson) .letter{background:#edf0e9!important;color:#39443f!important}
-body:has(.lesson) .speak-box{background:#f0eee6!important;border-color:#d8d8cf!important}
-body:has(.lesson) .chat .bubble{background:#f0eee6!important;color:#26312d!important;border-color:#d8d8cf!important}
-body:has(.lesson) .chat .bubble.you{background:#e7eddc!important;border-color:#c8d5b5!important}
-body:has(.lesson) textarea.input{background:#fffefa!important;color:#26312d!important;border:1px solid #cfd1c9!important}
-body:has(.lesson) textarea.input::placeholder{color:#7a827e!important}
-body:has(.lesson) .primary{background:#26312d!important;color:#fffefa!important;box-shadow:none!important}
-body:has(.lesson) .secondary{background:#fffefa!important;color:#26312d!important;border:1px solid #cfd1c9!important}
-body:has(.lesson) .complete{background:#e7eddc!important}
-</style></head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nahtive — Lesson</title>
+  <link rel="stylesheet" href="nahtive.css">
+  <style>
+    *{font-family:var(--font),Arial,sans-serif!important}
+    body:has(.lesson){background:#f6f3eb!important;color:#26312d!important}
+    .lesson{max-width:980px;margin:0 auto}
+    .lesson-header{padding:28px 0 18px}
+    .lesson-header h1{font-size:clamp(30px,4.5vw,44px);line-height:1.08;margin:8px 0;letter-spacing:-.035em}
+    .lesson-header p{font-size:16px;color:#5d6863;margin:0;line-height:1.5}
+    .lesson-progress{margin:4px 0 26px}
+    .progress-top{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:#5d6863}
+    .progress-track{height:5px;border-radius:99px;background:#dfdfd7;overflow:hidden}
+    .progress-track .fill{height:100%;background:#879b68;border-radius:99px;transition:width .3s ease}
+    .lesson-card{max-width:820px;margin:auto;padding:38px;border:1px solid #d8d8cf;border-radius:24px;background:#fffefa;box-shadow:0 14px 34px rgba(38,49,45,.07)}
+    .kicker{font-size:11px;font-weight:800;letter-spacing:.12em;color:#667b4f;text-transform:uppercase;margin-bottom:18px}
+    .context{font-size:18px;line-height:1.6;color:#26312d;margin:0}
+    .context-muted{font-size:15px;line-height:1.6;color:#5d6863;margin:8px 0 0}
+    .phrase{font-size:clamp(34px,5.5vw,52px);font-weight:700;line-height:1.08;letter-spacing:-.04em;margin:0 0 12px;color:#26312d}
+    .meaning{font-size:20px;line-height:1.5;color:#5d6863;margin:0 0 18px}
+    .detail{padding:15px 16px;border:1px solid #d8d8cf;border-radius:15px;background:#f0eee6;margin-top:10px}
+    .detail-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#667b4f;margin-bottom:6px}
+    .detail p{margin:0;color:#39443f;line-height:1.55;font-size:15px}
+    .example-target{font-size:17px;color:#26312d;line-height:1.55}
+    .example-meaning{font-size:14px;color:#5d6863;line-height:1.5;margin-top:4px}
+    .listen-row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:26px;padding-top:20px;border-top:1px solid #d8d8cf}
+    .primary,.secondary{min-height:50px;padding:12px 20px}
+    .primary{background:#26312d!important;color:#fffefa!important;box-shadow:none!important}
+    .secondary{background:#fffefa!important;color:#26312d!important;border:1px solid #cfd1c9!important}
+    .primary:disabled{opacity:.45;cursor:not-allowed}
+    .question{font-size:24px;line-height:1.4;font-weight:650;margin:0 0 20px;color:#26312d}
+    .options{display:grid;gap:10px}
+    .option{width:100%;min-height:60px;text-align:left;padding:14px 16px;border:1px solid #cfd1c9;border-radius:15px;background:#fffefa;color:#26312d;font-size:16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+    .option:hover{background:#eef2e7!important;border-color:#879b68}
+    .option.correct{background:#e7eddc!important;border-color:#879b68}
+    .option.wrong{background:#f5dfd7!important;border-color:#d9957f}
+    .letter{width:29px;height:29px;display:grid;place-items:center;border-radius:9px;background:#edf0e9;color:#39443f;font-size:12px;font-weight:800;flex:none}
+    .feedback{margin-top:14px;color:#5d6863;font-size:14px;line-height:1.5;min-height:22px}
+    .speak-box{text-align:center;padding:26px;border:1px solid #d8d8cf;border-radius:18px;background:#f0eee6}
+    .speak-target{font-size:30px;font-weight:700;line-height:1.2;margin:8px 0;color:#26312d}
+    .speak-meaning{color:#5d6863;font-size:16px;line-height:1.5}
+    .speak-button{margin-top:20px;min-width:150px;min-height:56px}
+    .status{min-height:24px;margin-top:14px;color:#5d6863;font-size:14px}
+    .chat{display:grid;gap:10px;margin:0 0 16px;max-height:390px;overflow:auto}
+    .bubble{padding:13px 15px;border-radius:15px;background:#f0eee6;color:#26312d;line-height:1.55;border:1px solid #d8d8cf}
+    .bubble.you{background:#e7eddc;border-color:#c8d5b5}
+    .bubble-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#667b4f;margin-bottom:4px;font-weight:800}
+    .input{width:100%;min-height:54px;resize:vertical;background:#fffefa!important;color:#26312d!important;border:1px solid #cfd1c9!important}
+    .input::placeholder{color:#7a827e!important}
+    .live-goal{font-size:17px;line-height:1.55;margin:0 0 18px;color:#39443f}
+    .live-hint{font-size:13px;color:#5d6863;margin:0 0 16px}
+    .complete{text-align:center;background:#e7eddc}
+    .complete h2{font-size:34px;margin:0 0 10px;color:#26312d}
+    .complete p{color:#5d6863;line-height:1.6}
+    .learned-list{display:grid;gap:8px;text-align:left;margin:22px 0}
+    .learned-item{padding:12px 14px;background:#fffefa;border:1px solid #d8d8cf;border-radius:12px}
+    .learned-item strong{display:block;color:#26312d}
+    .learned-item span{display:block;color:#5d6863;font-size:13px;margin-top:3px}
+    .small{font-size:13px;color:#5d6863}
+    @media(max-width:600px){
+      .lesson-card{padding:26px 20px;border-radius:20px}
+      .phrase{font-size:40px}
+      .meaning{font-size:18px}
+      .question{font-size:22px}
+      .speak-target{font-size:25px}
+    }
+  </style>
+</head>
 <body>
 <div class="shell">
-<nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
-<div id="loading" class="loading">Loading lesson…</div>
-<div id="lesson" class="lesson" style="display:none">
-<header class="lesson-header">
-<div class="eyebrow"><span id="language">Language</span> · LIVE LESSON</div>
-<h1 id="title">Lesson</h1>
-<p id="intro">Learn it. Use it. Then talk.</p>
-</header>
-<div class="lesson-progress">
-<div class="progress-top"><span id="stage">Situation</span><strong id="count">1 / 8</strong></div>
-<div class="progress-track"><div class="fill" id="fill"></div></div>
+  <nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a class="exit" href="dashboard.html">Exit lesson</a></nav>
+  <div id="loading" class="loading">Loading lesson…</div>
+  <div id="lesson" class="lesson" style="display:none">
+    <header class="lesson-header">
+      <div class="eyebrow"><span id="language">Language</span> · LESSON</div>
+      <h1 id="title">Lesson</h1>
+      <p id="intro">Understand it. Use it. Then talk.</p>
+    </header>
+    <div class="lesson-progress">
+      <div class="progress-top"><span id="stage">Situation</span><strong id="count"></strong></div>
+      <div class="progress-track"><div class="fill" id="fill"></div></div>
+    </div>
+    <main id="card"></main>
+  </div>
 </div>
-<main id="card"></main>
-</div>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script>
 "use strict";
+
 const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let user=null,profile=null,baseLesson=null,lesson=null,index=0,xp=0,answers=[],conversation=[],recognition=null;
+let user=null,profile=null,baseLesson=null,lesson=null,index=0,answers=[],conversation=[],recognition=null,finished=false;
 
-function buildLessonFromContent(baseLesson){
- const data=baseLesson?.content&&typeof baseLesson.content==="object"?baseLesson.content:{};
- const scene=data.scene||{};
- const dialogue=Array.isArray(data.dialogue)?data.dialogue:[];
- const phrases=Array.isArray(data.phrases)?data.phrases:[];
- const nativeLines=dialogue.filter(x=>String(x.speaker||"").toLowerCase()==="native").map(x=>String(x.text||"")).filter(Boolean);
- const phraseData=phrases.slice(0,3).map((p,i)=>({
-   target:String(p?.target||"").trim(),
-   meaning:String(p?.meaning||"").trim(),
-   usage:String(p?.usage||"").trim(),
-   example:String(p?.example||"").trim()
- })).filter(p=>p.target);
- const fallback=String(nativeLines[0]||data.language?.phrase||"").trim();
- if(!phraseData.length&&fallback) phraseData.push({target:fallback,meaning:String(data.language?.meaning||""),usage:String(data.language?.usage||""),example:""});
- while(phraseData.length<3&&phraseData.length>0) phraseData.push({...phraseData[phraseData.length-1]});
- const setting=String(scene.place||baseLesson.topic||"Everyday situation");
- const moment=String(scene.situation||scene.time||"A real-world interaction.");
- const goal=String(scene.mission||"Handle the interaction naturally.");
- const cards=[];
- cards.push({type:"scene",stage:"Situation",setting,moment,goal});
- if(phraseData[0]) cards.push({type:"teach",stage:"Learn",...phraseData[0]});
- if(phraseData[0]) cards.push({type:"check",stage:"Recall",prompt:"You need this in the situation. Which expression would you use?",answer:phraseData[0].target,distractors:phraseData.slice(1).map(p=>p.target)});
- if(phraseData[1]) cards.push({type:"teach",stage:"Build",...phraseData[1]});
- if(phraseData[2]) cards.push({type:"teach",stage:"Add another",...phraseData[2]});
- if(phraseData[1]||phraseData[0]) cards.push({type:"speak",stage:"Speak",...(phraseData[1]||phraseData[0])});
- cards.push({type:"talk",stage:"Talk",setting,goal,opening:nativeLines[0]||phraseData[0]?.target||"Let's start."});
- return {setting,moment,goal,opening:nativeLines[0]||phraseData[0]?.target||"",cards};
+function normalizePhrase(raw){
+  if(Array.isArray(raw)){
+    return {
+      target:String(raw[0]??"").trim(),
+      meaning:String(raw[1]??"").trim(),
+      usage:String(raw[2]??"").trim(),
+      example:String(raw[3]??"").trim()
+    };
+  }
+  if(raw&&typeof raw==="object"){
+    return {
+      target:String(raw.target??raw.phrase??"").trim(),
+      meaning:String(raw.meaning??"").trim(),
+      usage:String(raw.usage??"").trim(),
+      example:String(raw.example??"").trim()
+    };
+  }
+  return {target:String(raw??"").trim(),meaning:"",usage:"",example:""};
 }
-function localReply(c,input,turn){
- const lines=Array.isArray(baseLesson?.content?.dialogue)?baseLesson.content.dialogue:[];
- const native=lines.filter(x=>String(x.speaker||"").toLowerCase()==="native").map(x=>String(x.text||"")).filter(Boolean);
- if(native.length)return native[Math.min(turn-1,native.length-1)];
- return "That makes sense. Tell me a little more.";
+
+function normalizeDialogue(raw){
+  if(!Array.isArray(raw))return [];
+  return raw.map((line,i)=>{
+    if(typeof line==="string")return {speaker:i%2===0?"native":"learner",text:line.trim()};
+    return {
+      speaker:String(line?.speaker||"").toLowerCase(),
+      text:String(line?.text||"").trim()
+    };
+  }).filter(x=>x.text);
+}
+
+/*
+  One content contract for every lesson version.
+  Old lessons used [target, meaning].
+  New lessons use {target, meaning, usage, example}.
+  The UI never needs to know which version it received.
+*/
+function normalizeLesson(row){
+  const data=row?.content&&typeof row.content==="object"?row.content:{};
+  const rawPhrases=Array.isArray(data.phrases)?data.phrases:[];
+  const phrases=rawPhrases.map(normalizePhrase).filter(x=>x.target);
+  const dialogue=normalizeDialogue(data.dialogue);
+  const scene=data.scene&&typeof data.scene==="object"?data.scene:{};
+  const language=data.language&&typeof data.language==="object"?data.language:{};
+
+  if(!phrases.length&&language.phrase){
+    phrases.push({
+      target:String(language.phrase),
+      meaning:String(language.meaning||""),
+      usage:String(language.usage||""),
+      example:""
+    });
+  }
+
+  const native=dialogue.filter(x=>x.speaker==="native");
+  const learners=dialogue.filter(x=>x.speaker==="learner");
+
+  const setting=String(scene.place||row.topic||"Everyday situation").trim();
+  const situation=String(scene.situation||scene.time||"A real-world interaction.").trim();
+  const mission=String(scene.mission||"Handle the situation naturally.").trim();
+
+  return {
+    title:String(row.title||setting||"Lesson"),
+    topic:String(row.topic||setting),
+    setting,situation,mission,
+    phrases:phrases.slice(0,6),
+    dialogue,
+    native,
+    learners,
+    opening:native[0]?.text||"",
+    language
+  };
+}
+
+function choosePhrases(content){
+  const list=content.phrases.slice(0,3);
+  if(list.length)return list;
+
+  const fromDialogue=content.dialogue
+    .map(x=>x.text)
+    .filter(Boolean)
+    .slice(0,3)
+    .map(x=>({target:x,meaning:"A useful expression from this situation.",usage:"Use it when the situation calls for it.",example:""}));
+
+  return fromDialogue;
+}
+
+function makeChoices(correct,alternatives){
+  const unique=[correct,...alternatives].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i);
+  const fillers=[
+    "Maybe another time.",
+    "I'm just looking around.",
+    "That sounds good.",
+    "I'm not sure yet."
+  ];
+  for(const f of fillers)if(unique.length<4&&!unique.includes(f))unique.push(f);
+  return unique.slice(0,4).sort(()=>Math.random()-.5);
+}
+
+function buildLesson(row){
+  const c=normalizeLesson(row);
+  const p=choosePhrases(c);
+  if(!p.length)throw new Error("This lesson does not contain usable phrases yet.");
+
+  const first=p[0];
+  const second=p[1]||p[0];
+  const third=p[2]||p[1]||p[0];
+
+  const cards=[
+    {type:"scene",stage:"Situation",setting:c.setting,situation:c.situation,mission:c.mission},
+    {type:"phrase",stage:"Learn",phrase:first},
+    {type:"recall",stage:"Recall",phrase:first,question:"What would you say here?",choices:makeChoices(first.target,p.slice(1).map(x=>x.target))},
+    {type:"phrase",stage:"Use",phrase:second},
+    {type:"phrase",stage:"Add another",phrase:third},
+    {type:"speak",stage:"Say it",phrase:second},
+    {type:"live",stage:"Live it",setting:c.setting,mission:c.mission,opening:c.opening}
+  ];
+
+  return {...c,phrases:p,cards};
 }
 
 function browserSpeak(text){
   const value=String(text||"").trim();
   if(!value||!("speechSynthesis" in window))return;
   try{
-    window.speechSynthesis.cancel();
+    speechSynthesis.cancel();
     const utterance=new SpeechSynthesisUtterance(value);
-    const code=profile?.code||"en-US";
-    const localeMap={es:"es-MX",fr:"fr-FR",nl:"nl-NL",de:"de-DE",pt:"pt-BR",pl:"pl-PL",it:"it-IT",ar:"ar-SA",ja:"ja-JP",ko:"ko-KR",zh:"zh-CN",en:"en-US",sv:"sv-SE",el:"el-GR",tr:"tr-TR",hi:"hi-IN"};
-    utterance.lang=localeMap[code]||code||"en-US";
-    utterance.rate=0.96;
-    utterance.pitch=1;
-    utterance.volume=1;
-    window.speechSynthesis.speak(utterance);
-  }catch(error){
-    console.warn("Nahtive speech playback unavailable:",error);
-  }
+    const map={es:"es-MX",fr:"fr-FR",nl:"nl-NL",de:"de-DE",pt:"pt-BR",pl:"pl-PL",it:"it-IT",ar:"ar-SA",ja:"ja-JP",ko:"ko-KR",zh:"zh-CN",en:"en-US",sv:"sv-SE",el:"el-GR",tr:"tr-TR",hi:"hi-IN"};
+    utterance.lang=map[profile?.code]||profile?.code||"en-US";
+    utterance.rate=.96;
+    speechSynthesis.speak(utterance);
+  }catch(e){console.warn("Speech unavailable",e)}
 }
 
 function stopRecognition(){
-  if(recognition){
-    try{
-      recognition.onresult=null;
-      recognition.onerror=null;
-      recognition.onend=null;
-      recognition.stop();
-    }catch(error){}
-    recognition=null;
-  }
+  if(!recognition)return;
+  try{recognition.stop()}catch(e){}
+  recognition=null;
 }
 
-function startRecognition(expected,done){
- stopRecognition();
- const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){done("");return}
- const r=new SR();
- recognition=r;
- r.lang=profile?.code||"en-US";
- r.continuous=false;
- r.interimResults=false;
- r.maxAlternatives=3;
- r.onresult=e=>{
-   const text=Array.from(e.results).map(x=>x[0]?.transcript||"").join(" ").trim();
-   recognition=null;
-   done(text);
- };
- r.onerror=()=>{recognition=null;done("")};
- r.onend=()=>{if(recognition===r)recognition=null};
- r.start();
+function startRecognition(done){
+  stopRecognition();
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){done("");return}
+  const r=new SR();
+  recognition=r;
+  r.lang=profile?.code||"en-US";
+  r.continuous=false;
+  r.interimResults=false;
+  r.maxAlternatives=3;
+  r.onresult=e=>{
+    const text=Array.from(e.results).map(x=>x[0]?.transcript||"").join(" ").trim();
+    recognition=null;
+    done(text);
+  };
+  r.onerror=()=>{recognition=null;done("")};
+  r.onend=()=>{if(recognition===r)recognition=null};
+  try{r.start()}catch(e){recognition=null;done("")}
+}
+
+function normalizeForSpeech(value){
+  return String(value||"").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9\u0600-\u06ff ]/g," ")
+    .replace(/\s+/g," ").trim();
 }
 
 function similarity(a,b){
- const clean=s=>String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\u0600-\u06ff ]/g," ").replace(/\s+/g," ").trim();
- const A=clean(a).split(" ").filter(Boolean),B=clean(b).split(" ").filter(Boolean);
- if(!A.length||!B.length)return 0;
- const set=new Set(B);return A.filter(x=>set.has(x)).length/Math.max(A.length,B.length);
-}
-
-function render(){
- const cards=lesson.cards;
- if(index>=cards.length){finish();return}
- $("stage").textContent=cards[index].stage;
- $("count").textContent=(index+1)+" / "+cards.length;
- $("fill").style.width=((index+1)/cards.length*100)+"%";
- const c=cards[index];
- if(c.type==="scene")renderScene(c);
- else if(c.type==="teach")renderTeach(c);
- else if(c.type==="check")renderCheck(c);
- else if(c.type==="speak")renderSpeak(c);
- else renderTalk(c);
+  const A=normalizeForSpeech(a).split(" ").filter(Boolean);
+  const B=normalizeForSpeech(b).split(" ").filter(Boolean);
+  if(!A.length||!B.length)return 0;
+  const counts={};
+  B.forEach(x=>counts[x]=(counts[x]||0)+1);
+  let hits=0;
+  A.forEach(x=>{if(counts[x]>0){hits++;counts[x]--}});
+  return hits/Math.max(A.length,B.length);
 }
 
 function frame(body,action){
- $("card").innerHTML='<section class="lesson-card">'+body+(action?'<div class="actions">'+action+'</div>':'')+'</section>';
+  $("card").innerHTML='<section class="lesson-card">'+body+(action?'<div class="actions">'+action+"</div>":"")+"</section>";
+}
+
+function updateProgress(){
+  const total=lesson.cards.length;
+  $("stage").textContent=lesson.cards[index]?.stage||"Complete";
+  $("count").textContent=index<total?(index+1)+" / "+total:"";
+  $("fill").style.width=Math.min(100,(index/total)*100)+"%";
+}
+
+function next(){
+  index++;
+  updateProgress();
+  render();
+}
+
+function render(){
+  if(finished)return;
+  if(index>=lesson.cards.length){finish();return}
+  updateProgress();
+  const c=lesson.cards[index];
+  if(c.type==="scene")renderScene(c);
+  else if(c.type==="phrase")renderPhrase(c);
+  else if(c.type==="recall")renderRecall(c);
+  else if(c.type==="speak")renderSpeak(c);
+  else renderLive(c);
 }
 
 function renderScene(c){
- frame('<div class="kicker">Situation</div><div class="scene-wrap"><p class="scene-text">'+esc(c.setting)+'</p><p class="scene-goal">'+esc(c.moment)+'</p><p class="scene-goal">'+esc(c.goal)+'</p></div>','<button class="primary" id="next">Start →</button>');
- $("next").onclick=()=>{index++;render()};
+  frame(
+    '<div class="kicker">Before you start</div>'+
+    '<p class="context"><strong>'+esc(c.setting)+'</strong></p>'+
+    '<p class="context-muted">'+esc(c.situation)+'</p>'+
+    '<div class="detail"><div class="detail-label">Your goal</div><p>'+esc(c.mission)+'</p></div>',
+    '<button class="primary" id="next">Start lesson →</button>'
+  );
+  $("next").onclick=next;
 }
 
-function renderTeach(c){
- const body='<div class="kicker">'+esc(c.stage||"Learn")+'</div><p class="phrase">'+esc(c.phrase)+'</p><p class="meaning">'+esc(c.meaning||"")+'</p>'+
-   (c.usage?'<div class="usage"><strong>When you use it</strong>'+esc(c.usage)+'</div>':"")+
-   (c.example?'<div class="example"><strong>Natural example</strong>'+esc(c.example)+'</div>':"")+
-   '<button class="secondary" id="listen">Listen</button>';
- frame(body,'<button class="primary" id="next">Continue →</button>');
- $("listen").onclick=()=>browserSpeak(c.phrase);
- browserSpeak(c.phrase);
- $("next").onclick=()=>{xp+=5;index++;render()};
+function renderPhrase(c){
+  const p=c.phrase;
+  const usage=p.usage||"Use this when the situation calls for it.";
+  const example=p.example||"";
+  frame(
+    '<div class="kicker">'+esc(c.stage)+'</div>'+
+    '<p class="phrase">'+esc(p.target)+'</p>'+
+    '<p class="meaning">'+esc(p.meaning||"A useful expression for this situation.")+'</p>'+
+    '<div class="detail"><div class="detail-label">When you use it</div><p>'+esc(usage)+'</p></div>'+
+    (example?'<div class="detail"><div class="detail-label">Natural example</div><p class="example-target">'+esc(example)+'</p></div>':"")+
+    '<div class="listen-row"><button class="secondary" id="listen">Listen</button></div>',
+    '<button class="primary" id="next">Continue →</button>'
+  );
+  $("listen").onclick=()=>browserSpeak(p.target);
+  $("next").onclick=next;
+  browserSpeak(p.target);
 }
-function renderCheck(c){
- const opts=[c.answer,...(c.distractors||[])].filter(Boolean).sort(()=>Math.random()-.5);
- frame('<div class="kicker">Recall</div><p class="question">'+esc(c.prompt)+'</p><div class="options">'+opts.map((o,i)=>'<button class="option" data-value="'+esc(o)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join("")+'</div><div class="feedback" id="feedback"></div>','<button class="primary" id="next" disabled>Continue →</button>');
- let answered=false;
- document.querySelectorAll(".option").forEach(btn=>btn.onclick=()=>{
-   if(answered)return; answered=true;
-   const ok=btn.dataset.value===c.answer;
-   btn.classList.add(ok?"correct":"wrong");
-   document.querySelectorAll(".option").forEach(x=>x.disabled=true);
-   $("feedback").textContent=ok?"Exactly. Now make it yours.":"Not quite. The phrase that fits is: "+c.answer;
-   $("next").disabled=false; xp+=ok?8:2; answers.push({type:"check",choice:btn.dataset.value,correct:ok});
- });
- $("next").onclick=()=>{index++;render()};
+
+function renderRecall(c){
+  const choices=c.choices;
+  frame(
+    '<div class="kicker">Recall</div>'+
+    '<p class="question">'+esc(c.question)+'</p>'+
+    '<div class="options">'+choices.map((o,i)=>
+      '<button class="option" data-value="'+esc(o)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>'
+    ).join("")+'</div>'+
+    '<div class="feedback" id="feedback"></div>',
+    '<button class="primary" id="next" disabled>Continue →</button>'
+  );
+
+  let answered=false;
+  document.querySelectorAll(".option").forEach(btn=>btn.onclick=()=>{
+    if(answered)return;
+    answered=true;
+    const ok=btn.dataset.value===c.phrase.target;
+    btn.classList.add(ok?"correct":"wrong");
+    document.querySelectorAll(".option").forEach(x=>x.disabled=true);
+    $("feedback").textContent=ok
+      ?"That’s the expression that fits."
+      :"The phrase you want here is: "+c.phrase.target;
+    $("next").disabled=false;
+    answers.push({type:"recall",target:c.phrase.target,choice:btn.dataset.value,correct:ok});
+  });
+  $("next").onclick=next;
 }
+
 function renderSpeak(c){
- frame('<div class="kicker">Your turn</div><div class="speak-box"><div class="speak-target">'+esc(c.phrase)+'</div><div class="speak-meaning">'+esc(c.meaning)+'</div><button class="primary speak-button" id="speak">Speak</button><div class="status" id="status">Say the phrase naturally.</div></div>','<button class="primary" id="next" disabled>Continue →</button>');
- $("speak").onclick=()=>{
-   $("status").textContent="Listening…";
-   $("speak").disabled=true;
-   startRecognition(c.phrase,text=>{
-     if(!text){$("status").textContent="I didn't catch that. Try again.";$("speak").disabled=false;return}
-     const score=similarity(text,c.phrase);
-     answers.push({type:"speak",expected:c.phrase,heard:text,score});
-     if(score>=.7){
-       $("status").textContent="Heard: "+text;
-       xp+=12;
-       $("next").disabled=false;
-       setTimeout(()=>{index++;render()},450);
-     }else{
-       $("status").textContent="Heard: "+text+" — try it once more.";
-       $("speak").disabled=false;
-     }
-   });
- };
-}
+  const p=c.phrase;
+  frame(
+    '<div class="kicker">Say it</div>'+
+    '<div class="speak-box">'+
+      '<div class="speak-target">'+esc(p.target)+'</div>'+
+      '<div class="speak-meaning">'+esc(p.meaning||"Say it naturally, without translating first.")+'</div>'+
+      '<button class="primary speak-button" id="speak">Speak</button>'+
+      '<div class="status" id="status">Say the phrase naturally.</div>'+
+    '</div>',
+    '<button class="primary" id="next" disabled>Continue →</button>'
+  );
 
-function renderTalk(c){
- frame('<div class="kicker">Talk</div><p class="live-goal">'+esc(c.goal)+'</p><div class="chat" id="chat"></div><textarea class="input" id="input" placeholder="Say what you would actually say…"></textarea><div class="actions"><button class="secondary" id="voice">Speak</button><button class="primary" id="send">Respond →</button></div><div class="feedback" id="status">The other person is waiting.</div>');
- conversation=[{role:"assistant",content:c.opening}];
- drawChat();
- browserSpeak(c.opening);
- $("voice").onclick=()=>{
-   $("status").textContent="Listening…";
-   startRecognition("",text=>{if(text){$("input").value=text;$("status").textContent="Heard: "+text}else $("status").textContent="Try again.";});
- };
- $("send").onclick=sendTalk;
+  $("speak").onclick=()=>{
+    $("speak").disabled=true;
+    $("status").textContent="Listening…";
+    startRecognition(text=>{
+      if(!text){
+        $("status").textContent="I didn’t catch that. Try again.";
+        $("speak").disabled=false;
+        return;
+      }
+      const score=similarity(text,p.target);
+      answers.push({type:"speak",target:p.target,heard:text,score});
+      $("status").textContent="Heard: "+text;
+      if(score>=.7){
+        $("next").disabled=false;
+        setTimeout(()=>{if(index<lesson.cards.length-1)next()},350);
+      }else{
+        $("status").textContent="Heard: "+text+" — try it once more.";
+        $("speak").disabled=false;
+      }
+    });
+  };
+  $("next").onclick=next;
 }
 
 function drawChat(){
- $("chat").innerHTML=conversation.map(m=>'<div class="bubble '+(m.role==="user"?"you":"")+'"><div class="bubble-label">'+(m.role==="user"?"You":"Native speaker")+'</div>'+esc(m.content)+'</div>').join("");
- $("chat").scrollTop=$("chat").scrollHeight;
+  $("chat").innerHTML=conversation.map(m=>
+    '<div class="bubble '+(m.role==="user"?"you":"")+'">'+
+      '<div class="bubble-label">'+(m.role==="user"?"You":"Native speaker")+'</div>'+
+      esc(m.content)+
+    "</div>"
+  ).join("");
+  $("chat").scrollTop=$("chat").scrollHeight;
 }
 
-async function sendTalk(){
- const input=$("input").value.trim();
- if(!input){$("status").textContent="Say or type something first.";return}
- const c=lesson.cards[index];
- const turn=conversation.filter(x=>x.role==="user").length+1;
- conversation.push({role:"user",content:input});
- $("input").value="";
- drawChat();
- $("send").disabled=true;
- let reply="";
- try{
-   const controller=new AbortController();
-   const timer=setTimeout(()=>controller.abort(),9000);
-   const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:profile.name,level:profile.level,goal:c.goal,topic:c.setting,context:{setting:c.setting,goal:c.goal,openingLine:c.opening},messages:conversation}),signal:controller.signal});
-   clearTimeout(timer);
-   const data=await res.json().catch(()=>({}));
-   if(!res.ok||!data.text)throw new Error("chat failed");
-   reply=String(data.text);
- }catch(e){reply=localReply(c,input,turn)}
- conversation.push({role:"assistant",content:reply});
- drawChat();
- browserSpeak(reply);
- xp+=15;
- if(turn>=3){
-   $("send").textContent="Finish lesson";
-   $("send").disabled=false;
-   $("send").onclick=finish;
-   $("status").textContent="You handled the situation.";
- }else{
-   $("send").disabled=false;
-   $("send").textContent="Respond →";
-   $("status").textContent="Keep the conversation moving.";
- }
+function localReply(c,turn){
+  const native=c.native||[];
+  if(native.length)return native[Math.min(turn-1,native.length-1)].text;
+  return turn===1
+    ?"Great. Go ahead — what would you say?"
+    :"Keep going. Respond naturally to the situation.";
+}
+
+async function sendLive(){
+  const input=$("input").value.trim();
+  if(!input)return;
+  const turn=conversation.filter(x=>x.role==="user").length+1;
+  const c=lesson.cards[index];
+  conversation.push({role:"user",content:input});
+  $("input").value="";
+  drawChat();
+  $("send").disabled=true;
+  $("status").textContent="Thinking…";
+
+  let reply="";
+  try{
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),7000);
+    const res=await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        language:profile.name,
+        level:profile.level,
+        goal:c.mission,
+        topic:c.setting,
+        context:{setting:c.setting,goal:c.mission,openingLine:c.opening},
+        messages:conversation
+      }),
+      signal:controller.signal
+    });
+    clearTimeout(timer);
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok||!data.text)throw new Error("chat failed");
+    reply=String(data.text);
+  }catch(e){
+    reply=localReply(normalizeLesson(baseLesson),turn);
+  }
+
+  conversation.push({role:"assistant",content:reply});
+  drawChat();
+  browserSpeak(reply);
+
+  if(turn>=3){
+    $("send").textContent="Finish lesson";
+    $("send").disabled=false;
+    $("send").onclick=finish;
+    $("status").textContent="Good. You handled the situation.";
+  }else{
+    $("send").disabled=false;
+    $("status").textContent="Keep the conversation moving.";
+  }
+}
+
+function renderLive(c){
+  conversation=[];
+  const opening=c.opening||"Go ahead. What would you say?";
+  if(opening)conversation.push({role:"assistant",content:opening});
+
+  frame(
+    '<div class="kicker">Live conversation</div>'+
+    '<p class="live-goal"><strong>'+esc(c.setting)+'</strong><br>'+esc(c.mission)+'</p>'+
+    '<p class="live-hint">Say or type what you would actually say. Don’t worry about being perfect.</p>'+
+    '<div class="chat" id="chat"></div>'+
+    '<textarea class="input" id="input" placeholder="What would you say?"></textarea>'+
+    '<div class="actions"><button class="secondary" id="voice">Speak</button><button class="primary" id="send">Respond →</button></div>'+
+    '<div class="feedback" id="status">The other person is waiting.</div>'
+  );
+
+  drawChat();
+  if(opening)browserSpeak(opening);
+
+  $("voice").onclick=()=>{
+    $("status").textContent="Listening…";
+    startRecognition(text=>{
+      if(text){
+        $("input").value=text;
+        $("status").textContent="Heard: "+text;
+      }else{
+        $("status").textContent="I didn’t catch that. Try again.";
+      }
+    });
+  };
+  $("send").onclick=sendLive;
+  $("input").addEventListener("keydown",e=>{
+    if((e.metaKey||e.ctrlKey)&&e.key==="Enter")sendLive();
+  });
+}
+
+async function saveLearning(){
+  if(!user||!baseLesson?.id)return;
+  const c=normalizeLesson(baseLesson);
+  const rows=c.phrases.slice(0,3);
+  for(const p of rows){
+    if(!p.target)continue;
+    try{
+      const existing=await client.from("review_items")
+        .select("id,mastery")
+        .eq("learner_language_id",profile.id)
+        .eq("target_text",p.target)
+        .eq("item_type","expression")
+        .limit(1)
+        .maybeSingle();
+
+      if(existing.data?.id){
+        await client.from("review_items")
+          .update({
+            source_text:p.meaning||p.target,
+            explanation:p.usage||p.meaning||null,
+            mastery:Math.min(100,Number(existing.data.mastery||0)+12),
+            updated_at:new Date().toISOString()
+          })
+          .eq("id",existing.data.id);
+      }else{
+        await client.from("review_items").insert({
+          learner_language_id:profile.id,
+          item_type:"expression",
+          source_text:p.meaning||p.target,
+          target_text:p.target,
+          explanation:p.usage||p.meaning||null,
+          mastery:12,
+          next_review_at:new Date(Date.now()+86400000).toISOString()
+        });
+      }
+    }catch(e){console.warn("phrase memory save failed",e)}
+  }
 }
 
 async function finish(){
- try{
-   if(user&&baseLesson?.id)await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score:Math.min(100,xp*2),responses:{answers,xp}});
- }catch(e){console.error("lesson save failed",e)}
- $("stage").textContent="Complete";
- $("count").textContent="";
- $("fill").style.width="100%";
- $("card").innerHTML='<section class="lesson-card complete"><div class="kicker">Complete</div><h2>Lesson complete</h2><p class="meaning">You learned the language, used it, and handled a real interaction.</p><div class="xp">'+xp+' XP</div><a class="primary" href="dashboard.html" style="display:inline-flex;text-decoration:none">Continue learning →</a></section>';
+  if(finished)return;
+  finished=true;
+  stopRecognition();
+
+  try{
+    await saveLearning();
+    if(user&&baseLesson?.id){
+      const recall=answers.filter(x=>x.type==="recall");
+      const speech=answers.filter(x=>x.type==="speak");
+      const score=Math.round(
+        (recall.length?recall.filter(x=>x.correct).length/recall.length:1)*50+
+        (speech.length?Math.min(1,Math.max(...speech.map(x=>x.score||0))):1)*50
+      );
+      await client.from("lesson_attempts").insert({
+        lesson_id:baseLesson.id,
+        score,
+        responses:{answers,score}
+      });
+    }
+  }catch(e){console.warn("lesson completion save failed",e)}
+
+  $("stage").textContent="Complete";
+  $("count").textContent="";
+  $("fill").style.width="100%";
+
+  const phrases=normalizeLesson(baseLesson).phrases.slice(0,3);
+  $("card").innerHTML=
+    '<section class="lesson-card complete">'+
+      '<div class="kicker">Finished</div>'+
+      '<h2>That’s the lesson.</h2>'+
+      '<p>You learned useful language, recalled it, said it, and used it in context.</p>'+
+      '<div class="learned-list">'+phrases.map(p=>
+        '<div class="learned-item"><strong>'+esc(p.target)+'</strong><span>'+esc(p.meaning)+'</span></div>'
+      ).join("")+'</div>'+
+      '<a class="primary" href="dashboard.html" style="display:inline-flex;text-decoration:none">Continue learning →</a>'+
+    '</section>';
 }
 
 async function load(){
- try{
-   const sessionResult=await Promise.race([
-     client.auth.getSession(),
-     new Promise((_,reject)=>setTimeout(()=>reject(new Error("Session check timed out.")),8000))
-   ]);
-   if(sessionResult.error||!sessionResult.data?.session?.user){location.href="login.html";return}
-   user=sessionResult.data.session.user;
+  try{
+    const sessionResult=await Promise.race([
+      client.auth.getSession(),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Session check timed out.")),6000))
+    ]);
+    if(sessionResult.error||!sessionResult.data?.session?.user){
+      location.href="login.html";
+      return;
+    }
+    user=sessionResult.data.session.user;
 
-   const saved=localStorage.getItem("Nahtive_current_learner_language");
-   const langsResult=await Promise.race([
-     client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id),
-     new Promise((_,reject)=>setTimeout(()=>reject(new Error("Language data timed out.")),8000))
-   ]);
-   const {data:langs,error}=langsResult;
-   if(error)throw error;
-   if(!langs?.length){location.href="onboarding.html";return}
+    const saved=localStorage.getItem("Nahtive_current_learner_language");
+    const langResult=await Promise.race([
+      client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Language data timed out.")),6000))
+    ]);
+    if(langResult.error)throw langResult.error;
+    const langs=langResult.data||[];
+    if(!langs.length){location.href="onboarding.html";return}
 
-   const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];
-   localStorage.setItem("Nahtive_current_learner_language",current.id);
+    const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];
+    localStorage.setItem("Nahtive_current_learner_language",current.id);
 
-   const params=new URLSearchParams(location.search);
-   const requested=params.get("id");
-   if(requested){
-     const r=await client.from("lessons")
-       .select("id,title,topic,level,content,learner_language_id,curriculum_node_id,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)")
-       .eq("id",requested).maybeSingle();
-     if(r.error)throw r.error;
-     if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("This lesson is not available.");
-     baseLesson=r.data;
-   }else{
-     const r=await client.from("lessons")
-       .select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)")
-       .eq("learner_language_id",current.id)
-       .order("created_at",{ascending:true})
-       .limit(120);
-     if(r.error)throw r.error;
-     const lessons=Array.isArray(r.data)?r.data:[];
-     if(!lessons.length)throw new Error("No lessons are available for this language yet.");
-     const ids=lessons.map(x=>x.id);
-     const attempts=await client.from("lesson_attempts").select("lesson_id").in("lesson_id",ids);
-     const completed=new Set((attempts.data||[]).map(x=>x.lesson_id));
-     const ordered=lessons.slice().sort((a,b)=>{
-       const as=Number(a.curriculum_nodes?.sequence_number||9999),bs=Number(b.curriculum_nodes?.sequence_number||9999);
-       return as-bs||new Date(a.created_at)-new Date(b.created_at);
-     });
-     baseLesson=ordered.find(x=>!completed.has(x.id))||ordered[ordered.length-1];
-   }
+    const requested=new URLSearchParams(location.search).get("id");
+    if(requested){
+      const r=await client.from("lessons")
+        .select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)")
+        .eq("id",requested)
+        .maybeSingle();
+      if(r.error)throw r.error;
+      if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("This lesson is not available.");
+      baseLesson=r.data;
+    }else{
+      const r=await client.from("lessons")
+        .select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)")
+        .eq("learner_language_id",current.id)
+        .order("created_at",{ascending:true})
+        .limit(120);
+      if(r.error)throw r.error;
+      const lessons=r.data||[];
+      if(!lessons.length)throw new Error("No lessons are available for this language yet.");
 
-   const linked=baseLesson.learner_languages;
-   profile={
-     id:linked.id,
-     name:linked.languages?.name||"Language",
-     code:linked.languages?.code||"en-US",
-     level:String(baseLesson.level||linked.level||"A1")
-   };
-   lesson=buildLessonFromContent(baseLesson);
+      const ids=lessons.map(x=>x.id);
+      const attempts=await client.from("lesson_attempts").select("lesson_id").in("lesson_id",ids);
+      const completed=new Set((attempts.data||[]).map(x=>x.lesson_id));
 
-   if(!lesson?.cards?.length)throw new Error("This lesson has no usable learning content yet.");
+      lessons.sort((a,b)=>{
+        const as=Number(a.curriculum_nodes?.sequence_number||9999);
+        const bs=Number(b.curriculum_nodes?.sequence_number||9999);
+        return as-bs||new Date(a.created_at)-new Date(b.created_at);
+      });
 
-   $("language").textContent=profile.name+" · "+profile.level;
-   $("title").textContent=baseLesson.title||lesson.setting||"Lesson";
-   $("intro").textContent=baseLesson.curriculum_nodes?.stage_name
-     ? baseLesson.curriculum_nodes.stage_name+" · "+(baseLesson.curriculum_nodes.focus||"Real conversation")
-     : "Learn it. Use it. Then talk.";
-   $("loading").style.display="none";
-   $("lesson").style.display="block";
-   render();
- }catch(e){
-   console.error("Nahtive lesson load failed:",e);
-   $("loading").innerHTML='<strong>We couldn’t load this lesson.</strong><br><span class="small">'+esc(e?.message||"Please try again.")+'</span><br><button class="primary" style="margin-top:16px" onclick="location.reload()">Try again</button>';
- }
+      baseLesson=lessons.find(x=>!completed.has(x.id))||lessons[lessons.length-1];
+    }
+
+    const linked=baseLesson.learner_languages;
+    profile={
+      id:linked.id,
+      name:linked.languages?.name||"Language",
+      code:linked.languages?.code||"en-US",
+      level:String(baseLesson.level||linked.level||"A1")
+    };
+
+    lesson=buildLesson(baseLesson);
+    if(!lesson.cards.length)throw new Error("This lesson has no usable learning content yet.");
+
+    $("language").textContent=profile.name+" · "+profile.level;
+    $("title").textContent=lesson.title;
+    $("intro").textContent=baseLesson.curriculum_nodes?.stage_name
+      ?baseLesson.curriculum_nodes.stage_name+" · "+(baseLesson.curriculum_nodes.focus||"Real conversation")
+      :"Understand it. Use it. Then talk.";
+
+    $("loading").style.display="none";
+    $("lesson").style.display="block";
+    render();
+  }catch(e){
+    console.error("Nahtive lesson load failed:",e);
+    $("loading").innerHTML=
+      '<strong>We couldn’t load this lesson.</strong><br>'+
+      '<span class="small">'+esc(e?.message||"Please try again.")+'</span><br>'+
+      '<button class="primary" style="margin-top:16px" onclick="location.reload()">Try again</button>';
+  }
 }
+
 load();
 </script>
 </body>
