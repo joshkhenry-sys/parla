@@ -98,7 +98,7 @@
 const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let user=null,profile=null,baseLesson=null,lesson=null,index=0,answers=[],conversation=[],recognition=null,finished=false;
+let user=null,profile=null,baseLesson=null,lesson=null,index=0,answers=[],conversation=[],recorder=null,recordingChunks=[],finished=false;
 
 function normalizePhrase(raw){
   if(Array.isArray(raw)){
@@ -243,29 +243,79 @@ function browserSpeak(text){
 }
 
 function stopRecognition(){
-  if(!recognition)return;
-  try{recognition.stop()}catch(e){}
-  recognition=null;
+  if(recorder){
+    try{if(recorder.state!=="inactive")recorder.stop()}catch(e){}
+  }
+  recorder=null;
+  recordingChunks=[];
 }
 
-function startRecognition(done){
+function blobToBase64(blob){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onloadend=()=>resolve(String(reader.result||"").split(",")[1]||"");
+    reader.onerror=reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function transcribeBlob(blob,target=""){
+  const audio=await blobToBase64(blob);
+  if(!audio)throw new Error("No recording captured.");
+  const res=await fetch("/api/transcribe",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      audio,
+      mimeType:blob.type||"audio/webm",
+      language:profile?.code||"en-US",
+      target
+    })
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(data.error||"Speech transcription failed.");
+  return String(data.text||"").trim();
+}
+
+async function startRecognition(done,target=""){
   stopRecognition();
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){done("");return}
-  const r=new SR();
-  recognition=r;
-  r.lang=profile?.code||"en-US";
-  r.continuous=false;
-  r.interimResults=false;
-  r.maxAlternatives=3;
-  r.onresult=e=>{
-    const text=Array.from(e.results).map(x=>x[0]?.transcript||"").join(" ").trim();
-    recognition=null;
-    done(text);
-  };
-  r.onerror=()=>{recognition=null;done("")};
-  r.onend=()=>{if(recognition===r)recognition=null};
-  try{r.start()}catch(e){recognition=null;done("")}
+  if(!navigator.mediaDevices?.getUserMedia||!("MediaRecorder" in window)){
+    done("",new Error("Microphone recording is not supported in this browser."));
+    return;
+  }
+
+  let stream;
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const preferred=[
+      "audio/webm;codecs=opus",
+      "audio/webm",
+      "audio/mp4"
+    ].find(type=>MediaRecorder.isTypeSupported(type));
+    recorder=new MediaRecorder(stream,preferred?{mimeType:preferred}:undefined);
+    recordingChunks=[];
+    recorder.ondataavailable=e=>{if(e.data?.size)recordingChunks.push(e.data)};
+    recorder.onerror=()=>done("",new Error("Recording failed."));
+    recorder.onstop=async()=>{
+      const activeRecorder=recorder;
+      recorder=null;
+      stream.getTracks().forEach(track=>track.stop());
+      try{
+        const blob=new Blob(recordingChunks,{type:activeRecorder?.mimeType||"audio/webm"});
+        recordingChunks=[];
+        const text=await transcribeBlob(blob,target);
+        done(text);
+      }catch(error){
+        recordingChunks=[];
+        done("",error);
+      }
+    };
+    recorder.start();
+  }catch(error){
+    if(stream)stream.getTracks().forEach(track=>track.stop());
+    recorder=null;
+    done("",error);
+  }
 }
 
 function normalizeForSpeech(value){
@@ -389,12 +439,12 @@ function renderSpeak(c){
     '<button class="primary" id="next" disabled>Continue →</button>'
   );
 
-  $("speak").onclick=()=>{
+  $("speak").onclick=async()=>{
     $("speak").disabled=true;
-    $("status").textContent="Listening…";
-    startRecognition(text=>{
+    $("status").textContent="Recording…";
+    await startRecognition((text,error)=>{
       if(!text){
-        $("status").textContent="I didn’t catch that. Try again.";
+        $("status").textContent=error?.message||"I didn’t catch that. Try again.";
         $("speak").disabled=false;
         return;
       }
@@ -403,12 +453,11 @@ function renderSpeak(c){
       $("status").textContent="Heard: "+text;
       if(score>=.7){
         $("next").disabled=false;
-        setTimeout(()=>{if(index<lesson.cards.length-1)next()},350);
       }else{
         $("status").textContent="Heard: "+text+" — try it once more.";
         $("speak").disabled=false;
       }
-    });
+    },p.target);
   };
   $("next").onclick=next;
 }
@@ -500,14 +549,16 @@ function renderLive(c){
   drawChat();
   if(opening)browserSpeak(opening);
 
-  $("voice").onclick=()=>{
-    $("status").textContent="Listening…";
-    startRecognition(text=>{
+  $("voice").onclick=async()=>{
+    $("voice").disabled=true;
+    $("status").textContent="Recording…";
+    await startRecognition((text,error)=>{
+      $("voice").disabled=false;
       if(text){
         $("input").value=text;
         $("status").textContent="Heard: "+text;
       }else{
-        $("status").textContent="I didn’t catch that. Try again.";
+        $("status").textContent=error?.message||"I didn’t catch that. Try again.";
       }
     });
   };
@@ -568,7 +619,7 @@ async function finish(){
       const speech=answers.filter(x=>x.type==="speak");
       const score=Math.round(
         (recall.length?recall.filter(x=>x.correct).length/recall.length:1)*50+
-        (speech.length?Math.min(1,Math.max(...speech.map(x=>x.score||0))):1)*50
+        (speech.length?Math.min(1,Math.max(...speech.map(x=>x.score||0))):0)*50
       );
       await client.from("lesson_attempts").insert({
         lesson_id:baseLesson.id,
