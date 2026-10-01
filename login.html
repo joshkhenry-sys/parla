@@ -151,10 +151,12 @@
       googleBtn.textContent = "Connecting…";
       showMessage("");
 
+      localStorage.setItem("nahtive_auth_next", getNextPage());
+
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/" + getNextPage()
+          redirectTo: window.location.origin + "/auth-callback.html"
         }
       });
 
