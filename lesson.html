@@ -352,8 +352,12 @@ async function load(){
       const unfinished=valid.find(x=>!completed.has(x.id));
       if(unfinished)baseLesson=unfinished;
       else{
-        const levelBandMap={A1:["A1"],A2:["A2"],B1:["B1"],B2:["B2","B2+"],C1:["C1/C2"],C2:["C1/C2"]};const bands=levelBandMap[profile?.level||current.level||"A1"]||[current.level||"A1"];const nodeResult=await client.from("curriculum_nodes").select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band").in("level_band",bands).order("sequence_number",{ascending:true}).limit(1);
+        const levelBandMap={A1:["A1"],A2:["A2"],B1:["B1"],B2:["B2","B2+"],C1:["C1/C2"],C2:["C1/C2"]};const bands=levelBandMap[profile?.level||current.level||"A1"]||[current.level||"A1"];const maxSeq=valid.reduce((m,x)=>Math.max(m,Number(x.curriculum_nodes?.sequence_number||0)),0);
+        let nodeQuery=client.from("curriculum_nodes").select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band").in("level_band",bands).order("sequence_number",{ascending:true}).limit(1);
+        if(maxSeq>0)nodeQuery=nodeQuery.gt("sequence_number",maxSeq);
+        let nodeResult=await nodeQuery;
         if(nodeResult.error)throw nodeResult.error;
+        if(!nodeResult.data?.length&&maxSeq>0)nodeResult=await client.from("curriculum_nodes").select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band").in("level_band",bands).order("sequence_number",{ascending:true}).limit(1);
         const node=nodeResult.data?.[0];
         if(!node)throw new Error("No curriculum is available for "+(current.level||"this level")+".");
         const gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level||"A1",node})});
