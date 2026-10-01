@@ -140,7 +140,7 @@
     .limit(100);
   if (nodeError) throw nodeError;
 
-  const levelRank = { A1:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
+  const levelRank = {A1:1,A2:2,B1:3,B2:4,"B2+":4,C1:5,C2:6};
   const targetRank = levelRank[level] ?? 1;
   const levelMatches = node => {
     const band = String(node.level_band || "");
@@ -248,13 +248,13 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
   const isUsableLesson = row => {
     const phrases = Array.isArray(row?.content?.phrases) ? row.content.phrases : [];
     const dialogue = Array.isArray(row?.content?.dialogue) ? row.content.dialogue : [];
-    return phrases.length >= 2 &&
-      phrases.slice(0,2).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && Array.isArray(p.breakdown) && p.breakdown.length) &&
+    return phrases.length >= 5 &&
+      phrases.slice(0,5).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && p.build_target && Array.isArray(p.build_words) && p.build_words.length && Array.isArray(p.distractors) && p.distractors.length >= 3) &&
       dialogue.length >= 4;
   };
 
   let allLessons = (lessons || []).filter(isUsableLesson);
-  const levelRank = { A1:0, A1:1, A2:2, B1:3, B2:4, "B2+":5, C1:6, C2:7 };
+  const levelRank = {A1:1,A2:2,B1:3,B2:4,"B2+":4,C1:5,C2:6};
   const targetRank = levelRank[learnerLevel] ?? 1;
 
   const completedResult = allLessons.length
