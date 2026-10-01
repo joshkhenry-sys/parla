@@ -36,7 +36,7 @@ Rules:
 - Give the learner language they could actually use outside the app.
 - Do not translate every line literally.
 - Dialogue should feel like a real exchange where the other person reacts to the learner.
-- Exactly 3 teachable phrases.
+- Exactly 3 teachable phrases.\n- Every phrase must include a short natural example sentence in the target language that demonstrates how the learner could actually use it.
 - Exactly 6 dialogue lines, alternating native / learner / native / learner / native / learner.
 - The first phrase should be immediately useful.
 - The second should help the learner adapt or respond.
@@ -86,7 +86,7 @@ Rules:
                     meaning:{type:"string"},
                     usage:{type:"string"}
                   },
-                  required:["target","meaning","usage"]
+                  required:["target","meaning","usage","example"]
                 }
               },
               dialogue:{
