@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script src="site-config.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nahtive — Phrases</title>
+  <link rel="stylesheet" href="nahtive.css">
+  <style>
+    body{background:#f6f3eb!important;color:#26312d!important}
+    .phrases-page{max-width:1040px;margin:0 auto;padding:28px 20px 70px}
+    .phrases-header{padding:38px 0 28px}
+    .phrases-header h1{font-size:clamp(34px,5vw,52px);line-height:1.05;letter-spacing:-.04em;margin:8px 0 12px}
+    .phrases-header p{max-width:680px;color:#5d6863;font-size:17px;line-height:1.6;margin:0}
+    .phrase-list{display:grid;gap:14px}
+    .phrase-card{background:#fffefa;border:1px solid #d8d8cf;border-radius:22px;padding:25px;box-shadow:0 10px 28px rgba(38,49,45,.05)}
+    .phrase-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+    .phrase-target{font-size:30px;font-weight:750;letter-spacing:-.025em;line-height:1.15}
+    .phrase-meaning{font-size:16px;color:#4f5b55;margin-top:7px}
+    .phrase-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#667b4f;margin-bottom:10px}
+    .phrase-section{margin-top:20px;padding-top:17px;border-top:1px solid #e1e0d8}
+    .phrase-section p{margin:0;color:#3f4b46;line-height:1.55}
+    .phrase-example{font-size:18px}
+    .listen{border:1px solid #cfd1c9;background:#f0eee6;color:#26312d;border-radius:12px;padding:10px 14px;cursor:pointer;white-space:nowrap}
+    .empty{padding:40px;background:#fffefa;border:1px solid #d8d8cf;border-radius:22px;color:#5d6863;line-height:1.6}
+    @media(max-width:650px){.phrase-top{display:block}.listen{margin-top:16px}.phrase-target{font-size:27px}}
+  </style>
+</head>
+<body>
+<div class="phrases-page">
+  <nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a href="dashboard.html">Back to learning</a></nav>
+  <header class="phrases-header">
+    <div class="eyebrow">Your language</div>
+    <h1>Phrases you'll actually use.</h1>
+    <p>Language you have encountered in real Nahtive lessons, with the meaning, context, and examples you need to make it your own.</p>
+  </header>
+  <main id="phrases"></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+"use strict";
+const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+function speak(text,code){
+  if(!("speechSynthesis" in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  const map={es:"es-MX",fr:"fr-FR",nl:"nl-NL",de:"de-DE",pt:"pt-BR",pl:"pl-PL",it:"it-IT",ar:"ar-SA",ja:"ja-JP",ko:"ko-KR",zh:"zh-CN",en:"en-US",sv:"sv-SE",el:"el-GR",tr:"tr-TR",hi:"hi-IN"};
+  u.lang=map[code]||code||"en-US";u.rate=.96;speechSynthesis.speak(u);
+}
+async function load(){
+  const root=document.getElementById("phrases");
+  const session=await client.auth.getSession();
+  if(!session.data?.session?.user){location.href="login.html";return}
+  const user=session.data.session.user;
+  const current=localStorage.getItem("Nahtive_current_learner_language");
+  const lr=await client.from("learner_languages").select("id,level,languages(name,code)").eq("user_id",user.id);
+  if(lr.error||!lr.data?.length){root.innerHTML='<div class="empty">Choose a language first.</div>';return}
+  const learner=lr.data.find(x=>x.id===current)||lr.data.find(x=>x.is_current)||lr.data[0];
+  const lessons=await client.from("lessons").select("content,created_at").eq("learner_language_id",learner.id).order("created_at",{ascending:false}).limit(120);
+  const map=new Map();
+  for(const lesson of lessons.data||[]){
+    const phrases=Array.isArray(lesson.content?.phrases)?lesson.content.phrases:[];
+    for(const p of phrases){
+      const target=String(p?.target||"").trim();
+      if(!target||map.has(target))continue;
+      map.set(target,{target,meaning:String(p.meaning||"").trim(),usage:String(p.usage||"").trim(),example:String(p.example||"").trim(),code:learner.languages?.code||"en-US"});
+    }
+  }
+  const items=[...map.values()];
+  if(!items.length){root.innerHTML='<div class="empty"><strong>Your phrase library is empty.</strong><br>Complete a Nahtive lesson and the useful expressions you learn will appear here.</div>';return}
+  root.innerHTML='<div class="phrase-list">'+items.map((p,i)=>'<article class="phrase-card"><div class="phrase-label">Phrase '+String(i+1).padStart(2,"0")+'</div><div class="phrase-top"><div><div class="phrase-target">'+esc(p.target)+'</div><div class="phrase-meaning">'+esc(p.meaning||"Meaning will appear in the next lesson version.")+'</div></div><button class="listen" data-text="'+esc(p.target)+'">Listen</button></div>'+(p.usage?'<div class="phrase-section"><div class="phrase-label">When you use it</div><p>'+esc(p.usage)+'</p></div>':"")+(p.example?'<div class="phrase-section"><div class="phrase-label">Natural example</div><p class="phrase-example">'+esc(p.example)+'</p></div>':"")+'</article>').join("")+'</div>';
+  root.querySelectorAll(".listen").forEach(btn=>btn.onclick=()=>speak(btn.dataset.text,learner.languages?.code));
+}
+load().catch(e=>{console.error(e);document.getElementById("phrases").innerHTML='<div class="empty">We couldn’t load your phrases. Try again.</div>'});
+</script>
+</body>
+</html>
