@@ -250,14 +250,14 @@ function renderBuild(c){
     '<div class="built empty" id="built">Tap words below to build the sentence.</div><div class="word-bank" id="bank">'+bank.map((w,i)=>'<button class="word" data-i="'+i+'" data-word="'+esc(w)+'">'+esc(w)+'</button>').join("")+'</div>'+
     '<div class="feedback" id="feedback"></div>',
     '<button class="secondary-lesson" id="clear">Clear</button><button class="secondary-lesson" id="hint">Hint</button><button class="primary-lesson" id="check">Check ✓</button>');
-  const renderBuilt=()=>{$("built").classList.toggle("empty",!selected.length);$("built").innerHTML=selected.length?selected.map((w,i)=>'<button class="built-word" data-i="'+i+'">'+esc(w)+'</button>').join(""):"Tap words below to build the sentence.";document.querySelectorAll(".word").forEach(b=>b.classList.toggle("used",selected.includes(b.dataset.word+"::"+b.dataset.i)))};
+  const renderBuilt=()=>{$("built").classList.toggle("empty",!selected.length);$("built").innerHTML=selected.length?selected.map((w,i)=>'<button class="built-word" data-i="'+i+'">'+esc(w)+'</button>').join(""):"Tap words below to build the sentence.";document.querySelectorAll(".word").forEach(b=>b.classList.toggle("used",selected.some(x=>x.k===key(b.dataset.word,b.dataset.i))))};
   const key=(w,i)=>w+"::"+i;
   document.querySelectorAll(".word").forEach(btn=>btn.onclick=()=>{if(checked)return;const k=key(btn.dataset.word,btn.dataset.i);if(selected.some(x=>x.k===k))return;selected.push({word:btn.dataset.word,k});sound("click");renderBuilt()});
   $("built").onclick=e=>{const b=e.target.closest(".built-word");if(!b||checked)return;selected.splice(Number(b.dataset.i),1);renderBuilt();sound("click")};
   $("clear").onclick=()=>{if(!checked){selected=[];renderBuilt();sound("click")}};
   $("hint").onclick=()=>{
     if(checked)return;
-    const nextWord=target.split(/\s+/)[selected.length];
+    const nextWord=(p.build_words.length?p.build_words:target.split(/\s+/))[selected.length];
     if(nextWord){$("feedback").textContent="Hint: look for “"+nextWord+"”";$("feedback").className="feedback";sound("click")}
   };
   $("check").onclick=()=>{
@@ -345,14 +345,14 @@ async function load(){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").eq("learner_language_id",current.id).order("created_at",{ascending:false}).limit(80);
       if(r.error)throw r.error;
       const lessons=r.data||[];
-      const valid=lessons.filter(x=>Array.isArray(x?.content?.phrases)&&x.content.phrases.length>=2);
+      const valid=lessons.filter(x=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];return ps.length>=5&&ps.slice(0,5).every(p=>p&&p.target&&p.meaning&&p.build_target&&Array.isArray(p.build_words)&&p.build_words.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)});
       const attempts=valid.length?await client.from("lesson_attempts").select("lesson_id").in("lesson_id",valid.map(x=>x.id)):{data:[],error:null};
       if(attempts.error)throw attempts.error;
       const completed=new Set((attempts.data||[]).map(x=>x.lesson_id));
       const unfinished=valid.find(x=>!completed.has(x.id));
       if(unfinished)baseLesson=unfinished;
       else{
-        const nodeResult=await client.from("curriculum_nodes").select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band").eq("level_band",current.level||"A1").order("sequence_number",{ascending:true}).limit(1);
+        const levelBandMap={A1:["A1"],A2:["A2"],B1:["B1"],B2:["B2","B2+"],C1:["C1/C2"],C2:["C1/C2"]};const bands=levelBandMap[profile?.level||current.level||"A1"]||[current.level||"A1"];const nodeResult=await client.from("curriculum_nodes").select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band").in("level_band",bands).order("sequence_number",{ascending:true}).limit(1);
         if(nodeResult.error)throw nodeResult.error;
         const node=nodeResult.data?.[0];
         if(!node)throw new Error("No curriculum is available for "+(current.level||"this level")+".");
