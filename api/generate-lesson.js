@@ -7,7 +7,15 @@ const FALLBACKS={
   pt:[["Oi","Hi / Hello.","Use this to greet someone.","Oi, eu sou o Alex.","oy"],["Eu me chamo ___","My name is ___.","Use this to tell someone your name.","Eu me chamo Alex.","eh-oo mee SHAH-moo Alex"]],
   de:[["Hallo","Hello.","Use this to greet someone.","Hallo, ich bin Alex.","HAH-loh"],["Ich heiße ___","My name is ___.","Use this to tell someone your name.","Ich heiße Alex.","ikh HIGH-suh Alex"]],
   it:[["Ciao","Hi / Hello.","Use this to greet someone.","Ciao, sono Alex.","CHOW"],["Mi chiamo ___","My name is ___.","Use this to tell someone your name.","Mi chiamo Alex.","mee KYAH-moh Alex"]],
-  nl:[["Hoi","Hi / Hello.","Use this to greet someone.","Hoi, ik ben Alex.","hoy"],["Ik heet ___","My name is ___.","Use this to tell someone your name.","Ik heet Alex.","ik hayt Alex"]]
+  nl:[["Hoi","Hi / Hello.","Use this to greet someone.","Hoi, ik ben Alex.","hoy"],["Ik heet ___","My name is ___.","Use this to tell someone your name.","Ik heet Alex.","ik hayt Alex"]],
+  sv:[["Hej","Hi / Hello.","Use this to greet someone.","Hej, jag heter Alex.","hey"],["Jag heter ___","My name is ___.","Use this to tell someone your name.","Jag heter Alex.","yahg HAY-ter Alex"]],
+  el:[["Γεια σου","Hi / Hello.","Use this to greet someone casually.","Γεια σου, είμαι ο Alex.","ya sou"],["Με λένε ___","My name is ___.","Use this to tell someone your name.","Με λένε Alex.","meh LEH-neh Alex"]],
+  tr:[["Merhaba","Hello.","Use this to greet someone.","Merhaba, ben Alex.","mehr-ha-ba"],["Benim adım ___","My name is ___.","Use this to tell someone your name.","Benim adım Alex.","beh-neem ah-duhm Alex"]],
+  hi:[["नमस्ते","Hello.","Use this to greet someone politely.","नमस्ते, मैं Alex हूँ।","namaste"],["मेरा नाम ___ है","My name is ___.","Use this to tell someone your name.","मेरा नाम Alex है।","mera naam Alex hai"]],
+  ja:[["こんにちは","Hello.","Use this to greet someone politely.","こんにちは、アレックスです。","konnichiwa"],["私は___です","I am ___.","Use this to introduce yourself.","私はアレックスです。","watashi wa Alex desu"]],
+  ko:[["안녕하세요","Hello.","Use this to greet someone politely.","안녕하세요, 저는 Alex예요.","annyeonghaseyo"],["저는 ___예요","I am ___.","Use this to introduce yourself.","저는 Alex예요.","jeoneun Alex-yeyo"]],
+  zh:[["你好","Hello.","Use this to greet someone.","你好，我叫 Alex。","nǐ hǎo"],["我叫 ___","My name is ___.","Use this to tell someone your name.","我叫 Alex。","wǒ jiào Alex"]],
+  ar:[["مرحبا","Hello.","Use this to greet someone.","مرحبا، أنا أليكس.","marhaban"],["اسمي ___","My name is ___.","Use this to tell someone your name.","اسمي أليكس.","ismi Alex"]]
 };
 
 function fallbackLesson(language,code,level,node){
