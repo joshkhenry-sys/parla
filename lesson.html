@@ -210,19 +210,21 @@ function buildLesson(row){
   const p=choosePhrases(c);
   if(!p.length)throw new Error("This lesson does not contain usable phrases yet.");
 
-  const first=p[0];
-  const second=p[1]||p[0];
-  const third=p[2]||p[1]||p[0];
+  const cards=[{type:"scene",stage:"Situation",setting:c.setting,situation:c.situation,mission:c.mission}];
 
-  const cards=[
-    {type:"scene",stage:"Situation",setting:c.setting,situation:c.situation,mission:c.mission},
-    {type:"phrase",stage:"Learn",phrase:first},
-    {type:"recall",stage:"Recall",phrase:first,question:"What would you say here?",choices:makeChoices(first.target,p.slice(1).map(x=>x.target))},
-    {type:"phrase",stage:"Use",phrase:second},
-    {type:"phrase",stage:"Add another",phrase:third},
-    {type:"speak",stage:"Say it",phrase:second},
-    {type:"live",stage:"Live it",setting:c.setting,mission:c.mission,opening:c.opening}
-  ];
+  p.forEach((phrase,i)=>{
+    cards.push({type:"phrase",stage:i===0?"Learn":"Build",phrase});
+    cards.push({
+      type:"recall",
+      stage:"Recall",
+      phrase,
+      question:"Which phrase means “"+phrase.meaning+"”?",
+      choices:makeChoices(phrase.target,p.filter(x=>x!==phrase).map(x=>x.target))
+    });
+  });
+
+  cards.push({type:"speak",stage:"Say it",phrase:p[p.length-1]});
+  cards.push({type:"live",stage:"Live it",setting:c.setting,mission:c.mission,opening:c.opening});
 
   return {...c,phrases:p,cards};
 }
@@ -633,8 +635,17 @@ async function load(){
         .order("created_at",{ascending:true})
         .limit(120);
       if(r.error)throw r.error;
-      const lessons=r.data||[];
-      if(!lessons.length)throw new Error("No lessons are available for this language yet.");
+      const lessons=(r.data||[]).filter(x=>{
+        const phrases=Array.isArray(x?.content?.phrases)?x.content.phrases:[];
+        const dialogue=Array.isArray(x?.content?.dialogue)?x.content.dialogue:[];
+        return phrases.length>=2 &&
+          phrases.slice(0,2).every(p=>p && typeof p==="object" && p.target && p.meaning && p.usage && p.example && Array.isArray(p.breakdown) && p.breakdown.length) &&
+          dialogue.length>=4;
+      });
+      if(!lessons.length) {
+        window.location.href="dashboard.html";
+        return;
+      }
 
       const ids=lessons.map(x=>x.id);
       const attempts=await client.from("lesson_attempts").select("lesson_id").in("lesson_id",ids);
