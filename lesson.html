@@ -106,7 +106,10 @@ function normalizePhrase(raw){
       target:String(raw[0]??"").trim(),
       meaning:String(raw[1]??"").trim(),
       usage:String(raw[2]??"").trim(),
-      example:String(raw[3]??"").trim()
+      breakdown:[],
+      example:String(raw[3]??"").trim(),
+      example_meaning:"",
+      pronunciation:""
     };
   }
   if(raw&&typeof raw==="object"){
@@ -114,10 +117,13 @@ function normalizePhrase(raw){
       target:String(raw.target??raw.phrase??"").trim(),
       meaning:String(raw.meaning??"").trim(),
       usage:String(raw.usage??"").trim(),
-      example:String(raw.example??"").trim()
+      breakdown:Array.isArray(raw.breakdown)?raw.breakdown:[],
+      example:String(raw.example??"").trim(),
+      example_meaning:String(raw.example_meaning??"").trim(),
+      pronunciation:String(raw.pronunciation??"").trim()
     };
   }
-  return {target:String(raw??"").trim(),meaning:"",usage:"",example:""};
+  return {target:String(raw??"").trim(),meaning:"",usage:"",breakdown:[],example:"",example_meaning:"",pronunciation:""};
 }
 
 function normalizeDialogue(raw){
@@ -322,14 +328,18 @@ function renderPhrase(c){
   const p=c.phrase;
   const usage=p.usage||"Use this when the situation calls for it.";
   const example=p.example||"";
+  const breakdown=Array.isArray(p.breakdown)?p.breakdown.filter(x=>x&&x.target):[];
   frame(
     '<div class="kicker">'+esc(c.stage)+'</div>'+
     '<p class="phrase">'+esc(p.target)+'</p>'+
     '<p class="meaning">'+esc(p.meaning||"A useful expression for this situation.")+'</p>'+
+    '<div class="detail"><div class="detail-label">What you are saying</div><p>'+esc(p.meaning||"")+'</p></div>'+
     '<div class="detail"><div class="detail-label">When you use it</div><p>'+esc(usage)+'</p></div>'+
-    (example?'<div class="detail"><div class="detail-label">Natural example</div><p class="example-target">'+esc(example)+'</p></div>':"")+
+    (breakdown.length?'<div class="detail"><div class="detail-label">Break it down</div>'+breakdown.map(x=>'<p style="margin:6px 0"><strong>'+esc(x.target)+'</strong> — '+esc(x.meaning)+'</p>').join("")+'</div>':"")+
+    (p.pronunciation?'<div class="detail"><div class="detail-label">Pronunciation</div><p>'+esc(p.pronunciation)+'</p></div>':"")+
+    (example?'<div class="detail"><div class="detail-label">Natural example</div><p class="example-target">'+esc(example)+'</p>'+(p.example_meaning?'<p class="example-meaning">'+esc(p.example_meaning)+'</p>':"")+'</div>':"")+
     '<div class="listen-row"><button class="secondary" id="listen">Listen</button></div>',
-    '<button class="primary" id="next">Continue →</button>'
+    '<button class="primary" id="next">I understand →</button>'
   );
   $("listen").onclick=()=>browserSpeak(p.target);
   $("next").onclick=next;
