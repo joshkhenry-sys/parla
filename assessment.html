@@ -87,7 +87,7 @@ function localPlacement(code){
  sv:[["Hur mår du?","How are you?","How are you?"],["Jag vill boka ett bord för två.","I want to reserve a table for two.","I want to reserve a table for two."],["Jag gick till affären igår.","I went to the store yesterday.","I went to the store yesterday."],["Om jag har tid följer jag med dig.","If I have time, I'll go with you.","If I have time, I'll go with you."],["Även om jag var trött gick jag ändå ut.","Even though I was tired, I went out.","Even though I was tired, I went out."],["Det är inte så att jag inte vill; jag har bara inte tid.","It's not that I don't want to; I don't have time.","It's not that I don't want to; I don't have time."],["Vid det här laget borde jag redan ha förstått det.","By this point, I should have known better.","By this point, I should have known better."]]
  };
  const base=banks[code]||banks[String(code||"").split("-")[0]]||banks.es;
- const levels=["A0","A1","A2","B1","B2","C1","C2"];
+ const levels=["A1","A2","B1","B2","C1","C2"];
  const qs=[];
  base.forEach((item,i)=>{
    const [phrase,meaning]=item;
@@ -151,7 +151,7 @@ function choose(i){
 document.getElementById("next").addEventListener("click",()=>{if(selected===null)return;const item=questions[index];if(selected===item.answer){scoreByLevel[item.level]++;skillScores[item.type]=(skillScores[item.type]||0)+1;}if(index<questions.length-1){index++;render()}else{finish()}});
 function speakTarget(text){if(!text||!("speechSynthesis" in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=language.languages?.code||"";u.rate=.88;speechSynthesis.speak(u)}
 function calculateLevel(){
-  const order=["A0","A1","A2","B1","B2","C1","C2"];
+  const order=["A1","A2","B1","B2","C1","C2"];
   // Placement is conservative: a learner must demonstrate the level itself,
   // not merely accumulate enough easy answers from lower bands.
   let level="A0";
