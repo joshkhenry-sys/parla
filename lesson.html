@@ -7,7 +7,7 @@
   <title>Nahtive — Lesson</title>
   <link rel="stylesheet" href="nahtive.css">
   <style>
-    :root{--lesson-bg:#0b1020;--lesson-surface:#151c31;--lesson-surface2:#1d2741;--lesson-white:#f8fbff;--lesson-muted:#aab6ce;--lesson-blue:#4da3ff;--lesson-yellow:#ffd84d;--lesson-lime:#9df06b;--lesson-coral:#ff6b6b;--lesson-purple:#9b7cff}
+    :root{--lesson-bg:#0b0f1a;--lesson-surface:#141a2b;--lesson-surface2:#1b2238;--lesson-white:#f4f1ea;--lesson-muted:#9ba4ba;--lesson-blue:#b6f36a;--lesson-yellow:#b6f36a;--lesson-lime:#b6f36a;--lesson-coral:#ff6b6b;--lesson-purple:#b6f36a}
     body.lesson-page{background:var(--lesson-bg)!important;color:var(--lesson-white)!important}
     body.lesson-page .shell{width:min(1080px,calc(100% - 34px))}
     body.lesson-page nav{min-height:72px}
@@ -23,12 +23,12 @@
     .lesson-progress{position:sticky;top:0;z-index:5;padding:12px 0;background:linear-gradient(var(--lesson-bg) 72%,transparent)}
     .progress-meta{display:flex;justify-content:space-between;gap:15px;color:var(--lesson-muted);font-size:11px;font-weight:800}
     .progress-track{height:9px;margin-top:8px;border-radius:99px;background:#202a43;overflow:hidden;border:1px solid #2d3855}
-    .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--lesson-blue),var(--lesson-purple),var(--lesson-lime));border-radius:99px;transition:width .35s cubic-bezier(.2,.8,.2,1)}
+    .progress-fill{height:100%;width:0;background:var(--lesson-blue);border-radius:99px;transition:width .35s cubic-bezier(.2,.8,.2,1)}
     .lesson-card{position:relative;max-width:900px;margin:16px auto 0;padding:clamp(24px,5vw,48px);border-radius:30px;background:var(--lesson-surface);border:1px solid #2b3653;box-shadow:0 24px 70px rgba(0,0,0,.24);overflow:hidden}
-    .lesson-card:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-100px;top:-100px;background:rgba(77,163,255,.13);pointer-events:none}
+    .lesson-card:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-100px;top:-100px;background:rgba(182,243,106,.10);pointer-events:none}
     .stage-chip{display:inline-flex;padding:7px 10px;border-radius:10px;background:#222d49;color:var(--lesson-yellow);font-size:10px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
     .scene-card{min-height:410px;display:flex;flex-direction:column;justify-content:center}
-    .scene-icon{width:68px;height:68px;display:grid;place-items:center;border-radius:22px;background:var(--lesson-yellow);color:#12182a;font-size:30px;font-weight:900;box-shadow:8px 8px 0 rgba(77,163,255,.25);margin-bottom:25px}
+    .scene-icon{width:68px;height:68px;display:grid;place-items:center;border-radius:22px;background:var(--lesson-yellow);color:#12182a;font-size:30px;font-weight:900;box-shadow:8px 8px 0 rgba(182,243,106,.18);margin-bottom:25px}
     .scene-card h2{font-size:clamp(34px,6vw,66px);line-height:.94;letter-spacing:-.06em;color:#fff;max-width:700px;margin:17px 0}
     .scene-card p{max-width:650px;color:var(--lesson-muted);font-size:17px;line-height:1.65}
     .mission{display:inline-flex;align-items:center;gap:9px;margin-top:25px;padding:12px 15px;border-radius:14px;background:#17213a;border:1px solid #2c3958;color:#fff;font-size:13px;font-weight:750;width:max-content;max-width:100%}
