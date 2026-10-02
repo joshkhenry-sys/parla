@@ -280,24 +280,34 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
   }
 
   if (!lesson) {
-    try {
-      button.disabled = true;
-      button.textContent = "Building…";
-      lesson = await generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons);
-      if (lesson) allLessons.push(lesson);
-    } catch (generationError) {
-      console.error("Could not generate next lesson:", generationError);
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  if (!lesson) {
-    title.textContent = "Your next scene is being prepared.";
-    copy.textContent = "The core path is ready. Nahtive will create the next language-specific lesson when you start.";
-    if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>Core path</span>";
-    button.innerHTML = "Open learning path <span>→</span>";
+    // Start generation in the background instead of blocking the dashboard.
+    title.textContent = "Your next lesson is being prepared.";
+    copy.textContent = "Nahtive is preparing the next language-specific lesson in the background.";
+    if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>Preparing</span>";
+    button.disabled = false;
+    button.innerHTML = "Start lesson <span>→</span>";
     button.onclick = () => { window.location.href = "lesson.html"; };
+
+    const prewarmKey = "Nahtive_prewarm_"+learnerLanguageId;
+    const lastPrewarm = Number(localStorage.getItem(prewarmKey)||0);
+    if (!lastPrewarm || Date.now()-lastPrewarm > 60000) {
+      localStorage.setItem(prewarmKey, String(Date.now()));
+      generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons)
+        .then(prepared => {
+          if (!prepared) return;
+          allLessons.push(prepared);
+          title.textContent = prepared.title || "Continue learning";
+          copy.textContent = (prepared.curriculum_nodes?.focus || "Real conversation") + " — then use it in a real interaction.";
+          if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(prepared.curriculum_nodes?.stage_name || "Core path")+"</span>";
+          button.innerHTML = "Continue <span>→</span>";
+          button.onclick = () => {
+            sessionStorage.setItem("Nahtive_lesson_id", prepared.id);
+            window.location.href = "lesson.html?id=" + encodeURIComponent(prepared.id);
+          };
+        })
+        .catch(generationError => console.error("Could not prebuild next lesson:", generationError))
+        .finally(() => localStorage.removeItem(prewarmKey));
+    }
     return;
   }
 
