@@ -26,7 +26,7 @@ function fallbackLesson(language,code,level,node){
    example,example_meaning:meaning,pronunciation,
    build_target:target,build_meaning:meaning,
    build_words:target.split(/\s+/).filter(Boolean),
-   distractors:[i%2?"no":"maybe",i%3?"please":"today",i%2?"thanks":"sorry"]
+   distractors:rows.filter((_,j)=>j!==i).slice(0,3).map(r=>String(r[0]||"")).filter(Boolean)
  }));
  return {
    language_code:String(code||"").toLowerCase(),language_name:String(language||""),level:String(level||""),
@@ -65,8 +65,10 @@ TEACHING DESIGN:
 - Phrase 1 introduces the essential language. Later phrases reuse earlier language and add one meaningful piece.
 - Every phrase must be genuinely natural for native speakers.
 - Every phrase must include a plain English meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target.
-- For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
-- Give 3-6 plausible distractors per phrase. Distractors should be wrong or unnecessary, but relevant enough that the learner must understand the sentence. Do not make them absurd.
+- For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the target language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
+- Give 3-6 plausible distractors per phrase. Distractors must also be in the target language and must be wrong or unnecessary, but relevant enough that the learner must understand the sentence. NEVER use English distractors unless the target language itself is English.
+- All target-language learner content — target, example, dialogue, build_target, build_words, and distractors — must stay in the requested target language. English is allowed only in meaning/usage/example_meaning/build_meaning and breakdown explanations.
+- Before returning the JSON, verify that the lesson is internally consistent with the requested language and CEFR level.
 - The learner should see more words than are required, and the correct words must be scrambled by the app.
 - The lesson must be challenging without assuming knowledge above ${L}.
 - Dialogue must contain exactly 4 lines: native, learner, native, learner, and must reuse the taught language.
