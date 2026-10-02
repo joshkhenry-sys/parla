@@ -338,7 +338,7 @@ async function load(){
     const langResult=await Promise.race([client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Language data timed out.")),7000))]);
     if(langResult.error)throw langResult.error;
     const langs=langResult.data||[];if(!langs.length){location.href="onboarding.html";return}
-    const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];localStorage.setItem("Nahtive_current_learner_language",current.id);
+    const current=langs.find(x=>x.is_current)||langs.find(x=>x.id===saved)||langs[0];localStorage.setItem("Nahtive_current_learner_language",current.id);
     const requested=new URLSearchParams(location.search).get("id");
     if(requested){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").eq("id",requested).maybeSingle();
@@ -363,7 +363,11 @@ async function load(){
         if(!nodeResult.data?.length&&maxSeq>0)nodeResult=await client.from("curriculum_nodes").select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band").in("level_band",bands).order("sequence_number",{ascending:true}).limit(1);
         let node=nodeResult.data?.[0];
         if(!node)node={id:null,sequence_number:maxSeq+1,stage_number:maxSeq+1,stage_name:"Real-world practice",title:"Your next conversation",situation:"Handle a useful everyday interaction.",focus:"Practical conversation"};
-        const gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level||"A1",node})});
+        const nativeCodes = {en:"English",es:"Spanish",pt:"Portuguese",fr:"French",de:"German",it:"Italian",ja:"Japanese",ko:"Korean",zh:"Mandarin",ar:"Arabic",nl:"Dutch",sv:"Swedish",el:"Greek",tr:"Turkish",hi:"Hindi",pl:"Polish"};
+        let nativeLanguage = "English";
+        const nativeProfile = await client.from("profiles").select("Nahtive_language_code").eq("id",user.id).maybeSingle();
+        if (!nativeProfile.error && nativeProfile.data?.Nahtive_language_code) nativeLanguage = nativeCodes[String(nativeProfile.data.Nahtive_language_code).toLowerCase()] || "English";
+        const gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level||"A1",nativeLanguage,node})});
         const generated=await gen.json().catch(()=>({}));
         if(!gen.ok||!generated.content)throw new Error(generated.error||"Could not build your lesson.");
         const savedLesson=await client.from("lessons").insert({learner_language_id:current.id,curriculum_node_id:node.id,title:generated.title||node.title,topic:generated.topic||node.focus,level:current.level||"A1",content:generated.content}).select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").single();
