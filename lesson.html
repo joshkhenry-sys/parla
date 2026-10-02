@@ -163,7 +163,7 @@ function normalizePhrase(raw){
 }
 function normalizeLesson(row){
   const d=row?.content&&typeof row.content==="object"?row.content:{};
-  return {title:String(row?.title||d.title||"Lesson"),topic:String(row?.topic||d.topic||"Real life"),
+  return {language_code:String(d.language_code||"").toLowerCase(),language_name:String(d.language_name||""),level:String(d.level||row?.level||"").toUpperCase(),title:String(row?.title||d.title||"Lesson"),topic:String(row?.topic||d.topic||"Real life"),
     scene:d.scene&&typeof d.scene==="object"?d.scene:{},phrases:(Array.isArray(d.phrases)?d.phrases:[]).map(normalizePhrase).filter(p=>p.target),
     dialogue:Array.isArray(d.dialogue)?d.dialogue:[]};
 }
@@ -345,7 +345,8 @@ async function load(){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at").eq("learner_language_id",current.id).order("created_at",{ascending:false}).limit(80);
       if(r.error)throw r.error;
       const lessons=(r.data||[]).map(x=>({...x,learner_languages:{id:current.id,user_id:user.id,level:current.level,languages:current.languages}}));
-      const valid=lessons.filter(x=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];return ps.length>=5&&ps.slice(0,5).every(p=>p&&p.target&&p.meaning&&p.build_target&&Array.isArray(p.build_words)&&p.build_words.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)});
+      const wantedCode=String(current.languages?.code||"").toLowerCase();
+      const valid=lessons.filter(x=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];const storedCode=String(x?.content?.language_code||"").toLowerCase();return storedCode===wantedCode&&ps.length>=5&&ps.slice(0,5).every(p=>p&&p.target&&p.meaning&&p.build_target&&Array.isArray(p.build_words)&&p.build_words.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)});
       const attempts=valid.length?await client.from("lesson_attempts").select("lesson_id").in("lesson_id",valid.map(x=>x.id)):{data:[],error:null};
       if(attempts.error)throw attempts.error;
       const completed=new Set((attempts.data||[]).map(x=>x.lesson_id));
@@ -368,6 +369,9 @@ async function load(){
       }
     }
     const linked=baseLesson.learner_languages;
+    const lessonCode=String(baseLesson.content?.language_code||"").toLowerCase();
+    const currentCode=String(linked?.languages?.code||"").toLowerCase();
+    if(!lessonCode||lessonCode!==currentCode)throw new Error("This lesson belongs to a different language. Please start the next lesson.");
     if(!linked?.id)throw new Error("This language is not linked to your account.");
     profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(baseLesson.level||linked.level||"A1")};
     lesson=buildCards(baseLesson);
