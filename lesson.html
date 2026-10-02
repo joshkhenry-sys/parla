@@ -173,7 +173,12 @@ function normalizeLesson(row){
     dialogue:Array.isArray(d.dialogue)?d.dialogue:[]};
 }
 function fallbackNormalize(p){
-  if(!p.build_words?.length)p.build_words=p.build_target.split(/\s+/).filter(Boolean);
+  const target=String(p.build_target||p.target||"").normalize("NFKC").replace(/\s+/g," ").trim();
+  const chunks=Array.isArray(p.build_words)?p.build_words.map(String).filter(Boolean):[];
+  const joined=chunks.join(" ").normalize("NFKC").replace(/\s+/g," ").trim();
+  // Never render an impossible build exercise. If stored chunks do not
+  // reconstruct the target sentence, rebuild them from the target itself.
+  if(!chunks.length||joined!==target)p.build_words=target.split(/\s+/).filter(Boolean);
   return p;
 }
 function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
