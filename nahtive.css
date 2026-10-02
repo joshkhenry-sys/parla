@@ -824,3 +824,49 @@ h1,h2,h3,.logo,.language-name,.level-result,.summary-number,.streak-number{color
 .language-card,.big-option,.option,.google-btn,input,textarea,select{background:#141a2b!important;color:#f4f1ea!important;border-color:rgba(255,255,255,.14)!important}
 .language-card.selected,.big-option.selected,.option.selected{background:#1b2a24!important;border-color:#b6f36a!important}
 .primary,.primary-button,.next,.submit-btn,.continue-btn,.continue-button,.start-btn{background:#b6f36a!important;color:#10200a!important;box-shadow:none!important}
+
+
+/* Contrast repair: no pale buttons with pale or white labels. */
+button,.button,[role="button"],a.primary,a.primary-button{
+  color:#10200a!important;
+}
+.primary,.primary-button,.next,.submit-btn,.continue-btn,.continue-button,.start-btn,
+body.dashboard-page .primary-button,
+body.lesson-page .primary,
+body.lesson-page .continue-btn,
+body.lesson-page .continue-button{
+  background:#b6f36a!important;
+  color:#10200a!important;
+  border:1px solid #b6f36a!important;
+  box-shadow:none!important;
+}
+.primary *, .primary-button *, .next *, .submit-btn *, .continue-btn *,
+.continue-button *, .start-btn *, body.dashboard-page .primary-button *{
+  color:#10200a!important;
+}
+.secondary,.manage-button,.back-btn,.add-language-btn,.icon-button,.change-topic,.review-button,
+body.lesson-page .secondary{
+  background:#263554!important;
+  color:#f4f1ea!important;
+  border:1px solid #455574!important;
+}
+.secondary *, .manage-button *, .back-btn *, .add-language-btn *, .icon-button *,
+.change-topic *, .review-button *, body.lesson-page .secondary *{
+  color:#f4f1ea!important;
+}
+body.dashboard-page .dashboard-language-link.current{
+  background:#b6f36a!important;color:#10200a!important;border-color:#b6f36a!important;
+}
+body.dashboard-page .dashboard-language-link.current span{
+  color:#10200a!important;
+}
+body.dashboard-page .dashboard-language-link.current .manage-button{
+  background:#263554!important;color:#f4f1ea!important;border-color:#455574!important;
+}
+body.dashboard-page .quick-arrow{
+  background:#263554!important;color:#f4f1ea!important;border-color:#455574!important;
+}
+body.dashboard-page .quick-arrow *{color:#f4f1ea!important}
+.login-card .submit-btn{background:#b6f36a!important;color:#10200a!important}
+.login-card .google-btn{background:#263554!important;color:#f4f1ea!important;border-color:#455574!important}
+.login-card .google-btn *{color:#f4f1ea!important}
