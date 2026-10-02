@@ -644,6 +644,8 @@
     }
 
     async function finishOnboarding() {
+      if (state.level === "A0") state.level = "A1";
+      if (state.level === "B2+") state.level = "B2";
       const learningProfile = {
         targetLanguage: state.targetLanguage,
         NahtiveLanguage: state.NahtiveLanguage,
