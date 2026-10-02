@@ -672,14 +672,14 @@ body:has(.lesson) .lesson .complete .xp{color:#596b43!important}
 
 /* DASHBOARD — single source of truth */
 body.dashboard-page{
-  --dash-bg:#f5f2ea;
-  --dash-surface:#fffdf7;
-  --dash-soft:#e7eddc;
-  --dash-soft-2:#f0eee6;
-  --dash-ink:#18211e;
-  --dash-muted:#4b5651;
-  --dash-line:#a6aaa2;
-  --dash-green:#304a25;
+  --dash-bg:#0b0f1a;
+  --dash-surface:#141a2b;
+  --dash-soft:#1b2a24;
+  --dash-soft-2:#1b2238;
+  --dash-ink:#f4f1ea;
+  --dash-muted:#9ba4ba;
+  --dash-line:rgba(255,255,255,.12);
+  --dash-green:#b6f36a;
   background:var(--dash-bg)!important;
   color:var(--dash-ink)!important;
 }
@@ -717,8 +717,8 @@ body.dashboard-page .recommended::before{
   opacity:1!important;
 }
 body.dashboard-page .recommended::after{
-  background:#e8d273!important;
-  opacity:.7!important;
+  background:#b6f36a!important;
+  opacity:.12!important;
 }
 body.dashboard-page .recommended h2,
 body.dashboard-page .recommended-copy,
@@ -791,10 +791,10 @@ body.dashboard-page .quick-card{
   border:1px solid var(--dash-line)!important;
   box-shadow:0 8px 22px rgba(24,33,30,.04)!important;
 }
-body.dashboard-page .quick-card:nth-child(1){background:#e0edf2!important}
-body.dashboard-page .quick-card:nth-child(2){background:#efd9d1!important}
-body.dashboard-page .quick-card:nth-child(3){background:#e3ecd9!important}
-body.dashboard-page .quick-card:nth-child(4){background:#f2e9c2!important}
+body.dashboard-page .quick-card:nth-child(1){background:#17243b!important}
+body.dashboard-page .quick-card:nth-child(2){background:#211d31!important}
+body.dashboard-page .quick-card:nth-child(3){background:#1b2a24!important}
+body.dashboard-page .quick-card:nth-child(4){background:#222b1b!important}
 body.dashboard-page .quick-number,
 body.dashboard-page .quick-card p,
 body.dashboard-page .quick-arrow{
