@@ -133,7 +133,7 @@
       el.textContent = streak === 0 ? "0 day streak" : streak + (streak === 1 ? " day" : " days") + " streak";
     }
 
-    async function generateNextCurriculumLesson(learnerLanguageId, languageName, level, existingLessons) {
+    async function generateNextCurriculumLesson(learnerLanguageId, languageName, level, existingLessons, afterSequence = 0) {
   const { data: nodes, error: nodeError } = await supabaseClient
     .from("curriculum_nodes")
     .select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band")
@@ -156,6 +156,7 @@
 
   const completed = new Set((attempts || []).map(x => x.lesson_id));
   const usable = (nodes || []).filter(node => {
+    if (Number(node.sequence_number || 0) <= Number(afterSequence || 0)) return false;
     const related = (existingLessons || []).filter(x => x.curriculum_node_id === node.id && x.level === level);
     return related.length === 0 || related.some(x => !completed.has(x.id)) ? levelMatches(node) : false;
   });
@@ -321,6 +322,21 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     sessionStorage.setItem("Nahtive_lesson_id", lesson.id);
     window.location.href = "lesson.html?id=" + encodeURIComponent(lesson.id);
   };
+
+  // While the learner is working through this lesson, quietly prepare the following one.
+  const currentSequence = Number(lesson.curriculum_nodes?.sequence_number || 0);
+  const hasPreparedNext = currentSequence > 0 && allLessons.some(row =>
+    !completedIds.has(row.id) &&
+    Number(row.curriculum_nodes?.sequence_number || 0) > currentSequence
+  );
+  const prewarmKey = "Nahtive_prewarm_next_"+learnerLanguageId;
+  const lastPrewarm = Number(localStorage.getItem(prewarmKey)||0);
+  if (currentSequence > 0 && !hasPreparedNext && (!lastPrewarm || Date.now()-lastPrewarm > 60000)) {
+    localStorage.setItem(prewarmKey, String(Date.now()));
+    generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons, currentSequence)
+      .catch(error => console.error("Could not prebuild following lesson:", error))
+      .finally(() => localStorage.removeItem(prewarmKey));
+  }
 }
 
     async function addLanguage(languageName, button) {
