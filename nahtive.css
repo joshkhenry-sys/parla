@@ -775,11 +775,7 @@ body.dashboard-page .dashboard-language-link.current{
 body.dashboard-page .dashboard-language-link.current span{
   color:#fff!important;
 }
-body.dashboard-page .dashboard-language-link.current .manage-button{
-  background:#fffdf7!important;
-  color:var(--dash-ink)!important;
-  border-color:var(--dash-line)!important;
-}
+body.dashboard-page .dashboard-language-link.current .manage-button{background:#263554!important;color:#f4f1ea!important;border-color:#455574!important}body.dashboard-page .dashboard-language-link.current .manage-button:hover{background:#1b2a24!important;color:#f4f1ea!important;border-color:#b6f36a!important}
 body.dashboard-page .primary-button{
   background:var(--dash-ink)!important;
   color:#fff!important;
