@@ -198,10 +198,11 @@ function buildCards(row){
   return {...c,phrases:p,cards};
 }
 function makeChoices(p,all){
-  const correct=p.target;
-  const alternatives=all.filter(x=>x!==p).map(x=>x.target);
-  const extra=["Not right now.","Maybe later.","I don't know yet.","That works for me."];
-  return shuffle([correct,...alternatives,...extra].filter((x,i,a)=>x&&a.indexOf(x)===i)).slice(0,4);
+  // The correct answer must always be present. Use only target-language phrases
+  // from this lesson so recall never falls back to English filler answers.
+  const correct=String(p.target||"");
+  const alternatives=shuffle(all.filter(x=>x!==p).map(x=>String(x.target||"")).filter(Boolean)).slice(0,3);
+  return shuffle([correct,...alternatives]);
 }
 function addXP(n){
   xp+=n;$("xpLive").textContent=xp+" XP";
