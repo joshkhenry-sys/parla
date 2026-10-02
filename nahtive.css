@@ -210,6 +210,9 @@ nav::after{
 }
 .quick-card:hover::before{transform:scale(1.5) rotate(18deg)}
 .quick-card:hover{transform:translateY(-6px)!important}
+body.dashboard-page .quick-card:hover{background:var(--dash-green)!important;color:#10200a!important;border-color:var(--dash-green)!important;transform:translateY(-6px)!important}
+body.dashboard-page .quick-card:hover h3,body.dashboard-page .quick-card:hover p,body.dashboard-page .quick-card:hover .quick-number{color:#10200a!important}
+body.dashboard-page .quick-card:hover .quick-arrow{background:#263554!important;color:#f4f1ea!important;border-color:#263554!important}
 
 .dashboard-language-link{
   transition:transform .2s ease,background .2s ease,color .2s ease!important;
