@@ -50,6 +50,8 @@
     .built{min-height:72px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:12px;border-radius:18px;background:#0e1527;border:2px dashed #35415e;margin-bottom:15px}
     .built.empty{color:#65728d;font-size:13px}
     .word-bank{display:flex;flex-wrap:wrap;gap:9px}
+    .arabic-build{direction:rtl;unicode-bidi:plaintext;text-align:right}
+    .arabic-build .word,.arabic-build .built-word{direction:rtl;unicode-bidi:plaintext;text-align:center;font-size:17px!important;line-height:1.5}
     .word{border:1px solid #3a4867!important;background:#202b46!important;color:#fff!important;border-radius:13px!important;padding:12px 14px!important;font-size:14px!important;font-weight:800!important;transition:.14s!important}
     .word:hover{transform:translateY(-2px);border-color:var(--lesson-blue)!important;background:#263554!important}
     .word.used{opacity:1!important;transform:none!important;border:2px solid #b6f36a!important;background:#b6f36a!important;color:#10200a!important;box-shadow:0 0 0 3px rgba(182,243,106,.2),0 5px 16px rgba(182,243,106,.12)!important;position:relative}
@@ -175,6 +177,14 @@ function fallbackNormalize(p){
   return p;
 }
 function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function normalizeBuildAnswer(value){
+  return String(value||"")
+    .normalize("NFKC")
+    .replace(/[\u0640\u064B-\u065F\u0670\u06D6-\u06ED]/g,"")
+    .replace(/[،؛؟.!,:;()[\]{}«»“”"']/g,"")
+    .replace(/\s+/g," ")
+    .trim();
+}
 function makeBank(p,all){
   const correct=p.build_words.length?p.build_words:p.build_target.split(/\s+/).filter(Boolean);
   let distractors=[...p.distractors,...all.flatMap(x=>x.distractors||[])];
@@ -250,8 +260,9 @@ function renderTeach(c){
 function renderBuild(c){
   const p=c.phrase;let selected=[];let checked=false;
   const target=p.build_target||p.target;const bank=shuffle(c.bank);
+  const isArabic=/^(ar|arabic)(-|$)/i.test(String(profile?.code||lesson?.language_code||""));
   shell('<span class="stage-chip">Build it</span><div class="build-prompt">Put the words in the right order.</div><div class="build-target">'+esc(p.build_meaning||p.meaning)+'</div>'+
-    '<div class="built empty" id="built">Tap words below to build the sentence.</div><div class="word-bank" id="bank">'+bank.map((w,i)=>'<button class="word" data-i="'+i+'" data-word="'+esc(w)+'">'+esc(w)+'</button>').join("")+'</div>'+
+    '<div class="built empty'+(isArabic?' arabic-build':'')+'" id="built"'+(isArabic?' dir="rtl"':'')+'>Tap words below to build the sentence.</div><div class="word-bank'+(isArabic?' arabic-build':'')+'" id="bank"'+(isArabic?' dir="rtl"':'')+'>'+bank.map((w,i)=>'<button class="word" data-i="'+i+'" data-word="'+esc(w)+'"'+(isArabic?' dir="rtl"':'')+'>'+esc(w)+'</button>').join("")+'</div>'+
     '<div class="feedback" id="feedback"></div>',
     '<button class="secondary-lesson" id="clear">Clear</button><button class="secondary-lesson" id="hint">Hint</button><button class="primary-lesson" id="check">Check ✓</button>');
   const renderBuilt=()=>{$("built").classList.toggle("empty",!selected.length);$("built").innerHTML=selected.length?selected.map((w,i)=>'<button class="built-word" data-i="'+i+'" title="Remove '+esc(w.word)+'">'+esc(w.word)+'</button>').join(""):"Tap words below to build the sentence.";document.querySelectorAll(".word").forEach(b=>b.classList.toggle("used",selected.some(x=>x.k===key(b.dataset.word,b.dataset.i))))};
@@ -268,7 +279,10 @@ function renderBuild(c){
     if(checked)return;
     const answer=selected.map(x=>x.word).join(" ").trim();
     const expected=p.build_words.length?p.build_words.join(" ").trim():target.trim();
-    if(answer===expected){
+    // Arabic text can differ in diacritics, tatweel, or punctuation even when
+    // the learner selected the correct words. Compare normalized text, not raw bytes.
+    const correct=normalizeBuildAnswer(answer)===normalizeBuildAnswer(expected);
+    if(correct){
       checked=true;sound("good");addXP(15);$("feedback").textContent="Perfect build. You actually constructed it.";$("feedback").className="feedback good";$("check").textContent="Continue →";$("check").onclick=next;
       $("built").classList.add("pop");
     }else{
