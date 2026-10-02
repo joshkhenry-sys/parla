@@ -249,7 +249,9 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
   const isUsableLesson = row => {
     const phrases = Array.isArray(row?.content?.phrases) ? row.content.phrases : [];
     const dialogue = Array.isArray(row?.content?.dialogue) ? row.content.dialogue : [];
-    return phrases.length >= 5 &&
+    const storedCode = String(row?.content?.language_code || "").toLowerCase();
+    const wantedCode = String(learner?.languages?.code || window.Nahtive_language_code || "").toLowerCase();
+    return storedCode === wantedCode && phrases.length >= 5 &&
       phrases.slice(0,5).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && p.build_target && Array.isArray(p.build_words) && p.build_words.length && Array.isArray(p.distractors) && p.distractors.length >= 3) &&
       dialogue.length >= 4;
   };
