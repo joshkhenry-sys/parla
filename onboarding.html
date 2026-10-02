@@ -725,17 +725,10 @@
         );
 
         const NahtiveLanguageMap = {
-          English: "en",
-          Spanish: "es",
-          Portuguese: "pt",
-          French: "fr",
-          German: "de",
-          Italian: "it",
-          Japanese: "ja",
-          Korean: "ko",
-          Mandarin: "zh",
-          Arabic: "ar",
-          Other: null
+          English: "en", Spanish: "es", Portuguese: "pt", French: "fr",
+          German: "de", Italian: "it", Japanese: "ja", Korean: "ko",
+          Mandarin: "zh", Arabic: "ar", Dutch: "nl", Swedish: "sv",
+          Greek: "el", Turkish: "tr", Hindi: "hi", Polish: "pl", Other: null
         };
 
         const { error: profileError } = await client.from("profiles").upsert({
@@ -758,7 +751,14 @@
         window.location.href = "dashboard.html";
       } catch (error) {
         console.error("Onboarding save failed:", error);
-        alert("We couldn't save your learning profile yet. Please try again.");
+        const message = document.getElementById("onboardingError") || document.createElement("div");
+        message.id = "onboardingError";
+        message.setAttribute("role", "alert");
+        message.style.cssText = "margin:18px auto;padding:14px 16px;max-width:620px;border:1px solid #ff6b6b;border-radius:14px;background:#2b1820;color:#fff;font-size:13px;line-height:1.5";
+        message.textContent = "We couldn’t finish setting up your learning profile: " + (error?.message || "Please try again.") + " Your choices are still on this page. Select your level again to retry.";
+        const main = document.querySelector(".onboarding");
+        if (main && !message.isConnected) main.prepend(message);
+        message.scrollIntoView({behavior:"smooth",block:"center"});
       }
     }
 
