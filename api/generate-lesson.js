@@ -29,6 +29,7 @@ function fallbackLesson(language,code,level,node){
    distractors:[i%2?"no":"maybe",i%3?"please":"today",i%2?"thanks":"sorry"]
  }));
  return {
+   language_code:String(code||"").toLowerCase(),language_name:String(language||""),level:String(level||""),
    title:String(node?.title||"Your first conversation"),
    topic:String(node?.focus||"Everyday conversation"),
    scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Handle a simple real-world interaction."),situation:String(node?.situation||"Practice a short, useful interaction.")},
@@ -101,6 +102,7 @@ Return JSON only.`;
   if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.build_target||!p.build_meaning||!Array.isArray(p.build_words)||!p.build_words.length||!Array.isArray(p.distractors)||p.distractors.length<3))throw new Error("Incomplete phrase teaching data");
   if(!Array.isArray(parsed.dialogue)||parsed.dialogue.length!==4)throw new Error("Invalid dialogue count");
   const expected=["native","learner","native","learner"];if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]))throw new Error("Invalid dialogue order");
+  parsed.language_code=String(code||"").toLowerCase();parsed.language_name=String(language||"");parsed.level=L;
   return jsonResponse(res,200,{title:parsed.title,topic:parsed.topic,content:parsed});
  }catch(e){
   console.error("Lesson generation exception:",e);
