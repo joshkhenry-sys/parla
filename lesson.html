@@ -52,7 +52,8 @@
     .word-bank{display:flex;flex-wrap:wrap;gap:9px}
     .word{border:1px solid #3a4867!important;background:#202b46!important;color:#fff!important;border-radius:13px!important;padding:12px 14px!important;font-size:14px!important;font-weight:800!important;transition:.14s!important}
     .word:hover{transform:translateY(-2px);border-color:var(--lesson-blue)!important;background:#263554!important}
-    .word.used{opacity:.22;transform:none}
+    .word.used{opacity:.62;transform:none;border-color:var(--lesson-blue)!important;background:#263554!important;position:relative}
+    .word.used::after{content:" ✓";color:var(--lesson-blue);font-weight:950}
     .built-word{border:1px solid #4b5d80;background:#2a3757;color:#fff;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:850;cursor:pointer}
     .build-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
     .primary-lesson,.secondary-lesson{border-radius:14px!important;padding:13px 18px!important;font-weight:900!important;border:0!important}
@@ -250,7 +251,7 @@ function renderBuild(c){
     '<div class="built empty" id="built">Tap words below to build the sentence.</div><div class="word-bank" id="bank">'+bank.map((w,i)=>'<button class="word" data-i="'+i+'" data-word="'+esc(w)+'">'+esc(w)+'</button>').join("")+'</div>'+
     '<div class="feedback" id="feedback"></div>',
     '<button class="secondary-lesson" id="clear">Clear</button><button class="secondary-lesson" id="hint">Hint</button><button class="primary-lesson" id="check">Check ✓</button>');
-  const renderBuilt=()=>{$("built").classList.toggle("empty",!selected.length);$("built").innerHTML=selected.length?selected.map((w,i)=>'<button class="built-word" data-i="'+i+'">'+esc(w)+'</button>').join(""):"Tap words below to build the sentence.";document.querySelectorAll(".word").forEach(b=>b.classList.toggle("used",selected.some(x=>x.k===key(b.dataset.word,b.dataset.i))))};
+  const renderBuilt=()=>{$("built").classList.toggle("empty",!selected.length);$("built").innerHTML=selected.length?selected.map((w,i)=>'<button class="built-word" data-i="'+i+'" title="Remove '+esc(w.word)+'">'+esc(w.word)+'</button>').join(""):"Tap words below to build the sentence.";document.querySelectorAll(".word").forEach(b=>b.classList.toggle("used",selected.some(x=>x.k===key(b.dataset.word,b.dataset.i))))};
   const key=(w,i)=>w+"::"+i;
   document.querySelectorAll(".word").forEach(btn=>btn.onclick=()=>{if(checked)return;const k=key(btn.dataset.word,btn.dataset.i);if(selected.some(x=>x.k===k))return;selected.push({word:btn.dataset.word,k});sound("click");renderBuilt()});
   $("built").onclick=e=>{const b=e.target.closest(".built-word");if(!b||checked)return;selected.splice(Number(b.dataset.i),1);renderBuilt();sound("click")};
