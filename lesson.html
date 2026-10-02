@@ -358,7 +358,7 @@ async function load(){
         let nodeResult=await nodeQuery;
         if(nodeResult.error)throw nodeResult.error;
         if(!nodeResult.data?.length&&maxSeq>0)nodeResult=await client.from("curriculum_nodes").select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band").in("level_band",bands).order("sequence_number",{ascending:true}).limit(1);
-        const node=nodeResult.data?.[0];
+        let node=nodeResult.data?.[0];
         if(!node)node={id:null,sequence_number:maxSeq+1,stage_number:maxSeq+1,stage_name:"Real-world practice",title:"Your next conversation",situation:"Handle a useful everyday interaction.",focus:"Practical conversation"};
         const gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level||"A1",node})});
         const generated=await gen.json().catch(()=>({}));
