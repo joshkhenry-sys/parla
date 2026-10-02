@@ -39,10 +39,10 @@ function fallbackLesson(language,code,level,node){
 }
 function jsonResponse(res,status,payload){return res.status(status).json(payload)}
 export default async function handler(req,res){
- let language="",code="",level="",node=null;
+ let language="",code="",level="",nativeLanguage="English",node=null;
  try{
   if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
-  ({language,code,level,node}=req.body||{});
+  ({language,code,level,nativeLanguage="English",node}=req.body||{});
   if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
   if(!process.env.OPENAI_API_KEY)return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
   const L=String(level).toUpperCase();
@@ -54,7 +54,7 @@ export default async function handler(req,res){
    C1:"Advanced/Proficient User. Use demanding authentic contexts, precise vocabulary, implicit meaning, register shifts, idiomatic language and complex connected speech. Avoid artificially academic wording.",
    C2:"Mastery/Proficient User. Use subtle meaning, idiomaticity, register, humor or pragmatic nuance where appropriate. Require precise, flexible language and natural reformulation."
   }[L]||"Match the requested CEFR level closely.";
-  const prompt=`Create one Nahtive lesson for an adult learning ${language} at CEFR ${L}.
+  const prompt=`Create one Nahtive lesson for an adult learning ${language} at CEFR ${L}. Learner explanation language: ${nativeLanguage}.
 Curriculum sequence: ${node.sequence_number}. Situation: ${node.title}. Scenario: ${node.situation}. Focus: ${node.focus||"everyday communication"}.
 
 CEFR RULES:
@@ -64,16 +64,16 @@ TEACHING DESIGN:
 - Create exactly 5 core phrases/sentence frames. They should form a coherent progression inside one situation.
 - Phrase 1 introduces the essential language. Later phrases reuse earlier language and add one meaningful piece.
 - Every phrase must be genuinely natural for native speakers.
-- Every phrase must include a plain English meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target.
+- Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
 - For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the target language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
 - Give 3-6 plausible distractors per phrase. Distractors must also be in the target language and must be wrong or unnecessary, but relevant enough that the learner must understand the sentence. NEVER use English distractors unless the target language itself is English.
-- All target-language learner content — target, example, dialogue, build_target, build_words, and distractors — must stay in the requested target language. English is allowed only in meaning/usage/example_meaning/build_meaning and breakdown explanations.
+- All target-language learner content — target, example, dialogue, build_target, build_words, and distractors — must stay in the requested target language. The native language (${nativeLanguage}) is allowed only in meaning/usage/example_meaning/build_meaning and breakdown explanations.
 - Before returning the JSON, verify that the lesson is internally consistent with the requested language and CEFR level.
 - The learner should see more words than are required, and the correct words must be scrambled by the app.
 - The lesson must be challenging without assuming knowledge above ${L}.
 - Dialogue must contain exactly 4 lines: native, learner, native, learner, and must reuse the taught language.
 - Spanish must be contemporary Latin American / broadly American Spanish, never Spain-specific Spanish.
-- English is only for explanations/translations.
+- Explanations and translations must be in ${nativeLanguage}. Target phrases and dialogue must remain in ${language}.
 
 Return JSON only.`;
 
