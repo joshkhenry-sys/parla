@@ -81,7 +81,11 @@ function showResult(){
  const scores={A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
  questions.forEach((q,i)=>{if(answers[i]===q.correct_index)scores[q.level]++});
  let level="A1";
- for(let i=0;i<levels.length;i++){if(scores[levels[i]]===2)level=levels[i];}
+ for(let i=0;i<levels.length;i++){
+   const current=scores[levels[i]];
+   const prior=levels.slice(0,i).every(l=>scores[l]>=1);
+   if(current===2&&prior)level=levels[i];
+ }
  const next=level==="C2"?"C2":levels[Math.min(levels.indexOf(level)+1,5)];
  const strengths=levels.filter(l=>scores[l]>0);
  app.innerHTML='<div class="placement-card result"><span class="eyebrow">Your result</span><h1>You tested at</h1><div class="result-level">'+level+'</div><p class="result-note">That is your current placement estimate for '+escapeHtml(language)+'. Nahtive will use this as a starting point, and you can change your level later. For the most useful learning path, start at '+level+' and move up when the lessons feel consistently easy.</p><div class="result-actions"><a class="btn primary" href="signup.html?targetLanguage='+encodeURIComponent(language)+'&level='+encodeURIComponent(level)+'">Start learning at '+level+' →</a><button class="btn secondary" onclick="renderLanguage()">Retake test</button></div></div>';
