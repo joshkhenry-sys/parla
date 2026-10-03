@@ -678,3 +678,7 @@ body:has(.lesson) .lesson .complete .xp{color:#596b43!important}
 @keyframes nahtiveDotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.22);opacity:.72}}
 .logo b,.logo span,.logo i{display:inline-block;transform-origin:center;animation:nahtiveDotPulse 2.2s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.logo b,.logo span,.logo i{animation:none}}
+
+/* Keep Nahtive logo mark inline everywhere */
+.logo{display:inline-flex!important;align-items:center!important;white-space:nowrap!important;line-height:1!important}
+.logo b,.logo span,.logo i{display:inline-block!important;position:static!important;vertical-align:baseline!important;line-height:1!important;margin:0!important;padding:0!important;flex:none!important}
