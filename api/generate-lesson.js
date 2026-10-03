@@ -27,7 +27,7 @@ function fallbackLesson(language,code,level,node){
    example,example_meaning:meaning,pronunciation,
    build_target:target,build_meaning:meaning,
    build_words:target.split(/\s+/).filter(Boolean),
-   distractors:rows.filter((_,j)=>j!==i).slice(0,3).map(r=>String(r[0]||"")).filter(Boolean)
+   distractors:rows.filter((_,j)=>j!==i).slice(0,4).map(r=>String(r[0]||"")).filter(Boolean)
  }));
  return {
    language_code:String(code||"").toLowerCase(),language_name:String(language||""),level:String(level||""),
@@ -118,7 +118,7 @@ TEACHING DESIGN:
 
 Return JSON only.`;
 
-  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),10000);let response;
+  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);let response;
   try{
    response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
     body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:5000,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
