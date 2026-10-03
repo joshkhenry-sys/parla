@@ -202,12 +202,14 @@ function normalizeBuildAnswer(value){
 }
 function makeBank(p,all){
   const correct=p.build_words.length?p.build_words:p.build_target.split(/\s+/).filter(Boolean);
-  let distractors=[...p.distractors,...all.flatMap(x=>x.distractors||[])];
-  const natural=all.flatMap(x=>x.build_words||[]).filter(w=>!correct.includes(w));
-  distractors=[...distractors,...natural];
+  // Keep distractors local to this sentence. Pulling words from other phrases
+  // makes the answer too easy because the learner can eliminate unrelated vocabulary.
   const unique=[];
-  [...distractors].forEach(w=>{if(w&&!correct.includes(w)&&!unique.includes(w))unique.push(w)});
-  const count=profile.level==="A1"?3:profile.level==="A2"?4:5;
+  [...(p.distractors||[])].forEach(w=>{
+    const value=String(w||"").trim();
+    if(value&&!correct.includes(value)&&!unique.includes(value))unique.push(value);
+  });
+  const count=profile.level==="A1"?4:profile.level==="A2"?5:6;
   return shuffle([...correct,...unique.slice(0,count)]);
 }
 function buildCards(row){
