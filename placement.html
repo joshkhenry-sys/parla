@@ -13,11 +13,11 @@
     body.placement-page .aurora i:nth-child(1){width:520px;height:520px;background:#2f4b8f;top:-200px;left:-160px;opacity:.22}
     body.placement-page .aurora i:nth-child(2){width:460px;height:460px;background:#ff9f5a;top:30%;right:-160px;animation-duration:28s;opacity:.18}
     body.placement-page .aurora i:nth-child(3){width:400px;height:400px;background:#b6f36a;bottom:-180px;left:25%;animation-duration:25s;opacity:.10}
-    @keyframes placementDrift{to{transform:translate(70px,50px) scale(1.15)}}
+    @keyframes placementDrift{to{transform:translate(70px,50px) scale(1.15)}}@keyframes nahtiveDotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.22);opacity:.72}}
     body.placement-page .placement-wrap{position:relative;z-index:1;max-width:1080px;width:auto;margin:0 auto;padding:0 22px 70px}
     body.placement-page .placement-nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;margin:0 0 54px;background:transparent!important;color:#f4f1ea!important;border:0!important;box-shadow:none!important}
     body.placement-page .placement-nav .logo{font-family:Manrope,system-ui,sans-serif!important;color:#f4f1ea!important;font-weight:700;font-size:1.5rem;letter-spacing:-.02em;text-decoration:none;display:inline-flex!important;align-items:center!important;gap:0!important;white-space:nowrap!important;line-height:1!important}
-    body.placement-page .placement-nav .logo span{color:#b6f36a!important;display:inline!important;position:static!important;vertical-align:baseline!important;line-height:1!important;margin:0!important;padding:0!important}
+    body.placement-page .placement-nav .logo span{color:#b6f36a!important;display:inline!important;position:static!important;vertical-align:baseline!important;line-height:1!important;margin:0!important;padding:0!important;animation:nahtiveDotPulse 2.2s ease-in-out infinite;transform-origin:center}
     body.placement-page .placement-nav-right{display:flex;gap:10px;align-items:center}
     body.placement-page .placement-nav-right a{color:#9ba4ba!important;text-decoration:none;font-weight:500;padding:8px 12px;font-size:15px}
     body.placement-page .placement-nav-right a:hover{color:#f4f1ea!important}
