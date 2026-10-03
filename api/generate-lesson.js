@@ -152,7 +152,9 @@ Return JSON only.`;
     const meaningful=targets.filter(t=>{
       const words=t.split(/\s+/).filter(Boolean);
       const punctuation=(t.match(/[,;:]/g)||[]).length;
-      return words.length>=4||punctuation>0||/[?？]$/.test(t);
+      const compact=/^[^\\s]+$/.test(t);
+      const length=Array.from(t).length;
+      return (compact ? length>=8 : words.length>=4)||punctuation>0||/[?？]$/.test(t);
     }).length;
     if(meaningful<3)throw new Error("Generated lesson does not meet the "+L+" communication floor");
   }
