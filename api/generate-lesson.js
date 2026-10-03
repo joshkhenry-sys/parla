@@ -34,7 +34,13 @@ function fallbackLesson(language,code,level,node){
    topic:String(node?.focus||"Everyday conversation"),
    scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Handle a simple real-world interaction."),situation:String(node?.situation||"Practice a short, useful interaction.")},
    phrases:ps,
-   dialogue:ps.slice(0,4).map((p,i)=>({speaker:i%2?"learner":"native",text:p.target}))
+   dialogue:ps.slice(0,4).map((p,i)=>({speaker:i%2?"learner":"native",text:p.target})),
+   final_challenge:{
+     situation:String(node?.situation||"Practice this situation in a real conversation."),
+     prompt:"Respond to the person in this situation using the language you just learned.",
+     choices:[ps[4].target,ps[0].target,ps[1].target,ps[2].target],
+     correct_answer:ps[4].target
+   }
  };
 }
 function jsonResponse(res,status,payload){return res.status(status).json(payload)}
@@ -92,7 +98,7 @@ TEACHING DESIGN:
 - Every phrase must be genuinely natural for native speakers.
 - Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
 - For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the target language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
-- Give 3-6 plausible distractors per phrase. Distractors must also be in the target language and must be wrong or unnecessary, but relevant enough that the learner must understand the sentence. NEVER use English distractors unless the target language itself is English.
+- Give 4-6 plausible distractors per phrase. Distractors must also be in the target language and must be wrong or unnecessary, but relevant enough that the learner must understand the sentence. Make distractors difficult: each should be a natural alternative that could plausibly fit the same position or grammatical function, use the same register, and create a believable but incorrect sentence. Do not use random vocabulary, obviously unrelated words, or words that can be eliminated without understanding the sentence. NEVER use English distractors unless the target language itself is English.
 - All target-language learner content — target, example, dialogue, build_target, build_words, and distractors — must stay in the requested target language. The native language (${nativeLanguage}) is allowed only in meaning/usage/example_meaning/build_meaning and breakdown explanations.
 - Before returning the JSON, verify that the lesson is internally consistent with the requested language and CEFR level.
 - The learner should see more words than are required, and the correct words must be scrambled by the app.
@@ -125,7 +131,7 @@ Return JSON only.`;
         example:{type:"string"},example_meaning:{type:"string"},pronunciation:{type:"string"},
         build_target:{type:"string"},build_meaning:{type:"string"},
         build_words:{type:"array",minItems:1,maxItems:12,items:{type:"string"}},
-        distractors:{type:"array",minItems:3,maxItems:6,items:{type:"string"}}
+        distractors:{type:"array",minItems:4,maxItems:6,items:{type:"string"}}
        },required:["target","meaning","usage","breakdown","example","example_meaning","pronunciation","build_target","build_meaning","build_words","distractors"]}},
        dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}},
        final_challenge:{type:"object",additionalProperties:false,properties:{
@@ -141,7 +147,7 @@ Return JSON only.`;
   const data=await response.json();const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;if(!text)throw new Error("OpenAI returned no lesson text");
   const parsed=JSON.parse(text);
   if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==5)throw new Error("Invalid phrase count");
-  if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.build_target||!p.build_meaning||!Array.isArray(p.build_words)||!p.build_words.length||!Array.isArray(p.distractors)||p.distractors.length<3))throw new Error("Incomplete phrase teaching data");
+  if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.build_target||!p.build_meaning||!Array.isArray(p.build_words)||!p.build_words.length||!Array.isArray(p.distractors)||p.distractors.length<4))throw new Error("Incomplete phrase teaching data");
   // Enforce the CEFR floor after generation. Prompting alone is not enough.
   if(L==="B1"||L==="B2"||L==="C1"||L==="C2"){
     const key=String(code||"").toLowerCase().split("-")[0];
@@ -170,7 +176,7 @@ Return JSON only.`;
     }
     const correctSet=new Set(p.build_words.map(clean));
     p.distractors=p.distractors.map(String).map(clean).filter(Boolean).filter(w=>!correctSet.has(w)).slice(0,6);
-    while(p.distractors.length<3){
+    while(p.distractors.length<4){
       const filler=target.split(/\\s+/).find(w=>w&&!correctSet.has(w)&&!p.distractors.includes(w));
       if(!filler)break;
       p.distractors.push(filler);
