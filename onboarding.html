@@ -356,93 +356,37 @@
         </div>
 
         <div class="big-options">
-
-          <button class="big-option"
-            data-group="level"
-            data-value="A0">
-
-            <div class="big-icon">A0</div>
-
-            <div class="big-copy">
-              <span class="big-title">I'm starting from scratch</span>
-              <span class="big-sub">
-                I know little or nothing in this language.
-              </span>
-            </div>
-
-            <div class="radio"></div>
-
-          </button>
-
-          <button class="big-option"
-            data-group="level"
-            data-value="A1">
-
+          <button class="big-option" data-group="level" data-value="A1">
             <div class="big-icon">A1</div>
-
-            <div class="big-copy">
-              <span class="big-title">I know the basics</span>
-              <span class="big-sub">
-                I can understand simple words and phrases.
-              </span>
-            </div>
-
+            <div class="big-copy"><span class="big-title">I know the basics</span><span class="big-sub">I can understand and use simple words and phrases.</span></div>
             <div class="radio"></div>
-
           </button>
-
-          <button class="big-option"
-            data-group="level"
-            data-value="A2">
-
+          <button class="big-option" data-group="level" data-value="A2">
             <div class="big-icon">A2</div>
-
-            <div class="big-copy">
-              <span class="big-title">I can get by</span>
-              <span class="big-sub">
-                I can have simple conversations but still get stuck.
-              </span>
-            </div>
-
+            <div class="big-copy"><span class="big-title">I can get by</span><span class="big-sub">I can handle familiar everyday situations and simple conversations.</span></div>
             <div class="radio"></div>
-
           </button>
-
-          <button class="big-option"
-            data-group="level"
-            data-value="B1">
-
+          <button class="big-option" data-group="level" data-value="B1">
             <div class="big-icon">B1</div>
-
-            <div class="big-copy">
-              <span class="big-title">I can hold conversations</span>
-              <span class="big-sub">
-                I understand most things but want to sound more natural.
-              </span>
-            </div>
-
+            <div class="big-copy"><span class="big-title">I can hold conversations</span><span class="big-sub">I can explain things, tell stories, and handle most familiar situations.</span></div>
             <div class="radio"></div>
-
           </button>
-
-          <button class="big-option"
-            data-group="level"
-            data-value="B2+">
-
-            <div class="big-icon">B2+</div>
-
-            <div class="big-copy">
-              <span class="big-title">I'm pretty fluent</span>
-              <span class="big-sub">
-                I want precision, nuance, vocabulary and natural expression.
-              </span>
-            </div>
-
+          <button class="big-option" data-group="level" data-value="B2">
+            <div class="big-icon">B2</div>
+            <div class="big-copy"><span class="big-title">I can communicate comfortably</span><span class="big-sub">I can discuss ideas, explain viewpoints, and follow natural conversation.</span></div>
             <div class="radio"></div>
-
           </button>
-
-        </div>
+          <button class="big-option" data-group="level" data-value="C1">
+            <div class="big-icon">C1</div>
+            <div class="big-copy"><span class="big-title">I'm advanced</span><span class="big-sub">I can communicate flexibly, precisely, and naturally in demanding situations.</span></div>
+            <div class="radio"></div>
+          </button>
+          <button class="big-option" data-group="level" data-value="C2">
+            <div class="big-icon">C2</div>
+            <div class="big-copy"><span class="big-title">I'm near-native</span><span class="big-sub">I understand subtle meaning and can communicate with very high precision.</span></div>
+            <div class="radio"></div>
+          </button>
+        </div></div>
       </section>
 
 
@@ -644,8 +588,6 @@
     }
 
     async function finishOnboarding() {
-      if (state.level === "A0") state.level = "A1";
-      if (state.level === "B2+") state.level = "B2";
       const learningProfile = {
         targetLanguage: state.targetLanguage,
         NahtiveLanguage: state.NahtiveLanguage,
