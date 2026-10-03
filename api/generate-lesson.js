@@ -47,13 +47,39 @@ export default async function handler(req,res){
   if(!process.env.OPENAI_API_KEY)return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
   const L=String(level).toUpperCase();
   const rules={
-   A1:"Beginner/Basic User. Use concrete everyday situations, a small core vocabulary, very short sentences, common patterns, and heavy recycling. The learner should be able to handle simple personal needs and routine exchanges. Challenge recall and word order, not obscure vocabulary.",
-   A2:"Elementary/Basic User. Use familiar everyday situations and simple connected language. Add routine transactions, plans, preferences, past/future references and simple connectors. Keep vocabulary common and reusable.",
-   B1:"Intermediate/Independent User. Use familiar real-world topics with enough language to narrate experiences, explain reasons, compare options and maintain a conversation. Reduce scaffolding and increase variation.",
-   B2:"Upper-intermediate/Independent User. Use natural conversation, varied sentence structures, collocations, nuanced choices and less predictable situations. The learner should explain viewpoints and respond flexibly.",
-   C1:"Advanced/Proficient User. Use demanding authentic contexts, precise vocabulary, implicit meaning, register shifts, idiomatic language and complex connected speech. Avoid artificially academic wording.",
-   C2:"Mastery/Proficient User. Use subtle meaning, idiomaticity, register, humor or pragmatic nuance where appropriate. Require precise, flexible language and natural reformulation."
-  }[L]||"Match the requested CEFR level closely.";
+   A1:"TRUE A1. Focus on immediate personal needs: greetings, identity, very simple requests, basic descriptions, numbers, time, location and routine exchanges. Use short, predictable sentences and high-frequency vocabulary. Do not make the learner infer nuance. Do not artificially make A1 hard.",
+   A2:"TRUE A2. Use familiar everyday situations with connected but still straightforward language: shopping, travel, appointments, plans, preferences, simple past/future and basic reasons. Require more than memorized greetings, but keep grammar and vocabulary common.",
+   B1:"TRUE B1. The learner should communicate independently in familiar real-world situations. Across the five phrases, require meaningful connected language such as narrating an experience, explaining a reason, describing a problem, comparing options, making plans, or giving an opinion. At least 3 of 5 phrases must do this. Do not use beginner identity/greeting frames as core teaching targets.",
+   B2:"TRUE B2. Require flexible conversation, explanation and spontaneous response. Use varied sentence structures, common collocations, opinion/argument language, hypothetical or conditional situations, negotiation, contrast and nuance. At least 3 of 5 phrases must require more than a single predictable sentence frame. Avoid A1/A2 survival language as core targets.",
+   C1:"TRUE C1. Require precise, natural communication in demanding but realistic situations. Use register, implication, idiomatic or collocational language, reformulation, complex connected speech and nuanced distinctions. At least 3 of 5 phrases must contain a clear advanced feature. Avoid beginner/elementary teaching frames.",
+   C2:"TRUE C2. Require near-fluent flexibility: subtle pragmatic meaning, idiomaticity, register shifts, humor/irony where natural, precise reformulation and nuanced choices. At least 3 of 5 phrases must require high-level interpretation or production. Never fill a C2 lesson with elementary survival phrases."
+  }[L]||"Match the requested CEFR level exactly.";
+  const levelRequirements={
+   A1:"Core content may be greetings, introductions, simple needs and routine exchanges.",
+   A2:"Core content must go beyond greetings and identity into familiar transactions, plans, preferences, simple past/future and reasons.",
+   B1:"At least 3/5 core targets must involve narration, explanation, comparison, problem-solving, planning or opinion. No core target may be a standalone greeting, name exchange, 'how are you', or other rote beginner frame.",
+   B2:"At least 3/5 core targets must involve nuanced conversation, explanation, comparison, negotiation, hypotheticals, collocations or flexible response. Do not use A1/A2 survival frames as core targets.",
+   C1:"At least 3/5 core targets must demonstrate precision, nuance, register, idiomaticity/collocation, reformulation or complex connected speech. Do not use elementary frames as core targets.",
+   C2:"At least 3/5 core targets must require subtle pragmatic meaning, idiomaticity, register, humor/irony, precise reformulation or nuanced interpretation. Do not use elementary frames as core targets."
+  };
+  const beginnerPatterns={
+   es:[/¿?cómo te llamas\??/i,/^me llamo\b/i,/^hola[!.]?$/i,/^¿?cómo estás\??$/i,/^estoy bien[!.]?$/i,/^soy\s+\w+[!.]?$/i,/^tengo\s+\d+\s*años[!.]?$/i,/^mucho gusto[!.]?$/i],
+   en:[/^hello[!.]?$/i,/^hi[!.]?$/i,/^my name is\b/i,/^what'?s your name\??$/i,/^how are you\??$/i,/^i'?m fine[!.]?$/i,/^nice to meet you[!.]?$/i],
+   fr:[/^bonjour[!.]?$/i,/^je m'appelle\b/i,/^comment ça va\??$/i,/^ça va bien[!.]?$/i,/^enchanté[!.]?$/i],
+   de:[/^hallo[!.]?$/i,/^ich heiße\b/i,/^wie geht'?s\??$/i,/^mir geht'?s gut[!.]?$/i,/^freut mich[!.]?$/i],
+   it:[/^ciao[!.]?$/i,/^mi chiamo\b/i,/^come stai\??$/i,/^sto bene[!.]?$/i,/^piacere[!.]?$/i],
+   pt:[/^oi[!.]?$/i,/^eu me chamo\b/i,/^tudo bem\??$/i,/^tudo bem[!.]?$/i,/^prazer[!.]?$/i],
+   nl:[/^hoi[!.]?$/i,/^ik heet\b/i,/^hoe gaat het\??$/i,/^het gaat goed[!.]?$/i],
+   pl:[/^cześć[!.]?$/i,/^mam na imię\b/i,/^jak się masz\??$/i,/^mam się dobrze[!.]?$/i],
+   sv:[/^hej[!.]?$/i,/^jag heter\b/i,/^hur mår du\??$/i,/^jag mår bra[!.]?$/i],
+   tr:[/^merhaba[!.]?$/i,/^benim adım\b/i,/^nasılsın\??$/i,/^iyiyim[!.]?$/i],
+   el:[/^γεια σου[!.]?$/i,/^με λένε\b/i,/^τι κάνεις\??$/i,/^είμαι καλά[!.]?$/i],
+   hi:[/^नमस्ते[।.!]?$/i,/^मेरा नाम\b/i,/^आप कैसे हैं[?]?$/i,/^मैं ठीक हूँ[।.!]?$/i],
+   ja:[/^こんにちは[。.!]?$/i,/^元気ですか[？?]?$/i,/^私は.*です[。.!]?$/i],
+   ko:[/^안녕하세요[.!]?$/i,/^어떻게 지내세요[?]?$/i,/^저는 .*예요[.!]?$/i],
+   zh:[/^你好[！!。.]?$/i,/^你好吗[？?]?$/i,/^我叫\b/i],
+   ar:[/^مرحبا[!.؟]?$/i,/^كيف حالك[؟?]?$/i,/^اسمي\b/i]
+  };
   const prompt=`Create one Nahtive lesson for an adult learning ${language} at CEFR ${L}. Learner explanation language: ${nativeLanguage}.
 Curriculum sequence: ${node.sequence_number}. Situation: ${node.title}. Scenario: ${node.situation}. Focus: ${node.focus||"everyday communication"}.
 
@@ -62,7 +88,7 @@ ${rules}
 
 TEACHING DESIGN:
 - Create exactly 5 core phrases/sentence frames. They should form a coherent progression inside one situation.
-- Phrase 1 introduces the essential language. Later phrases reuse earlier language and add one meaningful piece.
+- Phrase 1 introduces language appropriate to ${L}. Later phrases reuse earlier language while increasing communicative demand. Do not make Phrase 1 a generic greeting or self-introduction unless ${L} is A1 or the situation genuinely requires an advanced reuse.
 - Every phrase must be genuinely natural for native speakers.
 - Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
 - For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the target language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
@@ -116,6 +142,20 @@ Return JSON only.`;
   const parsed=JSON.parse(text);
   if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==5)throw new Error("Invalid phrase count");
   if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.build_target||!p.build_meaning||!Array.isArray(p.build_words)||!p.build_words.length||!Array.isArray(p.distractors)||p.distractors.length<3))throw new Error("Incomplete phrase teaching data");
+  // Enforce the CEFR floor after generation. Prompting alone is not enough.
+  if(L==="B1"||L==="B2"||L==="C1"||L==="C2"){
+    const key=String(code||"").toLowerCase().split("-")[0];
+    const blocked=(beginnerPatterns[key]||[]);
+    const beginnerCount=parsed.phrases.filter(p=>blocked.some(re=>re.test(String(p.target||"").trim()))).length;
+    if(beginnerCount>0)throw new Error("Generated lesson contains beginner-level core content for "+L);
+    const targets=parsed.phrases.map(p=>String(p.target||"").trim());
+    const meaningful=targets.filter(t=>{
+      const words=t.split(/\s+/).filter(Boolean);
+      const punctuation=(t.match(/[,;:]/g)||[]).length;
+      return words.length>=4||punctuation>0||/[?？]$/.test(t);
+    }).length;
+    if(meaningful<3)throw new Error("Generated lesson does not meet the "+L+" communication floor");
+  }
   // A build exercise is only valid when its selectable chunks reconstruct the
   // target sentence exactly. If the model returns mismatched chunks, repair
   // them from build_target rather than shipping an impossible exercise.
