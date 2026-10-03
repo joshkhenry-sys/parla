@@ -84,7 +84,9 @@ async function start(l){
  app.innerHTML='<div class="placement-card"><span class="eyebrow">Preparing your test</span><h2>Building your '+escapeHtml(l)+' level check…</h2><p class="muted">This usually takes a few seconds.</p><div id="error" class="error"></div></div>';
  try{
    const res=await fetch("/api/generate-placement",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:l})});
-   const data=await res.json();
+   const raw=await res.text();
+   let data={};
+   try{data=JSON.parse(raw)}catch(_){throw new Error("The placement test server returned an invalid response. Please try again.")}
    if(!res.ok||!data.questions)throw new Error(data.error||"Could not load the test.");
    questions=data.questions.slice().sort((a,b)=>["A1","A2","B1","B2","C1","C2"].indexOf(a.level)-["A1","A2","B1","B2","C1","C2"].indexOf(b.level));
    index=0;answers=[];renderQuestion();
