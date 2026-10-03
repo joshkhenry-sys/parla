@@ -170,7 +170,13 @@ function normalizeLesson(row){
   const d=row?.content&&typeof row.content==="object"?row.content:{};
   return {language_code:String(d.language_code||"").toLowerCase(),language_name:String(d.language_name||""),level:String(d.level||row?.level||"").toUpperCase(),title:String(row?.title||d.title||"Lesson"),topic:String(row?.topic||d.topic||"Real life"),
     scene:d.scene&&typeof d.scene==="object"?d.scene:{},phrases:(Array.isArray(d.phrases)?d.phrases:[]).map(normalizePhrase).filter(p=>p.target),
-    dialogue:Array.isArray(d.dialogue)?d.dialogue:[]};
+    dialogue:Array.isArray(d.dialogue)?d.dialogue:[],
+    finalChallenge:d.final_challenge&&typeof d.final_challenge==="object"?{
+      situation:String(d.final_challenge.situation||"").trim(),
+      prompt:String(d.final_challenge.prompt||"").trim(),
+      choices:Array.isArray(d.final_challenge.choices)?d.final_challenge.choices.map(String).filter(Boolean):[],
+      correct_answer:String(d.final_challenge.correct_answer||"").trim()
+    }:null};
 }
 function fallbackNormalize(p){
   const target=String(p.build_target||p.target||"").normalize("NFKC").replace(/\s+/g," ").trim();
@@ -211,7 +217,10 @@ function buildCards(row){
     cards.push({type:"recall",stage:"Recall",phrase,choices:makeChoices(phrase,p)});
   });
   const dialogue=c.dialogue.filter(x=>x?.text).slice(0,4);
-  cards.push({type:"challenge",stage:"Final challenge",phrase:p[p.length-1],dialogue});
+  if(!c.finalChallenge||c.finalChallenge.choices.length!==4||!c.finalChallenge.correct_answer||!c.finalChallenge.choices.includes(c.finalChallenge.correct_answer)){
+    throw new Error("This lesson is missing a valid final challenge. Please start the next lesson.");
+  }
+  cards.push({type:"challenge",stage:"Final challenge",phrase:p[p.length-1],dialogue,finalChallenge:c.finalChallenge});
   return {...c,phrases:p,cards};
 }
 function makeChoices(p,all){
@@ -310,14 +319,15 @@ function renderRecall(c){
   $("next").onclick=next;
 }
 function renderChallenge(c){
-  const p=c.phrase;let answered=false;
-  const choices=makeChoices(p,lesson.phrases);
-  shell('<span class="stage-chip">Final challenge</span><div class="question">'+esc("You need to handle this situation. What would you say?")+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(lesson.scene?.mission||lesson.scene?.situation||"Use what you learned.")+'</p></div><div class="options">'+choices.map((o,i)=>'<button class="option" data-value="'+esc(o)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+esc(o)+'</button>').join("")+'</div><div class="feedback" id="feedback"></div>',
+  const fc=c.finalChallenge;let answered=false;
+  const choices=shuffle(fc.choices);
+  shell('<span class="stage-chip">Final challenge</span><div class="question">'+esc(fc.prompt)+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation)+'</p></div><div class="options">'+choices.map((o,i)=>'<button class="option" data-value="'+esc(o)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+esc(o)+'</button>').join("")+'</div><div class="feedback" id="feedback"></div>',
     '<button class="primary-lesson" id="next" disabled>Finish lesson →</button>');
   document.querySelectorAll(".option").forEach(btn=>btn.onclick=()=>{
-    if(answered)return;answered=true;const ok=btn.dataset.value===p.target;btn.classList.add(ok?"correct":"wrong");document.querySelectorAll(".option").forEach(x=>x.disabled=true);
-    $("feedback").textContent=ok?"You pulled it out of memory.":"The most natural choice here is: "+p.target;$("feedback").className="feedback "+(ok?"good":"bad");
-    answers.push({type:"challenge",target:p.target,choice:btn.dataset.value,correct:ok});
+    if(answered)return;answered=true;const ok=normalizeBuildAnswer(btn.dataset.value)===normalizeBuildAnswer(fc.correct_answer);btn.classList.add(ok?"correct":"wrong");document.querySelectorAll(".option").forEach(x=>x.disabled=true);
+    $("feedback").textContent=ok?"That fits the situation.":"Not quite. Read the situation and prompt again, then compare what each response actually means.";
+    $("feedback").className="feedback "+(ok?"good":"bad");
+    answers.push({type:"challenge",target:fc.correct_answer,choice:btn.dataset.value,correct:ok});
     if(ok){sound("good");addXP(25)}else sound("bad");
     $("next").disabled=false;
   });
@@ -369,7 +379,7 @@ async function load(){
       if(r.error)throw r.error;
       const lessons=(r.data||[]).map(x=>({...x,learner_languages:{id:current.id,user_id:user.id,level:current.level,languages:current.languages}}));
       const wantedCode=String(current.languages?.code||"").toLowerCase();
-      const valid=lessons.filter(x=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];const storedCode=String(x?.content?.language_code||"").toLowerCase();return storedCode===wantedCode&&ps.length>=5&&ps.slice(0,5).every(p=>p&&p.target&&p.meaning&&p.build_target&&Array.isArray(p.build_words)&&p.build_words.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)});
+      const valid=lessons.filter(x=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];const storedCode=String(x?.content?.language_code||"").toLowerCase();const fc=x?.content?.final_challenge;return storedCode===wantedCode&&ps.length>=5&&ps.slice(0,5).every(p=>p&&p.target&&p.meaning&&p.build_target&&Array.isArray(p.build_words)&&p.build_words.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)&&!!fc&&typeof fc.situation==="string"&&fc.situation.trim()&&typeof fc.prompt==="string"&&fc.prompt.trim()&&Array.isArray(fc.choices)&&fc.choices.length===4&&typeof fc.correct_answer==="string"&&fc.choices.includes(fc.correct_answer)});
       const attempts=valid.length?await client.from("lesson_attempts").select("lesson_id").in("lesson_id",valid.map(x=>x.id)):{data:[],error:null};
       if(attempts.error)throw attempts.error;
       const completed=new Set((attempts.data||[]).map(x=>x.lesson_id));
