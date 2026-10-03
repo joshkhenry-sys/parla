@@ -8,17 +8,29 @@
   <meta name="description" content="Take a free CEFR language placement test and find your level in minutes.">
   <link rel="stylesheet" href="nahtive.css">
   <style>
-    body.placement-page .language-choice{color:#f4f1ea!important;background:#141a2b!important;border:1px solid rgba(255,255,255,.12)!important;text-shadow:none!important}
+    body.placement-page .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    body.placement-page .aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.28;animation:placementDrift 22s ease-in-out infinite alternate}
+    body.placement-page .aurora i:nth-child(1){width:520px;height:520px;background:#2f4b8f;top:-200px;left:-160px;opacity:.22}
+    body.placement-page .aurora i:nth-child(2){width:460px;height:460px;background:#ff9f5a;top:30%;right:-160px;animation-duration:28s;opacity:.18}
+    body.placement-page .aurora i:nth-child(3){width:400px;height:400px;background:#b6f36a;bottom:-180px;left:25%;animation-duration:25s;opacity:.10}
+    @keyframes placementDrift{to{transform:translate(70px,50px) scale(1.15)}}
+    body.placement-page .placement-wrap{position:relative;z-index:1;max-width:1080px;width:auto;margin:0 auto;padding:0 22px 70px}
+    body.placement-page .placement-nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;margin:0 0 54px;background:transparent!important;color:#f4f1ea!important;border:0!important;box-shadow:none!important}
+    body.placement-page .placement-nav .logo{font-family:Manrope,system-ui,sans-serif;color:#f4f1ea!important;font-weight:700;font-size:1.5rem;letter-spacing:-.02em;text-decoration:none}
+    body.placement-page .placement-nav .logo span{color:#b6f36a!important}
+    body.placement-page .placement-nav-right{display:flex;gap:10px;align-items:center}
+    body.placement-page .placement-nav-right a{color:#9ba4ba!important;text-decoration:none;font-weight:500;padding:8px 12px;font-size:15px}
+    body.placement-page .placement-nav-right a:hover{color:#f4f1ea!important}
+    body.placement-page .placement-nav-right .nav-cta{color:#10200a!important;background:#b6f36a!important;padding:10px 18px;border-radius:14px;font-weight:700;box-shadow:0 4px 0 #7fbf3a}
+    body.placement-page .placement-nav-right .nav-cta:hover{color:#10200a!important;filter:brightness(1.06)}
+    body.placement-page .language-choice{color:#f4f1ea!important;background:#141a2b!important;border:1px solid rgba(255,255,255,.12)!important;text-shadow:none!important} .language-choice{color:#f4f1ea!important;background:#141a2b!important;border:1px solid rgba(255,255,255,.12)!important;text-shadow:none!important}
     body.placement-page .language-choice:hover{color:#10200a!important;background:#b6f36a!important;border-color:#b6f36a!important}
     body.placement-page .language-choice:focus-visible{outline:2px solid #b6f36a;outline-offset:2px}
-    body.placement-page{min-height:100vh;background:#0b0f1a;color:#f4f1ea}
-    .placement-wrap{width:min(920px,calc(100% - 40px));margin:0 auto;padding:28px 0 80px}
-    .placement-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:58px;padding:0!important;background:transparent!important;color:#f4f1ea!important;border:0!important;box-shadow:none!important}
-    .placement-nav .logo{color:#f4f1ea!important;text-decoration:none;font-weight:800;font-size:22px;letter-spacing:-.04em}.placement-nav a{color:#9ba4ba!important;text-decoration:none}.placement-nav a:hover{color:#b6f36a!important}
-    .placement-nav .logo span{color:#b6f36a}
+    body.placement-page{min-height:100vh;background:#0b0f1a;color:#f4f1ea;font-family:Manrope,system-ui,sans-serif}
+    .placement-card{max-width:760px;margin:0 auto;background:linear-gradient(160deg,#1b2238,#141a2b);border:1px solid rgba(255,255,255,.09);border-radius:26px;padding:34px;box-shadow:0 30px 70px -30px rgba(0,0,0,.6)}
     .placement-progress{height:5px;background:#1b2238;border-radius:99px;overflow:hidden;margin:0 0 42px}
     .placement-progress span{display:block;height:100%;width:0;background:#b6f36a;transition:width .25s}
-    .placement-card{background:#141a2b;border:1px solid rgba(255,255,255,.10);border-radius:28px;padding:42px;box-shadow:0 24px 70px rgba(0,0,0,.22)}
+
     .eyebrow{display:inline-block;color:#b6f36a;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
     h1{font-size:clamp(34px,6vw,56px);line-height:1.02;margin:0 0 16px;letter-spacing:-.04em}
     h2{font-size:28px;margin:0 0 10px}
@@ -46,10 +58,15 @@
   </style>
 </head>
 <body class="placement-page">
+<div class="aurora"><i></i><i></i><i></i></div>
 <div class="placement-wrap">
   <nav class="placement-nav">
     <a class="logo" href="index.html">Nahtive<span>•</span></a>
-    <a href="login.html" style="color:#9ba4ba;text-decoration:none;font-size:14px">Log in</a>
+    <div class="placement-nav-right">
+      <a href="index.html">Home</a>
+      <a href="login.html">Log in</a>
+      <a class="nav-cta" href="signup.html">Start learning</a>
+    </div>
   </nav>
   <div id="app"></div>
 </div>
