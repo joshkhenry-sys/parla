@@ -72,6 +72,14 @@ TEACHING DESIGN:
 - The learner should see more words than are required, and the correct words must be scrambled by the app.
 - The lesson must be challenging without assuming knowledge above ${L}.
 - Dialogue must contain exactly 4 lines: native, learner, native, learner, and must reuse the taught language.
+- Create a dedicated final_challenge for the learner's last exercise. It must test the lesson's situation, not simply ask them to remember the last phrase.
+- final_challenge.situation must describe one concrete real-world moment the learner can immediately picture.
+- final_challenge.prompt must tell the learner exactly what they need to do, including who they are responding to and what information/action their response should communicate. Do not use vague prompts like "What would you say here?" without context.
+- final_challenge.choices must contain exactly 4 target-language responses. Exactly ONE choice must be clearly appropriate for the stated situation and prompt. The other three must be plausible but clearly wrong, irrelevant, or inappropriate for that specific situation. Do not create two choices that could both reasonably satisfy the prompt.
+- final_challenge.correct_answer must be an exact match for the one correct choice.
+- The final challenge must be answerable using language taught in this lesson. Do not require vocabulary or grammar that was not taught or clearly introduced.
+- final_challenge.situation and final_challenge.prompt should be written in the learner's native language; the four choices and correct_answer must be in the target language.
+- Before returning JSON, simulate the challenge as a learner: verify the situation, prompt, and four choices together make one unambiguous question with exactly one defensible answer.
 - Spanish must be contemporary Latin American / broadly American Spanish, never Spain-specific Spanish.
 - Explanations and translations must be in ${nativeLanguage}. Target phrases and dialogue must remain in ${language}.
 
@@ -93,8 +101,14 @@ Return JSON only.`;
         build_words:{type:"array",minItems:1,maxItems:12,items:{type:"string"}},
         distractors:{type:"array",minItems:3,maxItems:6,items:{type:"string"}}
        },required:["target","meaning","usage","breakdown","example","example_meaning","pronunciation","build_target","build_meaning","build_words","distractors"]}},
-       dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}}
-      },required:["title","topic","scene","phrases","dialogue"]
+       dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}},
+       final_challenge:{type:"object",additionalProperties:false,properties:{
+         situation:{type:"string"},
+         prompt:{type:"string"},
+         choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},
+         correct_answer:{type:"string"}
+       },required:["situation","prompt","choices","correct_answer"]}
+      },required:["title","topic","scene","phrases","dialogue","final_challenge"]
     }}}}),signal:controller.signal});
   }finally{clearTimeout(timeout)}
   if(!response.ok){console.error("OpenAI lesson generation failed:",await response.text());return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true})}
@@ -122,6 +136,13 @@ Return JSON only.`;
   });
   if(!Array.isArray(parsed.dialogue)||parsed.dialogue.length!==4)throw new Error("Invalid dialogue count");
   const expected=["native","learner","native","learner"];if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]))throw new Error("Invalid dialogue order");
+  const fc=parsed.final_challenge;
+  if(!fc||!String(fc.situation||"").trim()||!String(fc.prompt||"").trim()||!Array.isArray(fc.choices)||fc.choices.length!==4||!String(fc.correct_answer||"").trim())throw new Error("Invalid final challenge");
+  const challengeChoices=fc.choices.map(v=>String(v||"").normalize("NFKC").replace(/\s+/g," ").trim());
+  const correctAnswer=String(fc.correct_answer||"").normalize("NFKC").replace(/\s+/g," ").trim();
+  if(challengeChoices.some((v,i)=>!v||challengeChoices.indexOf(v)!==i))throw new Error("Final challenge choices must be unique");
+  if(!challengeChoices.includes(correctAnswer))throw new Error("Final challenge correct answer is not one of the choices");
+  parsed.final_challenge={situation:String(fc.situation).trim(),prompt:String(fc.prompt).trim(),choices:challengeChoices,correct_answer:correctAnswer};
   parsed.language_code=String(code||"").toLowerCase();parsed.language_name=String(language||"");parsed.level=L;
   return jsonResponse(res,200,{title:parsed.title,topic:parsed.topic,content:parsed});
  }catch(e){
