@@ -244,8 +244,18 @@ function buildCards(row){
     cards.push({type:"recall",stage:"Recall",phrase,choices:makeChoices(phrase,p)});
   });
   const dialogue=c.dialogue.filter(x=>x?.text).slice(0,4);
+  // Older saved lessons may predate the dedicated final_challenge field.
+  // Do not reject otherwise valid lessons. Build a deterministic challenge from
+  // the lesson's own taught phrases so existing lessons remain playable.
   if(!c.finalChallenge||c.finalChallenge.choices.length!==4||!c.finalChallenge.correct_answer||!c.finalChallenge.choices.includes(c.finalChallenge.correct_answer)){
-    throw new Error("This lesson is missing a valid final challenge. Please start the next lesson.");
+    const last=p[p.length-1];
+    const choices=shuffle([last.target,...p.slice(0,-1).map(x=>x.target)]).slice(0,4);
+    c.finalChallenge={
+      situation:String(c.scene?.situation||c.scene?.mission||"Use the language you just learned in this situation."),
+      prompt:String(c.scene?.mission||"Respond naturally using the language you just learned."),
+      choices,
+      correct_answer:last.target
+    };
   }
   cards.push({type:"challenge",stage:"Final challenge",phrase:p[p.length-1],dialogue,finalChallenge:c.finalChallenge});
   return {...c,phrases:p,cards};
