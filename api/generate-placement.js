@@ -26,7 +26,7 @@ Question text and answer choices must be in ${language}. Include a short English
 Return JSON only.`;
   try{
     const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
-      body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:5000,text:{format:{type:"json_schema",name:"nahtive_placement",strict:true,schema:{
+      body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:9000,text:{format:{type:"json_schema",name:"nahtive_placement",strict:true,schema:{
         type:"object",additionalProperties:false,properties:{
           language:{type:"string"},
           questions:{type:"array",minItems:12,maxItems:12,items:{type:"object",additionalProperties:false,properties:{
@@ -38,7 +38,7 @@ Return JSON only.`;
           },required:["level","question","choices","correct_index","skill"]}}
         },required:["language","questions"]
       }}})});
-    if(!response.ok)return jsonResponse(res,502,{error:"Could not create placement test"});
+    if(!response.ok){const raw=await response.text().catch(()=>"" ); console.error("OpenAI placement error:",response.status,raw.slice(0,1000)); return jsonResponse(res,502,{error:"Could not create placement test"});}
     const data=await response.json();
     const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;
     if(!text)throw new Error("No placement test returned");
