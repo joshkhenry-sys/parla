@@ -6,6 +6,26 @@ const LANGUAGE_CODES={
 };
 const LEVELS=["A1","A2","B1","B2","C1","C2"];
 function jsonResponse(res,status,payload){return res.status(status).json(payload)}
+function extractOutputText(data){
+  if(typeof data?.output_text==="string"&&data.output_text.trim())return data.output_text.trim();
+  const parts=[];
+  for(const item of Array.isArray(data?.output)?data.output:[]){
+    for(const part of Array.isArray(item?.content)?item.content:[]){
+      if(part?.type==="output_text"&&typeof part.text==="string")parts.push(part.text);
+    }
+  }
+  return parts.join("\n").trim();
+}
+function validatePlacement(parsed){
+  if(!parsed||!Array.isArray(parsed.questions)||parsed.questions.length!==12)throw new Error("Invalid placement test");
+  const counts=Object.fromEntries(LEVELS.map(l=>[l,0]));
+  for(const q of parsed.questions){
+    if(!LEVELS.includes(q?.level)||!String(q.question||"").trim()||!Array.isArray(q.choices)||q.choices.length!==4||new Set(q.choices.map(String)).size!==4||!Number.isInteger(q.correct_index)||q.correct_index<0||q.correct_index>3)throw new Error("Invalid placement question");
+    counts[q.level]++;
+  }
+  if(LEVELS.some(l=>counts[l]!==2))throw new Error("Placement test must contain exactly two questions at each level");
+  return parsed.questions;
+}
 export default async function handler(req,res){
   if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
   const language=String(req.body?.language||"").trim();
@@ -25,35 +45,54 @@ Each question has exactly 4 answers and exactly one correct answer.
 Question text and answer choices must be in ${language}. Include a short English skill note for internal scoring only.
 Return JSON only.`;
   try{
-    const response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
-      body:JSON.stringify({model:MODEL,input:prompt,max_output_tokens:12000,text:{format:{type:"json_schema",name:"nahtive_placement",strict:true,schema:{
-        type:"object",additionalProperties:false,properties:{
-          language:{type:"string"},
-          questions:{type:"array",minItems:12,maxItems:12,items:{type:"object",additionalProperties:false,properties:{
-            level:{type:"string",enum:LEVELS},
-            question:{type:"string"},
-            choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},
-            correct_index:{type:"integer",minimum:0,maximum:3},
-            skill:{type:"string"}
-          },required:["level","question","choices","correct_index","skill"]}}
-        },required:["language","questions"]
-      }}})});
-    if(!response.ok){const raw=await response.text().catch(()=>"" ); console.error("OpenAI placement error:",response.status,raw.slice(0,1000)); return jsonResponse(res,502,{error:"Could not create placement test"});}
-    const data=await response.json();
-    const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;
-    if(!text){console.error("Placement response missing output_text:",JSON.stringify(data).slice(0,4000));throw new Error("No placement test returned");}
-    const parsed=JSON.parse(text);
-    if(!Array.isArray(parsed.questions)||parsed.questions.length!==12)throw new Error("Invalid placement test");
-    const seen=new Set();
-    for(const q of parsed.questions){
-      if(!LEVELS.includes(q.level)||!q.question||!Array.isArray(q.choices)||q.choices.length!==4||q.correct_index<0||q.correct_index>3)throw new Error("Invalid placement question");
-      const key=q.level;
-      seen.add(key);
+    const schema={
+      type:"object",additionalProperties:false,properties:{
+        language:{type:"string"},
+        questions:{type:"array",minItems:12,maxItems:12,items:{type:"object",additionalProperties:false,properties:{
+          level:{type:"string",enum:LEVELS},
+          question:{type:"string"},
+          choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},
+          correct_index:{type:"integer",minimum:0,maximum:3},
+          skill:{type:"string"}
+        },required:["level","question","choices","correct_index","skill"]}}
+      },required:["language","questions"]
+    };
+    let lastError=null;
+    for(let attempt=1;attempt<=2;attempt++){
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),30000);
+      try{
+        const response=await fetch("https://api.openai.com/v1/responses",{
+          method:"POST",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
+          signal:controller.signal,
+          body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:12000,text:{format:{type:"json_schema",name:"nahtive_placement",strict:true,schema}})
+        });
+        const raw=await response.text();
+        if(!response.ok){
+          console.error("OpenAI placement error:",response.status,raw.slice(0,1200));
+          lastError=new Error("OpenAI request failed");
+          continue;
+        }
+        let data;
+        try{data=JSON.parse(raw)}catch(e){lastError=new Error("OpenAI returned invalid JSON");continue}
+        const output=extractOutputText(data);
+        if(!output){lastError=new Error("No placement test returned");continue}
+        let parsed;
+        try{parsed=JSON.parse(output)}catch(e){lastError=new Error("Placement output was not valid JSON");continue}
+        try{
+          const questions=validatePlacement(parsed);
+          return jsonResponse(res,200,{language,code,questions});
+        }catch(e){lastError=e;continue}
+      }catch(e){
+        lastError=e?.name==="AbortError"?new Error("Placement generation timed out"):e;
+      }finally{
+        clearTimeout(timer);
+      }
     }
-    if(LEVELS.some(l=>!seen.has(l)))throw new Error("Missing placement level");
-    return jsonResponse(res,200,{language,code,questions:parsed.questions});
+    throw lastError||new Error("Could not create placement test");
   }catch(e){
     console.error("Placement generation failed:",e);
-    return jsonResponse(res,500,{error:"Could not create placement test"});
+    return jsonResponse(res,502,{error:"Could not create placement test. Please try again."});
   }
 }
