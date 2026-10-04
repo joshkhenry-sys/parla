@@ -41,8 +41,11 @@ For B2 test nuanced everyday communication, collocations, opinion, conditionals 
 For C1 test precision, register, idiomatic/collocational language, implication and complex structures.
 For C2 test subtle pragmatic meaning, register, idiomaticity and fine distinctions.
 Do not reuse the same phrase across questions. Do not make higher-level questions merely longer; they must require higher-level language knowledge.
+A1 questions must be genuinely accessible to a beginner: common everyday situations, high-frequency words, and clear sentence structures. A2 should be slightly more demanding but still practical and concrete.
+Every wrong answer must be a plausible distractor: use realistic learner mistakes, near-miss grammar, wrong word choice, or a response that could make sense in another context. Never use random word salad, obviously broken sentences, or absurd distractors that make the correct answer easy to spot.
 Each question has exactly 4 answers and exactly one correct answer.
-Question text and answer choices must be in ${language}. Include a short English skill note for internal scoring only.
+Question text and answer choices must be in ${language}. Also provide an accurate, concise English translation of the question only. The translation is a comprehension aid and must never reveal or imply the correct answer.
+Include a short English skill note for internal scoring only.
 Return JSON only.`;
   try{
     const schema={
@@ -53,8 +56,9 @@ Return JSON only.`;
           question:{type:"string"},
           choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},
           correct_index:{type:"integer",minimum:0,maximum:3},
+          question_translation:{type:"string"},
           skill:{type:"string"}
-        },required:["level","question","choices","correct_index","skill"]}}
+        },required:["level","question","choices","correct_index","question_translation","skill"]}}
       },required:["language","questions"]
     };
     let lastError=null;
