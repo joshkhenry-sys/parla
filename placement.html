@@ -38,7 +38,7 @@
     .language-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:32px}
     .language-choice,.answer{font:700 14px Manrope,system-ui,sans-serif;color:#f4f1ea;background:#1b2238;border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:17px 16px;text-align:left;cursor:pointer;transition:transform .16s ease,background .16s ease,border-color .16s ease}
     .language-choice:hover,.answer:hover{background:#1b2a24;border-color:#b6f36a;transform:translateY(-2px)}
-    .answer-grid{display:grid;gap:11px;margin-top:26px}
+    .answer-grid{display:grid;gap:11px;margin-top:26px}\n    .translate-question{margin-top:2px;background:transparent;border:0;color:#b6f36a;font:700 14px Manrope,system-ui,sans-serif;padding:0;cursor:pointer;text-align:left}.translate-question:hover{text-decoration:underline}.question-translation{margin-top:10px;padding:12px 14px;border-left:2px solid #b6f36a;background:#11182a;color:#d4d9e5;line-height:1.5;font-size:14px;border-radius:0 10px 10px 0}
     .answer.selected{border-color:#b6f36a;background:#1b2a24}
     .answer.correct{border-color:#b6f36a;background:#1b2a24}
     .answer.wrong{border-color:#ff6b6b;background:#321e28}
@@ -94,7 +94,12 @@ async function start(l){
 }
 function renderQuestion(){
  const q=questions[index];
- app.innerHTML='<div class="placement-progress"><span style="width:'+((index/questions.length)*100)+'%"></span></div><div class="placement-card"><div class="topline"><span>Question '+(index+1)+' of '+questions.length+'</span><span class="level-pill">'+escapeHtml(q.level)+'</span></div><h2>'+escapeHtml(q.question)+'</h2><div class="answer-grid">'+q.choices.map((c,i)=>'<button class="answer" data-index="'+i+'">'+escapeHtml(c)+'</button>').join("")+'</div><div class="actions"><button class="btn secondary" onclick="goBack()" '+(index===0?"disabled":"")+' style="'+(index===0?"opacity:.4":"")+'">Back</button><button class="btn primary" id="next" disabled>Next</button></div></div>';
+ app.innerHTML='<div class="placement-progress"><span style="width:'+(((index+1)/questions.length)*100)+'%"></span></div><div class="placement-card"><div class="topline"><span>Question '+(index+1)+' of '+questions.length+'</span><span class="level-pill">'+escapeHtml(q.level)+'</span></div><h2>'+escapeHtml(q.question)+'</h2><button type="button" class="translate-question" id="translateQuestion">Translate question</button><div id="questionTranslation" class="question-translation" hidden>'+escapeHtml(q.question_translation||"")+'</div><div class="answer-grid">'+q.choices.map((c,i)=>'<button class="answer" data-index="'+i+'">'+escapeHtml(c)+'</button>').join("")+'</div><div class="actions"><button class="btn secondary" onclick="goBack()" '+(index===0?"disabled":"")+' style="'+(index===0?"opacity:.4":"")+'">Back</button><button class="btn primary" id="next" disabled>Next</button></div></div>';
+ document.getElementById("translateQuestion").onclick=()=>{
+   const box=document.getElementById("questionTranslation");
+   box.hidden=!box.hidden;
+   document.getElementById("translateQuestion").textContent=box.hidden?"Translate question":"Hide translation";
+ };
  document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>{document.querySelectorAll(".answer").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");document.getElementById("next").disabled=false;answers[index]=Number(b.dataset.index)});
  document.getElementById("next").onclick=()=>{if(index<questions.length-1){index++;renderQuestion()}else showResult()};
 }
@@ -104,14 +109,15 @@ function showResult(){
  const scores={A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
  questions.forEach((q,i)=>{if(answers[i]===q.correct_index)scores[q.level]++});
  let level="A1";
+ let cumulativeCorrect=0;
  for(let i=0;i<levels.length;i++){
-   const current=scores[levels[i]];
-   const prior=levels.slice(0,i).every(l=>scores[l]>=1);
-   if(current===2&&prior)level=levels[i];
+   cumulativeCorrect+=scores[levels[i]];
+   const answeredThrough=(i+1)*2;
+   const accuracy=cumulativeCorrect/answeredThrough;
+   if(scores[levels[i]]>0 && accuracy>=0.75) level=levels[i];
  }
  const next=level==="C2"?"C2":levels[Math.min(levels.indexOf(level)+1,5)];
- const strengths=levels.filter(l=>scores[l]>0);
- app.innerHTML='<div class="placement-card result"><span class="eyebrow">Your result</span><h1>You tested at</h1><div class="result-level">'+level+'</div><p class="result-note">That is your current placement estimate for '+escapeHtml(language)+'. Nahtive will use this as a starting point, and you can change your level later. For the most useful learning path, start at '+level+' and move up when the lessons feel consistently easy.</p><div class="result-actions"><a class="btn primary" href="signup.html?targetLanguage='+encodeURIComponent(language)+'&level='+encodeURIComponent(level)+'">Start learning at '+level+' →</a><button class="btn secondary" onclick="renderLanguage()">Retake test</button></div></div>';
+ app.innerHTML='<div class="placement-card result"><span class="eyebrow">Your result</span><h1>You tested at</h1><div class="result-level">'+level+'</div><p class="result-note">This is an estimate based on your overall performance across increasing difficulty. One missed question early in the test will not automatically place you at A1. Start at '+level+' and move up when the lessons feel consistently easy.</p><div class="result-actions"><a class="btn primary" href="signup.html?targetLanguage='+encodeURIComponent(language)+'&level='+encodeURIComponent(level)+'">Start learning at '+level+' →</a><button class="btn secondary" onclick="renderLanguage()">Retake test</button></div></div>';
 }
 renderLanguage();
 </script>
