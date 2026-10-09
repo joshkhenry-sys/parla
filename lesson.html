@@ -230,12 +230,12 @@ function makeBank(p,all){
     const value=String(w||"").trim();
     if(value&&!correct.includes(value)&&!unique.includes(value))unique.push(value);
   });
-  const count=profile.level==="A1"?4:profile.level==="A2"?5:6;
+  const count=profile.level==="A0"?1:profile.level==="A1"?4:profile.level==="A2"?5:6;
   return shuffle([...correct,...unique.slice(0,count)]);
 }
 function buildCards(row){
   const c=normalizeLesson(row);c.phrases.forEach(fallbackNormalize);
-  const p=c.phrases.slice(0,5);
+  const p=c.phrases.slice(0,profile.level==="A0"?3:5);
   if(p.length<2)throw new Error("This lesson needs at least two taught phrases.");
   const cards=[{type:"scene",stage:"Mission",scene:c.scene,topic:c.topic}];
   p.forEach((phrase,i)=>{
@@ -264,7 +264,7 @@ function makeChoices(p,all){
   // The correct answer must always be present. Use only target-language phrases
   // from this lesson so recall never falls back to English filler answers.
   const correct=String(p.target||"");
-  const alternatives=shuffle(all.filter(x=>x!==p).map(x=>String(x.target||"")).filter(Boolean)).slice(0,3);
+  const alternatives=shuffle(all.filter(x=>x!==p).map(x=>String(x.target||"")).filter(Boolean)).slice(0,profile.level==="A0"?1:3);
   return shuffle([correct,...alternatives]);
 }
 function addXP(n){
@@ -357,7 +357,9 @@ function renderRecall(c){
 }
 function renderChallenge(c){
   const fc=c.finalChallenge;let answered=false;
-  const choices=shuffle(fc.choices);
+  let challengeChoices=fc.choices;
+  if(profile.level==="A0")challengeChoices=shuffle([fc.correct_answer,...fc.choices.filter(x=>normalizeBuildAnswer(x)!==normalizeBuildAnswer(fc.correct_answer))].slice(0,2));
+  const choices=shuffle(challengeChoices);
   shell('<span class="stage-chip">Final challenge</span><div class="question">'+esc(fc.prompt)+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation)+'</p></div><div class="options">'+choices.map((o,i)=>'<button class="option" data-value="'+esc(o)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+esc(o)+'</button>').join("")+'</div><div class="feedback" id="feedback"></div>',
     '<button class="primary-lesson" id="next" disabled>Finish lesson →</button>');
   document.querySelectorAll(".option").forEach(btn=>btn.onclick=()=>{
