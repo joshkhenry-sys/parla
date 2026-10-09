@@ -39,6 +39,7 @@
     <div class="level-result" id="resultLevel">B1</div>
     <h2 id="resultTitle">Your lessons will start here.</h2>
     <p id="resultCopy"></p>
+    <div id="scoreBreakdown" style="margin:22px auto 0;max-width:520px;text-align:left"></div>
     <button class="next" id="continueButton">Start my first lesson</button>
   </div>
 </section>
@@ -48,7 +49,7 @@
 <script>
 const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const params=new URLSearchParams(location.search);
-const requestedLanguageId=params.get("language_id");
+const requestedLanguageId=params.get("language_id")||localStorage.getItem("Nahtive_current_learner_language");
 const returnTo=params.get("return")==="lesson"?"lesson":"dashboard";
 let user=null,language=null,index=0,selected=null;
 let questions=[];
@@ -152,11 +153,13 @@ document.getElementById("next").addEventListener("click",()=>{if(selected===null
 function speakTarget(text){if(!text||!("speechSynthesis" in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=language.languages?.code||"";u.rate=.88;speechSynthesis.speak(u)}
 function calculateLevel(){
   const order=["A1","A2","B1","B2","C1","C2"];
-  // Placement is conservative: a learner must demonstrate the level itself,
-  // not merely accumulate enough easy answers from lower bands.
-  let level="A0";
+  // Each band has four questions. Require at least 3/4 at every band
+  // before advancing; lower-level answers cannot compensate for a later gap.
+  let level="A1";
   for(const l of order){
-    if(scoreByLevel[l] >= 3) level=l;
+    const total=questions.filter(q=>q.level===l).length;
+    const threshold=Math.ceil(total*0.75);
+    if(total>0 && scoreByLevel[l]>=threshold) level=l;
     else break;
   }
   return level;
@@ -178,6 +181,16 @@ async function finish(){
   document.getElementById("result").classList.remove("hidden");
   document.getElementById("resultLevel").textContent=result;
   document.getElementById("resultCopy").textContent=descriptions[result];
+  const levelOrder=["A0","A1","A2","B1","B2","C1","C2"];
+  const levelRows=levelOrder.map(level=>{
+    const total=questions.filter(q=>q.level===level).length;
+    return '<div style="display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);color:#d4d9e5"><span>'+level+'</span><strong>'+scoreByLevel[level]+' / '+total+'</strong></div>';
+  }).join("");
+  const skillRows=[["reading","Reading"],["listening","Listening"],["grammar","Grammar"],["production","Real-world response"]].map(([key,label])=>{
+    const total=questions.filter(q=>q.type===key).length;
+    return '<div style="display:flex;justify-content:space-between;gap:16px;padding:7px 0;color:#9ba4ba"><span>'+label+'</span><span>'+ (skillScores[key]||0)+' / '+total+'</span></div>';
+  }).join("");
+  document.getElementById("scoreBreakdown").innerHTML='<h3 style="color:#f4f1ea;font-size:14px;margin:0 0 8px">Your level-by-level scores</h3>'+levelRows+'<h3 style="color:#f4f1ea;font-size:14px;margin:20px 0 6px">Skills</h3>'+skillRows;
   document.getElementById("continueButton").onclick=()=>{localStorage.setItem("Nahtive_current_learner_language",language.id);location.href="dashboard.html"};
   const {error:updateError}=await client.from("learner_languages").update({level:result}).eq("id",language.id).eq("user_id",user.id);
   if(updateError){console.error("Placement level save failed:",updateError);document.getElementById("resultCopy").textContent+= " Your result is shown above; we'll keep the result on this device while we retry the save.";}
