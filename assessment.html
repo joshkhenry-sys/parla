@@ -116,15 +116,15 @@ async function begin(){
     if(!response.ok) throw new Error("Assessment unavailable");
     const data=await response.json();
     if(!Array.isArray(data.questions)||data.questions.length!==28) throw new Error("Incomplete assessment");
-    questions=data.questions;
+    questions=data.questions.slice().sort(()=>Math.random()-.5);
     document.getElementById("intro").classList.add("hidden");document.getElementById("test").classList.remove("hidden");render();
   }catch(error){
     console.error(error);
-    questions=localPlacement(language.languages?.code||"es");
-    if(questions.length===14){ const expanded=[]; questions.forEach(q=>{ ["reading","listening"].forEach(type=>expanded.push({...q,type,audioText:type==="listening" ? String(q.options?.[0]||"") : ""})); }); questions=expanded; }
-    document.getElementById("intro").classList.add("hidden");
-    document.getElementById("test").classList.remove("hidden");
-    render();
+    button.disabled=false;
+    button.textContent="Try again";
+    const note=document.querySelector("#intro .note");
+    note.textContent="We couldn't build a reliable test just now. Try again when the connection is ready. We won't give you a repetitive fallback test or guess your level.";
+    note.style.color="#e6b89c";
   }
 }
 function render(){
