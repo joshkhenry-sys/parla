@@ -337,13 +337,9 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     !completedIds.has(row.id) &&
     Number(row.curriculum_nodes?.sequence_number || 0) > currentSequence
   );
-  const prewarmKey = "Nahtive_prewarm_next_"+learnerLanguageId;
-  const lastPrewarm = Number(localStorage.getItem(prewarmKey)||0);
-  if (currentSequence > 0 && !hasPreparedNext && (!lastPrewarm || Date.now()-lastPrewarm > 60000)) {
-    localStorage.setItem(prewarmKey, String(Date.now()));
+  if (currentSequence > 0 && !hasPreparedNext) {
     generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons, currentSequence)
-      .catch(error => console.error("Could not prebuild following lesson:", error))
-      .finally(() => localStorage.removeItem(prewarmKey));
+      .catch(error => console.error("Could not prebuild following lesson:", error));
   }
 }
 
