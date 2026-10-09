@@ -168,7 +168,7 @@ function calculateLevel(){
 }
 async function finish(){
   document.getElementById("bar").style.width="100%";
-  const result=calculateLevel();
+  const result="A1"
   const descriptions={
     A0:"We'll start with survival language and build confidence one useful idea at a time.",
     A1:"We'll build practical everyday language with short phrases, clear support, and simple responses.",
@@ -181,7 +181,7 @@ async function finish(){
   // Show the placement result first. Saving progress must never trap the learner on the final question.
   document.getElementById("test").classList.add("hidden");
   document.getElementById("result").classList.remove("hidden");
-  document.getElementById("resultLevel").textContent=result;
+  document.getElementById("resultLevel").textContent="A1"
   document.getElementById("resultCopy").textContent=descriptions[result];
   const levelOrder=["A0","A1","A2","B1","B2","C1","C2"];
   const levelRows=levelOrder.map(level=>{
@@ -194,7 +194,7 @@ async function finish(){
   }).join("");
   document.getElementById("scoreBreakdown").innerHTML='<h3 style="color:#f4f1ea;font-size:14px;margin:0 0 8px">Your level-by-level scores</h3>'+levelRows+'<h3 style="color:#f4f1ea;font-size:14px;margin:20px 0 6px">Skills</h3>'+skillRows;
   document.getElementById("continueButton").onclick=()=>{localStorage.setItem("Nahtive_current_learner_language",language.id);location.href="dashboard.html"};
-  const {error:updateError}=await client.from("learner_languages").update({level:result}).eq("id",language.id).eq("user_id",user.id);
+  const {error:updateError}=await client.from("learner_languages").update({level:"A1"}).eq("id",language.id).eq("user_id",user.id);
   if(updateError){console.error("Placement level save failed:",updateError);document.getElementById("resultCopy").textContent+= " Your result is shown above; we'll keep the result on this device while we retry the save.";}
   const {error:eventError}=await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:result,scores:scoreByLevel,skills:skillScores,question_count:questions.length,version:4}});
   if(eventError){console.error("Placement event save failed:",eventError)}
