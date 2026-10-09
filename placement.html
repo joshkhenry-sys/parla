@@ -95,7 +95,14 @@ async function start(l){
 }
 function renderQuestion(){
  const q=questions[index];
- app.innerHTML='<div class="placement-progress"><span style="width:'+(((index+1)/questions.length)*100)+'%"></span></div><div class="placement-card"><div class="topline"><span>Question '+(index+1)+' of '+questions.length+'</span><span class="level-pill">Adaptive assessment</span></div><h2>\'+escapeHtml(q.question_translation||q.question)+\'</h2>\'+(q.question_translation?\'<p class="muted" style="margin-top:12px;padding:12px;border-left:2px solid #b6f36a;background:#11182a"><strong>Original question:</strong> \'+escapeHtml(q.question)+\'</p>\':\'\')+\'<div class="answer-grid">'+q.choices.map((c,i)=>'<button class="answer" data-index="'+i+'">'+escapeHtml(c)+'</button>').join("")+'</div><div class="actions"><button class="btn secondary" onclick="goBack()" '+(index===0?"disabled":"")+' style="'+(index===0?"opacity:.4":"")+'">Back</button><button class="btn primary" id="next" disabled>Next</button></div></div>';
+  app.innerHTML=`<div class="placement-progress"><span style="width:${((index+1)/questions.length)*100}%"></span></div>
+  <div class="placement-card">
+    <div class="topline"><span>Question ${index+1} of ${questions.length}</span><span class="level-pill">Adaptive assessment</span></div>
+    <h2>${escapeHtml(q.question_translation||q.question)}</h2>
+    ${q.question_translation ? `<p class="muted" style="margin-top:12px;padding:12px;border-left:2px solid #b6f36a;background:#11182a"><strong>Original question:</strong> ${escapeHtml(q.question)}</p>` : ""}
+    <div class="answer-grid">${q.choices.map((choice,i)=>`<button class="answer" data-index="${i}">${escapeHtml(choice)}</button>`).join("")}</div>
+    <div class="actions"><button class="btn secondary" onclick="goBack()" ${index===0?"disabled":""} style="${index===0?"opacity:.4":""}">Back</button><button class="btn primary" id="next" disabled>Next</button></div>
+  </div>`;
  document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>{document.querySelectorAll(".answer").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");document.getElementById("next").disabled=false;answers[index]=Number(b.dataset.index)});
  document.getElementById("next").onclick=()=>{if(index<questions.length-1){index++;renderQuestion()}else showResult()};
 }
