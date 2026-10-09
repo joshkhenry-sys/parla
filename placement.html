@@ -108,7 +108,7 @@ function renderQuestion(){
 }
 function goBack(){if(index>0){index--;renderQuestion()}}
 function showResult(){
- const levels=["A1","A2","B1","B2","C1","C2"];
+ const levels=["A1"];
  const scores={A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
  questions.forEach((q,i)=>{if(answers[i]===q.correct_index)scores[q.level]++});
  // Advance through CEFR bands in order. Later answers cannot compensate
