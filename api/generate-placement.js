@@ -78,7 +78,7 @@ Return JSON only.`;
           method:"POST",
           headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
           signal:controller.signal,
-          body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:9000,text:{format:{type:"json_schema",name:"nahtive_placement",strict:true,schema}}})
+          body:JSON.stringify({model:MODEL,input:prompt,max_output_tokens:9000,text:{format:{type:"json_schema",name:"nahtive_placement",strict:true,schema}}})
         });
         const raw=await response.text();
         if(!response.ok){
