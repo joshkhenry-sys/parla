@@ -155,6 +155,12 @@
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 let client=null,user=null,profile=null,baseLesson=null,lesson=null,index=0,finished=false,xp=0,answers=[],audioCtx=null;
+const lessonLoadWatchdog=setTimeout(()=>{
+  const loading=$("loading");
+  if(loading&&loading.style.display!=="none"){
+    loading.innerHTML="<strong>This lesson is taking too long to load.</strong><br><span style='color:#aab6ce;font-size:13px'>Your lesson request did not finish. Try again; if it keeps happening, the timeout message will help identify where it is stuck.</span><br><button class='primary-lesson' style='margin-top:18px' onclick='location.reload()'>Try again</button>";
+  }
+},50000);
 
 function sound(kind){
   try{
@@ -468,7 +474,7 @@ async function load(){
     $("language").textContent=profile.name+" · "+profile.level;
     $("title").textContent=lesson.title;
     $("intro").textContent=(lesson.scene?.stage_name||baseLesson.curriculum_nodes?.stage_name||"Real-world practice")+" · Learn, build, recall.";
-    $("loading").style.display="none";$("lesson").style.display="block";render();
+    clearTimeout(lessonLoadWatchdog);    $("loading").style.display="none";$("lesson").style.display="block";render();
   }catch(e){
     console.error("Nahtive lesson load failed",e);
     $("loading").innerHTML="<strong>We couldn’t load this lesson.</strong><br><span style='color:#aab6ce;font-size:13px'>"+esc(e?.message||"Please try again.")+"</span><br><button class='primary-lesson' style='margin-top:18px' onclick='location.reload()'>Try again</button>";
