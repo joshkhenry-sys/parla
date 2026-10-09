@@ -50,11 +50,11 @@ export default async function handler(req,res){
  try{
   if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
   ({language,code,level,nativeLanguage="English",node}=req.body||{});
+  level="A1";
   if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
   if(!process.env.OPENAI_API_KEY)return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
   const L="A1";
   const rules={
-   A0:"ABSOLUTE ZERO-BEGINNER. Assume the learner knows no French and may not understand any French sentence yet. Teach only 3 tiny, immediately useful words or phrases. Use very common words, short concrete meanings in the learner's language, and one clear example. Do not use verb conjugation explanations, idioms, subordinate clauses, grammar terminology, or open-ended inference. Keep each target to 1–4 very common words, and make every exercise solvable from the lesson just shown. Prioritize meaning first, listening, then recognition and gentle practice.",
    A1:"TRUE A1. Focus on immediate personal needs: greetings, identity, very simple requests, basic descriptions, numbers, time, location and routine exchanges. Use short, predictable sentences and high-frequency vocabulary. Do not make the learner infer nuance. Do not artificially make A1 hard.",
    A2:"TRUE A2. Use familiar everyday situations with connected but still straightforward language: shopping, travel, appointments, plans, preferences, simple past/future and basic reasons. Require more than memorized greetings, but keep grammar and vocabulary common.",
    B1:"TRUE B1. The learner should communicate independently in familiar real-world situations. Across the five phrases, require meaningful connected language such as narrating an experience, explaining a reason, describing a problem, comparing options, making plans, or giving an opinion. At least 3 of 5 phrases must do this. Do not use beginner identity/greeting frames as core teaching targets.",
@@ -94,7 +94,7 @@ TEACHING DESIGN:
 - Every phrase must be genuinely natural for native speakers.
 - Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
 - For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the target language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
-- Give 4-6 plausible distractors per phrase. For A0, however, make distractors extremely simple and familiar (for French, examples like oui/non/bonjour/merci); use only one distractor in the learner-facing exercise, and make the correct answer easy to distinguish after teaching. For A1 and above, use plausible target-language alternatives that require understanding. NEVER use English distractors unless the target language itself is English.
+- Give 4-6 plausible target-language distractors per phrase that require understanding. For A1 and above, use plausible target-language alternatives that require understanding. NEVER use English distractors unless the target language itself is English.
 - All target-language learner content — target, example, dialogue, build_target, build_words, and distractors — must stay in the requested target language. The native language (${nativeLanguage}) is allowed only in meaning/usage/example_meaning/build_meaning and breakdown explanations.
 - Before returning the JSON, verify that the lesson is internally consistent with the requested language and CEFR level.
 - The learner should see more words than are required, and the correct words must be scrambled by the app.
