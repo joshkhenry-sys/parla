@@ -73,7 +73,7 @@
 <script>
 const app=document.getElementById("app");
 const languages=["Spanish","English","Portuguese","French","Italian","German","Japanese","Korean","Mandarin","Arabic","Dutch","Swedish","Greek","Turkish","Hindi","Polish"];
-let questions=[],index=0,answers=[],language="";
+let questions=[],index=0,answers=[],language="",instructionLanguage="English";
 function escapeHtml(v){const d=document.createElement("div");d.textContent=String(v??"");return d.innerHTML}
 function renderLanguage(){
  app.innerHTML='<div class="placement-card"><span class="eyebrow">Free placement test</span><h1>Find your real level.</h1><p class="muted">Answer a short set of questions that gets harder as it goes. No account required.</p><div class="language-grid">'+languages.map(l=>'<button class="language-choice" data-language="'+escapeHtml(l)+'">'+escapeHtml(l)+'</button>').join("")+'</div><div id="error" class="error"></div></div>';
@@ -83,7 +83,7 @@ async function start(l){
  language=l;
  app.innerHTML='<div class="placement-card"><span class="eyebrow">Preparing your test</span><h2>Building your '+escapeHtml(l)+' level check…</h2><p class="muted">This usually takes a few seconds.</p><div id="error" class="error"></div></div>';
  try{
-   const res=await fetch("/api/generate-placement",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:l})});
+   const res=await fetch("/api/generate-placement",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:l,instructionLanguage})});
    const raw=await res.text();
    let data={};
    try{data=JSON.parse(raw)}catch(_){throw new Error("The placement test server returned an invalid response. Please try again.")}
