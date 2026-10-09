@@ -147,7 +147,7 @@
   const levelMatches = node => {
     const band = String(node.level_band || "");
     if (band === "C1/C2") return level === "C1" || level === "C2";
-    return band === level || (level === "A0" && band === "A1") || (level === "A1" && band === "A1");
+    return band === "A1";
   };
 
   const { data: attempts } = await supabaseClient
@@ -232,7 +232,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     .eq("id", learnerLanguageId)
     .maybeSingle();
 
-  const learnerLevel = learner?.level || document.getElementById("dashboardLevel")?.textContent || "A1";
+  const learnerLevel = "A1";
   window.Nahtive_language_code = learner?.languages?.code || "en-US";
 
   const { data: lessons, error } = await supabaseClient
@@ -253,7 +253,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     const dialogue = Array.isArray(row?.content?.dialogue) ? row.content.dialogue : [];
     const storedCode = String(row?.content?.language_code || "").toLowerCase();
     const wantedCode = String(learner?.languages?.code || window.Nahtive_language_code || "").toLowerCase();
-    const requiredPhraseCount = String(row?.level || learnerLevel || "A1").toUpperCase() === "A0" ? 3 : 5;
+    const requiredPhraseCount = 5;
     return storedCode === wantedCode && phrases.length >= requiredPhraseCount &&
       phrases.slice(0,requiredPhraseCount).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && p.build_target && Array.isArray(p.build_words) && p.build_words.length && Array.isArray(p.distractors) && p.distractors.length >= 3) &&
       dialogue.length >= 4;
@@ -429,7 +429,11 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         }
 
         const languageName = learnerLanguage.languages?.name || "English";
-        const level = learnerLanguage.level || "A1";
+        const level = "A1";
+        const { error: normalizeLevelsError } = await supabaseClient.from("learner_languages").update({level:"A1"}).eq("user_id",user.id);
+        if (normalizeLevelsError) console.error("Could not normalize learner levels:", normalizeLevelsError);
+        (learnerLanguages || []).forEach(row => { row.level = "A1"; });
+        learnerLanguage.level = "A1";
 
         await loadRealStreak(user.id);
         localStorage.setItem("Nahtive_current_learner_language", learnerLanguage.id);
@@ -527,7 +531,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
             const hub=document.getElementById("languageHub");
             hub.classList.add("open");
             const name=lang.languages?.name||"Language", level=lang.level||"A1";
-            hub.innerHTML="<div class='level-panel-head'><div><h3>"+escapeHtml(name)+" learning path</h3><p>Choose the level Nahtive should build lessons for. You can change it anytime.</p></div><button type='button' class='manage-button' id='closeHub'>Close</button></div><div class='level-options'>"+["A1","A2","B1","B2","C1","C2"].map(l=>"<button type='button' class='level-option "+(l===level?"active":"")+"' data-level='"+l+"'>"+l+"</button>").join("")+"</div><div class='hub-actions'><a href='assessment.html?language_id="+encodeURIComponent(lang.id)+"&return=dashboard'>Retake placement</a></div>";
+            hub.innerHTML="<div class='level-panel-head'><div><h3>"+escapeHtml(name)+" learning path</h3><p>Nahtive lessons are currently set to A1.</p></div><button type='button' class='manage-button' id='closeHub'>Close</button></div><div class='level-options'>"+["A1"].map(l=>"<button type='button' class='level-option "+(l===level?"active":"")+"' data-level='"+l+"'>"+l+"</button>").join("")+"</div><div class='hub-actions'><a href='assessment.html?language_id="+encodeURIComponent(lang.id)+"&return=dashboard'>Retake placement</a></div>";
             hub.querySelector("#closeHub").onclick=()=>hub.classList.remove("open");
             hub.querySelectorAll(".level-option").forEach(opt=>opt.onclick=async()=>{
               const newLevel=opt.dataset.level;
