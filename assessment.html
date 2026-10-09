@@ -36,7 +36,7 @@
 <section id="result" class="hidden">
   <div class="panel result">
     <div class="kicker">Placement complete</div>
-    <div class="level-result" id="resultLevel">B1</div>
+    <div class="level-result" id="resultLevel">A1</div>
     <h2 id="resultTitle">Your lessons will start here.</h2>
     <p id="resultCopy"></p>
     <div id="scoreBreakdown" style="margin:22px auto 0;max-width:520px;text-align:left"></div>
@@ -94,7 +94,7 @@ function localPlacement(code){
    const [phrase,meaning]=item;
    const pool=base.map(x=>x[0]);
    const distractors=pool.filter((_,n)=>n!==i).slice(0,2);
-   qs.push({level:levels[i],question:"What does this target-language phrase mean? • "+phrase,options:[meaning,"I need directions to the nearest station.","I am asking someone to wait for me."],answer:0});
+   qs.push({level:"A1",question:"What does this target-language phrase mean? • "+phrase,options:[meaning,"I need directions to the nearest station.","I am asking someone to wait for me."],answer:0});
    const prompts=[
      "Which phrase would you use to greet someone and ask about their condition?",
      "Which phrase would you use to make this request politely?",
@@ -154,7 +154,7 @@ function choose(i){
 document.getElementById("next").addEventListener("click",()=>{if(selected===null)return;const item=questions[index];if(selected===item.answer){scoreByLevel[item.level]++;skillScores[item.type]=(skillScores[item.type]||0)+1;}if(index<questions.length-1){index++;render()}else{finish()}});
 function speakTarget(text){if(!text||!("speechSynthesis" in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=language.languages?.code||"";u.rate=.88;speechSynthesis.speak(u)}
 function calculateLevel(){
-  const order=["A1","A2","B1","B2","C1","C2"];
+  const order=["A1"];
   // Each band has four questions. Require at least 3/4 at every band
   // before advancing; lower-level answers cannot compensate for a later gap.
   let level="A1";
