@@ -134,7 +134,7 @@ function render(){
   document.getElementById("questionType").textContent=(item.type||"reading").toUpperCase();
   document.getElementById("skillLabel").textContent=(item.type||"reading");
   document.getElementById("question").textContent=item.question;
-  const translated=document.getElementById("questionTranslation"); if(translated) translated.remove(); if(item.questionTranslation){const box=document.createElement("div");box.id="questionTranslation";box.className="question";box.style.marginTop="12px";box.style.padding="12px";box.style.borderLeft="3px solid #9caf78";box.style.opacity=".95";box.textContent=item.questionTranslation;document.getElementById("question").after(box);}
+  const translated=document.getElementById("questionTranslation"); if(translated) translated.remove(); if(item.questionTranslation){const box=document.createElement("div");box.id="questionTranslation";box.className="question";box.style.marginTop="12px";box.style.padding="12px";box.style.borderLeft="3px solid #9caf78";box.style.opacity=".95";box.textContent=item.questionTranslation;document.getElementById("question").before(box);}
   const oldAudio=document.getElementById("audioPrompt"); if(oldAudio) oldAudio.remove();
   if(item.type==="listening" && item.audioText){ const audio=document.createElement("button"); audio.id="audioPrompt"; audio.className="next"; audio.style.marginTop="14px"; audio.style.background="#9caf78"; audio.textContent="▶ Hear it again"; audio.onclick=()=>speakTarget(item.audioText); document.getElementById("question").after(audio); setTimeout(()=>speakTarget(item.audioText),180); }
   document.getElementById("feedback").textContent="";
