@@ -53,7 +53,7 @@ const requestedLanguageId=params.get("language_id")||localStorage.getItem("Nahti
 const returnTo=params.get("return")==="lesson"?"lesson":"dashboard";
 let user=null,language=null,index=0,selected=null;
 let questions=[];
-let scoreByLevel={A0:0,A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
+let scoreByLevel={A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
 let skillScores={reading:0,listening:0,grammar:0,production:0};
 
 
@@ -170,7 +170,6 @@ async function finish(){
   document.getElementById("bar").style.width="100%";
   const result="A1"
   const descriptions={
-    A0:"We'll start with survival language and build confidence one useful idea at a time.",
     A1:"We'll build practical everyday language with short phrases, clear support, and simple responses.",
     A2:"We'll move beyond memorized phrases into short original responses and everyday variations.",
     B1:"We'll work with natural everyday speech, follow-up questions, useful idioms, and real situations—not beginner greetings.",
@@ -183,7 +182,7 @@ async function finish(){
   document.getElementById("result").classList.remove("hidden");
   document.getElementById("resultLevel").textContent="A1"
   document.getElementById("resultCopy").textContent=descriptions[result];
-  const levelOrder=["A0","A1","A2","B1","B2","C1","C2"];
+  const levelOrder=["A1"];
   const levelRows=levelOrder.map(level=>{
     const total=questions.filter(q=>q.level===level).length;
     return '<div style="display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);color:#d4d9e5"><span>'+level+'</span><strong>'+scoreByLevel[level]+' / '+total+'</strong></div>';
