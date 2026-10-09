@@ -240,7 +240,7 @@
 
     const state = {
       language: "",
-      level: "A0",
+      level: "A1"
       goal: "Real conversation",
       interests: [],
       topic: "Your weekend",
@@ -276,7 +276,7 @@
 
       const profile = {
         targetLanguage: learnerLanguage.languages?.name || "",
-        level: learnerLanguage.level || "A0",
+        level: "A1"
         goal: learnerLanguage.goal || "Real conversation",
         interests: Array.isArray(learnerLanguage.interests)
           ? learnerLanguage.interests
@@ -446,7 +446,7 @@ micButton.addEventListener("click",startVoice);
       }
 
       state.language = profile.targetLanguage;
-      state.level = profile.level || "A0";
+      state.level = "A1"
       state.goal = profile.goal || "Real conversation";
       state.interests = Array.isArray(profile.interests) ? profile.interests : [];
 
