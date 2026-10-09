@@ -154,7 +154,7 @@ Return JSON only.`;
     const meaningful=targets.filter(t=>{
       const words=t.split(/\s+/).filter(Boolean);
       const punctuation=(t.match(/[,;:]/g)||[]).length;
-      const compact=/^[^\\s]+$/.test(t);
+      const compact=/^[^\s]+$/.test(t);
       const length=Array.from(t).length;
       return (compact ? length>=8 : words.length>=4)||punctuation>0||/[?？]$/.test(t);
     }).length;
@@ -164,16 +164,16 @@ Return JSON only.`;
   // target sentence exactly. If the model returns mismatched chunks, repair
   // them from build_target rather than shipping an impossible exercise.
   parsed.phrases.forEach(p=>{
-    const clean=v=>String(v||"").normalize("NFKC").replace(/\\s+/g," ").trim();
+    const clean=v=>String(v||"").normalize("NFKC").replace(/\s+/g," ").trim();
     const joined=clean(p.build_words.join(" "));
     const target=clean(p.build_target);
     if(joined!==target){
-      p.build_words=target.split(/\\s+/).filter(Boolean);
+      p.build_words=target.split(/\s+/).filter(Boolean);
     }
     const correctSet=new Set(p.build_words.map(clean));
     p.distractors=p.distractors.map(String).map(clean).filter(Boolean).filter(w=>!correctSet.has(w)).slice(0,6);
     while(p.distractors.length<4){
-      const filler=target.split(/\\s+/).find(w=>w&&!correctSet.has(w)&&!p.distractors.includes(w));
+      const filler=target.split(/\s+/).find(w=>w&&!correctSet.has(w)&&!p.distractors.includes(w));
       if(!filler)break;
       p.distractors.push(filler);
     }
