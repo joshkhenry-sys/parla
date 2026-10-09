@@ -682,3 +682,8 @@ body:has(.lesson) .lesson .complete .xp{color:#596b43!important}
 /* Keep Nahtive logo mark inline everywhere */
 .logo{display:inline-flex!important;align-items:center!important;white-space:nowrap!important;line-height:1!important}
 .logo b,.logo span,.logo i{display:inline-block!important;position:static!important;vertical-align:baseline!important;line-height:1!important;margin:0!important;padding:0!important;flex:none!important}
+
+/* Dashboard recommended lesson: maintain readable contrast on the warm card surface. */
+body.dashboard-page .recommended-copy,
+body.dashboard-page .lesson-meta{color:var(--text)!important}
+body.dashboard-page .recommended .recommended-time{color:var(--text)!important;background:var(--surface)!important;border-color:var(--line)!important}
