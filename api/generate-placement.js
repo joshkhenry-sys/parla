@@ -36,6 +36,7 @@ function validatePlacement(parsed){
 export default async function handler(req,res){
   if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
   const language=String(req.body?.language||"").trim();
+  const instructionLanguage=String(req.body?.instructionLanguage||"English").trim();
   const code=LANGUAGE_CODES[language];
   if(!code)return jsonResponse(res,400,{error:"Unsupported language"});
   if(!process.env.OPENAI_API_KEY)return jsonResponse(res,503,{error:"Placement test is temporarily unavailable."});
@@ -51,8 +52,8 @@ Do not reuse the same phrase, scenario, grammatical target, answer pattern, or c
 A1 questions must be genuinely accessible to a beginner: common everyday situations, high-frequency words, and clear sentence structures. A2 should be slightly more demanding but still practical and concrete.
 Every wrong answer must be a plausible distractor: use realistic learner mistakes, near-miss grammar, wrong word choice, or a response that could make sense in another context. Never use random word salad, obviously broken sentences, or absurd distractors that make the correct answer easy to spot.
 Each question has exactly 4 answers and exactly one correct answer.
-Question text and answer choices must be in ${language}. Also provide an accurate, concise English translation of the question only. The translation is a comprehension aid and must never reveal or imply the correct answer.
-Include a short English skill note for internal scoring only.
+Question text and answer choices must be in ${language}. Also provide an accurate, concise translation of each question into \${instructionLanguage}, in a field named question_translation. Translate the question/prompt only, not the answer choices; the target-language answer choices must remain in \${language} so the test still measures the learner's ability. The translation must never reveal or imply the correct answer. Translate the question into \${instructionLanguage} naturally and clearly, including script and punctuation appropriate to that language.
+Include a short skill note in English for internal scoring only.
 Return JSON only.`;
   try{
     const schema={
@@ -93,7 +94,7 @@ Return JSON only.`;
         try{parsed=JSON.parse(output)}catch(e){lastError=new Error("Placement output was not valid JSON");continue}
         try{
           const questions=validatePlacement(parsed);
-          return jsonResponse(res,200,{language,code,questions});
+          return jsonResponse(res,200,{language,code,instructionLanguage,questions});
         }catch(e){lastError=e;continue}
       }catch(e){
         lastError=e?.name==="AbortError"?new Error("Placement generation timed out"):e;
