@@ -438,10 +438,23 @@ async function load(){
         let nativeLanguage = "English";
         const nativeProfile = await client.from("profiles").select("Nahtive_language_code").eq("id",user.id).maybeSingle();
         if (!nativeProfile.error && nativeProfile.data?.Nahtive_language_code) nativeLanguage = nativeCodes[String(nativeProfile.data.Nahtive_language_code).toLowerCase()] || "English";
-        const gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:"A1",nativeLanguage,node})});
+        const generationController=new AbortController();
+        const generationTimer=setTimeout(()=>generationController.abort(),35000);
+        let gen;
+        try {
+          gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:"A1",nativeLanguage,node}),signal:generationController.signal});
+        } catch (generationError) {
+          if(generationError?.name==="AbortError") throw new Error("Lesson generation timed out after 35 seconds. Please try again.");
+          throw generationError;
+        } finally {
+          clearTimeout(generationTimer);
+        }
         const generated=await gen.json().catch(()=>({}));
         if(!gen.ok||!generated.content)throw new Error(generated.error||"Could not build your lesson.");
-        const savedLesson=await client.from("lessons").insert({learner_language_id:current.id,curriculum_node_id:node.id,title:generated.title||node.title,topic:generated.topic||node.focus,level:"A1",content:generated.content}).select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").single();
+        const savedLesson=await Promise.race([
+          client.from("lessons").insert({learner_language_id:current.id,curriculum_node_id:node.id,title:generated.title||node.title,topic:generated.topic||node.focus,level:"A1",content:{...generated.content,level:"A1"}}).select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").single(),
+          new Promise((_,reject)=>setTimeout(()=>reject(new Error("Saving your lesson timed out. Please try again.")),12000))
+        ]);
         if(savedLesson.error)throw savedLesson.error;baseLesson=savedLesson.data;
       }
     }
