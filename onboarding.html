@@ -361,31 +361,11 @@
             <div class="big-copy"><span class="big-title">I know the basics</span><span class="big-sub">I can understand and use simple words and phrases.</span></div>
             <div class="radio"></div>
           </button>
-          <button class="big-option" data-group="level" data-value="A2">
-            <div class="big-icon">A2</div>
-            <div class="big-copy"><span class="big-title">I can get by</span><span class="big-sub">I can handle familiar everyday situations and simple conversations.</span></div>
-            <div class="radio"></div>
-          </button>
-          <button class="big-option" data-group="level" data-value="B1">
-            <div class="big-icon">B1</div>
-            <div class="big-copy"><span class="big-title">I can hold conversations</span><span class="big-sub">I can explain things, tell stories, and handle most familiar situations.</span></div>
-            <div class="radio"></div>
-          </button>
-          <button class="big-option" data-group="level" data-value="B2">
-            <div class="big-icon">B2</div>
-            <div class="big-copy"><span class="big-title">I can communicate comfortably</span><span class="big-sub">I can discuss ideas, explain viewpoints, and follow natural conversation.</span></div>
-            <div class="radio"></div>
-          </button>
-          <button class="big-option" data-group="level" data-value="C1">
-            <div class="big-icon">C1</div>
-            <div class="big-copy"><span class="big-title">I'm advanced</span><span class="big-sub">I can communicate flexibly, precisely, and naturally in demanding situations.</span></div>
-            <div class="radio"></div>
-          </button>
-          <button class="big-option" data-group="level" data-value="C2">
-            <div class="big-icon">C2</div>
-            <div class="big-copy"><span class="big-title">I'm near-native</span><span class="big-sub">I understand subtle meaning and can communicate with very high precision.</span></div>
-            <div class="radio"></div>
-          </button>
+          
+          
+          
+          
+          
         </div>
       </section>
 
@@ -444,7 +424,7 @@
     const state = {
       targetLanguage: null,
       NahtiveLanguage: null,
-      level: null,
+      level: "A1"
       goal: "Conversation",
       interests: ["EverydayLife"]
     };
@@ -591,7 +571,7 @@
       const learningProfile = {
         targetLanguage: state.targetLanguage,
         NahtiveLanguage: state.NahtiveLanguage,
-        level: state.level,
+        level: "A1"
         goal: state.goal,
         interests: state.interests
       };
@@ -711,7 +691,7 @@
 
       if (state.targetLanguage) params.set("targetLanguage", state.targetLanguage);
       if (state.NahtiveLanguage) params.set("NahtiveLanguage", state.NahtiveLanguage);
-      if (state.level) params.set("level", state.level);
+      params.set("level", "A1");
       if (state.goal) params.set("goal", state.goal);
       if (state.interests.length) params.set("interests", JSON.stringify(state.interests));
 
