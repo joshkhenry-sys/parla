@@ -88,13 +88,13 @@ async function start(l){
    let data={};
    try{data=JSON.parse(raw)}catch(_){throw new Error("The placement test server returned an invalid response. Please try again.")}
    if(!res.ok||!data.questions)throw new Error(data.error||"Could not load the test.");
-   questions=data.questions.slice().sort((a,b)=>["A1","A2","B1","B2","C1","C2"].indexOf(a.level)-["A1","A2","B1","B2","C1","C2"].indexOf(b.level));
+   questions=data.questions.slice().sort(()=>Math.random()-.5);
    index=0;answers=[];renderQuestion();
  }catch(e){app.innerHTML='<div class="placement-card"><h2>We could not load the test.</h2><p class="muted">'+escapeHtml(e.message)+'</p><button class="btn secondary" onclick="renderLanguage()">Try again</button></div>'}
 }
 function renderQuestion(){
  const q=questions[index];
- app.innerHTML='<div class="placement-progress"><span style="width:'+(((index+1)/questions.length)*100)+'%"></span></div><div class="placement-card"><div class="topline"><span>Question '+(index+1)+' of '+questions.length+'</span><span class="level-pill">'+escapeHtml(q.level)+'</span></div><h2>'+escapeHtml(q.question)+'</h2><button type="button" class="translate-question" id="translateQuestion">Translate question</button><div id="questionTranslation" class="question-translation" hidden>'+escapeHtml(q.question_translation||"")+'</div><div class="answer-grid">'+q.choices.map((c,i)=>'<button class="answer" data-index="'+i+'">'+escapeHtml(c)+'</button>').join("")+'</div><div class="actions"><button class="btn secondary" onclick="goBack()" '+(index===0?"disabled":"")+' style="'+(index===0?"opacity:.4":"")+'">Back</button><button class="btn primary" id="next" disabled>Next</button></div></div>';
+ app.innerHTML='<div class="placement-progress"><span style="width:'+(((index+1)/questions.length)*100)+'%"></span></div><div class="placement-card"><div class="topline"><span>Question '+(index+1)+' of '+questions.length+'</span><span class="level-pill">Adaptive assessment</span></div><h2>'+escapeHtml(q.question)+'</h2><button type="button" class="translate-question" id="translateQuestion">Translate question</button><div id="questionTranslation" class="question-translation" hidden>'+escapeHtml(q.question_translation||"")+'</div><div class="answer-grid">'+q.choices.map((c,i)=>'<button class="answer" data-index="'+i+'">'+escapeHtml(c)+'</button>').join("")+'</div><div class="actions"><button class="btn secondary" onclick="goBack()" '+(index===0?"disabled":"")+' style="'+(index===0?"opacity:.4":"")+'">Back</button><button class="btn primary" id="next" disabled>Next</button></div></div>';
  document.getElementById("translateQuestion").onclick=()=>{
    const box=document.getElementById("questionTranslation");
    box.hidden=!box.hidden;
@@ -112,9 +112,8 @@ function showResult(){
  let cumulativeCorrect=0;
  for(let i=0;i<levels.length;i++){
    cumulativeCorrect+=scores[levels[i]];
-   const answeredThrough=(i+1)*2;
-   const accuracy=cumulativeCorrect/answeredThrough;
-   if(scores[levels[i]]>0 && accuracy>=0.75) level=levels[i];
+   const accuracy=scores[levels[i]]/3;
+   if(accuracy>=2/3 && cumulativeCorrect/((i+1)*3)>=0.72) level=levels[i];
  }
  const next=level==="C2"?"C2":levels[Math.min(levels.indexOf(level)+1,5)];
  app.innerHTML='<div class="placement-card result"><span class="eyebrow">Your result</span><h1>You tested at</h1><div class="result-level">'+level+'</div><p class="result-note">This is an estimate based on your overall performance across increasing difficulty. One missed question early in the test will not automatically place you at A1. Start at '+level+' and move up when the lessons feel consistently easy.</p><div class="result-actions"><a class="btn primary" href="signup.html?targetLanguage='+encodeURIComponent(language)+'&level='+encodeURIComponent(level)+'">Start learning at '+level+' →</a><button class="btn secondary" onclick="renderLanguage()">Retake test</button></div></div>';
