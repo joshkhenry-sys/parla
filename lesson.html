@@ -299,7 +299,7 @@ function renderTeach(c){
   const p=c.phrase;
   const phraseMarkup='<div class="target">'+esc(p.target)+'</div><div class="translation">'+esc(p.meaning)+'</div>';
   shell('<span class="stage-chip">'+esc(c.stage)+'</span>'+phraseMarkup+
-    '<div class="explain-grid"><div class="explain"><div class="explain-label">When to use it</div><p>'+esc(p.usage||"Use it when this situation calls for it.")+'</p></div><div class="explain"><div class="explain-label">Say it naturally</div><p>'+esc(p.example_meaning||p.meaning||"")+'</p></div></div>'+
+    '<div class="explain-grid"><div class="explain"><div class="explain-label">When to use it</div><p>'+esc(p.usage||"Use it when this situation calls for it.")+'</p></div><div class="explain"><div class="explain-label">Say it naturally</div><p>'+esc(p.pronunciation||"Listen first, then say the phrase out loud on your own.")+'</p></div></div>'+
     (p.breakdown?.length?'<div class="clarification"><div class="explain-label">Clarification</div>'+p.breakdown.map(x=>'<p style="margin-top:5px"><strong>'+esc(x.target)+'</strong> — '+esc(x.meaning)+'</p>').join("")+'</div>':"")+
     (p.example?'<div class="example"><strong>'+esc(p.example)+'</strong><span>'+esc(p.example_meaning||"")+'</span></div>':"")+
     '<button class="audio-btn" id="listen">▶ Listen</button>',
