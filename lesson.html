@@ -297,16 +297,27 @@ function renderScene(c){
 }
 function renderTeach(c){
   const p=c.phrase;
-  shell('<span class="stage-chip">'+esc(c.stage)+'</span><div class="target">'+esc(p.target)+'</div><div class="translation">'+esc(p.meaning)+'</div>'+
-    '<div class="explain-grid"><div class="explain"><div class="explain-label">When to use it</div><p>'+esc(p.usage||"Use it when this situation calls for it.")+'</p></div>'+
-    '<div class="explain"><div class="explain-label">Say it naturally</div><p>'+esc(p.pronunciation||"Listen first, then say the phrase out loud on your own.")+'</p></div></div>'+
-    (p.breakdown?.length?'<div class="clarification"><div class="explain-label">Clarification</div>'+p.breakdown.map(x=>'<p style="margin-top:5px"><strong>'+esc(x.target)+'</strong> — '+esc(x.meaning)+'</p>').join("")+'</div>':"")+
-    (p.example?'<div class="example"><strong>'+esc(p.example)+'</strong><span>'+esc(p.example_meaning||"")+'</span></div>':"")+
+  const isA0=profile.level==="A0";
+  const phraseMarkup=isA0
+    ? '<div class="translation" style="font-size:25px;font-weight:800;margin:24px 0 12px">'+esc(p.meaning)+'</div><div class="target" id="targetPhrase" style="display:none">'+esc(p.target)+'</div><p class="muted" style="margin-top:8px">Listen first. When you’re ready, reveal the French.</p><button class="secondary-lesson" id="revealPhrase" style="margin-top:12px">Reveal French</button>'
+    : '<div class="target">'+esc(p.target)+'</div><div class="translation">'+esc(p.meaning)+'</div>';
+  shell('<span class="stage-chip">'+esc(c.stage)+'</span>'+phraseMarkup+
+    (!isA0?'<div class="explain-grid"><div class="explain"><div class="explain-label">When to use it</div><p>'+esc(p.usage||"Use it when this situation calls for it.")+'</p></div><div class="explain"><div class="explain-label">Say it naturally</div><p>'+esc(p.pronunciation||"Listen first, then say the phrase out loud on your own.")+'</p></div></div>': '<div class="explain" style="margin-top:18px"><div class="explain-label">Remember</div><p>'+esc(p.usage||"Listen, then reveal the French when you’re ready.")+'</p></div>')+
+    (!isA0&&p.breakdown?.length?'<div class="clarification"><div class="explain-label">Clarification</div>'+p.breakdown.map(x=>'<p style="margin-top:5px"><strong>'+esc(x.target)+'</strong> — '+esc(x.meaning)+'</p>').join("")+'</div>':"')+
+    (p.example?'<div class="example"'+(isA0?' style="display:none" id="exampleBlock"':'')+'><strong>'+esc(p.example)+'</strong><span>'+esc(p.example_meaning||"")+'</span></div>':"")+
     '<button class="audio-btn" id="listen">▶ Listen</button>',
     '<button class="primary-lesson" id="go">I’ve got it →</button>');
   $("listen").onclick=()=>{sound("click");speak(p.target)};
+  if(isA0){
+    $("revealPhrase").onclick=()=>{
+      $("targetPhrase").style.display="block";
+      $("revealPhrase").style.display="none";
+      const example=$("exampleBlock");if(example)example.style.display="block";
+      sound("click");speak(p.target);
+    };
+  }
   $("go").onclick=()=>{sound("click");addXP(5);next()};
-  setTimeout(()=>speak(p.target),180);
+  if(!isA0)setTimeout(()=>speak(p.target),180);
 }
 function renderBuild(c){
   const p=c.phrase;let selected=[];let checked=false;
