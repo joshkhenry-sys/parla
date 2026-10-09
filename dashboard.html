@@ -254,9 +254,12 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     const storedCode = String(row?.content?.language_code || "").toLowerCase();
     const wantedCode = String(learner?.languages?.code || window.Nahtive_language_code || "").toLowerCase();
     const requiredPhraseCount = 5;
+    const challenge = row?.content?.final_challenge;
     return storedCode === wantedCode && phrases.length >= requiredPhraseCount &&
       phrases.slice(0,requiredPhraseCount).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && p.build_target && Array.isArray(p.build_words) && p.build_words.length && Array.isArray(p.distractors) && p.distractors.length >= 3) &&
-      dialogue.length >= 4;
+      dialogue.length >= 4 && !!challenge && typeof challenge.situation === "string" && challenge.situation.trim() &&
+      typeof challenge.prompt === "string" && challenge.prompt.trim() && Array.isArray(challenge.choices) &&
+      challenge.choices.length === 4 && typeof challenge.correct_answer === "string" && challenge.choices.includes(challenge.correct_answer);
   };
 
   let allLessons = (lessons || []).filter(isUsableLesson);
@@ -434,6 +437,11 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         if (normalizeLevelsError) console.error("Could not normalize learner levels:", normalizeLevelsError);
         (learnerLanguages || []).forEach(row => { row.level = "A1"; });
         learnerLanguage.level = "A1";
+        const languageIds = (learnerLanguages || []).map(row => row.id).filter(Boolean);
+        if (languageIds.length) {
+          const { error: normalizeLessonsError } = await supabaseClient.from("lessons").update({level:"A1"}).in("learner_language_id", languageIds);
+          if (normalizeLessonsError) console.error("Could not normalize saved lesson levels:", normalizeLessonsError);
+        }
 
         await loadRealStreak(user.id);
         localStorage.setItem("Nahtive_current_learner_language", learnerLanguage.id);
