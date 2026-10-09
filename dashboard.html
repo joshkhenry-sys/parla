@@ -294,26 +294,29 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     button.innerHTML = "Start lesson <span>→</span>";
     button.onclick = () => { window.location.href = "lesson.html"; };
 
-    const prewarmKey = "Nahtive_prewarm_"+learnerLanguageId;
-    const lastPrewarm = Number(localStorage.getItem(prewarmKey)||0);
-    if (!lastPrewarm || Date.now()-lastPrewarm > 60000) {
-      localStorage.setItem(prewarmKey, String(Date.now()));
-      generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons)
-        .then(prepared => {
-          if (!prepared) return;
-          allLessons.push(prepared);
-          title.textContent = prepared.title || "Continue learning";
-          copy.textContent = (prepared.curriculum_nodes?.focus || "Real conversation") + " — then use it in a real interaction.";
-          if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(prepared.curriculum_nodes?.stage_name || "Core path")+"</span>";
-          button.innerHTML = "Continue <span>→</span>";
-          button.onclick = () => {
-            sessionStorage.setItem("Nahtive_lesson_id", prepared.id);
-            window.location.href = "lesson.html?id=" + encodeURIComponent(prepared.id);
-          };
-        })
-        .catch(generationError => console.error("Could not prebuild next lesson:", generationError))
-        .finally(() => localStorage.removeItem(prewarmKey));
-    }
+    generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons)
+      .then(prepared => {
+        if (!prepared) {
+          copy.textContent = "No A1 curriculum lesson was available to prepare. Start lesson to retry.";
+          return;
+        }
+        allLessons.push(prepared);
+        title.textContent = prepared.title || "Continue learning";
+        copy.textContent = (prepared.curriculum_nodes?.focus || "Real conversation") + " — then use it in a real interaction.";
+        if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(prepared.curriculum_nodes?.stage_name || "Core path")+"</span>";
+        button.innerHTML = "Continue <span>→</span>";
+        button.onclick = () => {
+          sessionStorage.setItem("Nahtive_lesson_id", prepared.id);
+          window.location.href = "lesson.html?id=" + encodeURIComponent(prepared.id);
+        };
+      })
+      .catch(generationError => {
+        console.error("Could not prebuild next lesson:", generationError);
+        title.textContent = "Your lesson isn't ready yet.";
+        copy.textContent = "We couldn't prepare this lesson. Select Start lesson to retry.";
+        button.innerHTML = "Try again <span>→</span>";
+        button.onclick = () => { window.location.href = "lesson.html"; };
+      });
     return;
   }
 
