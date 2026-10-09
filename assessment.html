@@ -104,7 +104,7 @@ function localPlacement(code){
      "Which phrase softens or qualifies a refusal by explaining the real reason?",
      "Which phrase expresses hindsight or that something should have been understood earlier?"
    ];
-   qs.push({level:levels[i],question:prompts[i],options:[phrase,distractors[0],distractors[1]],answer:0});
+   qs.push({level:"A1",question:prompts[i],options:[phrase,distractors[0],distractors[1]],answer:0});
  });
  return qs;
 }
