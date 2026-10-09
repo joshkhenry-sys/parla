@@ -1,4 +1,4 @@
-const MODEL="gpt-5.6-luna";
+const MODEL="gpt-4o-mini";
 export default async function handler(req,res){
  if(req.method!=="POST") return res.status(405).json({error:"Method not allowed"});
  if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Missing OPENAI_API_KEY"});
@@ -26,8 +26,8 @@ Each question must have exactly 3 answer choices and exactly one correct answer.
 Do not reduce the assessment to English translations. The target language must provide meaningful evidence of proficiency.
 `;
   const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),55000);
-  const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization:"Bearer "+process.env.OPENAI_API_KEY},body:JSON.stringify({
-   model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:5000,
+  const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},body:JSON.stringify({
+   model:MODEL,input:prompt,max_output_tokens:5000,
    text:{format:{type:"json_schema",name:"placement_test",strict:true,schema:{type:"object",additionalProperties:false,properties:{questions:{type:"array",minItems:28,maxItems:28,items:{type:"object",additionalProperties:false,properties:{level:{type:"string",enum:["A0","A1","A2","B1","B2","C1","C2"]},type:{type:"string",enum:["reading","listening","grammar","production"]},question:{type:"string"},audioText:{type:"string"},options:{type:"array",minItems:3,maxItems:3,items:{type:"string"}},answer:{type:"integer",minimum:0,maximum:2}},required:["level","type","question","audioText","options","answer"]}}},required:["questions"]}}}
   }),signal:controller.signal}); clearTimeout(timer);
   if(!r.ok){const body=await r.text();return res.status(502).json({error:"Assessment generation failed",detail:body.slice(0,500)})}
@@ -36,7 +36,7 @@ Do not reduce the assessment to English translations. The target language must p
   const parsed=JSON.parse(text);
   if(!parsed.questions||parsed.questions.length!==28) return res.status(502).json({error:"Incomplete assessment"});
   // Reject mechanically repetitive items instead of silently shipping a weak test.
-  const normalize = value => String(value || "").toLowerCase().normalize("NFKC").replace(/[\\p{P}\\p{S}\\s]+/gu, " ").trim();
+  const normalize = value => String(value || "").toLowerCase().normalize("NFKC").replace(/[\p{P}\p{S}\s]+/gu, " ").trim();
   const questionKeys = parsed.questions.map(q => normalize(q.question));
   const utteranceKeys = parsed.questions.map(q => normalize(q.audioText)).filter(Boolean);
   if(new Set(questionKeys).size !== questionKeys.length) return res.status(502).json({error:"Assessment contained repeated questions"});
