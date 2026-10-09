@@ -88,7 +88,7 @@ function localPlacement(code){
  sv:[["Hur mår du?","How are you?","How are you?"],["Jag vill boka ett bord för två.","I want to reserve a table for two.","I want to reserve a table for two."],["Jag gick till affären igår.","I went to the store yesterday.","I went to the store yesterday."],["Om jag har tid följer jag med dig.","If I have time, I'll go with you.","If I have time, I'll go with you."],["Även om jag var trött gick jag ändå ut.","Even though I was tired, I went out.","Even though I was tired, I went out."],["Det är inte så att jag inte vill; jag har bara inte tid.","It's not that I don't want to; I don't have time.","It's not that I don't want to; I don't have time."],["Vid det här laget borde jag redan ha förstått det.","By this point, I should have known better.","By this point, I should have known better."]]
  };
  const base=banks[code]||banks[String(code||"").split("-")[0]]||banks.es;
- const levels=["A1","A2","B1","B2","C1","C2"];
+ const levels=["A1"];
  const qs=[];
  base.forEach((item,i)=>{
    const [phrase,meaning]=item;
