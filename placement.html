@@ -113,11 +113,7 @@ function showResult(){
  questions.forEach((q,i)=>{if(answers[i]===q.correct_index)scores[q.level]++});
  // Advance through CEFR bands in order. Later answers cannot compensate
  // for a gap at an earlier band.
- let level="A1";
- for(const band of levels){
-   if(scores[band]>=2) level=band;
-   else break;
- }
+ let level="A1"
  const scoreRows=levels.map(band=>'<div style="display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);color:#d4d9e5"><span>'+band+'</span><strong>'+scores[band]+' / 3</strong></div>').join("");
  app.innerHTML='<div class="placement-card result"><span class="eyebrow">Your result</span><h1>You tested at</h1><div class="result-level">'+level+'</div><p class="result-note">This is an estimate based on your performance across increasing difficulty. You need at least 2 of 3 correct answers at each level to advance. Your scores below show where your strengths and gaps appeared.</p><div style="max-width:420px;margin:24px auto;text-align:left"><h3 style="color:#f4f1ea;font-size:14px;margin:0 0 8px">Level breakdown</h3>'+scoreRows+'</div><div class="result-actions"><a class="btn primary" href="signup.html?targetLanguage='+encodeURIComponent(language)+'&level='+encodeURIComponent(level)+'">Start learning at '+level+' →</a><button class="btn secondary" onclick="renderLanguage()">Retake test</button></div></div>';
 }
