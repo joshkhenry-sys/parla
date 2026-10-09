@@ -1,4 +1,4 @@
-const MODEL="gpt-5.6-luna";
+const MODEL="gpt-4o-mini";
 const LANGUAGE_CODES={
  Spanish:"es",English:"en",Portuguese:"pt",French:"fr",Italian:"it",German:"de",
  Japanese:"ja",Korean:"ko",Mandarin:"zh",Arabic:"ar",Dutch:"nl",Swedish:"sv",
@@ -70,15 +70,15 @@ Return JSON only.`;
       },required:["language","questions"]
     };
     let lastError=null;
-    for(let attempt=1;attempt<=2;attempt++){
+    for(let attempt=1;attempt<=1;attempt++){
       const controller=new AbortController();
-      const timer=setTimeout(()=>controller.abort(),30000);
+      const timer=setTimeout(()=>controller.abort(),20000);
       try{
         const response=await fetch("https://api.openai.com/v1/responses",{
           method:"POST",
           headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
           signal:controller.signal,
-          body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:12000,text:{format:{type:"json_schema",name:"nahtive_placement",strict:true,schema}}})
+          body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:9000,text:{format:{type:"json_schema",name:"nahtive_placement",strict:true,schema}}})
         });
         const raw=await response.text();
         if(!response.ok){
