@@ -3,11 +3,11 @@ export default async function handler(req,res){
  if(req.method!=="POST") return res.status(405).json({error:"Method not allowed"});
  if(!process.env.OPENAI_API_KEY) return res.status(500).json({error:"Missing OPENAI_API_KEY"});
  try{
-  const {targetLanguage,targetCode}=req.body||{};
+  const {targetLanguage,targetCode,instructionLanguage="English"}=req.body||{};
   if(!targetLanguage||!targetCode) return res.status(400).json({error:"Missing language"});
   const prompt=`Create a CEFR placement test for a language-learning app called Nahtive.
 Target language: ${targetLanguage} (${targetCode}).
-The learner's interface/native language is English.
+The learner's preferred instruction language is ${String(instructionLanguage||"English").slice(0,80)}. Translate each question prompt into that language in a required field named questionTranslation. Do not translate the target-language passage, listening utterance (audioText), or answer options. Keep all language evidence in the target language so the test measures proficiency rather than interface comprehension. The translation must not reveal or imply the correct answer. Any directions/context needed to understand the task should be in questionTranslation; the original target-language content stays visible.
 Return exactly 28 questions: exactly 4 labeled A0, exactly 4 A1, exactly 4 A2, exactly 4 B1, exactly 4 B2, exactly 4 C1, and exactly 4 C2. This is a serious CEFR diagnostic, not a phrase-recognition quiz. Randomize the order of all 28 questions so the test does not feel like seven predictable blocks.
 For every CEFR band, create four different diagnostic tasks with type values: "reading", "listening", "grammar", and "production". Every item must use a different scenario, communicative goal, target construction, and surface wording from every other item in the test. Do not recycle one sentence across multiple questions, do not ask the same question in reverse, do not use the same café/reservation/store/tired-yesterday examples repeatedly, and do not reuse a template with only one word changed. The four items at a given level must assess distinct evidence, not four versions of the same skill. The target language must provide the evidence of proficiency.
 Reading: a realistic message, dialogue, sign, post, or short passage in the target language with a comprehension or usage question.
@@ -28,7 +28,7 @@ Do not reduce the assessment to English translations. The target language must p
   const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),55000);
   const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},body:JSON.stringify({
    model:MODEL,input:prompt,max_output_tokens:5000,
-   text:{format:{type:"json_schema",name:"placement_test",strict:true,schema:{type:"object",additionalProperties:false,properties:{questions:{type:"array",minItems:28,maxItems:28,items:{type:"object",additionalProperties:false,properties:{level:{type:"string",enum:["A0","A1","A2","B1","B2","C1","C2"]},type:{type:"string",enum:["reading","listening","grammar","production"]},question:{type:"string"},audioText:{type:"string"},options:{type:"array",minItems:3,maxItems:3,items:{type:"string"}},answer:{type:"integer",minimum:0,maximum:2}},required:["level","type","question","audioText","options","answer"]}}},required:["questions"]}}}
+   text:{format:{type:"json_schema",name:"placement_test",strict:true,schema:{type:"object",additionalProperties:false,properties:{questions:{type:"array",minItems:28,maxItems:28,items:{type:"object",additionalProperties:false,properties:{level:{type:"string",enum:["A0","A1","A2","B1","B2","C1","C2"]},type:{type:"string",enum:["reading","listening","grammar","production"]},question:{type:"string"},questionTranslation:{type:"string"},audioText:{type:"string"},options:{type:"array",minItems:3,maxItems:3,items:{type:"string"}},answer:{type:"integer",minimum:0,maximum:2}},required:["level","type","question","questionTranslation","audioText","options","answer"]}}},required:["questions"]}}}
   }),signal:controller.signal}); clearTimeout(timer);
   if(!r.ok){const body=await r.text();return res.status(502).json({error:"Assessment generation failed",detail:body.slice(0,500)})}
   const data=await r.json(); const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;
