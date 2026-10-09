@@ -1,5 +1,4 @@
-const MODEL="gpt-5.6-luna";
-const A0_FALLBACKS={fr:[["Bonjour","Hello.","Say this when you greet someone.","Bonjour !","bohn-ZHOOR"],["Merci","Thank you.","Say this to thank someone.","Merci !","mehr-SEE"],["Oui","Yes.","Use this to say yes.","Oui.","wee"],["Non","No.","Use this to say no.","Non.","noh(n)"],["S’il vous plaît","Please.","Use this to say please politely.","Un café, s’il vous plaît.","seel voo PLEH"]]};
+const MODEL="gpt-4o-mini";
 const FALLBACKS={
  en:[["Hi","Hello.","Use this to greet someone naturally.","Hi, I'm Alex.","hy"],["How's it going?","How are you?","Use this in casual conversation.","Hey, how's it going?","howz it GO-ing"],["I'm doing pretty well.","I'm doing well.","Use this to answer naturally.","I'm doing pretty well, thanks.","im DOO-ing PRIT-ee well"],["What have you been up to?","What have you been doing lately?","Use this to keep a conversation going.","So, what have you been up to?","wut uv yoo bin UP-too"],["Sounds good to me.","That works for me.","Use this when agreeing to a plan or suggestion.","Friday works. Sounds good to me.","soundz good tuh mee"]],
  es:[["Hola","Hello.","Use this to greet someone.","Hola, soy Alex.","HO-la"],["¿Cómo estás?","How are you?","Use this to ask how someone is doing.","Hola, ¿cómo estás?","KOH-moh es-TAHS"],["Estoy bien.","I'm good.","Use this to say how you are.","Estoy bien, gracias.","es-TOY byen"],["Me llamo Alex.","My name is Alex.","Use this to introduce yourself.","Hola, me llamo Alex.","meh YAH-moh"],["Mucho gusto.","Nice to meet you.","Use this after meeting someone.","Mucho gusto.","MOO-cho GOOS-toh"]],
@@ -21,7 +20,7 @@ const FALLBACKS={
 function fallbackLesson(language,code,level,node){
  const raw=String(code||"").toLowerCase();
  const key=raw.split("-")[0];
- const rows=(String(level||"").toUpperCase()==="A0"&&A0_FALLBACKS[key])||FALLBACKS[raw]||FALLBACKS[key]||FALLBACKS.en;
+ const rows=FALLBACKS[raw]||FALLBACKS[key]||FALLBACKS.en;
  const ps=rows.map(([target,meaning,usage,example,pronunciation],i)=>({
    target,meaning,usage,
    breakdown:[{target,meaning}],
@@ -53,7 +52,7 @@ export default async function handler(req,res){
   ({language,code,level,nativeLanguage="English",node}=req.body||{});
   if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
   if(!process.env.OPENAI_API_KEY)return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
-  const L=String(level).toUpperCase();
+  const L="A1";
   const rules={
    A0:"ABSOLUTE ZERO-BEGINNER. Assume the learner knows no French and may not understand any French sentence yet. Teach only 3 tiny, immediately useful words or phrases. Use very common words, short concrete meanings in the learner's language, and one clear example. Do not use verb conjugation explanations, idioms, subordinate clauses, grammar terminology, or open-ended inference. Keep each target to 1–4 very common words, and make every exercise solvable from the lesson just shown. Prioritize meaning first, listening, then recognition and gentle practice.",
    A1:"TRUE A1. Focus on immediate personal needs: greetings, identity, very simple requests, basic descriptions, numbers, time, location and routine exchanges. Use short, predictable sentences and high-frequency vocabulary. Do not make the learner infer nuance. Do not artificially make A1 hard.",
@@ -63,15 +62,6 @@ export default async function handler(req,res){
    C1:"TRUE C1. Require precise, natural communication in demanding but realistic situations. Use register, implication, idiomatic or collocational language, reformulation, complex connected speech and nuanced distinctions. At least 3 of 5 phrases must contain a clear advanced feature. Avoid beginner/elementary teaching frames.",
    C2:"TRUE C2. Require near-fluent flexibility: subtle pragmatic meaning, idiomaticity, register shifts, humor/irony where natural, precise reformulation and nuanced choices. At least 3 of 5 phrases must require high-level interpretation or production. Never fill a C2 lesson with elementary survival phrases."
   }[L]||"Match the requested CEFR level exactly.";
-  const levelRequirements={
-   A0:"Exactly 3 tiny beginner targets. Use common greetings, yes/no, please/thank you, or simple needs. Keep sentences extremely short and teach the meaning before asking the learner to recognize or build anything.",
-   A1:"Core content may be greetings, introductions, simple needs and routine exchanges.",
-   A2:"Core content must go beyond greetings and identity into familiar transactions, plans, preferences, simple past/future and reasons.",
-   B1:"At least 3/5 core targets must involve narration, explanation, comparison, problem-solving, planning or opinion. No core target may be a standalone greeting, name exchange, 'how are you', or other rote beginner frame.",
-   B2:"At least 3/5 core targets must involve nuanced conversation, explanation, comparison, negotiation, hypotheticals, collocations or flexible response. Do not use A1/A2 survival frames as core targets.",
-   C1:"At least 3/5 core targets must demonstrate precision, nuance, register, idiomaticity/collocation, reformulation or complex connected speech. Do not use elementary frames as core targets.",
-   C2:"At least 3/5 core targets must require subtle pragmatic meaning, idiomaticity, register, humor/irony, precise reformulation or nuanced interpretation. Do not use elementary frames as core targets."
-  };
   const beginnerPatterns={
    es:[/¿?cómo te llamas\??/i,/^me llamo\b/i,/^hola[!.]?$/i,/^¿?cómo estás\??$/i,/^estoy bien[!.]?$/i,/^soy\s+\w+[!.]?$/i,/^tengo\s+\d+\s*años[!.]?$/i,/^mucho gusto[!.]?$/i],
    en:[/^hello[!.]?$/i,/^hi[!.]?$/i,/^my name is\b/i,/^what'?s your name\??$/i,/^how are you\??$/i,/^i'?m fine[!.]?$/i,/^nice to meet you[!.]?$/i],
@@ -90,7 +80,7 @@ export default async function handler(req,res){
    zh:[/^你好[！!。.]?$/i,/^你好吗[？?]?$/i,/^我叫\b/i],
    ar:[/^مرحبا[!.؟]?$/i,/^كيف حالك[؟?]?$/i,/^اسمي\b/i]
   };
-  const phraseCount=L==="A0"?3:5;
+  const phraseCount=5;
   const prompt=`Create one Nahtive lesson for an adult learning ${language} at CEFR ${L}. Learner explanation language: ${nativeLanguage}.
 Curriculum sequence: ${node.sequence_number}. Situation: ${node.title}. Scenario: ${node.situation}. Focus: ${node.focus||"everyday communication"}.
 
@@ -99,7 +89,7 @@ ${rules}
 
 TEACHING DESIGN:
 - Create exactly ${phraseCount} core phrases/sentence frames. They should form a coherent progression inside one situation.
-- For A0, teach absolute beginners who know zero French. Limit the lesson to three tiny targets; introduce the English meaning clearly before any quiz. Use familiar concrete words, short phrases, no grammar terminology, no idioms, no long sentences, and no requirement to infer meaning. Each target should be 1–4 very common words. Build practice from recognition to a tiny sentence, with all answers supported by the teaching card.
+- Teach true A1 learners with common everyday phrases and short, predictable sentences. Keep the lesson practical and supported by the teaching cards.
 - Phrase 1 introduces language appropriate to ${L}. Later phrases reuse earlier language while increasing communicative demand. Do not make Phrase 1 a generic greeting or self-introduction unless ${L} is A1 or the situation genuinely requires an advanced reuse.
 - Every phrase must be genuinely natural for native speakers.
 - Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
@@ -126,7 +116,7 @@ Return JSON only.`;
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),30000);let response;
   try{
    response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
-    body:JSON.stringify({model:MODEL,input:prompt,reasoning:{effort:"low"},max_output_tokens:5000,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
+    body:JSON.stringify({model:MODEL,input:prompt,max_output_tokens:5000,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
       type:"object",additionalProperties:false,
       properties:{
        title:{type:"string"},topic:{type:"string"},
