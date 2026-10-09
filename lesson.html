@@ -425,7 +425,7 @@ async function load(){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").eq("id",requested).maybeSingle();
       if(r.error)throw r.error;if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("This lesson is not available.");baseLesson=r.data;
       const challenge=baseLesson.content?.final_challenge;
-      if(!Array.isArray(baseLesson.content?.phrases)||baseLesson.content.phrases.length<5||!challenge||!Array.isArray(challenge.choices)||challenge.choices.length!==4||!challenge.choices.includes(challenge.correct_answer)){location.replace("lesson.html");return;}
+      if(!baseLesson.curriculum_node_id||!Array.isArray(baseLesson.content?.phrases)||baseLesson.content.phrases.length<5||!challenge||!Array.isArray(challenge.choices)||challenge.choices.length!==4||!challenge.choices.includes(challenge.correct_answer)){location.replace("lesson.html");return;}
     }else{
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at").eq("learner_language_id",current.id).order("created_at",{ascending:false}).limit(80);
       if(r.error)throw r.error;
