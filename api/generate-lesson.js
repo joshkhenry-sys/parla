@@ -20,7 +20,15 @@ const FALLBACKS={
 function fallbackLesson(language,code,level,node){
  const raw=String(code||"").toLowerCase();
  const key=raw.split("-")[0];
- const rows=FALLBACKS[raw]||FALLBACKS[key]||FALLBACKS.en;
+ const advancedSpanishB2=[
+  ["Entiendo lo que planteas, pero hay algo que me preocupa.","I understand what you're suggesting, but something worries me.","Use this to acknowledge someone's idea before raising a concern.","Entiendo lo que planteas, pero hay algo que me preocupa del presupuesto.","en-TYEN-do lo keh plan-TEH-as"],
+  ["El problema es que no habíamos tenido en cuenta ese detalle.","The problem is that we hadn't taken that detail into account.","Use this to explain a specific objection without attacking the person.","El problema es que no habíamos tenido en cuenta el tiempo de traslado.","el pro-BLEH-ma es keh no ah-BYAH-mos teh-NEE-do en KWEN-ta"],
+  ["No es que me parezca mala idea; es que ahora mismo no es viable.","It's not that I think it's a bad idea; it's that right now it's not feasible.","Use this structure to soften disagreement and clarify the real issue.","No es que me parezca mala idea; es que ahora mismo no tenemos presupuesto.","no es keh meh pa-RES-ka MA-la ee-DEH-a"],
+  ["Si lo hubiéramos hablado antes, habríamos podido organizarnos mejor.","If we'd discussed it earlier, we could have organized ourselves better.","Use this to reflect on an unreal past situation and its consequence.","Si lo hubiéramos hablado antes, habríamos podido reservar con tiempo.","see lo oo-BYEH-ra-mos ah-BLA-do AN-tes"],
+  ["¿Y si buscamos un punto medio que nos funcione a los dos?","What if we find a middle ground that works for both of us?","Use this to propose a compromise and keep the conversation collaborative.","¿Y si buscamos un punto medio que nos funcione a los dos?","ee see boos-KA-mos oon POON-toh MEH-dyo"]
+ ];
+ const rows=(key==="es"&&String(level).toUpperCase()==="B2")?advancedSpanishB2:(FALLBACKS[raw]||FALLBACKS[key]||FALLBACKS.en);
+ const advancedEsB2=key==="es"&&String(level).toUpperCase()==="B2";
  const ps=rows.map(([target,meaning,usage,example,pronunciation],i)=>({
    target,meaning,usage,
    breakdown:[{target,meaning}],
@@ -31,9 +39,9 @@ function fallbackLesson(language,code,level,node){
  }));
  return {
    language_code:String(code||"").toLowerCase(),language_name:String(language||""),level:String(level||""),
-   title:String(node?.title||"Your first conversation"),
-   topic:String(node?.focus||"Everyday conversation"),
-   scene:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Handle a simple real-world interaction."),situation:String(node?.situation||"Practice a short, useful interaction.")},
+   title:advancedEsB2?"Disagreeing Without Shutting Down the Conversation":String(node?.title||"Your first conversation"),
+   topic:advancedEsB2?"Expressing disagreement and finding common ground":String(node?.focus||"Everyday conversation"),
+   scene:advancedEsB2?{time:"A real conversation",place:"Making a plan together",mission:"Explain your concern and suggest a compromise without dismissing the other person's idea.",situation:"A friend proposes a plan you don't think will work. Explain your concern respectfully, then suggest a compromise."}:{time:"Right now",place:String(node?.title||"Everyday life"),mission:String(node?.situation||"Handle a simple real-world interaction."),situation:String(node?.situation||"Practice a short, useful interaction.")},
    phrases:ps,
    dialogue:ps.slice(0,4).map((p,i)=>({speaker:i%2?"learner":"native",text:p.target})),
    final_challenge:{
