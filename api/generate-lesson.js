@@ -50,10 +50,11 @@ export default async function handler(req,res){
  try{
   if(req.method!=="POST")return jsonResponse(res,405,{error:"Method not allowed"});
   ({language,code,level,nativeLanguage="English",node}=req.body||{});
-  level="A1";
-  if(!language||!code||!level||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
+  level=String(level||"A1").toUpperCase();
+  if(!["A1","A2","B1","B2","C1","C2"].includes(level))return jsonResponse(res,400,{error:"Unsupported CEFR level"});
+  if(!language||!code||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
   if(!process.env.OPENAI_API_KEY)return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
-  const L="A1";
+  const L=level;
   const rules={
    A1:"TRUE A1. Focus on immediate personal needs: greetings, identity, very simple requests, basic descriptions, numbers, time, location and routine exchanges. Use short, predictable sentences and high-frequency vocabulary. Do not make the learner infer nuance. Do not artificially make A1 hard.",
    A2:"TRUE A2. Use familiar everyday situations with connected but still straightforward language: shopping, travel, appointments, plans, preferences, simple past/future and basic reasons. Require more than memorized greetings, but keep grammar and vocabulary common.",
