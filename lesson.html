@@ -414,7 +414,7 @@ async function load(){
     const langResult=await Promise.race([client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Language data timed out.")),7000))]);
     if(langResult.error)throw langResult.error;
     const langs=langResult.data||[];if(!langs.length){location.href="onboarding.html";return}
-    const current=langs.find(x=>x.is_current)||langs.find(x=>x.id===saved)||langs[0];current.level=["A1","A2","B1","B2","C1","C2"].includes(String(current.level||"").toUpperCase())?String(current.level).toUpperCase():"A1";localStorage.setItem("Nahtive_current_learner_language",current.id);
+    const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];current.level=["A1","A2","B1","B2","C1","C2"].includes(String(current.level||"").toUpperCase())?String(current.level).toUpperCase():"A1";localStorage.setItem("Nahtive_current_learner_language",current.id);
     const requested=new URLSearchParams(location.search).get("id");
     if(requested){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").eq("id",requested).maybeSingle();
@@ -470,7 +470,7 @@ async function load(){
     const currentCode=String(linked?.languages?.code||"").toLowerCase();
     if(!lessonCode||lessonCode!==currentCode)throw new Error("This lesson belongs to a different language. Please start the next lesson.");
     if(!linked?.id)throw new Error("This language is not linked to your account.");
-    profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:"A1"};
+    profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(linked.level||baseLesson.level||current.level||"A1").toUpperCase()};
     lesson=buildCards(baseLesson);
     $("language").textContent=profile.name+" · "+profile.level;
     $("title").textContent=lesson.title;
