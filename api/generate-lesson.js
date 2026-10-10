@@ -45,8 +45,8 @@ function fallbackLesson(language,code,level,node){
    phrases:ps,
    dialogue:ps.slice(0,4).map((p,i)=>({speaker:i%2?"learner":"native",text:p.target})),
    final_challenge:{
-     situation:String(node?.situation||"Practice this situation in a real conversation."),
-     prompt:"Respond to the person in this situation using the language you just learned.",
+     situation:advancedEsB2?"A friend proposes a plan you don't think will work. Explain your concern respectfully, then suggest a compromise.":String(node?.situation||"Practice this situation in a real conversation."),
+     prompt:advancedEsB2?"Respond to your friend by acknowledging their idea, explaining your concern, and suggesting a compromise.":"Respond to the person in this situation using the language you just learned.",
      choices:[ps[4].target,ps[0].target,ps[1].target,ps[2].target],
      correct_answer:ps[4].target
    }
