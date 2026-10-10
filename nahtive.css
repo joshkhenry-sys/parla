@@ -687,3 +687,78 @@ body:has(.lesson) .lesson .complete .xp{color:#596b43!important}
 body.dashboard-page .recommended-copy,
 body.dashboard-page .lesson-meta{color:var(--text)!important}
 body.dashboard-page .recommended .recommended-time{color:var(--text)!important;background:var(--surface)!important;border-color:var(--line)!important}
+
+
+/* Dashboard interaction polish: green outlines and clear text, no navy hover blocks. */
+body.dashboard-page .dashboard-language-link,
+body.dashboard-page .dashboard-language-link.current{
+  color:var(--text)!important;
+  background:var(--surface)!important;
+  border:1px solid var(--line)!important;
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease!important;
+}
+body.dashboard-page .dashboard-language-link:hover,
+body.dashboard-page .dashboard-language-link:focus-visible{
+  color:var(--text)!important;
+  background:var(--surface)!important;
+  border-color:#7fa86a!important;
+  box-shadow:0 0 0 2px rgba(127,168,106,.16)!important;
+  transform:translateY(-2px)!important;
+  outline:none!important;
+}
+body.dashboard-page .dashboard-language-link.current{
+  border-color:#7fa86a!important;
+  box-shadow:inset 3px 0 0 #7fa86a!important;
+}
+body.dashboard-page .dashboard-language-link .manage-button{
+  color:var(--text)!important;
+  background:transparent!important;
+  border-color:var(--line)!important;
+}
+body.dashboard-page .dashboard-language-link .manage-button:hover{
+  border-color:#7fa86a!important;
+  color:var(--text)!important;
+}
+body.dashboard-page .quick-card{
+  background:var(--surface)!important;
+  color:var(--text)!important;
+  border:1px solid var(--line)!important;
+  box-shadow:0 8px 24px rgba(34,48,38,.045)!important;
+}
+body.dashboard-page .quick-card .quick-number{
+  color:#557746!important;
+  font-weight:800!important;
+}
+body.dashboard-page .quick-card h3{
+  color:var(--text)!important;
+  font-weight:750!important;
+}
+body.dashboard-page .quick-card p{
+  color:#4f5c53!important;
+  line-height:1.65!important;
+  font-size:13px!important;
+}
+body.dashboard-page .quick-card .quick-arrow{
+  color:#355c32!important;
+  background:#edf4e8!important;
+  border:1px solid #d0e1c7!important;
+  transition:transform .22s ease,background .22s ease,border-color .22s ease!important;
+}
+body.dashboard-page .quick-card:hover{
+  background:#fbfdf9!important;
+  color:var(--text)!important;
+  border-color:#7fa86a!important;
+  box-shadow:0 14px 32px rgba(34,48,38,.09)!important;
+  transform:translateY(-4px)!important;
+}
+body.dashboard-page .quick-card:hover h3,
+body.dashboard-page .quick-card:hover p,
+body.dashboard-page .quick-card:hover .quick-number{
+  color:var(--text)!important;
+}
+body.dashboard-page .quick-card:hover .quick-arrow{
+  color:#284d27!important;
+  background:#e2efd9!important;
+  border-color:#7fa86a!important;
+  transform:translateX(3px)!important;
+}
