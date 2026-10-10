@@ -358,14 +358,28 @@
         <div class="big-options">
           <button class="big-option" data-group="level" data-value="A1">
             <div class="big-icon">A1</div>
-            <div class="big-copy"><span class="big-title">I know the basics</span><span class="big-sub">I can understand and use simple words and phrases.</span></div>
-            <div class="radio"></div>
+            <div class="big-copy"><span class="big-title">Beginner</span><span class="big-sub">I know a few words and simple phrases.</span></div><div class="radio"></div>
           </button>
-          
-          
-          
-          
-          
+          <button class="big-option" data-group="level" data-value="A2">
+            <div class="big-icon">A2</div>
+            <div class="big-copy"><span class="big-title">Elementary</span><span class="big-sub">I can handle simple everyday exchanges.</span></div><div class="radio"></div>
+          </button>
+          <button class="big-option" data-group="level" data-value="B1">
+            <div class="big-icon">B1</div>
+            <div class="big-copy"><span class="big-title">Intermediate</span><span class="big-sub">I can manage familiar situations and explain opinions.</span></div><div class="radio"></div>
+          </button>
+          <button class="big-option" data-group="level" data-value="B2">
+            <div class="big-icon">B2</div>
+            <div class="big-copy"><span class="big-title">Upper intermediate</span><span class="big-sub">I can converse comfortably and discuss many topics.</span></div><div class="radio"></div>
+          </button>
+          <button class="big-option" data-group="level" data-value="C1">
+            <div class="big-icon">C1</div>
+            <div class="big-copy"><span class="big-title">Advanced</span><span class="big-sub">I can communicate fluently with nuance.</span></div><div class="radio"></div>
+          </button>
+          <button class="big-option" data-group="level" data-value="C2">
+            <div class="big-icon">C2</div>
+            <div class="big-copy"><span class="big-title">Proficient</span><span class="big-sub">I can understand and express subtle distinctions with ease.</span></div><div class="radio"></div>
+          </button>
         </div>
       </section>
 
@@ -571,7 +585,7 @@
       const learningProfile = {
         targetLanguage: state.targetLanguage,
         NahtiveLanguage: state.NahtiveLanguage,
-        level: "A1",
+        level: state.level || "A1",
         goal: state.goal,
         interests: state.interests
       };
@@ -691,7 +705,7 @@
 
       if (state.targetLanguage) params.set("targetLanguage", state.targetLanguage);
       if (state.NahtiveLanguage) params.set("NahtiveLanguage", state.NahtiveLanguage);
-      params.set("level", "A1");
+      params.set("level", state.level || "A1");
       if (state.goal) params.set("goal", state.goal);
       if (state.interests.length) params.set("interests", JSON.stringify(state.interests));
 
