@@ -762,3 +762,24 @@ body.dashboard-page .quick-card:hover .quick-arrow{
   border-color:#7fa86a!important;
   transform:translateX(3px)!important;
 }
+
+
+/* Restore the green filled state for the currently selected learning language. */
+body.dashboard-page .dashboard-language-link.current{
+  background:#b6f36a!important;
+  color:#10200a!important;
+  border-color:#b6f36a!important;
+  box-shadow:0 4px 14px rgba(182,243,106,.18)!important;
+}
+body.dashboard-page .dashboard-language-link.current:hover,
+body.dashboard-page .dashboard-language-link.current:focus-visible{
+  background:#b6f36a!important;
+  color:#10200a!important;
+  border-color:#b6f36a!important;
+  box-shadow:0 6px 18px rgba(182,243,106,.24)!important;
+  transform:translateY(-2px)!important;
+}
+body.dashboard-page .dashboard-language-link.current .manage-button{
+  color:#10200a!important;
+  border-color:rgba(16,32,10,.22)!important;
+}
