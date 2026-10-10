@@ -532,12 +532,50 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
             hub.innerHTML="<div class='level-panel-head'><div><h3>"+escapeHtml(name)+" learning path</h3><p>Choose the level that matches your current ability.</p></div><button type='button' class='manage-button' id='closeHub'>Close</button></div><div class='level-options'>"+["A1","A2","B1","B2","C1","C2"].map(l=>"<button type='button' class='level-option "+(l===level?"active":"")+"' data-level='"+l+"'>"+l+"</button>").join("")+"</div><div class='hub-actions'><a href='assessment.html?language_id="+encodeURIComponent(lang.id)+"&return=dashboard'>Retake placement</a></div>";
             hub.querySelector("#closeHub").onclick=()=>hub.classList.remove("open");
             hub.querySelectorAll(".level-option").forEach(opt=>opt.onclick=async()=>{
-              const newLevel=opt.dataset.level;
-              const {error}=await supabaseClient.from("learner_languages").update({level:newLevel}).eq("id",lang.id).eq("user_id",user.id);
-              if(error){console.error(error);return}
-              await supabaseClient.from("learner_events").insert({user_id:user.id,learner_language_id:lang.id,event_type:"level_manually_changed",event_data:{from:level,to:newLevel}});
-              localStorage.setItem("Nahtive_current_learner_language",lang.id);
-              window.location.reload();
+              const newLevel=String(opt.dataset.level||"").toUpperCase();
+              if(!["A1","A2","B1","B2","C1","C2"].includes(newLevel)) return;
+              const previousLevel=String(lang.level||"A1").toUpperCase();
+              hub.querySelectorAll(".level-option").forEach(button=>{button.disabled=true;});
+              opt.textContent="Saving…";
+              try {
+                const {data:updated,error:updateError}=await supabaseClient
+                  .from("learner_languages")
+                  .update({level:newLevel})
+                  .eq("id",lang.id)
+                  .eq("user_id",user.id)
+                  .select("id,level")
+                  .maybeSingle();
+                if(updateError) throw updateError;
+                if(!updated || String(updated.level||"").toUpperCase()!==newLevel) {
+                  throw new Error("The level wasn't saved. Your account may not have permission to update this learning path.");
+                }
+                lang.level=newLevel;
+                localStorage.setItem("Nahtive_current_learner_language",lang.id);
+                const {error:eventError}=await supabaseClient.from("learner_events").insert({
+                  user_id:user.id,
+                  learner_language_id:lang.id,
+                  event_type:"level_manually_changed",
+                  event_data:{from:previousLevel,to:newLevel}
+                });
+                if(eventError) console.warn("Level saved, but change event could not be recorded:",eventError);
+                const badge=document.getElementById("dashboardLevel");
+                if(badge && lang.id===learnerLanguage.id) badge.textContent=newLevel;
+                const languageLabel=document.querySelector('[data-language-id="'+CSS.escape(lang.id)+'"] span');
+                if(languageLabel) languageLabel.textContent=(lang.languages?.name||"Language")+" · "+newLevel;
+                hub.querySelectorAll(".level-option").forEach(button=>{
+                  button.disabled=false;
+                  button.classList.toggle("active",button.dataset.level===newLevel);
+                  button.textContent=button.dataset.level;
+                });
+                window.location.reload();
+              } catch(saveError) {
+                console.error("Could not save selected level:",saveError);
+                alert(saveError.message||"We couldn't save that level. Please try again.");
+                hub.querySelectorAll(".level-option").forEach(button=>{
+                  button.disabled=false;
+                  button.textContent=button.dataset.level;
+                });
+              }
             });
           });
         });
