@@ -414,7 +414,7 @@ async function load(){
     const langResult=await Promise.race([client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Language data timed out.")),7000))]);
     if(langResult.error)throw langResult.error;
     const langs=langResult.data||[];if(!langs.length){location.href="onboarding.html";return}
-    const current=langs.find(x=>x.is_current)||langs.find(x=>x.id===saved)||langs[0];current.level="A1";await client.from("learner_languages").update({level:"A1"}).eq("id",current.id).eq("user_id",user.id);localStorage.setItem("Nahtive_current_learner_language",current.id);
+    const current=langs.find(x=>x.is_current)||langs.find(x=>x.id===saved)||langs[0];current.level=["A1","A2","B1","B2","C1","C2"].includes(String(current.level||"").toUpperCase())?String(current.level).toUpperCase():"A1";localStorage.setItem("Nahtive_current_learner_language",current.id);
     const requested=new URLSearchParams(location.search).get("id");
     if(requested){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").eq("id",requested).maybeSingle();
@@ -449,7 +449,7 @@ async function load(){
         const generationTimer=setTimeout(()=>generationController.abort(),35000);
         let gen;
         try {
-          gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:"A1",nativeLanguage,node}),signal:generationController.signal});
+          gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level,nativeLanguage,node}),signal:generationController.signal});
         } catch (generationError) {
           if(generationError?.name==="AbortError") throw new Error("Lesson generation timed out after 35 seconds. Please try again.");
           throw generationError;
@@ -459,7 +459,7 @@ async function load(){
         const generated=await gen.json().catch(()=>({}));
         if(!gen.ok||!generated.content)throw new Error(generated.error||"Could not build your lesson.");
         const savedLesson=await Promise.race([
-          client.from("lessons").insert({learner_language_id:current.id,curriculum_node_id:node.id,title:generated.title||node.title,topic:generated.topic||node.focus,level:"A1",content:{...generated.content,level:"A1"}}).select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").single(),
+          client.from("lessons").insert({learner_language_id:current.id,curriculum_node_id:node.id,title:generated.title||node.title,topic:generated.topic||node.focus,level:current.level,content:{...generated.content,level:current.level}}).select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").single(),
           new Promise((_,reject)=>setTimeout(()=>reject(new Error("Saving your lesson timed out. Please try again.")),12000))
         ]);
         if(savedLesson.error)throw savedLesson.error;baseLesson=savedLesson.data;
