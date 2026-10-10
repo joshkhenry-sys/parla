@@ -90,7 +90,7 @@ ${rules}
 
 TEACHING DESIGN:
 - Create exactly ${phraseCount} core phrases/sentence frames. They should form a coherent progression inside one situation.
-- Teach true A1 learners with common everyday phrases and short, predictable sentences. Keep the lesson practical and supported by the teaching cards.
+- Teach true ${L} learners at their selected CEFR level. Keep the lesson practical and supported by the teaching cards; match vocabulary, sentence complexity, nuance, and task demands to ${L}.
 - Phrase 1 introduces language appropriate to ${L}. Later phrases reuse earlier language while increasing communicative demand. Do not make Phrase 1 a generic greeting or self-introduction unless ${L} is A1 or the situation genuinely requires an advanced reuse.
 - Every phrase must be genuinely natural for native speakers.
 - Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
