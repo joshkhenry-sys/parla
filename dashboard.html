@@ -262,7 +262,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
       challenge.choices.length === 4 && typeof challenge.correct_answer === "string" && challenge.choices.includes(challenge.correct_answer);
   };
 
-  let allLessons = (lessons || []).filter(isUsableLesson);
+  let allLessons = (lessons || []).filter(row => isUsableLesson(row) && String(row.level || "A1").toUpperCase() === learnerLevel);
   const levelRank = {A1:1,A2:2,B1:3,B2:4,"B2+":4,C1:5,C2:6};
   const targetRank = levelRank[learnerLevel] ?? 1;
 
