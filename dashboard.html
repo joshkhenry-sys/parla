@@ -423,7 +423,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         if (learnerLanguagesError) throw learnerLanguagesError;
 
         const savedCurrent = localStorage.getItem("Nahtive_current_learner_language") || localStorage.getItem("native_current_learner_language");
-        const learnerLanguage = (learnerLanguages || []).find(row => row.is_current) || (learnerLanguages || []).find(row => row.id === savedCurrent) || (learnerLanguages || [])[0];
+        const learnerLanguage = (learnerLanguages || []).find(row => row.id === savedCurrent) || (learnerLanguages || []).find(row => row.is_current) || (learnerLanguages || [])[0];
 
         if (!learnerLanguage) {
           window.location.href = "onboarding.html";
@@ -540,15 +540,21 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
               try {
                 const {data:updated,error:updateError}=await supabaseClient
                   .from("learner_languages")
-                  .update({level:newLevel})
+                  .update({level:newLevel,is_current:true})
                   .eq("id",lang.id)
                   .eq("user_id",user.id)
-                  .select("id,level")
+                  .select("id,level,is_current")
                   .maybeSingle();
                 if(updateError) throw updateError;
                 if(!updated || String(updated.level||"").toUpperCase()!==newLevel) {
                   throw new Error("The level wasn't saved. Your account may not have permission to update this learning path.");
                 }
+                const {error:clearCurrentError}=await supabaseClient
+                  .from("learner_languages")
+                  .update({is_current:false})
+                  .eq("user_id",user.id)
+                  .neq("id",lang.id);
+                if(clearCurrentError) throw clearCurrentError;
                 lang.level=newLevel;
                 localStorage.setItem("Nahtive_current_learner_language",lang.id);
                 const {error:eventError}=await supabaseClient.from("learner_events").insert({
