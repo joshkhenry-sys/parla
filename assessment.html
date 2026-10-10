@@ -51,7 +51,7 @@ const client=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_AN
 const params=new URLSearchParams(location.search);
 const requestedLanguageId=params.get("language_id")||localStorage.getItem("Nahtive_current_learner_language");
 const returnTo=params.get("return")==="lesson"?"lesson":"dashboard";
-let user=null,language=null,index=0,selected=null;
+let user=null,language=null,index=0,selected=null,selectedLevel="A1";
 let questions=[];
 let scoreByLevel={A1:0,A2:0,B1:0,B2:0,C1:0,C2:0};
 let skillScores={reading:0,listening:0,grammar:0,production:0};
@@ -67,6 +67,7 @@ async function init(){
   const {data:rows,error:langErr}=await q;
   if(langErr||!rows?.length){location.href="dashboard.html";return}
   language=rows[0];
+  selectedLevel=["A1","A2","B1","B2","C1","C2"].includes(String(language.level||"").toUpperCase())?String(language.level).toUpperCase():"A1";
   document.getElementById("languageLabel").textContent=(language.languages?.name||"Language")+" placement";
 }
 function localPlacement(code){
@@ -181,7 +182,7 @@ async function finish(){
   document.getElementById("test").classList.add("hidden");
   document.getElementById("result").classList.remove("hidden");
   document.getElementById("resultLevel").textContent="A1"
-  document.getElementById("resultCopy").textContent=descriptions[result];
+  document.getElementById("resultCopy").textContent="This short check covers beginner foundations. Choose the level that best matches your current ability; you can change it later.";
   const levelOrder=["A1"];
   const levelRows=levelOrder.map(level=>{
     const total=questions.filter(q=>q.level===level).length;
@@ -191,12 +192,10 @@ async function finish(){
     const total=questions.filter(q=>q.type===key).length;
     return '<div style="display:flex;justify-content:space-between;gap:16px;padding:7px 0;color:#9ba4ba"><span>'+label+'</span><span>'+ (skillScores[key]||0)+' / '+total+'</span></div>';
   }).join("");
-  document.getElementById("scoreBreakdown").innerHTML='<h3 style="color:#f4f1ea;font-size:14px;margin:0 0 8px">Your level-by-level scores</h3>'+levelRows+'<h3 style="color:#f4f1ea;font-size:14px;margin:20px 0 6px">Skills</h3>'+skillRows;
-  document.getElementById("continueButton").onclick=()=>{localStorage.setItem("Nahtive_current_learner_language",language.id);location.href="dashboard.html"};
-  const {error:updateError}=await client.from("learner_languages").update({level:"A1"}).eq("id",language.id).eq("user_id",user.id);
-  if(updateError){console.error("Placement level save failed:",updateError);document.getElementById("resultCopy").textContent+= " Your result is shown above; we'll keep the result on this device while we retry the save.";}
-  const {error:eventError}=await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:result,scores:scoreByLevel,skills:skillScores,question_count:questions.length,version:4}});
-  if(eventError){console.error("Placement event save failed:",eventError)}
+  document.getElementById("scoreBreakdown").innerHTML='<h3 style="color:#f4f1ea;font-size:14px;margin:0 0 8px">Your level-by-level scores</h3>'+levelRows+'<h3 style="color:#f4f1ea;font-size:14px;margin:20px 0 6px">Skills</h3>'+skillRows+'<h3 style="color:#f4f1ea;font-size:14px;margin:22px 0 10px">Choose your starting level</h3><div id="levelPicker" style="display:flex;flex-wrap:wrap;gap:8px">'+["A1","A2","B1","B2","C1","C2"].map(level=>'<button type="button" data-level-choice="'+level+'" style="border:1px solid '+(level===selectedLevel?"#9caf78":"rgba(255,255,255,.2)")+';border-radius:10px;padding:10px 14px;background:'+(level===selectedLevel?"#9caf78":"transparent")+';color:'+(level===selectedLevel?"#151713":"#f4f1ea")+';cursor:pointer">'+level+'</button>').join("")+'</div>';
+  document.querySelectorAll("[data-level-choice]").forEach(button=>button.onclick=()=>{selectedLevel=button.dataset.levelChoice;document.querySelectorAll("[data-level-choice]").forEach(item=>{const active=item.dataset.levelChoice===selectedLevel;item.style.background=active?"#9caf78":"transparent";item.style.color=active?"#151713":"#f4f1ea";item.style.borderColor=active?"#9caf78":"rgba(255,255,255,.2)"});document.getElementById("resultLevel").textContent=selectedLevel;});
+  document.getElementById("resultLevel").textContent=selectedLevel;
+  document.getElementById("continueButton").onclick=async()=>{const button=document.getElementById("continueButton");button.disabled=true;button.textContent="Saving level…";const {error}=await client.from("learner_languages").update({level:selectedLevel}).eq("id",language.id).eq("user_id",user.id);if(error){console.error("Placement level save failed:",error);button.disabled=false;button.textContent="Try saving again";document.getElementById("resultCopy").textContent="We couldn’t save your level. Please try again.";return;}await client.from("learner_events").insert({user_id:user.id,learner_language_id:language.id,event_type:"placement_completed",event_data:{level:selectedLevel,scores:scoreByLevel,skills:skillScores,question_count:questions.length,version:5}});localStorage.setItem("Nahtive_current_learner_language",language.id);location.href="dashboard.html"};
 }
 init();
 </script>
