@@ -117,7 +117,7 @@ async function begin(){
     clearTimeout(timer);
     if(!response.ok) throw new Error("Assessment unavailable");
     const data=await response.json();
-    if(!Array.isArray(data.questions)||data.questions.length!==28) throw new Error("Incomplete assessment");
+    if(!Array.isArray(data.questions)||data.questions.length!==4) throw new Error("Incomplete assessment");
     questions=data.questions.slice().sort(()=>Math.random()-.5);
     document.getElementById("intro").classList.add("hidden");document.getElementById("test").classList.remove("hidden");render();
   }catch(error){
