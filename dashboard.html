@@ -142,13 +142,9 @@
     .limit(100);
   if (nodeError) throw nodeError;
 
-  const levelRank = {A1:1,A2:2,B1:3,B2:4,"B2+":4,C1:5,C2:6};
-  const targetRank = levelRank[level] ?? 1;
-  const levelMatches = node => {
-    const band = String(node.level_band || "");
-    if (band === "C1/C2") return level === "C1" || level === "C2";
-    return ["A1","A2","B1","B2","B2+","C1","C2"].includes(band) || !!band;
-  };
+  const allowedBands = (level === "C1" || level === "C2") ? [level, "C1/C2"] : [level];
+  // Never let another CEFR band fill a gap in the learner's selected path.
+  const levelMatches = node => allowedBands.includes(String(node.level_band || "").trim().toUpperCase());
 
   const { data: attempts } = await supabaseClient
     .from("lesson_attempts")
@@ -213,7 +209,7 @@
       level,
       content:payload
     })
-    .select("id,title,topic,level,content,created_at,curriculum_node_id,curriculum_nodes(sequence_number,stage_name,focus)")
+    .select("id,title,topic,level,content,created_at,curriculum_node_id,curriculum_nodes(sequence_number,stage_name,focus,level_band)")
     .single();
 
   if (saveError) throw saveError;
@@ -237,7 +233,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
 
   const { data: lessons, error } = await supabaseClient
     .from("lessons")
-    .select("id,title,topic,level,content,created_at,curriculum_node_id,curriculum_nodes(sequence_number,stage_name,focus)")
+    .select("id,title,topic,level,content,created_at,curriculum_node_id,curriculum_nodes(sequence_number,stage_name,focus,level_band)")
     .eq("learner_language_id", learnerLanguageId)
     .limit(120);
 
@@ -262,9 +258,12 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
       challenge.choices.length === 4 && typeof challenge.correct_answer === "string" && challenge.choices.includes(challenge.correct_answer);
   };
 
-  let allLessons = (lessons || []).filter(row => isUsableLesson(row) && String(row.level || "A1").toUpperCase() === learnerLevel);
-  const levelRank = {A1:1,A2:2,B1:3,B2:4,"B2+":4,C1:5,C2:6};
-  const targetRank = levelRank[learnerLevel] ?? 1;
+  const allowedBands = (learnerLevel === "C1" || learnerLevel === "C2") ? [learnerLevel, "C1/C2"] : [learnerLevel];
+  let allLessons = (lessons || []).filter(row =>
+    isUsableLesson(row) &&
+    String(row.level || "A1").toUpperCase() === learnerLevel &&
+    allowedBands.includes(String(row.curriculum_nodes?.level_band || "").trim().toUpperCase())
+  );
 
   const completedResult = allLessons.length
     ? await supabaseClient.from("lesson_attempts").select("lesson_id").in("lesson_id", allLessons.map(row => row.id))
@@ -272,9 +271,6 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
   const completedIds = new Set((completedResult.data || []).map(row => row.lesson_id));
 
   allLessons.sort((a,b) => {
-    const ar = Math.abs((levelRank[a.level] ?? 1) - targetRank);
-    const br = Math.abs((levelRank[b.level] ?? 1) - targetRank);
-    if (ar !== br) return ar - br;
     const as = Number(a.curriculum_nodes?.sequence_number || 9999);
     const bs = Number(b.curriculum_nodes?.sequence_number || 9999);
     return as - bs || new Date(a.created_at) - new Date(b.created_at);
