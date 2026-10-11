@@ -12,9 +12,56 @@
   <script src="supabase-config.js"></script>
 
   
-<link rel="stylesheet" href="nahtive.css"></head>
+<link rel="stylesheet" href="nahtive.css">
+  <style>
+    body.signup-page{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at 15% 15%,rgba(182,243,106,.09),transparent 32%),var(--bg)!important}
+    .signup-page nav{width:min(1100px,calc(100% - 48px));margin:0 auto;min-height:84px;border-bottom:1px solid var(--line)}
+    .signup-page .logo{font-size:25px!important}
+    .signup-page .nav-right{font-size:13px}
+    .signup-page .nav-right a{color:var(--accent)!important;font-weight:750;text-decoration:none}
+    .signup-page main{flex:1;display:flex;align-items:center;padding:44px 24px 64px}
+    .signup-page .signup-wrap{width:min(1000px,100%);margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.92fr);align-items:center;gap:clamp(38px,7vw,90px)}
+    .signup-page .intro{margin:0;text-align:left}
+    .signup-page .eyebrow{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid rgba(182,243,106,.2);border-radius:999px;background:rgba(182,243,106,.07);color:var(--accent)!important}
+    .signup-page .eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px rgba(182,243,106,.5)}
+    .signup-page h1{margin-top:24px;max-width:480px;font-size:clamp(42px,5.2vw,64px);line-height:1.02;letter-spacing:-.06em}
+    .signup-page .intro p{max-width:410px;margin-top:18px;font-size:16px;line-height:1.8;color:var(--muted)}
+    .signup-page .signup-points{display:grid;gap:16px;margin-top:34px;color:var(--muted);font-size:13px}
+    .signup-page .signup-point{display:flex;align-items:center;gap:12px}
+    .signup-page .signup-point-mark{width:27px;height:27px;display:grid;place-items:center;flex:none;border:1px solid rgba(182,243,106,.22);border-radius:9px;color:var(--accent);background:rgba(182,243,106,.07);font-size:13px}
+    .signup-page .signup-wrap>.card{width:100%;max-width:440px;margin:0;padding:clamp(24px,3vw,34px)!important;border-color:rgba(255,255,255,.1)!important;border-radius:26px!important;background:rgba(20,26,43,.94)!important;box-shadow:0 30px 90px rgba(0,0,0,.28)!important}
+    .signup-page .google-btn{height:52px;display:flex;align-items:center;justify-content:center;gap:11px;border-radius:13px!important;border-color:rgba(255,255,255,.15)!important;background:#1b2238!important;color:var(--text)!important;font-size:13px;font-weight:750;transition:border-color .18s,background .18s}
+    .signup-page .google-btn:hover{border-color:rgba(182,243,106,.5)!important;background:#202941!important}
+    .signup-page .divider{margin:22px 0;color:#8f99af;font-size:10px;letter-spacing:.02em}
+    .signup-page .field{margin-bottom:17px}
+    .signup-page .field label{margin-bottom:8px;color:#e8eaf0;font-size:12px;font-weight:700}
+    .signup-page input{min-height:49px;padding:13px 14px;border-radius:12px!important;border-color:rgba(255,255,255,.13)!important;background:#0f1422!important;color:var(--text)!important;font-size:13px}
+    .signup-page input::placeholder{color:#727d94}
+    .signup-page input:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(182,243,106,.1)!important}
+    .signup-page .password-note{margin-top:7px;color:#818ba0;font-size:11px}
+    .signup-page .submit-btn{width:100%;min-height:51px;margin-top:5px;border-radius:13px!important;background:var(--accent)!important;color:#10200a!important;font-size:13px;font-weight:800;box-shadow:0 4px 0 var(--accent-deep);transition:transform .15s,filter .15s}
+    .signup-page .submit-btn:hover{filter:brightness(1.04);transform:translateY(-1px)}
+    .signup-page .terms{margin-top:20px;color:#8993a8;font-size:10px;line-height:1.8}
+    .signup-page .terms a{color:#cbd2e0;text-underline-offset:3px}
+    .signup-page #signupMessage{color:var(--muted)!important}
+    .signup-page footer{padding:0 24px 24px;text-align:center;color:#68738a;font-size:11px}
+    @media(max-width:760px){
+      .signup-page nav{width:calc(100% - 32px);min-height:72px}
+      .signup-page main{padding:40px 16px 48px}
+      .signup-page .signup-wrap{max-width:460px;grid-template-columns:1fr;gap:28px}
+      .signup-page .intro{text-align:center}
+      .signup-page h1{font-size:clamp(39px,10vw,52px);margin:20px auto 0}
+      .signup-page .intro p{font-size:14px;margin:14px auto 0}
+      .signup-page .signup-points{display:none}
+      .signup-page .signup-wrap>.card{max-width:none}
+    }
+    @media(max-width:420px){
+      .signup-page .nav-right{gap:6px;font-size:11px}
+      .signup-page .signup-wrap>.card{padding:22px!important}
+    }
+  </style></head>
 
-<body>
+<body class="signup-page">
 
   <nav>
     <a href="index.html" class="logo">nahtive<span>•</span></a>
@@ -38,8 +85,14 @@
         <h1>Let's make this yours.</h1>
 
         <p>
-          Tell Nahtive a little about yourself, and we'll build your learning experience around you.
+          A more personal way to learn a language. Build real-world confidence one conversation at a time.
         </p>
+
+        <div class="signup-points" aria-label="What you get">
+          <div class="signup-point"><span class="signup-point-mark">✓</span><span>Practice language you can use in real life</span></div>
+          <div class="signup-point"><span class="signup-point-mark">✓</span><span>Start at your level, not someone else's</span></div>
+          <div class="signup-point"><span class="signup-point-mark">✓</span><span>Build confidence by actually speaking</span></div>
+        </div>
 
       </div>
 
