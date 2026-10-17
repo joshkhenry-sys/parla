@@ -36,6 +36,34 @@
 </section>
 </div>
 
+<section class="language-switcher-section" aria-labelledby="twentyHourTitle" style="margin-top:24px">
+  <div class="card" style="padding:24px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap">
+      <div>
+        <div class="card-label">THE FIRST 20 HOURS</div>
+        <h2 id="twentyHourTitle" style="margin:8px 0;font-size:clamp(24px,3vw,34px)">Get good enough to use it.</h2>
+        <p style="max-width:640px;color:var(--muted);line-height:1.6;margin:0">Pick a meaningful real-world outcome. Break it into useful subskills, practice them in context, and correct mistakes as they happen. This is focused practice—not a promise of fluency.</p>
+      </div>
+      <div style="min-width:145px;text-align:right">
+        <div id="twentyHourCount" style="font-size:30px;font-weight:850;letter-spacing:-.04em">0.0 / 20 h</div>
+        <div style="font-size:12px;color:var(--muted)">Focused lesson time</div>
+      </div>
+    </div>
+    <div style="height:9px;background:var(--line,#293044);border-radius:99px;overflow:hidden;margin:20px 0 10px"><div id="twentyHourFill" style="height:100%;width:0;background:var(--accent,#b6f36a);border-radius:99px;transition:width .3s ease"></div></div>
+    <div id="twentyHourStatus" style="font-size:13px;color:var(--muted);margin-bottom:20px">Your 20-hour clock starts with your next lesson. Only time while the lesson page is visible is counted.</div>
+    <div id="twentyHourGoal" style="padding:14px 16px;border:1px solid var(--line,#293044);border-radius:14px;margin-bottom:18px">
+      <div style="font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Target performance</div>
+      <div style="font-weight:750">Handle a real conversation for your chosen goal with less hesitation.</div>
+    </div>
+    <div id="twentyHourStages" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+      <div style="padding:14px;border:1px solid var(--line,#293044);border-radius:14px"><strong>0–2 hours · Deconstruct</strong><p style="font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0">Define the outcome and learn the most useful building blocks.</p></div>
+      <div style="padding:14px;border:1px solid var(--line,#293044);border-radius:14px"><strong>2–5 hours · Build patterns</strong><p style="font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0">Practice high-value phrases and sentence patterns you can reuse.</p></div>
+      <div style="padding:14px;border:1px solid var(--line,#293044);border-radius:14px"><strong>5–15 hours · Use it</strong><p style="font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0">Have guided conversations, get feedback, and correct weak spots.</p></div>
+      <div style="padding:14px;border:1px solid var(--line,#293044);border-radius:14px"><strong>15–20 hours · Perform</strong><p style="font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0">Handle realistic scenarios and retest the skills that still need work.</p></div>
+    </div>
+  </div>
+</section>
+
 <section class="language-switcher-section">
   <div class="section-title">My languages</div>
   <div class="card language-switcher-card"><div class="dashboard-language-grid" id="myLanguagesGrid"><div style="grid-column:1/-1;padding:14px;color:var(--muted);font-size:13px;">Loading your languages…</div></div><div id="languageHub" class="level-panel"></div></div>
@@ -399,6 +427,43 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
       }
     }
 
+    async function loadTwentyHourProgress(userId, learnerLanguageId, learnerLanguage) {
+      const count = document.getElementById("twentyHourCount");
+      const fill = document.getElementById("twentyHourFill");
+      const status = document.getElementById("twentyHourStatus");
+      const goal = document.querySelector("#twentyHourGoal > div:last-child");
+      try {
+        const { data, error } = await supabaseClient
+          .from("learner_events")
+          .select("event_data,created_at")
+          .eq("user_id", userId)
+          .eq("learner_language_id", learnerLanguageId)
+          .eq("event_type", "lesson_completed")
+          .limit(1000);
+        if (error) throw error;
+        const rows = data || [];
+        const seconds = rows.reduce((sum, row) => {
+          const value = Number(row.event_data?.practice_seconds);
+          return sum + (Number.isFinite(value) && value > 0 ? value : 0);
+        }, 0);
+        const hours = seconds / 3600;
+        const shown = Math.min(20, hours);
+        if (count) count.textContent = shown.toFixed(1) + " / 20 h";
+        if (fill) fill.style.width = Math.min(100, hours / 20 * 100) + "%";
+        const phase = hours < 2 ? "Deconstruct the goal and learn the essentials"
+          : hours < 5 ? "Build high-value phrases and reusable patterns"
+          : hours < 15 ? "Practice guided conversations and correct weak spots"
+          : hours < 20 ? "Apply the language in realistic scenarios"
+          : "20 hours completed — check what you can do now";
+        if (status) status.textContent = phase + ". " + rows.length + " completed lesson" + (rows.length === 1 ? "" : "s") + " logged. Time tracking begins with lessons completed after this update.";
+        const chosenGoal = String(learnerLanguage?.goal || "").trim();
+        if (goal && chosenGoal) goal.textContent = chosenGoal;
+      } catch (error) {
+        console.error("Could not load 20-hour progress:", error);
+        if (status) status.textContent = "We couldn't load your practice time. Your lesson history hasn't been changed.";
+      }
+    }
+
     async function loadLearningProfile() {
       try {
         const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
@@ -430,6 +495,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         const level = String(learnerLanguage.level || "A1").toUpperCase();
 
         await loadRealStreak(user.id);
+        await loadTwentyHourProgress(user.id, learnerLanguage.id, learnerLanguage);
         localStorage.setItem("Nahtive_current_learner_language", learnerLanguage.id);
 
         await loadSavedLessons(learnerLanguage.id, languageName);
