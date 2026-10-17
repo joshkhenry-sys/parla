@@ -5,6 +5,9 @@
     "api/generate-lesson.js": {
       "maxDuration": 60
     },
+    "api/evaluate-practice.js": {
+      "maxDuration": 30
+    },
     "api/generate-placement.js": {
       "maxDuration": 60
     },
