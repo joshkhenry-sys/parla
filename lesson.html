@@ -414,7 +414,7 @@ async function load(){
     if(sessionResult.error||!sessionResult.data?.session?.user){location.href="login.html";return}
     user=sessionResult.data.session.user;
     const saved=localStorage.getItem("Nahtive_current_learner_language");
-    const langResult=await Promise.race([client.from("learner_languages").select("id,level,is_current,languages(name,code)").eq("user_id",user.id),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Language data timed out.")),7000))]);
+    const langResult=await Promise.race([client.from("learner_languages").select("id,level,goal,interests,is_current,languages(name,code)").eq("user_id",user.id),new Promise((_,reject)=>setTimeout(()=>reject(new Error("Language data timed out.")),7000))]);
     if(langResult.error)throw langResult.error;
     const langs=langResult.data||[];if(!langs.length){location.href="onboarding.html";return}
     const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];current.level=["A1","A2","B1","B2","C1","C2"].includes(String(current.level||"").toUpperCase())?String(current.level).toUpperCase():"A1";localStorage.setItem("Nahtive_current_learner_language",current.id);
@@ -455,7 +455,7 @@ async function load(){
         const generationTimer=setTimeout(()=>generationController.abort(),35000);
         let gen;
         try {
-          gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level,nativeLanguage,node}),signal:generationController.signal});
+          gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level,nativeLanguage,node,goal:current.goal||"",interests:current.interests||[]}),signal:generationController.signal});
         } catch (generationError) {
           if(generationError?.name==="AbortError") throw new Error("Lesson generation timed out after 35 seconds. Please try again.");
           throw generationError;
