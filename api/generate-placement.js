@@ -72,7 +72,7 @@ Return JSON only.`;
     let lastError=null;
     for(let attempt=1;attempt<=1;attempt++){
       const controller=new AbortController();
-      const timer=setTimeout(()=>controller.abort(),20000);
+      const timer=setTimeout(()=>controller.abort(),45000);
       try{
         const response=await fetch("https://api.openai.com/v1/responses",{
           method:"POST",
