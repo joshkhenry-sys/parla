@@ -29,7 +29,7 @@ function fallbackLesson(language,code,level,node){
  ];
  const rows=(key==="es"&&String(level).toUpperCase()==="B2")?advancedSpanishB2:(FALLBACKS[raw]||FALLBACKS[key]||FALLBACKS.en);
  const advancedEsB2=key==="es"&&String(level).toUpperCase()==="B2";
- const ps=rows.map(([target,meaning,usage,example,pronunciation],i)=>({
+ const ps=rows.slice(0,3).map(([target,meaning,usage,example,pronunciation],i)=>({
    target,meaning,usage,
    breakdown:[{target,meaning}],
    example,example_meaning:meaning,pronunciation,
@@ -47,8 +47,8 @@ function fallbackLesson(language,code,level,node){
    final_challenge:{
      situation:advancedEsB2?"A friend proposes a plan you don't think will work. Explain your concern respectfully, then suggest a compromise.":String(node?.situation||"Practice this situation in a real conversation."),
      prompt:advancedEsB2?"Respond to your friend by acknowledging their idea, explaining your concern, and suggesting a compromise.":"Respond to the person in this situation using the language you just learned.",
-     choices:[ps[4].target,ps[0].target,ps[1].target,ps[2].target],
-     correct_answer:ps[4].target
+     choices:[ps[2].target,...ps[2].distractors.slice(0,3)],
+     correct_answer:ps[2].target
    }
  };
 }
@@ -91,7 +91,7 @@ export default async function handler(req,res){
    zh:[/^你好[！!。.]?$/i,/^你好吗[？?]?$/i,/^我叫\b/i],
    ar:[/^مرحبا[!.؟]?$/i,/^كيف حالك[؟?]?$/i,/^اسمي\b/i]
   };
-  const phraseCount=5;
+  const phraseCount=3;
   const prompt=`Create one Nahtive lesson for an adult learning ${language} at CEFR ${L}. Learner explanation language: ${nativeLanguage}.
 Learner target performance goal: ${goal||"Handle a meaningful real-world conversation with less hesitation."}
 Learner interests: ${interests||"Use a varied, practical adult-life scenario"}.
@@ -102,11 +102,11 @@ CEFR RULES:
 ${rules}
 
 TEACHING DESIGN:
-- Create exactly ${phraseCount} core phrases/sentence frames. They should form a coherent progression inside one situation.
+- Create exactly ${phraseCount} core phrases/sentence frames. Each phrase represents a useful subskill for the target performance goal. They should form a coherent progression inside one situation.
 - Teach true ${L} learners at their selected CEFR level. Keep the lesson practical and supported by the teaching cards; match vocabulary, sentence complexity, nuance, and task demands to ${L}.
-- Phrase 1 introduces language appropriate to ${L}. Later phrases reuse earlier language while increasing communicative demand. Do not make Phrase 1 a generic greeting or self-introduction unless ${L} is A1 or the situation genuinely requires an advanced reuse.
+- Phrase 1 introduces the most useful building block. Later phrases reuse earlier language while increasing communicative demand toward the learner's real-world goal. Do not make Phrase 1 a generic greeting or self-introduction unless ${L} is A1 or the situation genuinely requires an advanced reuse.
 - Every phrase must be genuinely natural for native speakers.
-- Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
+- Prioritize three high-value phrases or sentence frames that unlock the target performance. Avoid vocabulary overload. Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
 - For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the target language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
 - Give 4-6 plausible target-language distractors per phrase that require understanding. For A1 and above, use plausible target-language alternatives that require understanding. NEVER use English distractors unless the target language itself is English.
 - All target-language learner content — target, example, dialogue, build_target, build_words, and distractors — must stay in the requested target language. The native language (${nativeLanguage}) is allowed only in meaning/usage/example_meaning/build_meaning and breakdown explanations.
