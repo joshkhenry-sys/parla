@@ -5,6 +5,9 @@
     "api/generate-lesson.js": {
       "maxDuration": 60
     },
+    "api/generate-placement.js": {
+      "maxDuration": 60
+    },
     "api/chat.js": {
       "maxDuration": 30
     },
