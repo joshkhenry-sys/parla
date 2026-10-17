@@ -113,7 +113,7 @@ document.getElementById("instructionLanguage").addEventListener("change",()=>{do
 async function begin(){
   const button=document.querySelector("#intro .next"); button.disabled=true; button.textContent="Building your placement check…";
   try{
-    const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),40000);
+    const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),55000);
     const response=await fetch("/api/generate-placement",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:language.languages?.name||"Spanish",instructionLanguage:(document.getElementById("instructionLanguage")?.value==="Other"?document.getElementById("otherInstructionLanguage")?.value?.trim():document.getElementById("instructionLanguage")?.value)||"English"}),signal:controller.signal});
     clearTimeout(timer);
     if(!response.ok) throw new Error("Assessment unavailable");
