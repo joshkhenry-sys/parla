@@ -343,7 +343,7 @@ function renderBuild(c){
     // the learner selected the correct words. Compare normalized text, not raw bytes.
     const correct=normalizeBuildAnswer(answer)===normalizeBuildAnswer(expected);
     if(correct){
-      checked=true;sound("good");addXP(15);$("feedback").textContent="Perfect build. You actually constructed it.";$("feedback").className="feedback good";$("check").textContent="Continue →";$("check").onclick=next;
+      checked=true;sound("good");addXP(15);answers.push({type:"build",target:expected,attempt:answer,correct:true});$("feedback").textContent="Good. You reconstructed the sentence from memory and context.";$("feedback").className="feedback good";$("check").textContent="Continue →";$("check").onclick=next;
       $("built").classList.add("pop");
     }else{
       sound("bad");$("feedback").textContent=answer?"Not quite. Check the word order and try again.":"Build the sentence first.";$("feedback").className="feedback bad";
@@ -408,8 +408,9 @@ function confetti(){
 }
 async function finish(){
   if(finished)return;finished=true;const practiceSecondsTotal=stopPracticeClock();sound("complete");addXP(40);confetti();
-  const correct=answers.filter(x=>x.correct).length,total=answers.filter(x=>x.type==="recall"||x.type==="challenge").length+lesson.phrases.length;
-  const score=total?Math.round((correct+lesson.phrases.length)/Math.max(total,1)*100):100;
+  const scored=answers.filter(x=>["build","recall","challenge","production"].includes(x.type));
+  const correct=scored.filter(x=>x.correct).length,total=scored.length;
+  const score=total?Math.round(correct/total*100):0;
   try{
     if(baseLesson?.id){
       await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score,responses:{answers,xp,completed:true}});
@@ -476,7 +477,22 @@ async function load(){
         const generationTimer=setTimeout(()=>generationController.abort(),35000);
         let gen;
         try {
-          gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level,nativeLanguage,node,goal:current.goal||"",interests:current.interests||[]}),signal:generationController.signal});
+          const recentLessons=await client.from("lessons").select("id").eq("learner_language_id",current.id).order("created_at",{ascending:false}).limit(6);
+          let weakSkills=[];
+          if(!recentLessons.error&&recentLessons.data?.length){
+            const recentAttempts=await client.from("lesson_attempts").select("lesson_id,score,responses").in("lesson_id",recentLessons.data.map(x=>x.id)).order("created_at",{ascending:false}).limit(6);
+            if(!recentAttempts.error){
+              const misses=[];
+              (recentAttempts.data||[]).forEach(attempt=>{
+                (attempt.responses?.answers||[]).forEach(answer=>{
+                  if(answer.correct===false)misses.push({skill:String(answer.type||"practice"),target:String(answer.target||"").slice(0,140),focus:String(answer.nextFocus||"").slice(0,180)});
+                  if(answer.type==="production"&&answer.nextFocus)misses.push({skill:"production",target:String(answer.target||"").slice(0,140),focus:String(answer.nextFocus).slice(0,180)});
+                });
+              });
+              weakSkills=misses.slice(-8);
+            }
+          }
+          gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level,nativeLanguage,node,goal:current.goal||"",interests:current.interests||[],weakSkills}),signal:generationController.signal});
         } catch (generationError) {
           if(generationError?.name==="AbortError") throw new Error("Lesson generation timed out after 35 seconds. Please try again.");
           throw generationError;
