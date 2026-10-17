@@ -244,7 +244,7 @@ function makeBank(p,all){
 }
 function buildCards(row){
   const c=normalizeLesson(row);c.phrases.forEach(fallbackNormalize);
-  const p=c.phrases.slice(0,5);
+  const p=c.phrases.slice(0,3);
   if(p.length<2)throw new Error("This lesson needs at least two taught phrases.");
   const cards=[{type:"scene",stage:"Mission",scene:c.scene,topic:c.topic}];
   p.forEach((phrase,i)=>{
@@ -365,20 +365,41 @@ function renderRecall(c){
   $("next").onclick=next;
 }
 function renderChallenge(c){
-  const fc=c.finalChallenge;let answered=false;
-  let challengeChoices=fc.choices;
-  const choices=shuffle(challengeChoices);
-  const learnedPhrases=(c.phrases||[]).slice(0,5).map(p=>'<div style="padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);font-size:13px;margin-top:4px">'+esc(p.meaning)+'</div></div>').join("");
-  shell('<span class="stage-chip">Final challenge</span><div class="question">'+esc(fc.prompt)+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation)+'</p></div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Use what you learned</div><p style="margin-bottom:6px;color:var(--muted);font-size:13px">Review these phrases before choosing your response.</p>'+learnedPhrases+'</div><div class="options">'+choices.map((o,i)=>'<button class="option" data-value="'+esc(o)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+esc(o)+'</button>').join("")+'</div><div class="feedback" id="feedback"></div>',
-    '<button class="primary-lesson" id="next" disabled>Finish lesson →</button>');
-  document.querySelectorAll(".option").forEach(btn=>btn.onclick=()=>{
-    if(answered)return;answered=true;const ok=normalizeBuildAnswer(btn.dataset.value)===normalizeBuildAnswer(fc.correct_answer);btn.classList.add(ok?"correct":"wrong");document.querySelectorAll(".option").forEach(x=>x.disabled=true);
-    $("feedback").textContent=ok?"That fits the situation.":"Not quite. Read the situation and prompt again, then compare what each response actually means.";
-    $("feedback").className="feedback "+(ok?"good":"bad");
-    answers.push({type:"challenge",target:fc.correct_answer,choice:btn.dataset.value,correct:ok});
-    if(ok){sound("good");addXP(25)}else sound("bad");
-    $("next").disabled=false;
-  });
+  const fc=c.finalChallenge;let submitted=false;
+  const learnedPhrases=(c.phrases||[]).slice(0,3).map(p=>'<div style="padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);font-size:13px;margin-top:4px">'+esc(p.meaning)+'</div></div>').join("");
+  shell('<span class="stage-chip">Use it for real</span><div class="question">'+esc(fc.prompt)+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation)+'</p></div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Useful building blocks</div>'+learnedPhrases+'</div><label for="practiceResponse" style="display:block;font-weight:750;margin:16px 0 8px">Write what you would actually say</label><textarea id="practiceResponse" rows="4" maxlength="1200" placeholder="Respond in '+esc(profile?.name||"the language you're learning")+'…"></textarea><div class="feedback" id="feedback" aria-live="polite"></div><div id="practiceResult" style="display:none;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px"><div class="explain-label">A natural version</div><p id="practiceCorrection" style="font-weight:750"></p><div class="explain-label" style="margin-top:12px">Your next focus</div><p id="practiceNextFocus"></p></div>',
+    '<button class="primary-lesson" id="evaluate">Get feedback →</button><button class="secondary-lesson" id="next" disabled>Finish lesson</button>');
+  $("evaluate").onclick=async()=>{
+    if(submitted)return;
+    const responseText=$("practiceResponse").value.trim();
+    if(!responseText){$("feedback").textContent="Try writing a response first. A rough attempt is better than a blank answer.";$("feedback").className="feedback bad";return}
+    const button=$("evaluate");button.disabled=true;button.textContent="Reviewing your response…";
+    $("feedback").textContent="Checking whether your response communicates the right idea—not whether it matches one exact sentence.";
+    try{
+      const res=await fetch("/api/evaluate-practice",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+        language:profile?.name||lesson.language_name||"the target language",level:profile?.level||lesson.level||"A1",nativeLanguage:lesson.native_language||"English",
+        goal:profile?.goal||lesson.scene?.mission||"",situation:fc.situation,prompt:fc.prompt,modelAnswer:fc.correct_answer,
+        phrases:(c.phrases||[]).slice(0,3).map(p=>({target:p.target,meaning:p.meaning})),response:responseText
+      })});
+      const result=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error(result.error||"Feedback is temporarily unavailable.");
+      submitted=true;
+      $("feedback").textContent=result.feedback;
+      $("feedback").className="feedback "+(result.rating==="strong"?"good":"");
+      $("practiceCorrection").textContent=result.correction;
+      $("practiceNextFocus").textContent=result.nextFocus;
+      $("practiceResult").style.display="block";
+      $("evaluate").style.display="none";
+      $("practiceResponse").disabled=true;
+      $("next").disabled=false;
+      const didWell=result.rating==="strong";
+      answers.push({type:"production",target:fc.correct_answer,attempt:responseText,correct:didWell,rating:result.rating,feedback:result.feedback,nextFocus:result.nextFocus});
+      if(didWell){sound("good");addXP(25)}else{sound("click");addXP(10)}
+    }catch(error){
+      $("feedback").textContent=error.message||"Feedback could not be loaded. Your response is still here—try again.";
+      $("feedback").className="feedback bad";button.disabled=false;button.textContent="Try feedback again";
+    }
+  };
   $("next").onclick=next;
 }
 function confetti(){
@@ -423,13 +444,13 @@ async function load(){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").eq("id",requested).maybeSingle();
       if(r.error)throw r.error;if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("This lesson is not available.");baseLesson=r.data;
       const challenge=baseLesson.content?.final_challenge;
-      if(String(baseLesson.level||"A1").toUpperCase()!==current.level||!baseLesson.curriculum_node_id||!Array.isArray(baseLesson.content?.phrases)||baseLesson.content.phrases.length<5||!challenge||!Array.isArray(challenge.choices)||challenge.choices.length!==4||!challenge.choices.includes(challenge.correct_answer)){location.replace("lesson.html");return;}
+      if(String(baseLesson.level||"A1").toUpperCase()!==current.level||!baseLesson.curriculum_node_id||!Array.isArray(baseLesson.content?.phrases)||baseLesson.content.phrases.length<3||!challenge||!Array.isArray(challenge.choices)||challenge.choices.length!==4||!challenge.choices.includes(challenge.correct_answer)){location.replace("lesson.html");return;}
     }else{
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,curriculum_nodes(sequence_number,level_band)").eq("learner_language_id",current.id).order("created_at",{ascending:false}).limit(80);
       if(r.error)throw r.error;
       const lessons=(r.data||[]).map(x=>({...x,learner_languages:{id:current.id,user_id:user.id,level:current.level,languages:current.languages}}));
       const wantedCode=String(current.languages?.code||"").toLowerCase();
-      const requiredPhraseCount=5;const allowedBands=(current.level==="C1"||current.level==="C2")?[current.level,"C1/C2"]:[current.level];const valid=lessons.filter(x=>String(x.level||"A1").toUpperCase()===current.level&&allowedBands.includes(String(x.curriculum_nodes?.level_band||"").toUpperCase())&&(()=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];const storedCode=String(x?.content?.language_code||"").toLowerCase();const fc=x?.content?.final_challenge;return !!x.curriculum_node_id&&storedCode===wantedCode&&ps.length>=requiredPhraseCount&&ps.slice(0,requiredPhraseCount).every(p=>p&&p.target&&p.meaning&&p.build_target&&Array.isArray(p.build_words)&&p.build_words.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)&&!!fc&&typeof fc.situation==="string"&&fc.situation.trim()&&typeof fc.prompt==="string"&&fc.prompt.trim()&&Array.isArray(fc.choices)&&fc.choices.length===4&&typeof fc.correct_answer==="string"&&fc.choices.includes(fc.correct_answer)})());
+      const requiredPhraseCount=3;const allowedBands=(current.level==="C1"||current.level==="C2")?[current.level,"C1/C2"]:[current.level];const valid=lessons.filter(x=>String(x.level||"A1").toUpperCase()===current.level&&allowedBands.includes(String(x.curriculum_nodes?.level_band||"").toUpperCase())&&(()=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];const storedCode=String(x?.content?.language_code||"").toLowerCase();const fc=x?.content?.final_challenge;return !!x.curriculum_node_id&&storedCode===wantedCode&&ps.length>=requiredPhraseCount&&ps.slice(0,requiredPhraseCount).every(p=>p&&p.target&&p.meaning&&p.build_target&&Array.isArray(p.build_words)&&p.build_words.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)&&!!fc&&typeof fc.situation==="string"&&fc.situation.trim()&&typeof fc.prompt==="string"&&fc.prompt.trim()&&Array.isArray(fc.choices)&&fc.choices.length===4&&typeof fc.correct_answer==="string"&&fc.choices.includes(fc.correct_answer)})());
       const attempts=valid.length?await client.from("lesson_attempts").select("lesson_id").in("lesson_id",valid.map(x=>x.id)):{data:[],error:null};
       if(attempts.error)throw attempts.error;
       const completed=new Set((attempts.data||[]).map(x=>x.lesson_id));
@@ -476,11 +497,11 @@ async function load(){
     const currentCode=String(linked?.languages?.code||"").toLowerCase();
     if(!lessonCode||lessonCode!==currentCode)throw new Error("This lesson belongs to a different language. Please start the next lesson.");
     if(!linked?.id)throw new Error("This language is not linked to your account.");
-    profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(linked.level||baseLesson.level||current.level||"A1").toUpperCase()};
+    profile={id:linked.id,name:linked.languages?.name||"Language",code:linked.languages?.code||"en-US",level:String(linked.level||baseLesson.level||current.level||"A1").toUpperCase(),goal:current.goal||"",interests:current.interests||[]};
     lesson=buildCards(baseLesson);
     $("language").textContent=profile.name+" · "+profile.level;
     $("title").textContent=lesson.title;
-    $("intro").textContent=(lesson.scene?.stage_name||baseLesson.curriculum_nodes?.stage_name||"Real-world practice")+" · Learn, build, recall.";
+    $("intro").textContent=(lesson.scene?.stage_name||baseLesson.curriculum_nodes?.stage_name||"Real-world practice")+" · Learn, build, use it.";
     clearTimeout(lessonLoadWatchdog);    $("loading").style.display="none";$("lesson").style.display="block";startPracticeClock();render();
   }catch(e){
     console.error("Nahtive lesson load failed",e);
