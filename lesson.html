@@ -352,16 +352,38 @@ function renderBuild(c){
   };
 }
 function renderRecall(c){
-  const p=c.phrase;let answered=false;
-  shell('<span class="stage-chip">Recall</span><div class="question">'+esc("Which phrase means “"+p.meaning+"”?")+'</div><div class="options">'+c.choices.map((o,i)=>'<button class="option" data-value="'+esc(o)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span>'+esc(o)+'</button>').join("")+'</div><div class="feedback" id="feedback"></div>',
-    '<button class="primary-lesson" id="next" disabled>Continue →</button>');
-  document.querySelectorAll(".option").forEach(btn=>btn.onclick=()=>{
-    if(answered)return;answered=true;const ok=btn.dataset.value===p.target;btn.classList.add(ok?"correct":"wrong");document.querySelectorAll(".option").forEach(x=>x.disabled=true);
-    $("feedback").textContent=ok?"Yes. You remembered it.":"The phrase you want is: "+p.target;$("feedback").className="feedback "+(ok?"good":"bad");
-    answers.push({type:"recall",target:p.target,choice:btn.dataset.value,correct:ok});
-    if(ok){sound("good");addXP(10)}else sound("bad");
-    $("next").disabled=false;
-  });
+  const p=c.phrase;let attempts=0,solved=false,checked=false;
+  shell('<span class="stage-chip">Recall from memory</span><div class="question">How would you say this without looking?</div><div class="build-target" style="margin:16px 0">'+esc(p.meaning)+'</div><p style="color:var(--muted);font-size:13px">Try to retrieve the phrase from memory before checking. Small mistakes are useful information.</p><label for="recallResponse" style="display:block;font-weight:750;margin:14px 0 8px">Your answer in '+esc(profile?.name||"the language you're learning")+'</label><textarea id="recallResponse" rows="2" maxlength="500" placeholder="Type the phrase you remember…"></textarea><div class="feedback" id="feedback" aria-live="polite"></div><div id="recallCorrection" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);margin-top:5px">'+esc(p.usage||p.meaning)+'</div></div>',
+    '<button class="primary-lesson" id="checkRecall">Check my memory</button><button class="secondary-lesson" id="next" disabled>Continue →</button>');
+  $("checkRecall").onclick=()=>{
+    if(solved)return;
+    const response=$("recallResponse").value.trim();
+    if(!response){$("feedback").textContent="Give it a try first—even if you’re unsure.";$("feedback").className="feedback bad";return}
+    attempts++;
+    const ok=normalizeBuildAnswer(response)===normalizeBuildAnswer(p.target);
+    answers.push({type:"recall",target:p.target,attempt:response,correct:ok});
+    if(ok){
+      solved=true;sound("good");addXP(15);
+      $("feedback").textContent="You retrieved it without the answer choices. That’s the kind of practice that builds recall.";
+      $("feedback").className="feedback good";
+      $("recallResponse").disabled=true;$("checkRecall").style.display="none";$("next").disabled=false;
+      $("recallCorrection").style.display="block";
+    }else if(attempts===1){
+      sound("bad");
+      $("feedback").textContent="Not quite yet. Compare the structure below, then try once more from memory.";
+      $("feedback").className="feedback bad";
+      $("recallCorrection").style.display="block";
+      $("checkRecall").textContent="Try once more";
+      $("recallResponse").value="";
+      $("recallResponse").placeholder="Now try again without copying…";
+      $("recallResponse").focus();
+    }else{
+      solved=true;sound("click");addXP(5);
+      $("feedback").textContent="Now you’ve seen the correction. Say it out loud once, then continue and retrieve it again in a later session.";
+      $("feedback").className="feedback";
+      $("recallResponse").disabled=true;$("checkRecall").style.display="none";$("next").disabled=false;
+    }
+  };
   $("next").onclick=next;
 }
 function renderChallenge(c){
