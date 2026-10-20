@@ -137,7 +137,7 @@
       <div>
         <div class="lesson-eyebrow" id="language">LANGUAGE · A1</div>
         <h1 id="title">Lesson</h1>
-        <p class="lesson-intro" id="intro">Learn it. Build it. Use it.</p>
+        <p class="lesson-intro" id="intro">Learn it. Understand it. Use it.</p>
       </div>
       <div class="xp-pill"><span class="xp-star">★</span><span id="xpLive">0 XP</span></div>
     </div>
@@ -411,7 +411,7 @@ function confetti(){
 }
 async function finish(){
   if(finished)return;finished=true;const practiceSecondsTotal=stopPracticeClock();sound("complete");addXP(40);confetti();
-  const scored=answers.filter(x=>["build","recall","challenge","production"].includes(x.type));
+  const scored=answers.filter(x=>["build","recall","understanding","challenge","production"].includes(x.type));
   const correct=scored.filter(x=>x.correct).length,total=scored.length;
   const score=total?Math.round(correct/total*100):0;
   try{
@@ -428,7 +428,7 @@ async function finish(){
   }catch(e){console.warn("completion save",e)}
   sessionStorage.setItem("nahtive_lesson_completed","true");sessionStorage.setItem("nahtive_last_lesson_title",lesson.title);
   $("stage").textContent="Complete";$("count").textContent="";$("fill").style.width="100%";
-  $("card").innerHTML='<section class="lesson-card final-card pop"><div class="finish-badge">★</div><div class="stage-chip">Lesson complete</div><h2>You built it.</h2><p>You learned the language, reconstructed it, recalled it, and used it in a challenge.</p><div class="xp-total">+'+xp+'</div><div class="xp-label">XP earned</div><div class="learned">'+lesson.phrases.map(p=>'<div class="learned-item"><strong>'+esc(p.target)+'</strong><span>'+esc(p.meaning)+'</span></div>').join("")+'</div><a class="primary-lesson" href="dashboard.html" style="display:inline-flex;text-decoration:none">Keep going →</a></section>';
+  $("card").innerHTML='<section class="lesson-card final-card pop"><div class="finish-badge">★</div><div class="stage-chip">Lesson complete</div><h2>You built it.</h2><p>You learned useful phrases, checked your understanding, and chose how to use them in a real situation.</p><div class="xp-total">+'+xp+'</div><div class="xp-label">XP earned</div><div class="learned">'+lesson.phrases.map(p=>'<div class="learned-item"><strong>'+esc(p.target)+'</strong><span>'+esc(p.meaning)+'</span></div>').join("")+'</div><a class="primary-lesson" href="dashboard.html" style="display:inline-flex;text-decoration:none">Keep going →</a></section>';
 }
 async function load(){
   try{
