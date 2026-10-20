@@ -245,36 +245,32 @@ function makeBank(p,all){
 function buildCards(row){
   const c=normalizeLesson(row);c.phrases.forEach(fallbackNormalize);
   const p=c.phrases.slice(0,3);
-  if(p.length<2)throw new Error("This lesson needs at least two taught phrases.");
+  if(p.length<1)throw new Error("This lesson has no teachable phrases.");
   const cards=[{type:"scene",stage:"Mission",scene:c.scene,topic:c.topic}];
   p.forEach((phrase,i)=>{
     cards.push({type:"teach",stage:i===0?"Learn":"Add on",phrase});
-    cards.push({type:"build",stage:"Build it",phrase,bank:makeBank(phrase,p)});
-    cards.push({type:"recall",stage:"Recall",phrase,choices:makeChoices(phrase,p)});
+    cards.push({type:"recall",stage:"Check understanding",phrase,choices:makeChoices(phrase,p)});
   });
-  const dialogue=c.dialogue.filter(x=>x?.text).slice(0,4);
-  // Older saved lessons may predate the dedicated final_challenge field.
-  // Do not reject otherwise valid lessons. Build a deterministic challenge from
-  // the lesson's own taught phrases so existing lessons remain playable.
+  const dialogue=c.dialogue.filter(x=>x&&x.text).slice(0,4);
+  const last=p[p.length-1];
   if(!c.finalChallenge||c.finalChallenge.choices.length!==4||!c.finalChallenge.correct_answer||!c.finalChallenge.choices.includes(c.finalChallenge.correct_answer)){
-    const last=p[p.length-1];
-    const choices=shuffle([last.target,...p.slice(0,-1).map(x=>x.target)]).slice(0,4);
     c.finalChallenge={
-      situation:String(c.scene?.situation||c.scene?.mission||"Use the language you just learned in this situation."),
-      prompt:String(c.scene?.mission||"Respond naturally using the language you just learned."),
-      choices,
+      situation:String(c.scene.situation||c.scene.mission||"Use the language you just learned in this situation."),
+      prompt:"Choose the response that best fits the situation.",
+      choices:[last.target,...(last.distractors||[]).filter(x=>x!==last.target)].slice(0,4),
       correct_answer:last.target
     };
   }
-  cards.push({type:"challenge",stage:"Final challenge",phrase:p[p.length-1],dialogue,finalChallenge:c.finalChallenge});
+  cards.push({type:"challenge",stage:"Use it",phrase:last,dialogue,finalChallenge:c.finalChallenge});
   return {...c,phrases:p,cards};
 }
 function makeChoices(p,all){
-  // The correct answer must always be present. Use only target-language phrases
-  // from this lesson so recall never falls back to English filler answers.
-  const correct=String(p.target||"");
-  const alternatives=shuffle(all.filter(x=>x!==p).map(x=>String(x.target||"")).filter(Boolean)).slice(0,3);
-  return shuffle([correct,...alternatives]);
+  const correct=String(p.target||"").trim();
+  const alternatives=(p.distractors||[]).map(x=>String(x||"").trim()).filter(x=>x&&x!==correct);
+  const seen=new Set([correct]);
+  const unique=alternatives.filter(x=>{if(seen.has(x))return false;seen.add(x);return true;});
+  const fallback=all.filter(x=>x!==p).map(x=>String(x.target||"").trim()).filter(x=>x&&!seen.has(x)&&seen.add(x));
+  return shuffle([correct,...unique,...fallback].slice(0,4));
 }
 function addXP(n){
   xp+=n;$("xpLive").textContent=xp+" XP";
@@ -352,76 +348,61 @@ function renderBuild(c){
   };
 }
 function renderRecall(c){
-  const p=c.phrase;let attempts=0,solved=false,checked=false;
-  shell('<span class="stage-chip">Recall from memory</span><div class="question">How would you say this without looking?</div><div class="build-target" style="margin:16px 0">'+esc(p.meaning)+'</div><p style="color:var(--muted);font-size:13px">Try to retrieve the phrase from memory before checking. Small mistakes are useful information.</p><label for="recallResponse" style="display:block;font-weight:750;margin:14px 0 8px">Your answer in '+esc(profile?.name||"the language you're learning")+'</label><textarea id="recallResponse" rows="2" maxlength="500" placeholder="Type the phrase you remember…"></textarea><div class="feedback" id="feedback" aria-live="polite"></div><div id="recallCorrection" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);margin-top:5px">'+esc(p.usage||p.meaning)+'</div></div>',
-    '<button class="primary-lesson" id="checkRecall">Check my memory</button><button class="secondary-lesson" id="next" disabled>Continue →</button>');
-  $("checkRecall").onclick=()=>{
-    if(solved)return;
-    const response=$("recallResponse").value.trim();
-    if(!response){$("feedback").textContent="Give it a try first—even if you’re unsure.";$("feedback").className="feedback bad";return}
-    attempts++;
-    const ok=normalizeBuildAnswer(response)===normalizeBuildAnswer(p.target);
-    answers.push({type:"recall",target:p.target,attempt:response,correct:ok});
-    if(ok){
-      solved=true;sound("good");addXP(15);
-      $("feedback").textContent="You retrieved it without the answer choices. That’s the kind of practice that builds recall.";
+  const p=c.phrase;
+  const choices=(c.choices||makeChoices(p,lesson.phrases)).slice(0,4);
+  let selected=false;
+  const options=choices.map((choice,i)=>'<button class="option" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(choice)+'</span></button>').join("");
+  shell('<span class="stage-chip">Check understanding</span><div class="question">Which phrase means this?</div><div class="build-target" style="margin:16px 0">'+esc(p.meaning)+'</div><p style="color:var(--muted);font-size:13px">You just learned this phrase. Choose the closest meaning, then continue.</p><div class="options" id="recallOptions">'+options+'</div><div class="feedback" id="feedback" aria-live="polite"></div><div id="recallCorrection" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);margin-top:5px">'+esc(p.usage||p.meaning)+'</div></div>',
+    '<button class="primary-lesson" id="next" disabled>Continue →</button>');
+  document.querySelectorAll("#recallOptions .option").forEach(button=>button.onclick=()=>{
+    if(selected)return;selected=true;
+    const correct=normalizeBuildAnswer(button.dataset.choice)===normalizeBuildAnswer(p.target);
+    document.querySelectorAll("#recallOptions .option").forEach(option=>{
+      option.disabled=true;
+      if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(p.target))option.classList.add("correct");
+    });
+    if(correct){
+      button.classList.add("correct");sound("good");addXP(10);
+      $("feedback").textContent="Correct. You recognized the phrase in context.";
       $("feedback").className="feedback good";
-      $("recallResponse").disabled=true;$("checkRecall").style.display="none";$("next").disabled=false;
-      $("recallCorrection").style.display="block";
-    }else if(attempts===1){
-      sound("bad");
-      $("feedback").textContent="Not quite yet. Compare the structure below, then try once more from memory.";
-      $("feedback").className="feedback bad";
-      $("recallCorrection").style.display="block";
-      $("checkRecall").textContent="Try once more";
-      $("recallResponse").value="";
-      $("recallResponse").placeholder="Now try again without copying…";
-      $("recallResponse").focus();
     }else{
-      solved=true;sound("click");addXP(5);
-      $("feedback").textContent="Now you’ve seen the correction. Say it out loud once, then continue and retrieve it again in a later session.";
+      button.classList.add("wrong");sound("click");addXP(5);
+      $("feedback").textContent="Not quite—and that's okay. The correct phrase is shown below. Keep going.";
       $("feedback").className="feedback";
-      $("recallResponse").disabled=true;$("checkRecall").style.display="none";$("next").disabled=false;
     }
-  };
+    answers.push({type:"understanding",target:p.target,attempt:button.dataset.choice,correct});
+    $("recallCorrection").style.display="block";$("next").disabled=false;
+  });
   $("next").onclick=next;
 }
 function renderChallenge(c){
-  const fc=c.finalChallenge;let submitted=false;
-  const learnedPhrases=(c.phrases||[]).slice(0,3).map(p=>'<div style="padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);font-size:13px;margin-top:4px">'+esc(p.meaning)+'</div></div>').join("");
-  shell('<span class="stage-chip">Use it for real</span><div class="question">'+esc(fc.prompt)+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation)+'</p></div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Useful building blocks</div>'+learnedPhrases+'</div><label for="practiceResponse" style="display:block;font-weight:750;margin:16px 0 8px">Write what you would actually say</label><textarea id="practiceResponse" rows="4" maxlength="1200" placeholder="Respond in '+esc(profile?.name||"the language you're learning")+'…"></textarea><div class="feedback" id="feedback" aria-live="polite"></div><div id="practiceResult" style="display:none;margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:14px"><div class="explain-label">A natural version</div><p id="practiceCorrection" style="font-weight:750"></p><div class="explain-label" style="margin-top:12px">Your next focus</div><p id="practiceNextFocus"></p></div>',
-    '<button class="primary-lesson" id="evaluate">Get feedback →</button><button class="secondary-lesson" id="next" disabled>Finish lesson</button>');
-  $("evaluate").onclick=async()=>{
-    if(submitted)return;
-    const responseText=$("practiceResponse").value.trim();
-    if(!responseText){$("feedback").textContent="Try writing a response first. A rough attempt is better than a blank answer.";$("feedback").className="feedback bad";return}
-    const button=$("evaluate");button.disabled=true;button.textContent="Reviewing your response…";
-    $("feedback").textContent="Checking whether your response communicates the right idea—not whether it matches one exact sentence.";
-    try{
-      const res=await fetch("/api/evaluate-practice",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-        language:profile?.name||lesson.language_name||"the target language",level:profile?.level||lesson.level||"A1",nativeLanguage:lesson.native_language||"English",
-        goal:profile?.goal||lesson.scene?.mission||"",situation:fc.situation,prompt:fc.prompt,modelAnswer:fc.correct_answer,
-        phrases:(c.phrases||[]).slice(0,3).map(p=>({target:p.target,meaning:p.meaning})),response:responseText
-      })});
-      const result=await res.json().catch(()=>({}));
-      if(!res.ok)throw new Error(result.error||"Feedback is temporarily unavailable.");
-      submitted=true;
-      $("feedback").textContent=result.feedback;
-      $("feedback").className="feedback "+(result.rating==="strong"?"good":"");
-      $("practiceCorrection").textContent=result.correction;
-      $("practiceNextFocus").textContent=result.nextFocus;
-      $("practiceResult").style.display="block";
-      $("evaluate").style.display="none";
-      $("practiceResponse").disabled=true;
-      $("next").disabled=false;
-      const didWell=result.rating==="strong";
-      answers.push({type:"production",target:fc.correct_answer,attempt:responseText,correct:didWell,rating:result.rating,feedback:result.feedback,nextFocus:result.nextFocus});
-      if(didWell){sound("good");addXP(25)}else{sound("click");addXP(10)}
-    }catch(error){
-      $("feedback").textContent=error.message||"Feedback could not be loaded. Your response is still here—try again.";
-      $("feedback").className="feedback bad";button.disabled=false;button.textContent="Try feedback again";
+  const fc=c.finalChallenge||{};
+  const choices=Array.isArray(fc.choices)?fc.choices.slice(0,4):[];
+  if(!choices.length){choices.push(c.phrase.target);}
+  const options=choices.map((choice,i)=>'<button class="option" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(choice)+'</span></button>').join("");
+  let selected=false;
+  const learnedPhrases=(lesson.phrases||[]).map(p=>'<div style="padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);font-size:13px;margin-top:4px">'+esc(p.meaning)+'</div></div>').join("");
+  shell('<span class="stage-chip">Use it in context</span><div class="question">'+esc(fc.prompt||"Choose the response that best fits the situation.")+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation||lesson.scene?.situation||"Use the language you just learned.")+'</p></div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Phrases you learned</div>'+learnedPhrases+'</div><div class="options" id="challengeOptions">'+options+'</div><div class="feedback" id="feedback" aria-live="polite"></div><div id="challengeCorrection" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>'+esc(fc.correct_answer||c.phrase.target)+'</strong><div style="color:var(--muted);margin-top:5px">Review the phrase and notice how it fits the situation.</div></div>',
+    '<button class="primary-lesson" id="next" disabled>Finish lesson →</button>');
+  document.querySelectorAll("#challengeOptions .option").forEach(button=>button.onclick=()=>{
+    if(selected)return;selected=true;
+    const correct=normalizeBuildAnswer(button.dataset.choice)===normalizeBuildAnswer(fc.correct_answer||c.phrase.target);
+    document.querySelectorAll("#challengeOptions .option").forEach(option=>{
+      option.disabled=true;
+      if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(fc.correct_answer||c.phrase.target))option.classList.add("correct");
+    });
+    if(correct){
+      button.classList.add("correct");sound("good");addXP(15);
+      $("feedback").textContent="That fits the situation. Nice work.";
+      $("feedback").className="feedback good";
+    }else{
+      button.classList.add("wrong");sound("click");addXP(5);
+      $("feedback").textContent="Not the best fit, but you can still finish. Review the answer and keep moving.";
+      $("feedback").className="feedback";
     }
-  };
+    answers.push({type:"challenge",target:fc.correct_answer||c.phrase.target,attempt:button.dataset.choice,correct});
+    $("challengeCorrection").style.display="block";$("next").disabled=false;
+  });
   $("next").onclick=next;
 }
 function confetti(){
