@@ -242,6 +242,19 @@ function makeBank(p,all){
   const count=4;
   return shuffle([...correct,...unique.slice(0,count)]);
 }
+function cleanChallengeChoices(values){
+  const source=Array.isArray(values)?values.map(String):[String(values||"")];
+  const unique=[];
+  source.forEach(raw=>{
+    // Some older lessons stored A/B/C/D options as one concatenated string.
+    const parts=raw.replace(/([B-D])(?=[A-Z][a-z])/g,"\n$1").split(/\n/);
+    parts.forEach((part,i)=>{
+      const cleaned=part.trim().replace(/^[A-D][.)\s]*/,"").trim();
+      if(cleaned&&!unique.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(cleaned)))unique.push(cleaned);
+    });
+  });
+  return unique.slice(0,4);
+}
 function buildCards(row){
   const c=normalizeLesson(row);c.phrases.forEach(fallbackNormalize);
   const p=c.phrases.slice(0,3);
@@ -377,7 +390,7 @@ function renderRecall(c){
 }
 function renderChallenge(c){
   const fc=c.finalChallenge||{};
-  const choices=Array.isArray(fc.choices)?fc.choices.slice(0,4):[];
+  const choices=cleanChallengeChoices(fc.choices);
   if(!choices.length){choices.push(c.phrase.target);}
   const options=choices.map((choice,i)=>'<button class="option" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(choice)+'</span></button>').join("");
   let selected=false;
