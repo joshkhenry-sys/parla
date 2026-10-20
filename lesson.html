@@ -392,11 +392,11 @@ function renderChallenge(c){
   const fc=c.finalChallenge||{};
   let choices=cleanChallengeChoices(fc.choices);
   if(!choices.length){choices.push(c.phrase.target);}
-  let correctAnswer=String(fc.correct_answer||c.phrase.target).replace(/^[A-D][.)\\s]+/,"").trim();
+  let correctAnswer=String(fc.correct_answer||c.phrase.target).replace(/^[A-D][.)\s]+/,"").trim();
   const taskText=String(fc.prompt||"")+" "+String(fc.situation||"");
   if(/preferenc|haz.{0,30}pregunta|ask.{0,30}question/i.test(taskText)){
-    const preference=(lesson.phrases||[]).find(p=>/\\bI (?:really )?like\\b|\\bI prefer\\b|\\bme gusta\\b/i.test(p.target));
-    const followUp=(lesson.phrases||[]).find(p=>/\\bwhat about you\\b|\\bhow about you\\b|\\by tú\\b/i.test(p.target));
+    const preference=(lesson.phrases||[]).find(p=>/\bI (?:really )?like\b|\bI prefer\b|\bme gusta\b/i.test(p.target));
+    const followUp=(lesson.phrases||[]).find(p=>/\bwhat about you\b|\bhow about you\b|\by tú\b/i.test(p.target));
     if(preference&&followUp){
       correctAnswer=preference.target.replace(/[.!?]+$/,"")+". "+followUp.target;
       choices=[correctAnswer,...choices.filter(x=>normalizeBuildAnswer(x)!==normalizeBuildAnswer(correctAnswer)).slice(0,3)];
