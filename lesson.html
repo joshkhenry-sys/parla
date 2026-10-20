@@ -390,16 +390,26 @@ function renderRecall(c){
 }
 function renderChallenge(c){
   const fc=c.finalChallenge||{};
-  const choices=cleanChallengeChoices(fc.choices);
+  let choices=cleanChallengeChoices(fc.choices);
   if(!choices.length){choices.push(c.phrase.target);}
+  let correctAnswer=String(fc.correct_answer||c.phrase.target).replace(/^[A-D][.)\\s]+/,"").trim();
+  const taskText=String(fc.prompt||"")+" "+String(fc.situation||"");
+  if(/preferenc|haz.{0,30}pregunta|ask.{0,30}question/i.test(taskText)){
+    const preference=(lesson.phrases||[]).find(p=>/\\bI (?:really )?like\\b|\\bI prefer\\b|\\bme gusta\\b/i.test(p.target));
+    const followUp=(lesson.phrases||[]).find(p=>/\\bwhat about you\\b|\\bhow about you\\b|\\by tú\\b/i.test(p.target));
+    if(preference&&followUp){
+      correctAnswer=preference.target.replace(/[.!?]+$/,"")+". "+followUp.target;
+      choices=[correctAnswer,...choices.filter(x=>normalizeBuildAnswer(x)!==normalizeBuildAnswer(correctAnswer)).slice(0,3)];
+    }
+  }
   const options=choices.map((choice,i)=>'<button class="option" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(choice)+'</span></button>').join("");
   let selected=false;
   const learnedPhrases=(lesson.phrases||[]).map(p=>'<div style="padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);font-size:13px;margin-top:4px">'+esc(p.meaning)+'</div></div>').join("");
-  shell('<span class="stage-chip">Use it in context</span><div class="question">'+esc(fc.prompt||"Choose the response that best fits the situation.")+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation||lesson.scene?.situation||"Use the language you just learned.")+'</p></div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Phrases you learned</div>'+learnedPhrases+'</div><div class="options" id="challengeOptions">'+options+'</div><div class="feedback" id="feedback" aria-live="polite"></div><div id="challengeCorrection" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>'+esc(fc.correct_answer||c.phrase.target)+'</strong><div style="color:var(--muted);margin-top:5px">Review the phrase and notice how it fits the situation.</div></div>',
+  shell('<span class="stage-chip">Use it in context</span><div class="question">'+esc(fc.prompt||"Choose the response that best fits the situation.")+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation||lesson.scene?.situation||"Use the language you just learned.")+'</p></div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Phrases you learned</div>'+learnedPhrases+'</div><div class="options" id="challengeOptions">'+options+'</div><div class="feedback" id="feedback" aria-live="polite"></div><div id="challengeCorrection" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>'+esc(correctAnswer)+'</strong><div style="color:var(--muted);margin-top:5px">Review the phrase and notice how it fits the situation.</div></div>',
     '<button class="primary-lesson" id="next" disabled>Finish lesson →</button>');
   document.querySelectorAll("#challengeOptions .option").forEach(button=>button.onclick=()=>{
     if(selected)return;selected=true;
-    const correct=normalizeBuildAnswer(button.dataset.choice)===normalizeBuildAnswer(fc.correct_answer||c.phrase.target);
+    const correct=normalizeBuildAnswer(button.dataset.choice)===normalizeBuildAnswer(correctAnswer);
     document.querySelectorAll("#challengeOptions .option").forEach(option=>{
       option.disabled=true;
       if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(fc.correct_answer||c.phrase.target))option.classList.add("correct");
@@ -413,7 +423,7 @@ function renderChallenge(c){
       $("feedback").textContent="Not the best fit, but you can still finish. Review the answer and keep moving.";
       $("feedback").className="feedback";
     }
-    answers.push({type:"challenge",target:fc.correct_answer||c.phrase.target,attempt:button.dataset.choice,correct});
+    answers.push({type:"challenge",target:correctAnswer,attempt:button.dataset.choice,correct});
     $("challengeCorrection").style.display="block";$("next").disabled=false;
   });
   $("next").onclick=next;
