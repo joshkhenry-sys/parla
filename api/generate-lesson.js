@@ -109,12 +109,10 @@ TEACHING DESIGN:
 - Teach true ${L} learners at their selected CEFR level. Keep the lesson practical and supported by the teaching cards; match vocabulary, sentence complexity, nuance, and task demands to ${L}.
 - Phrase 1 introduces the most useful building block. Later phrases reuse earlier language while increasing communicative demand toward the learner's real-world goal. Do not make Phrase 1 a generic greeting or self-introduction unless ${L} is A1 or the situation genuinely requires an advanced reuse.
 - Every phrase must be genuinely natural for native speakers.
-- Prioritize three high-value phrases or sentence frames that unlock the target performance. Avoid vocabulary overload. Every phrase must include a meaning, when to use it, a breakdown, a natural example, pronunciation help, and a sentence-building target. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
-- For build_words, return the exact sequence of selectable chunks needed to construct build_target. Use words/chunks that make sense for the target language; for languages normally written without spaces, use meaningful chunks rather than individual characters.
+- Prioritize three high-value phrases or sentence frames that unlock the target performance. Avoid vocabulary overload. Every phrase must include a meaning, when to use it, a short breakdown, a natural example, and pronunciation help. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
 - Give 4-6 natural target-language phrase distractors for each taught phrase. Distractors must be clearly different in meaning or use from the correct phrase; avoid near-synonyms that could also be correct. NEVER use English distractors unless the target language itself is English.
 - All target-language learner content — target, example, dialogue, build_target, build_words, and distractors — must stay in the requested target language. The native language (${nativeLanguage}) is allowed only in meaning/usage/example_meaning/build_meaning and breakdown explanations.
 - Before returning the JSON, verify that the lesson is internally consistent with the requested language and CEFR level.
-- The learner should see more words than are required, and the correct words must be scrambled by the app.
 - The lesson must be challenging without assuming knowledge above ${L}.
 - Dialogue must contain exactly 4 lines: native, learner, native, learner, and must reuse the taught language.
 - Create a dedicated final_challenge for the learner's last exercise. It must test the lesson's situation, not simply ask them to remember the last phrase. It must be answerable by recognizing one of the three taught phrases; no new grammar or vocabulary may be required.
@@ -142,10 +140,8 @@ Return JSON only.`;
         target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},
         breakdown:{type:"array",minItems:1,maxItems:6,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
         example:{type:"string"},example_meaning:{type:"string"},pronunciation:{type:"string"},
-        build_target:{type:"string"},build_meaning:{type:"string"},
-        build_words:{type:"array",minItems:1,maxItems:12,items:{type:"string"}},
         distractors:{type:"array",minItems:4,maxItems:6,items:{type:"string"}}
-       },required:["target","meaning","usage","breakdown","example","example_meaning","pronunciation","build_target","build_meaning","build_words","distractors"]}},
+       },required:["target","meaning","usage","breakdown","example","example_meaning","pronunciation","distractors"]}},
        dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}},
        final_challenge:{type:"object",additionalProperties:false,properties:{
          situation:{type:"string"},
@@ -160,7 +156,7 @@ Return JSON only.`;
   const data=await response.json();const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;if(!text)throw new Error("OpenAI returned no lesson text");
   const parsed=JSON.parse(text);
   if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==phraseCount)throw new Error("Invalid phrase count");
-  if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!p.build_target||!p.build_meaning||!Array.isArray(p.build_words)||!p.build_words.length||!Array.isArray(p.distractors)||p.distractors.length<4))throw new Error("Incomplete phrase teaching data");
+  if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!Array.isArray(p.breakdown)||!p.breakdown.length||!p.pronunciation||!Array.isArray(p.distractors)||p.distractors.length<4))throw new Error("Incomplete phrase teaching data");
   // Enforce the CEFR floor after generation. Prompting alone is not enough.
   if(L==="B1"||L==="B2"||L==="C1"||L==="C2"){
     const key=String(code||"").toLowerCase().split("-")[0];
@@ -177,24 +173,6 @@ Return JSON only.`;
     }).length;
     if(meaningful<3)throw new Error("Generated lesson does not meet the "+L+" communication floor");
   }
-  // A build exercise is only valid when its selectable chunks reconstruct the
-  // target sentence exactly. If the model returns mismatched chunks, repair
-  // them from build_target rather than shipping an impossible exercise.
-  parsed.phrases.forEach(p=>{
-    const clean=v=>String(v||"").normalize("NFKC").replace(/\s+/g," ").trim();
-    const joined=clean(p.build_words.join(" "));
-    const target=clean(p.build_target);
-    if(joined!==target){
-      p.build_words=target.split(/\s+/).filter(Boolean);
-    }
-    const correctSet=new Set(p.build_words.map(clean));
-    p.distractors=p.distractors.map(String).map(clean).filter(Boolean).filter(w=>!correctSet.has(w)).slice(0,6);
-    while(p.distractors.length<4){
-      const filler=target.split(/\s+/).find(w=>w&&!correctSet.has(w)&&!p.distractors.includes(w));
-      if(!filler)break;
-      p.distractors.push(filler);
-    }
-  });
   if(!Array.isArray(parsed.dialogue)||parsed.dialogue.length!==4)throw new Error("Invalid dialogue count");
   const expected=["native","learner","native","learner"];if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]))throw new Error("Invalid dialogue order");
   const fc=parsed.final_challenge;
