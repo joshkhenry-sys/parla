@@ -246,10 +246,10 @@ function cleanChallengeChoices(values){
   const source=Array.isArray(values)?values.map(String):[String(values||"")];
   const unique=[];
   source.forEach(raw=>{
-    // Some older lessons stored A/B/C/D options as one concatenated string.
-    const parts=raw.replace(/([B-D])(?=[A-Z][a-z])/g,"\n$1").split(/\n/);
-    parts.forEach((part,i)=>{
-      const cleaned=part.trim().replace(/^[A-D][.)\s]*/,"").trim();
+    // Repair concatenated legacy choices such as "AI like...BI like...CCan...DWhat...".
+    const parts=raw.replace(/([A-D])(?=(?:I\s|Can\s|What\s|It\s|My\s|The\s|You\s|Hello\b))/g,"\n$1").split(/\n/);
+    parts.forEach(part=>{
+      const cleaned=part.trim().replace(/^[A-D](?:[.)]\s*|\s*)/,"").trim();
       if(cleaned&&!unique.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(cleaned)))unique.push(cleaned);
     });
   });
@@ -265,16 +265,18 @@ function buildCards(row){
     cards.push({type:"recall",stage:"Check understanding",phrase,choices:makeChoices(phrase,p)});
   });
   const dialogue=c.dialogue.filter(x=>x&&x.text).slice(0,4);
-  const last=p[p.length-1];
-  if(!c.finalChallenge||c.finalChallenge.choices.length!==4||!c.finalChallenge.correct_answer||!c.finalChallenge.choices.includes(c.finalChallenge.correct_answer)){
-    c.finalChallenge={
-      situation:String(c.scene.situation||c.scene.mission||"Use the language you just learned in this situation."),
-      prompt:"Choose the response that best fits the situation.",
-      choices:[last.target,...(last.distractors||[]).filter(x=>x!==last.target)].slice(0,4),
-      correct_answer:last.target
-    };
+  const last=p[p.length-1],challenge=c.finalChallenge||{};
+  challenge.choices=cleanChallengeChoices(challenge.choices);
+  challenge.correct_answer=String(challenge.correct_answer||"").trim().replace(/^[A-D](?:[.)]\s*|\s*)/,"").trim();
+  const hasCorrect=challenge.correct_answer&&challenge.choices.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(challenge.correct_answer));
+  if(challenge.choices.length!==4||!hasCorrect){
+    challenge.situation=String(challenge.situation||c.scene.situation||c.scene.mission||"Use the language you just learned in this situation.");
+    challenge.prompt=String(challenge.prompt||"Choose the response that best fits the situation.");
+    const distractors=(last.distractors||[]).filter(x=>normalizeBuildAnswer(x)!==normalizeBuildAnswer(last.target));
+    challenge.choices=shuffle([last.target,...distractors]).slice(0,4);
+    challenge.correct_answer=last.target;
   }
-  cards.push({type:"challenge",stage:"Use it",phrase:last,dialogue,finalChallenge:c.finalChallenge});
+  cards.push({type:"challenge",stage:"Use it",phrase:last,dialogue,finalChallenge:challenge});
   return {...c,phrases:p,cards};
 }
 function makeChoices(p,all){
@@ -414,7 +416,7 @@ function renderChallenge(c){
     const correct=normalizeBuildAnswer(button.dataset.choice)===normalizeBuildAnswer(correctAnswer);
     document.querySelectorAll("#challengeOptions .option").forEach(option=>{
       option.disabled=true;
-      if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(fc.correct_answer||c.phrase.target))option.classList.add("correct");
+      if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(correctAnswer))option.classList.add("correct");
     });
     if(correct){
       button.classList.add("correct");sound("good");addXP(15);
