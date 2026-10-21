@@ -91,6 +91,9 @@
 
     .question{font-size:clamp(24px,4vw,38px);line-height:1.12;letter-spacing:-.04em;color:#fff;margin:22px 0}
     .options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    #challengeOptions{grid-template-columns:1fr;gap:10px;margin:16px 0}
+    #challengeOptions .option{width:100%;min-width:0;align-items:flex-start;white-space:normal;line-height:1.45;padding:15px 16px}
+    #challengeOptions .option-copy{display:block;min-width:0;overflow-wrap:anywhere}
     .option{display:flex;align-items:center;gap:12px;text-align:left;min-height:65px;padding:14px;border-radius:16px!important;border:1px solid #35415f!important;background:#1d2741!important;color:#fff!important;font-size:14px;font-weight:750!important}
     .option:hover{border-color:var(--lesson-lime)!important;transform:translateY(-1px)}
     .option.correct{background:#173629!important;border-color:var(--lesson-lime)!important}
@@ -397,14 +400,31 @@ function renderChallenge(c){
   let correctAnswer=String(fc.correct_answer||c.phrase.target).replace(/^[A-D][.)\s]+/,"").trim();
   const taskText=String(fc.prompt||"")+" "+String(fc.situation||"");
   if(/preferenc|haz.{0,30}pregunta|ask.{0,30}question/i.test(taskText)){
-    const preference=(lesson.phrases||[]).find(p=>/\bI (?:really )?like\b|\bI prefer\b|\bme gusta\b/i.test(p.target));
-    const followUp=(lesson.phrases||[]).find(p=>/\bwhat about you\b|\bhow about you\b|\by tú\b/i.test(p.target));
+    const phrases=lesson.phrases||[];
+    const preference=phrases.find(p=>/\bI (?:really )?like\b|\bI prefer\b|\bme gusta\b/i.test(p.target));
+    const followUp=phrases.find(p=>/\bwhat about you\b|\bhow about you\b|\by tú\b/i.test(p.target));
     if(preference&&followUp){
-      correctAnswer=preference.target.replace(/[.!?]+$/,"")+". "+followUp.target;
-      choices=[correctAnswer,...choices.filter(x=>normalizeBuildAnswer(x)!==normalizeBuildAnswer(correctAnswer)).slice(0,3)];
+      correctAnswer=preference.target.replace(/[.!?]+$/,"")+". "+followUp.target.replace(/^[.!?\s]+/,"");
+      // Use four complete, readable responses that test the whole conversational turn.
+      const candidates=[
+        correctAnswer,
+        preference.target,
+        phrases.find(p=>/\bwhat book do you like\b|\bwhat .* do you like\b/i.test(p.target))?.target||"What book do you like?",
+        "I like romance books."
+      ];
+      choices=[];
+      candidates.forEach(value=>{
+        const cleaned=String(value||"").trim();
+        if(cleaned&&!choices.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(cleaned)))choices.push(cleaned);
+      });
+      // Guarantee four options without reintroducing concatenated legacy text.
+      ["I like mystery books.","What about you?","I prefer romance books.","That sounds interesting."].forEach(value=>{
+        if(choices.length<4&&!choices.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(value)))choices.push(value);
+      });
+      choices=choices.slice(0,4);
     }
   }
-  const options=choices.map((choice,i)=>'<button class="option" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span>'+esc(choice)+'</span></button>').join("");
+  const options=choices.map((choice,i)=>'<button class="option" type="button" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span class="option-copy">'+esc(choice)+'</span></button>').join("");
   let selected=false;
   const otherPerson=(c.dialogue||[]).find(line=>line&&line.speaker==="native"&&line.text);
   const conversation=otherPerson?'<div class="explain" style="margin-bottom:15px"><div class="explain-label">THE OTHER PERSON</div><p style="font-size:17px;color:#fff">“'+esc(otherPerson.text)+'”</p></div>':"";
