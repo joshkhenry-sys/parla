@@ -183,12 +183,24 @@ function sound(kind){
     });
   }catch(e){}
 }
-function speak(text){
+function speak(text,languageCode){
   if(!text||!("speechSynthesis" in window))return;
   try{
     speechSynthesis.cancel();
+    // Audio must use the language being learned, never the learner's native language.
+    const raw=String(languageCode||lesson?.language_code||profile?.code||"en").trim().toLowerCase();
+    const code=raw.split(/[-_]/)[0];
     const map={es:"es-MX",fr:"fr-FR",nl:"nl-NL",de:"de-DE",pt:"pt-BR",pl:"pl-PL",it:"it-IT",ar:"ar-SA",ja:"ja-JP",ko:"ko-KR",zh:"zh-CN",en:"en-US",sv:"sv-SE",el:"el-GR",tr:"tr-TR",hi:"hi-IN"};
-    const u=new SpeechSynthesisUtterance(text);u.lang=map[profile?.code]||profile?.code||"en-US";u.rate=.94;speechSynthesis.speak(u);
+    const locale=map[code]||raw||"en-US";
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=locale;
+    // Select a matching installed voice where possible; otherwise let the browser use the locale.
+    const voices=speechSynthesis.getVoices();
+    const voice=voices.find(v=>String(v.lang||"").toLowerCase()===locale.toLowerCase())
+      ||voices.find(v=>String(v.lang||"").toLowerCase().startsWith(code+"-"));
+    if(voice)u.voice=voice;
+    u.rate=.94;
+    speechSynthesis.speak(u);
   }catch(e){}
 }
 function normalizePhrase(raw){
