@@ -271,7 +271,34 @@ function cleanChallengeChoices(values){
   return unique.slice(0,4);
 }
 function buildCards(row){
-  const c=normalizeLesson(row);c.phrases.forEach(fallbackNormalize);
+  const c=normalizeLesson(row);
+  // Old saved lessons may contain curriculum instructions in the learner's native language.
+  // For English lessons, replace Spanish scene/challenge instructions before rendering.
+  if(String(c.language_code||"").toLowerCase().startsWith("en")){
+    const hasSpanish=value=>/\b(estás|estas|responde|nueva persona|preferencias|hazles|pregunta|feria de libros|conoces a|has hablado|sobre tus)\b/i.test(String(value||""));
+    const sceneText=String(c.scene?.situation||"")+" "+String(c.scene?.mission||"");
+    if(hasSpanish(sceneText)){
+      const bookFair=/feria de libros|preferencias de libros/i.test(sceneText);
+      c.scene={...c.scene,
+        place:bookFair?"At a book fair":"A real-world conversation",
+        situation:bookFair?"You are at a book fair and meet someone new. You are talking about the kinds of books you like.":"You are in a real-life conversation and need to respond naturally in English.",
+        mission:bookFair?"Tell the other person what kinds of books you like and ask about their preference.":"Use the English phrases you have learned to respond naturally."
+      };
+    }
+    if(c.finalChallenge){
+      if(hasSpanish(c.finalChallenge.situation)){
+        c.finalChallenge.situation=/feria de libros|preferencias de libros/i.test(c.finalChallenge.situation)
+          ?"You are at a book fair and meet someone new. You are talking about the kinds of books you like."
+          :"Someone speaks to you in a real-world conversation. Respond naturally in English.";
+      }
+      if(hasSpanish(c.finalChallenge.prompt)){
+        c.finalChallenge.prompt=/preferencias|hazles una pregunta|nueva persona/i.test(c.finalChallenge.prompt)
+          ?"Tell the new person what kinds of books you like, then ask what they like."
+          :"Choose the English response that best fits the situation.";
+      }
+    }
+  }
+  c.phrases.forEach(fallbackNormalize);
   const p=c.phrases.slice(0,3);
   if(p.length<1)throw new Error("This lesson has no teachable phrases.");
   const cards=[{type:"scene",stage:"Mission",scene:c.scene,topic:c.topic}];
