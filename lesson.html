@@ -220,6 +220,7 @@ function normalizeLesson(row){
   return {language_code:String(d.language_code||"").toLowerCase(),language_name:String(d.language_name||""),level:String(d.level||row?.level||"").toUpperCase(),title:String(row?.title||d.title||"Lesson"),topic:String(row?.topic||d.topic||"Real life"),
     scene:d.scene&&typeof d.scene==="object"?d.scene:{},phrases:(Array.isArray(d.phrases)?d.phrases:[]).map(normalizePhrase).filter(p=>p.target),
     dialogue:Array.isArray(d.dialogue)?d.dialogue:[],
+    readingComprehension:d.reading_comprehension&&typeof d.reading_comprehension==="object"?{passage:String(d.reading_comprehension.passage||"").trim(),questions:Array.isArray(d.reading_comprehension.questions)?d.reading_comprehension.questions.map(q=>({question:String(q?.question||"").trim(),choices:Array.isArray(q?.choices)?q.choices.map(String):[],correct_answer:String(q?.correct_answer||"").trim(),explanation:String(q?.explanation||"").trim()})):[]}:null,
     finalChallenge:d.final_challenge&&typeof d.final_challenge==="object"?{
       situation:String(d.final_challenge.situation||"").trim(),
       prompt:String(d.final_challenge.prompt||"").trim(),
@@ -318,6 +319,11 @@ function buildCards(row){
     challenge.choices=shuffle([last.target,...distractors]).slice(0,4);
     challenge.correct_answer=last.target;
   }
+  if(c.readingComprehension?.passage&&Array.isArray(c.readingComprehension.questions)){
+    c.readingComprehension.questions.slice(0,4).forEach((question,i)=>{
+      if(question.question&&question.choices.length===4&&question.choices.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(question.correct_answer)))cards.push({type:"reading",stage:"Reading "+(i+1)+" of 4",reading:c.readingComprehension,question,questionIndex:i});
+    });
+  }
   cards.push({type:"challenge",stage:"Use it",phrase:last,dialogue,finalChallenge:challenge});
   return {...c,phrases:p,cards};
 }
@@ -350,6 +356,7 @@ function render(){
   else if(c.type==="teach")renderTeach(c);
   else if(c.type==="build")renderBuild(c);
   else if(c.type==="recall")renderRecall(c);
+  else if(c.type==="reading")renderReading(c);
   else renderChallenge(c);
 }
 function renderScene(c){
@@ -502,9 +509,24 @@ function confetti(){
   const pieces=["#4da3ff","#ffd84d","#9df06b","#ff6b6b","#9b7cff"];
   for(let i=0;i<55;i++){const el=document.createElement("i");el.className="confetti";el.style.left=(35+Math.random()*30)+"vw";el.style.top="42vh";el.style.background=pieces[i%pieces.length];el.style.setProperty("--dx",(Math.random()*600-300)+"px");el.style.setProperty("--dy",(Math.random()*500+150)+"px");document.body.appendChild(el);setTimeout(()=>el.remove(),1400)}
 }
+function renderReading(c){
+  const q=c.question;const reading=c.reading;let selected=false;
+  const options=q.choices.map((choice,i)=>'<button class="option" type="button" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span class="option-copy">'+esc(choice)+'</span></button>').join("");
+  shell('<span class="stage-chip">Reading comprehension · '+(c.questionIndex+1)+'/4</span><h2 style="margin:12px 0">Read and understand</h2><div class="reading-passage" style="padding:16px 18px;border:1px solid var(--line);border-radius:14px;line-height:1.8;margin:14px 0;white-space:pre-wrap">'+esc(reading.passage)+'</div><div class="question" style="margin:18px 0 12px">'+esc(q.question)+'</div><div class="options" id="readingOptions">'+options+'</div><div class="feedback" id="readingFeedback" aria-live="polite"></div><div id="readingExplanation" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>Why?</strong><div style="color:var(--muted);margin-top:5px">'+esc(q.explanation)+'</div></div>', '<button class="primary-lesson" id="next" disabled>Continue →</button>');
+  document.querySelectorAll("#readingOptions .option").forEach(button=>button.onclick=()=>{
+    if(selected)return;selected=true;
+    const correct=normalizeBuildAnswer(button.dataset.choice)===normalizeBuildAnswer(q.correct_answer);
+    document.querySelectorAll("#readingOptions .option").forEach(option=>{option.disabled=true;if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(q.correct_answer))option.classList.add("correct")});
+    if(correct){button.classList.add("correct");sound("good");addXP(10);$("readingFeedback").textContent="Correct. You understood the passage."; $("readingFeedback").className="feedback good";}
+    else{button.classList.add("wrong");sound("click");addXP(3);$("readingFeedback").textContent="Not quite. Review the passage and the explanation."; $("readingFeedback").className="feedback bad";}
+    answers.push({type:"reading",target:q.correct_answer,attempt:button.dataset.choice,correct,question:q.question,explanation:q.explanation});
+    $("readingExplanation").style.display="block";$("next").disabled=false;
+  });
+  $("next").onclick=next;
+}
 async function finish(){
   if(finished)return;finished=true;const practiceSecondsTotal=stopPracticeClock();sound("complete");addXP(40);confetti();
-  const scored=answers.filter(x=>["build","recall","understanding","challenge","production"].includes(x.type));
+  const scored=answers.filter(x=>["build","recall","understanding","challenge","production","reading"].includes(x.type));
   const correct=scored.filter(x=>x.correct).length,total=scored.length;
   const score=total?Math.round(correct/total*100):0;
   try{
