@@ -60,6 +60,14 @@
     .clarification .explain-label{color:#b6f36a!important;margin-bottom:7px}
     .clarification p{color:var(--lesson-white)!important;font-size:14px;line-height:1.65}
     .clarification strong{color:#ffffff!important;font-weight:900;text-decoration:underline;text-decoration-color:rgba(182,243,106,.7);text-underline-offset:3px}
+    .verb-highlight{color:#101729;background:var(--lesson-lime);padding:0 .08em;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone;font-weight:950}
+    .verb-focus-list{display:grid;gap:12px;margin-top:18px}
+    .verb-focus{padding:18px;border:1px solid #3b4a6d;border-radius:17px;background:#19233a}
+    .verb-focus-head{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:10px}
+    .verb-form{font-size:20px;font-weight:950;color:var(--lesson-lime)}
+    .verb-tense{font-size:11px;font-weight:850;letter-spacing:.04em;color:#dbe5f6;background:#293654;padding:6px 9px;border-radius:999px}
+    .verb-focus p{color:var(--lesson-white);font-size:14px;line-height:1.65;margin-top:6px}
+    .verb-focus .verb-meta{color:var(--lesson-muted);font-size:12px}
     .example{margin-top:10px;padding:16px;border-radius:17px;background:#121a2d;border:1px solid #2c3958}
     .example strong{display:block;color:#fff;font-size:16px}
     .example span{display:block;margin-top:4px;color:var(--lesson-muted);font-size:12px}
@@ -206,14 +214,16 @@ function speak(text,languageCode){
 function normalizePhrase(raw){
   if(raw&&typeof raw==="object")return {
     target:String(raw.target||"").trim(),meaning:String(raw.meaning||"").trim(),usage:String(raw.usage||"").trim(),
-    breakdown:Array.isArray(raw.breakdown)?raw.breakdown:[],example:String(raw.example||"").trim(),
+    breakdown:Array.isArray(raw.breakdown)?raw.breakdown:[],
+    verb_focus:Array.isArray(raw.verb_focus)?raw.verb_focus.map(v=>({form:String(v?.form||"").trim(),lemma:String(v?.lemma||"").trim(),meaning:String(v?.meaning||"").trim(),tense:String(v?.tense||"").trim(),why_this_form:String(v?.why_this_form||"").trim(),check_question:String(v?.check_question||"").trim(),check_choices:Array.isArray(v?.check_choices)?v.check_choices.map(String):[],check_answer:String(v?.check_answer||"").trim(),check_explanation:String(v?.check_explanation||"").trim()})).filter(v=>v.form&&v.tense):[],
+    example:String(raw.example||"").trim(),
     example_meaning:String(raw.example_meaning||"").trim(),pronunciation:String(raw.pronunciation||"").trim(),
     build_target:String(raw.build_target||raw.target||"").trim(),build_meaning:String(raw.build_meaning||raw.meaning||"").trim(),
     build_words:Array.isArray(raw.build_words)?raw.build_words.map(String).filter(Boolean):[],
     distractors:Array.isArray(raw.distractors)?raw.distractors.map(String).filter(Boolean):[]
   };
-  if(Array.isArray(raw))return {target:String(raw[0]||""),meaning:String(raw[1]||""),usage:String(raw[2]||""),breakdown:[],example:String(raw[3]||""),example_meaning:"",pronunciation:String(raw[4]||""),build_target:String(raw[0]||""),build_meaning:String(raw[1]||""),build_words:String(raw[0]||"").split(/\s+/).filter(Boolean),distractors:[]};
-  return {target:String(raw||""),meaning:"",usage:"",breakdown:[],example:"",example_meaning:"",pronunciation:"",build_target:String(raw||""),build_meaning:"",build_words:String(raw||"").split(/\s+/).filter(Boolean),distractors:[]};
+  if(Array.isArray(raw))return {target:String(raw[0]||""),meaning:String(raw[1]||""),usage:String(raw[2]||""),breakdown:[],verb_focus:[],example:String(raw[3]||""),example_meaning:"",pronunciation:String(raw[4]||""),build_target:String(raw[0]||""),build_meaning:String(raw[1]||""),build_words:String(raw[0]||"").split(/\s+/).filter(Boolean),distractors:[]};
+  return {target:String(raw||""),meaning:"",usage:"",breakdown:[],verb_focus:[],example:"",example_meaning:"",pronunciation:"",build_target:String(raw||""),build_meaning:"",build_words:String(raw||"").split(/\s+/).filter(Boolean),distractors:[]};
 }
 function hasBeginnerLevelContent(phrases,level,languageCode){
   const band=String(level||"A1").toUpperCase();
@@ -253,6 +263,19 @@ function fallbackNormalize(p){
   return p;
 }
 function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function highlightVerbForms(text,verbFocus){
+  const source=String(text||"");
+  const forms=[...new Set((Array.isArray(verbFocus)?verbFocus:[]).map(v=>String(v?.form||"").trim()).filter(Boolean))].sort((a,b)=>b.length-a.length);
+  if(!forms.length)return esc(source);
+  const escaped=forms.map(f=>f.replace(/[.*+?^${}()|[\]\\]/g,"\\function shuffle(a){return [...a].sort(()=>Math.random()-.5)}"));
+  const pattern=new RegExp(escaped.join("|"),"giu");
+  let out="",last=0,match;
+  while((match=pattern.exec(source))!==null){
+    out+=esc(source.slice(last,match.index))+'<mark class="verb-highlight">'+esc(match[0])+'</mark>';
+    last=match.index+match[0].length;
+  }
+  return out+esc(source.slice(last));
+}
 function normalizeBuildAnswer(value){
   return String(value||"")
     .normalize("NFKC")
@@ -320,6 +343,11 @@ function buildCards(row){
   const cards=[{type:"scene",stage:"Mission",scene:c.scene,topic:c.topic}];
   p.forEach((phrase,i)=>{
     cards.push({type:"teach",stage:i===0?"Learn":"Add on",phrase});
+    (phrase.verb_focus||[]).forEach((verbFocus,verbIndex)=>{
+      if(verbFocus.check_question&&verbFocus.check_choices.length===4&&verbFocus.check_choices.includes(verbFocus.check_answer)){
+        cards.push({type:"verb",stage:"Verb + tense",phrase,verbFocus,verbIndex});
+      }
+    });
     cards.push({type:"recall",stage:"Check understanding",phrase,choices:makeChoices(phrase,p)});
   });
   const dialogue=c.dialogue.filter(x=>x&&x.text).slice(0,4);
@@ -372,6 +400,7 @@ function render(){
   else if(c.type==="build")renderBuild(c);
   else if(c.type==="recall")renderRecall(c);
   else if(c.type==="reading")renderReading(c);
+  else if(c.type==="verb")renderVerbCheck(c);
   else renderChallenge(c);
 }
 function renderScene(c){
@@ -381,10 +410,11 @@ function renderScene(c){
 }
 function renderTeach(c){
   const p=c.phrase;
-  const phraseMarkup='<div class="target">'+esc(p.target)+'</div><div class="translation">'+esc(p.meaning)+'</div>';
+  const phraseMarkup='<div class="target">'+highlightVerbForms(p.target,p.verb_focus)+'</div><div class="translation">'+esc(p.meaning)+'</div>';
   shell('<span class="stage-chip">'+esc(c.stage)+'</span>'+phraseMarkup+
     '<div class="explain-grid"><div class="explain"><div class="explain-label">When to use it</div><p>'+esc(p.usage||"Use it when this situation calls for it.")+'</p></div><div class="explain"><div class="explain-label">Say it naturally</div><p>'+esc(p.pronunciation||"Listen first, then say the phrase out loud on your own.")+'</p></div></div>'+
-    (p.breakdown?.length?'<div class="clarification"><div class="explain-label">Clarification</div>'+p.breakdown.map(x=>'<p style="margin-top:5px"><strong>'+esc(x.target)+'</strong> — '+esc(x.meaning)+'</p>').join("")+'</div>':"")+
+    (p.breakdown?.length?'<div class="clarification"><div class="explain-label">Phrase breakdown</div>'+p.breakdown.map(x=>'<p style="margin-top:5px"><strong>'+esc(x.target)+'</strong> — '+esc(x.meaning)+'</p>').join("")+'</div>':"")+
+    (p.verb_focus?.length?'<div class="clarification"><div class="explain-label">Verb lab · meaning + tense</div><div class="verb-focus-list">'+p.verb_focus.map(v=>'<div class="verb-focus"><div class="verb-focus-head"><span class="verb-form">'+esc(v.form)+'</span><span class="verb-tense">'+esc(v.tense)+'</span></div><p><strong>Base verb:</strong> '+esc(v.lemma)+' — '+esc(v.meaning)+'</p><p><strong>Why this form:</strong> '+esc(v.why_this_form)+'</p></div>').join("")+'</div></div>':"")+
     (p.example?'<div class="example"><strong>'+esc(p.example)+'</strong><span>'+esc(p.example_meaning||"")+'</span></div>':"")+
     '<button class="audio-btn" id="listen">▶ Listen</button>',
     '<button class="primary-lesson" id="go">I’ve got it →</button>');
@@ -523,6 +553,20 @@ function renderChallenge(c){
 function confetti(){
   const pieces=["#4da3ff","#ffd84d","#9df06b","#ff6b6b","#9b7cff"];
   for(let i=0;i<55;i++){const el=document.createElement("i");el.className="confetti";el.style.left=(35+Math.random()*30)+"vw";el.style.top="42vh";el.style.background=pieces[i%pieces.length];el.style.setProperty("--dx",(Math.random()*600-300)+"px");el.style.setProperty("--dy",(Math.random()*500+150)+"px");document.body.appendChild(el);setTimeout(()=>el.remove(),1400)}
+}
+function renderVerbCheck(c){
+  const v=c.verbFocus;let selected=false;
+  const options=shuffle(v.check_choices).map((choice,i)=>'<button class="option" type="button" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span class="option-copy">'+esc(choice)+'</span></button>').join("");
+  shell('<span class="stage-chip">Verb + tense</span><h2 style="margin:14px 0 8px">Now use the grammar</h2><p style="color:var(--lesson-muted);line-height:1.6">You just learned <strong style="color:var(--lesson-lime)">'+esc(v.form)+'</strong> from <strong>'+esc(c.phrase.target)+'</strong>.</p><div class="verb-focus"><div class="verb-focus-head"><span class="verb-form">'+esc(v.form)+'</span><span class="verb-tense">'+esc(v.tense)+'</span></div><p><strong>Base verb:</strong> '+esc(v.lemma)+' — '+esc(v.meaning)+'</p><p><strong>Why this form:</strong> '+esc(v.why_this_form)+'</p></div><div class="question" style="margin:22px 0 14px">'+esc(v.check_question)+'</div><div class="options" id="verbOptions">'+options+'</div><div class="feedback" id="verbFeedback" aria-live="polite"></div><div id="verbExplanation" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>Explanation</strong><div style="color:var(--muted);margin-top:5px">'+esc(v.check_explanation)+'</div></div>','<button class="primary-lesson" id="next" disabled>Continue →</button>');
+  document.querySelectorAll("#verbOptions .option").forEach(button=>button.onclick=()=>{
+    if(selected)return;selected=true;
+    const correct=normalizeBuildAnswer(button.dataset.choice)===normalizeBuildAnswer(v.check_answer);
+    document.querySelectorAll("#verbOptions .option").forEach(option=>{option.disabled=true;if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(v.check_answer))option.classList.add("correct")});
+    if(correct){button.classList.add("correct");sound("good");addXP(8);$("verbFeedback").textContent="Correct — you understand the form, not just the translation.";$("verbFeedback").className="feedback good";}
+    else{button.classList.add("wrong");sound("bad");$("verbFeedback").textContent="Not quite. Review why this form is used here.";$("verbFeedback").className="feedback bad";}
+    $("verbExplanation").style.display="block";$("next").disabled=false;
+  });
+  $("next").onclick=()=>{sound("click");next()};
 }
 function renderReading(c){
   const q=c.question;const reading=c.reading;let selected=false;
