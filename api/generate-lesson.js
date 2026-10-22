@@ -200,6 +200,8 @@ Return JSON only.`;
   const reading=parsed.reading_comprehension;
   if(!reading||!String(reading.passage||"").trim()||!Array.isArray(reading.questions)||reading.questions.length!==4)throw new Error("Invalid reading comprehension section");
   reading.passage=String(reading.passage).trim();
+  const taughtVerbForms=parsed.phrases.flatMap(p=>p.verb_focus.map(v=>String(v.form||"").trim().toLocaleLowerCase())).filter(Boolean);
+  if(!taughtVerbForms.some(form=>reading.passage.toLocaleLowerCase().includes(form)))throw new Error("Reading passage does not reuse any taught verb forms");
   reading.questions=reading.questions.map((q)=>{
     if(!q||!String(q.question||"").trim()||!Array.isArray(q.choices)||q.choices.length!==4||!String(q.correct_answer||"").trim()||!String(q.explanation||"").trim())throw new Error("Incomplete reading question");
     const choices=q.choices.map(v=>String(v||"").normalize("NFKC").replace(/\s+/g," ").trim());
