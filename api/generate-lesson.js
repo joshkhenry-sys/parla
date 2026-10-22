@@ -122,7 +122,7 @@ TEACHING DESIGN:
 - Teach true ${L} learners at their selected CEFR level. Keep the lesson practical and supported by the teaching cards; match vocabulary, sentence complexity, nuance, and task demands to ${L}.
 - Phrase 1 introduces the most useful building block. Later phrases reuse earlier language while increasing communicative demand toward the learner's real-world goal. Do not make Phrase 1 a generic greeting or self-introduction unless ${L} is A1 or the situation genuinely requires an advanced reuse.
 - Every phrase must be genuinely natural for native speakers.
-- INTENTIONAL GRAMMAR TEACHING IS REQUIRED: select exactly 1-2 meaningful verb forms that actually occur in each core phrase. Add verb_focus for each one: form (exact text as it appears in the phrase), lemma (dictionary/infinitive form), meaning in ${nativeLanguage}, accurate tense/aspect/mood/person label, why_this_form (explain why this tense/form is used here and what meaning it contributes, in ${nativeLanguage}), plus one four-choice check_question/check_choices/check_answer/check_explanation that tests the specific verb form or tense. Exactly one answer must be correct; all choices and explanations must be in ${nativeLanguage}. Do not label a tense by guesswork; if the form is a fixed construction, explain that construction accurately.
+- INTENTIONAL GRAMMAR TEACHING IS REQUIRED: select exactly ONE meaningful verb form that actually occurs in each core phrase. Add one verb_focus item for that form: form (exact text as it appears in the phrase), lemma (dictionary/infinitive form), meaning in ${nativeLanguage}, accurate tense/aspect/mood/person label, why_this_form (explain why this tense/form is used here and what meaning it contributes, in ${nativeLanguage}), plus one four-choice check_question/check_choices/check_answer/check_explanation that tests the specific verb form or tense. Exactly one answer must be correct; all choices and explanations must be in ${nativeLanguage}. Do not label a tense by guesswork; if the form is a fixed construction, explain that construction accurately.
 - Highlight the exact verb forms in the displayed core phrase and explain them explicitly. Do not merely translate the whole sentence or give a generic grammar note.
 - Build a deliberate progression of eight high-value phrases or sentence frames: (1) establish the core idea, (2) add a reason, (3) add detail, (4) contrast or qualify, (5) handle a complication, (6) respond naturally to another person, (7) reformulate with nuance, and (8) combine the skills in a realistic reply. Avoid filler and vocabulary overload. Every phrase must include a meaning, when to use it, a short breakdown, a natural example, and pronunciation help. Write explanations and translations in ${nativeLanguage}, not English unless the native language is English.
 - Give 4-6 natural target-language phrase distractors for each taught phrase. Distractors must be clearly different in meaning or use from the correct phrase; avoid near-synonyms that could also be correct. NEVER use English distractors unless the target language itself is English.
@@ -148,7 +148,7 @@ Return JSON only.`;
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);let response;
   try{
    response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
-    body:JSON.stringify({model:MODEL,input:prompt,max_output_tokens:14000,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
+    body:JSON.stringify({model:MODEL,input:prompt,max_output_tokens:11000,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
       type:"object",additionalProperties:false,
       properties:{
        title:{type:"string"},topic:{type:"string"},
@@ -156,7 +156,7 @@ Return JSON only.`;
        phrases:{type:"array",minItems:phraseCount,maxItems:phraseCount,items:{type:"object",additionalProperties:false,properties:{
         target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},
         breakdown:{type:"array",minItems:1,maxItems:6,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
-        verb_focus:{type:"array",minItems:1,maxItems:3,items:{type:"object",additionalProperties:false,properties:{
+        verb_focus:{type:"array",minItems:1,maxItems:1,items:{type:"object",additionalProperties:false,properties:{
           form:{type:"string"},lemma:{type:"string"},meaning:{type:"string"},tense:{type:"string"},why_this_form:{type:"string"},
           check_question:{type:"string"},check_choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},check_answer:{type:"string"},check_explanation:{type:"string"}
         },required:["form","lemma","meaning","tense","why_this_form","check_question","check_choices","check_answer","check_explanation"]}},
