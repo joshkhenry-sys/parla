@@ -319,7 +319,7 @@ const lessonLoadWatchdog=setTimeout(()=>{
   if(loading&&loading.style.display!=="none"){
     loading.innerHTML="<strong>This lesson is taking too long.</strong><br><span style='color:#aab6ce;font-size:13px'>The lesson service did not respond in time. You can retry now instead of waiting.</span><br><button class='primary-lesson' style='margin-top:18px' onclick='location.reload()'>Retry lesson</button>";
   }
-},28000);
+},50000);
 
 function sound(kind){
   try{
