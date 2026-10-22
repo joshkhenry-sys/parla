@@ -77,7 +77,7 @@ export default async function handler(req,res){
   level=String(level||"A1").toUpperCase();
   if(!["A1","A2","B1","B2","C1","C2"].includes(level))return jsonResponse(res,400,{error:"Unsupported CEFR level"});
   if(!language||!code||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
-  if(!process.env.OPENAI_API_KEY)return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});
+  if(!process.env.OPENAI_API_KEY){if(["B1","B2","C1","C2"].includes(level))return jsonResponse(res,503,{error:"Advanced lesson generation is temporarily unavailable. Please try again; Nahtive will not substitute a beginner lesson for your selected level."});return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});}
   const L=level;
   const rules={
    A1:"TRUE A1. Focus on immediate personal needs: greetings, identity, very simple requests, basic descriptions, numbers, time, location and routine exchanges. Use short, predictable sentences and high-frequency vocabulary. Do not make the learner infer nuance. Do not artificially make A1 hard.",
