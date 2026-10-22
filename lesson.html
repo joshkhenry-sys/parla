@@ -126,16 +126,161 @@
     .pop{animation:pop .35s ease}
     .loading-dark{padding:70px 0;color:var(--lesson-muted)}
 
+    /* Mobile-first lesson experience */
+    body.lesson-page{
+      -webkit-text-size-adjust:100%;
+      overscroll-behavior-x:none;
+    }
+    body.lesson-page .shell{
+      width:min(1080px,calc(100% - 32px));
+    }
+    body.lesson-page nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      min-height:58px;
+      padding:10px 0;
+    }
+    body.lesson-page .exit{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:42px;
+      padding:8px 12px;
+      border:1px solid #303b57;
+      border-radius:999px;
+      font-size:12px;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .lesson-wrap{padding:8px 0 calc(32px + env(safe-area-inset-bottom))}
+    .lesson-top{align-items:center;margin:14px 0 8px}
+    .lesson-intro{max-width:40ch;line-height:1.5}
+    .lesson-progress{
+      top:0;
+      padding:10px 0 12px;
+      background:var(--lesson-bg);
+      background:color-mix(in srgb,var(--lesson-bg) 96%,transparent);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+    }
+    .progress-meta{font-size:12px}
+    .progress-track{height:6px;border:0}
+    .lesson-card{
+      padding:clamp(20px,4vw,42px);
+      border-radius:26px;
+      overflow:visible;
+    }
+    .lesson-card:before{width:120px;height:120px;right:-55px;top:-55px}
+    .scene-card{min-height:0;padding:12px 0}
+    .scene-icon{width:54px;height:54px;border-radius:17px;margin-bottom:18px;font-size:25px}
+    .scene-card h2{font-size:clamp(34px,5vw,60px);line-height:1.02;margin:14px 0}
+    .scene-card p{font-size:16px;line-height:1.7}
+    .mission{width:100%;box-sizing:border-box;align-items:flex-start;line-height:1.5;margin-top:20px}
+    .target{font-size:clamp(34px,5.5vw,58px);line-height:1.13;overflow-wrap:anywhere;margin:22px 0 12px}
+    .translation{font-size:clamp(17px,2.2vw,20px);line-height:1.6}
+    .explain-grid{gap:10px;margin-top:20px}
+    .explain{padding:16px}
+    .explain p,.clarification p,.verb-focus p{font-size:15px;line-height:1.7}
+    .clarification{padding:16px;margin-top:14px}
+    .verb-focus{padding:15px}
+    .verb-form{font-size:19px;overflow-wrap:anywhere}
+    .example{padding:15px}
+    .build-prompt{font-size:14px;line-height:1.5}
+    .build-target{font-size:clamp(20px,3vw,25px);line-height:1.5;overflow-wrap:anywhere}
+    .built{min-height:64px;padding:10px;gap:7px}
+    .word-bank{gap:8px}
+    .word,.built-word{
+      min-height:48px;
+      max-width:100%;
+      padding:11px 13px!important;
+      font-size:15px!important;
+      line-height:1.4;
+      overflow-wrap:anywhere;
+      touch-action:manipulation;
+    }
+    .build-actions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:9px;
+      margin-top:22px;
+    }
+    .primary-lesson,.secondary-lesson{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      min-height:54px;
+      padding:14px 18px!important;
+      font-size:15px!important;
+      touch-action:manipulation;
+    }
+    .option{
+      width:100%;
+      min-width:0;
+      min-height:60px;
+      align-items:flex-start;
+      padding:14px;
+      font-size:15px;
+      line-height:1.5;
+      overflow-wrap:anywhere;
+      touch-action:manipulation;
+    }
+    .option-copy{min-width:0;overflow-wrap:anywhere}
+    .letter{width:30px;height:30px;flex:0 0 30px}
+    .question{font-size:clamp(23px,4.5vw,34px);line-height:1.2;overflow-wrap:anywhere}
+    .reading-passage{font-size:16px;line-height:1.85!important;padding:16px!important}
+    .feedback{font-size:14px;line-height:1.55}
+    .learned{gap:8px;margin:22px 0}
+    .learned-item{padding:14px}
+    .xp-total{font-size:clamp(42px,10vw,54px)}
+    button,a{-webkit-tap-highlight-color:transparent}
+    button:focus-visible,a:focus-visible{
+      outline:3px solid #fff!important;
+      outline-offset:3px;
+    }
     @media(max-width:680px){
-      body.lesson-page .shell{width:min(100% - 22px,1080px)}
-      .lesson-top{align-items:flex-start}
-      .lesson-top h1{font-size:36px}
-      .xp-pill{padding:8px 10px}
-      .lesson-card{border-radius:23px;padding:24px 19px}
-      .scene-card{min-height:430px}
-      .explain-grid,.options,.learned{grid-template-columns:1fr}
-      .target{font-size:42px}
-      .question{font-size:27px}
+      body.lesson-page .shell{width:calc(100% - 28px);max-width:520px}
+      body.lesson-page nav{min-height:54px}
+      body.lesson-page .logo{font-size:21px}
+      body.lesson-page .exit{min-height:40px;padding:7px 10px}
+      .lesson-top{align-items:flex-start;gap:10px;margin-top:10px}
+      .lesson-top h1{font-size:clamp(29px,8vw,38px);line-height:1.02;letter-spacing:-.045em}
+      .lesson-eyebrow{font-size:10px;letter-spacing:.09em}
+      .lesson-intro{font-size:13px;max-width:26ch}
+      .xp-pill{padding:7px 9px;font-size:11px;gap:5px}
+      .xp-star{width:17px;height:17px}
+      .lesson-progress{margin:0 -2px}
+      .lesson-card{padding:22px 16px;border-radius:22px;margin-top:10px}
+      .scene-card{min-height:0}
+      .scene-card h2{font-size:clamp(34px,10vw,46px)}
+      .scene-card p{font-size:15px}
+      .target{font-size:clamp(32px,8.5vw,42px);letter-spacing:-.04em}
+      .translation{font-size:18px}
+      .stage-chip{font-size:10px;letter-spacing:.08em;line-height:1.4;white-space:normal}
+      .question{font-size:25px;margin:18px 0 14px}
+      .options{grid-template-columns:minmax(0,1fr);gap:9px}
+      .option{min-height:60px}
+      .explain-grid,.learned{grid-template-columns:minmax(0,1fr)}
+      .verb-focus-head{align-items:flex-start}
+      .verb-tense{white-space:normal;line-height:1.4}
+      .final-card h2{font-size:clamp(36px,10vw,48px)}
+      .finish-badge{width:68px;height:68px;border-radius:22px}
+      .loading-dark{padding:38px 0;line-height:1.6}
+    }
+    @media(max-width:360px){
+      body.lesson-page .shell{width:calc(100% - 22px)}
+      .lesson-card{padding:19px 13px}
+      .lesson-top h1{font-size:29px}
+      .xp-pill{padding:6px 7px}
+      .target{font-size:30px}
+      .build-actions{gap:8px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .pop,.confetti{animation:none!important}
+      .progress-fill{transition:none!important}
+      .word,.built-word,.option,.primary-lesson{transition:none!important}
     }
   </style>
 </head>
