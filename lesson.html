@@ -669,10 +669,7 @@ function renderChallenge(c){
   }
   const options=choices.map((choice,i)=>'<button class="option" type="button" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span class="option-copy">'+esc(choice)+'</span></button>').join("");
   let selected=false;
-  const otherPerson=(c.dialogue||[]).find(line=>line&&line.speaker==="native"&&line.text);
-  const conversation=otherPerson?'<div class="explain" style="margin-bottom:15px"><div class="explain-label">THE OTHER PERSON</div><p style="font-size:17px;color:#fff">“'+esc(otherPerson.text)+'”</p></div>':"";
-  const learnedPhrases=(lesson.phrases||[]).map(p=>'<div style="padding:10px 12px;border:1px solid var(--line);border-radius:12px;margin-top:8px"><strong>'+esc(p.target)+'</strong><div style="color:var(--muted);font-size:13px;margin-top:4px">'+esc(p.meaning)+'</div></div>').join("");
-  shell('<span class="stage-chip">Use it in context</span><div class="question">'+esc(fc.prompt||"Choose the response that best fits the situation.")+'</div><div class="explain" style="margin-bottom:15px"><div class="explain-label">Situation</div><p>'+esc(fc.situation||lesson.scene?.situation||"Use the language you just learned.")+'</p></div>'+conversation+'<div class="explain" style="margin-bottom:15px"><div class="explain-label">Phrases you learned</div>'+learnedPhrases+'</div><div class="options" id="challengeOptions">'+options+'</div><div class="feedback" id="feedback" aria-live="polite"></div><div id="challengeCorrection" style="display:none;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px"><strong>'+esc(correctAnswer)+'</strong><div style="color:var(--muted);margin-top:5px">Review the phrase and notice how it fits the situation.</div></div>',
+  shell('<span class="stage-chip">Real-world practice</span><h2 style="margin:12px 0 8px">What would sound natural?</h2><p style="color:var(--lesson-muted);line-height:1.65;margin:0 0 18px">'+esc(fc.situation||lesson.scene?.situation||"Choose the most natural response for this moment.")+'</p><div class="question" style="margin-bottom:16px">'+esc(fc.prompt||"Choose the most natural response.")+'</div><div class="options" id="challengeOptions">'+options+'</div><div class="feedback" id="feedback" aria-live="polite"></div><div id="challengeCorrection" style="display:none;padding:14px 16px;border:1px solid var(--line);border-radius:12px;margin-top:12px"><strong>'+esc(correctAnswer)+'</strong><div style="color:var(--muted);margin-top:7px;line-height:1.6">This is the best fit for the situation. Compare what it communicates with the other options.</div></div>',
     '<button class="primary-lesson" id="next" disabled>Finish lesson →</button>');
   document.querySelectorAll("#challengeOptions .option").forEach(button=>button.onclick=()=>{
     if(selected)return;selected=true;
@@ -687,7 +684,7 @@ function renderChallenge(c){
       $("feedback").className="feedback good";
     }else{
       button.classList.add("wrong");sound("click");addXP(5);
-      $("feedback").textContent="Not the best fit, but you can still finish. Review the answer and keep moving.";
+      $("feedback").textContent="Not quite. Compare the best response below with your choice to see what fits the situation better.";
       $("feedback").className="feedback";
     }
     answers.push({type:"challenge",target:correctAnswer,attempt:button.dataset.choice,correct});
