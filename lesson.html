@@ -215,6 +215,21 @@ function normalizePhrase(raw){
   if(Array.isArray(raw))return {target:String(raw[0]||""),meaning:String(raw[1]||""),usage:String(raw[2]||""),breakdown:[],example:String(raw[3]||""),example_meaning:"",pronunciation:String(raw[4]||""),build_target:String(raw[0]||""),build_meaning:String(raw[1]||""),build_words:String(raw[0]||"").split(/\s+/).filter(Boolean),distractors:[]};
   return {target:String(raw||""),meaning:"",usage:"",breakdown:[],example:"",example_meaning:"",pronunciation:"",build_target:String(raw||""),build_meaning:"",build_words:String(raw||"").split(/\s+/).filter(Boolean),distractors:[]};
 }
+function hasBeginnerLevelContent(phrases,level,languageCode){
+  const band=String(level||"A1").toUpperCase();
+  if(!["B1","B2","C1","C2"].includes(band))return false;
+  const key=String(languageCode||"").toLowerCase().split("-")[0];
+  const beginnerPatterns={
+    es:[/^hola[!.]?$/i,/^¿?cómo estás\??$/i,/^¿?cómo te llamas\??$/i,/^me llamo\b/i,/^estoy bien[!.]?$/i,/^soy\s+\w+[!.]?$/i,/^tengo\s+\d+\s*años[!.]?$/i,/^mucho gusto[!.]?$/i],
+    en:[/^hello[!.]?$/i,/^hi[!.]?$/i,/^my name is\b/i,/^what'?s your name\??$/i,/^how are you\??$/i,/^i'?m fine[!.]?$/i,/^nice to meet you[!.]?$/i],
+    fr:[/^bonjour[!.]?$/i,/^je m'appelle\b/i,/^comment ça va\??$/i,/^ça va bien[!.]?$/i,/^enchanté[!.]?$/i],
+    de:[/^hallo[!.]?$/i,/^ich heiße\b/i,/^wie geht'?s\??$/i,/^mir geht's gut[!.]?$/i,/^freut mich[!.]?$/i],
+    it:[/^ciao[!.]?$/i,/^mi chiamo\b/i,/^come stai\??$/i,/^sto bene[!.]?$/i,/^piacere[!.]?$/i],
+    pt:[/^oi[!.]?$/i,/^eu me chamo\b/i,/^tudo bem\??$/i,/^prazer[!.]?$/i]
+  };
+  const blocked=beginnerPatterns[key]||[];
+  return Array.isArray(phrases)&&phrases.some(p=>blocked.some(re=>re.test(String(p?.target||"").trim())));
+}
 function normalizeLesson(row){
   const d=row?.content&&typeof row.content==="object"?row.content:{};
   return {language_code:String(d.language_code||"").toLowerCase(),language_name:String(d.language_name||""),level:String(d.level||row?.level||"").toUpperCase(),title:String(row?.title||d.title||"Lesson"),topic:String(row?.topic||d.topic||"Real life"),
@@ -563,13 +578,13 @@ async function load(){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").eq("id",requested).maybeSingle();
       if(r.error)throw r.error;if(!r.data||r.data.learner_languages?.user_id!==user.id)throw new Error("This lesson is not available.");baseLesson=r.data;
       const challenge=baseLesson.content?.final_challenge;
-      if(String(baseLesson.level||"A1").toUpperCase()!==current.level||!baseLesson.curriculum_node_id||!Array.isArray(baseLesson.content?.phrases)||baseLesson.content.phrases.length<3||!challenge||!Array.isArray(challenge.choices)||challenge.choices.length!==4||!challenge.choices.includes(challenge.correct_answer)){location.replace("lesson.html");return;}
+      if(String(baseLesson.level||"A1").toUpperCase()!==current.level||!baseLesson.curriculum_node_id||!Array.isArray(baseLesson.content?.phrases)||baseLesson.content.phrases.length<3||hasBeginnerLevelContent(baseLesson.content.phrases,current.level,current.languages?.code)||!baseLesson.content?.reading_comprehension||!Array.isArray(baseLesson.content.reading_comprehension.questions)||baseLesson.content.reading_comprehension.questions.length!==4||!challenge||!Array.isArray(challenge.choices)||challenge.choices.length!==4||!challenge.choices.includes(challenge.correct_answer)){location.replace("lesson.html");return;}
     }else{
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,curriculum_nodes(sequence_number,level_band)").eq("learner_language_id",current.id).order("created_at",{ascending:false}).limit(80);
       if(r.error)throw r.error;
       const lessons=(r.data||[]).map(x=>({...x,learner_languages:{id:current.id,user_id:user.id,level:current.level,languages:current.languages}}));
       const wantedCode=String(current.languages?.code||"").toLowerCase();
-      const requiredPhraseCount=3;const allowedBands=(current.level==="C1"||current.level==="C2")?[current.level,"C1/C2"]:[current.level];const valid=lessons.filter(x=>String(x.level||"A1").toUpperCase()===current.level&&allowedBands.includes(String(x.curriculum_nodes?.level_band||"").toUpperCase())&&(()=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];const storedCode=String(x?.content?.language_code||"").toLowerCase();const fc=x?.content?.final_challenge;return !!x.curriculum_node_id&&storedCode===wantedCode&&ps.length>=requiredPhraseCount&&ps.slice(0,requiredPhraseCount).every(p=>p&&p.target&&p.meaning&&p.usage&&p.example&&Array.isArray(p.breakdown)&&p.breakdown.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)&&!!fc&&typeof fc.situation==="string"&&fc.situation.trim()&&typeof fc.prompt==="string"&&fc.prompt.trim()&&Array.isArray(fc.choices)&&fc.choices.length===4&&typeof fc.correct_answer==="string"&&fc.choices.includes(fc.correct_answer)})());
+      const requiredPhraseCount=3;const allowedBands=(current.level==="C1"||current.level==="C2")?[current.level,"C1/C2"]:[current.level];const valid=lessons.filter(x=>String(x.level||"A1").toUpperCase()===current.level&&allowedBands.includes(String(x.curriculum_nodes?.level_band||"").toUpperCase())&&(()=>{const ps=Array.isArray(x?.content?.phrases)?x.content.phrases:[];const storedCode=String(x?.content?.language_code||"").toLowerCase();const fc=x?.content?.final_challenge;return !!x.curriculum_node_id&&storedCode===wantedCode&&ps.length>=requiredPhraseCount&&!hasBeginnerLevelContent(ps.slice(0,requiredPhraseCount),current.level,wantedCode)&&!!x.content?.reading_comprehension&&typeof x.content.reading_comprehension.passage==="string"&&x.content.reading_comprehension.passage.trim()&&Array.isArray(x.content.reading_comprehension.questions)&&x.content.reading_comprehension.questions.length===4&&ps.slice(0,requiredPhraseCount).every(p=>p&&p.target&&p.meaning&&p.usage&&p.example&&Array.isArray(p.breakdown)&&p.breakdown.length&&Array.isArray(p.distractors)&&p.distractors.length>=3)&&!!fc&&typeof fc.situation==="string"&&fc.situation.trim()&&typeof fc.prompt==="string"&&fc.prompt.trim()&&Array.isArray(fc.choices)&&fc.choices.length===4&&typeof fc.correct_answer==="string"&&fc.choices.includes(fc.correct_answer)})());
       const attempts=valid.length?await client.from("lesson_attempts").select("lesson_id").in("lesson_id",valid.map(x=>x.id)):{data:[],error:null};
       if(attempts.error)throw attempts.error;
       const completed=new Set((attempts.data||[]).map(x=>x.lesson_id));
