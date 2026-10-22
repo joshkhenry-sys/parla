@@ -319,7 +319,7 @@ const lessonLoadWatchdog=setTimeout(()=>{
   if(loading&&loading.style.display!=="none"){
     loading.innerHTML="<strong>This lesson is taking too long.</strong><br><span style='color:#aab6ce;font-size:13px'>The lesson service did not respond in time. You can retry now instead of waiting.</span><br><button class='primary-lesson' style='margin-top:18px' onclick='location.reload()'>Retry lesson</button>";
   }
-},50000);
+},65000);
 
 function sound(kind){
   try{
@@ -796,7 +796,7 @@ async function load(){
         const nativeProfile = await client.from("profiles").select("Nahtive_language_code").eq("id",user.id).maybeSingle();
         if (!nativeProfile.error && nativeProfile.data?.Nahtive_language_code) nativeLanguage = nativeCodes[String(nativeProfile.data.Nahtive_language_code).toLowerCase()] || "English";
         const generationController=new AbortController();
-        const generationTimer=setTimeout(()=>generationController.abort(),35000);
+        const generationTimer=setTimeout(()=>generationController.abort(),50000);
         let gen;
         try {
           const recentLessons=await client.from("lessons").select("id").eq("learner_language_id",current.id).order("created_at",{ascending:false}).limit(6);
