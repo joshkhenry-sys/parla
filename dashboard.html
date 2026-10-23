@@ -492,8 +492,14 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
 
         if (learnerLanguagesError) throw learnerLanguagesError;
 
+        // Only surface learning paths for the three languages currently supported by Nahtive.
+        // Legacy test profiles for other languages remain stored but are not shown or selected.
+        const supportedLanguages = new Set(["spanish", "french", "english"]);
+        const activeLearnerLanguages = (learnerLanguages || []).filter(row =>
+          supportedLanguages.has(String(row.languages?.name || "").trim().toLowerCase())
+        );
         const savedCurrent = localStorage.getItem("Nahtive_current_learner_language") || localStorage.getItem("native_current_learner_language");
-        const learnerLanguage = (learnerLanguages || []).find(row => row.id === savedCurrent) || (learnerLanguages || []).find(row => row.is_current) || (learnerLanguages || [])[0];
+        const learnerLanguage = activeLearnerLanguages.find(row => row.id === savedCurrent) || activeLearnerLanguages.find(row => row.is_current) || activeLearnerLanguages.find(row => String(row.languages?.name || "").trim().toLowerCase() === "spanish") || activeLearnerLanguages[0];
 
         if (!learnerLanguage) {
           window.location.href = "onboarding.html";
@@ -511,7 +517,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
 
         const myLanguagesGrid = document.getElementById("myLanguagesGrid");
         if (myLanguagesGrid) {
-          myLanguagesGrid.innerHTML = (learnerLanguages || []).map(language => {
+          myLanguagesGrid.innerHTML = activeLearnerLanguages.map(language => {
             const name = language.languages?.name || "Language";
             const current = language.is_current;
             return '<div class="dashboard-language-link '+(current ? 'current' : '')+'" data-language-id="'+escapeHtml(language.id)+'"><span>'+escapeHtml(name)+' · '+escapeHtml(language.level || "A1")+'</span><button type="button" class="manage-button" data-manage-id="'+escapeHtml(language.id)+'">Manage</button></div>';
@@ -595,7 +601,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         document.querySelectorAll("[data-manage-id]").forEach(button => {
           button.addEventListener("click", (event) => {
             event.preventDefault(); event.stopPropagation();
-            const lang=learnerLanguages.find(row => row.id===button.dataset.manageId);
+            const lang=activeLearnerLanguages.find(row => row.id===button.dataset.manageId);
             if(!lang) return;
             const hub=document.getElementById("languageHub");
             hub.classList.add("open");
