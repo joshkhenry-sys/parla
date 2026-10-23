@@ -1,0 +1,76 @@
+/* Nahtive unified visual system — inspired by the approved brand direction */
+:root{
+  --nh-bg:#050a1c;
+  --nh-bg-2:#080f29;
+  --nh-panel:#0a1533;
+  --nh-panel-2:#0e1c40;
+  --nh-line:rgba(120,164,255,.25);
+  --nh-text:#f8faff;
+  --nh-muted:#b9c8e7;
+  --nh-cyan:#00d4ff;
+  --nh-blue:#1685ff;
+  --nh-violet:#8b35ff;
+  --nh-gradient:linear-gradient(110deg,var(--nh-cyan) 0%,var(--nh-blue) 48%,var(--nh-violet) 100%);
+}
+html{scroll-behavior:smooth}
+body{
+  background-color:var(--nh-bg)!important;
+  background-image:radial-gradient(ellipse at 8% 0%,rgba(0,153,255,.16),transparent 35%),radial-gradient(ellipse at 94% 8%,rgba(125,48,255,.16),transparent 33%),linear-gradient(145deg,#050a1c 0%,#07102a 58%,#0a0921 100%)!important;
+  color:var(--nh-text)!important;
+}
+.nahtive-logo{
+  display:block!important;
+  width:clamp(238px,27vw,330px)!important;
+  height:auto!important;
+  max-width:min(100%,330px)!important;
+  object-fit:contain!important;
+}
+a:has(>img.nahtive-logo),a:has(> .nahtive-logo),.brand:has(.nahtive-logo),.logo:has(.nahtive-logo){
+  display:inline-flex!important;
+  align-items:center!important;
+  flex:none!important;
+  line-height:0!important;
+  text-decoration:none!important;
+  white-space:nowrap!important;
+}
+.site-header{
+  min-height:102px!important;
+  height:auto!important;
+  padding-top:12px!important;
+  padding-bottom:12px!important;
+  border-bottom:1px solid rgba(118,157,255,.22)!important;
+}
+.site-header .nav{gap:clamp(12px,2.2vw,30px)!important;color:#d6e1fa!important}
+.site-header .nav a:not(.button):hover{color:#fff!important}
+.button,.primary,.primary-button,.continue-btn,.continue-button,.start-btn,.submit-btn,.nav-cta{
+  background:var(--nh-gradient)!important;
+  border:0!important;
+  color:#04102b!important;
+  box-shadow:0 8px 26px rgba(38,117,255,.2)!important;
+  font-weight:800!important;
+}
+.button.secondary,.secondary,.back-btn,.manage-button{
+  background:rgba(10,20,48,.72)!important;
+  color:#f7f9ff!important;
+  border:1px solid rgba(137,171,255,.42)!important;
+  box-shadow:none!important;
+}
+.card,.panel,.login-card,.signup-wrap>.card,.lesson-demo,.detail-card,.flow-card,.language-card,.cta-panel{
+  border-color:var(--nh-line)!important;
+  box-shadow:0 22px 70px rgba(0,0,0,.24)!important;
+}
+h1,h2,h3{color:var(--nh-text)!important}
+.eyebrow,.accent,.section-heading .accent,.demo-label,.why-title{color:#58dfff!important}
+input,textarea,select{
+  background:#08132c!important;
+  color:#f8faff!important;
+  border-color:rgba(130,166,255,.3)!important;
+}
+input::placeholder,textarea::placeholder{color:#8295bc!important}
+footer,.footer,.footer-inner{border-color:rgba(118,157,255,.2)!important}
+@media(max-width:700px){
+  .nahtive-logo{width:clamp(205px,58vw,250px)!important;max-width:250px!important}
+  .site-header{min-height:78px!important}
+  .site-header .nav{gap:10px!important}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
