@@ -74,3 +74,29 @@ footer,.footer,.footer-inner{border-color:rgba(118,157,255,.2)!important}
   .site-header .nav{gap:10px!important}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Remove legacy lime/clay/orange accents from remaining screens. */
+body.placement-page .aurora i:nth-child(1){background:#1685ff!important;opacity:.2!important}
+body.placement-page .aurora i:nth-child(2){background:#8b35ff!important;opacity:.16!important}
+body.placement-page .aurora i:nth-child(3){background:#00d4ff!important;opacity:.1!important}
+body.placement-page .placement-nav-right .nav-cta{
+  background:var(--nh-gradient)!important;color:#04102b!important;
+  box-shadow:0 8px 24px rgba(38,117,255,.2)!important
+}
+body.placement-page .language-choice:hover{border-color:#1685ff!important;color:#fff!important;background:#10244b!important}
+body.placement-page .language-choice:focus-visible{outline-color:#00d4ff!important}
+body.placement-page .placement-nav .logo span,
+body.placement-page .eyebrow,
+body.placement-page .level-result,
+body.placement-page .question-count{color:#58dfff!important}
+body.dashboard-page nav{border-bottom-color:rgba(118,157,255,.22)!important}
+body.dashboard-page .recommended{border-color:rgba(70,143,255,.38)!important}
+body.dashboard-page .dashboard-page .logo span{color:#58dfff!important}
+body.signup-page .eyebrow{border-color:rgba(0,190,255,.25)!important;background:rgba(0,151,255,.08)!important;color:#58dfff!important}
+body.signup-page .eyebrow-dot{background:var(--nh-gradient)!important}
+body.signup-page .nav-right a{color:#58dfff!important}
+body.signup-page .google-btn{border-color:rgba(130,166,255,.3)!important;background:#08132c!important}
+body.signup-page .google-btn:hover{border-color:#1685ff!important;background:#0c1b3c!important}
+body.signup-page .submit-btn,body.signup-page button[type="submit"]{
+  background:var(--nh-gradient)!important;color:#04102b!important;border:0!important
+}
