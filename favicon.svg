@@ -1,4 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 145 110">
-<defs><linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08D9F5"/><stop offset=".38" stop-color="#087BFF"/><stop offset=".7" stop-color="#6551FF"/><stop offset="1" stop-color="#982CFF"/></linearGradient><filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-<g transform="translate(5 5)" filter="url(#glow)"><rect x="8" y="7" width="42" height="86" rx="21" fill="url(#ribbon)"/><rect x="91" y="7" width="42" height="86" rx="21" fill="url(#ribbon)"/><rect x="49" y="-13" width="42" height="126" rx="21" transform="rotate(-45 70 50)" fill="url(#ribbon)"/></g>
-</svg>
+<defs><linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06D9F8"/><stop offset=".38" stop-color="#087BFF"/><stop offset=".7" stop-color="#6551FF"/><stop offset="1" stop-color="#982CFF"/></linearGradient></defs>
+<g transform="translate(5 5)">
+<path d="M12 31C12 14 24 4 40 4C51 4 61 9 72 20L124 72C136 84 136 95 125 100C114 105 104 100 94 90L25 42C16 36 12 34 12 31Z" fill="url(#ribbon)"/>
+<path d="M12 30C12 13 24 4 40 4C55 4 65 12 65 29V75C65 92 55 100 40 100C24 100 12 91 12 75Z" fill="url(#ribbon)"/>
+<path d="M65 29C65 12 77 4 92 4C108 4 120 13 120 30V75C120 91 108 100 92 100C77 100 65 92 65 75Z" fill="url(#ribbon)"/>
+<path d="M25 19C36 9 49 12 61 24L117 79C127 89 127 97 119 101C110 105 103 99 94 91L25 42C16 35 17 27 25 19Z" fill="url(#ribbon)"/>
+</g></svg>
