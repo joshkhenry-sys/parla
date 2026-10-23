@@ -6,10 +6,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Nahtive — Placement Check</title>
 
-<link rel="stylesheet" href="nahtive.css"></head>
+<link rel="stylesheet" href="nahtive.css"><style id="nahtive-brand-style">
+.nahtive-logo{display:block;width:clamp(132px,16vw,174px);height:auto;max-width:100%}
+a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:inline-flex;align-items:center;flex:none;line-height:0;text-decoration:none}
+.nahtive-brand{position:fixed;top:22px;left:24px;z-index:10}
+@media(max-width:520px){.nahtive-logo{width:132px}.nahtive-brand{top:16px;left:16px}}
+</style>
+</head>
 <body>
 <div class="wrap"><div class="test-shell">
-<header><a class="logo" href="dashboard.html"><img src="nahtive-logo.svg" alt="Nahtive" width="124" height="27" style="display:block;width:124px;height:auto;max-width:100%"></a><a class="exit" href="dashboard.html">Exit</a></header>
+<header><a class="logo" href="dashboard.html"><img src="nahtive-logo.svg" alt="Nahtive" class="nahtive-logo"></a><a class="exit" href="dashboard.html">Exit</a></header>
 <div class="progress"><i id="bar"></i></div>
 <section id="intro">
   <div class="kicker">Before your first lesson</div>
