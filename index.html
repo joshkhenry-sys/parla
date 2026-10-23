@@ -17,10 +17,16 @@
     @media(max-width:580px){.shell{width:min(100% - 30px,1160px)}.site-header{height:70px}.nav{gap:10px}.nav .nav-login{display:none}.brand{font-size:1.3rem}.nav .button{padding:0 12px;font-size:.82rem;min-height:39px}.hero{padding:49px 0 58px;gap:35px}.hero-copy h1{font-size:clamp(2.65rem,13vw,4.3rem)}.lede{font-size:1rem}.hero-actions .button{width:100%}.lesson-demo{padding:17px;border-radius:19px}.phrase{font-size:1.4rem}.section{padding:62px 0}.flow-grid{grid-template-columns:1fr;gap:10px}.flow-card,.flow-card:last-child{grid-column:auto;min-height:0;padding:19px}.flow-number{margin-bottom:16px}.detail-grid,.language-grid{grid-template-columns:1fr}.detail-card{padding:22px}.level-strip{padding:20px}.cta-panel{grid-template-columns:1fr;padding:26px}.cta-panel .button{width:100%}.footer{align-items:flex-start;flex-direction:column}.demo-bottom{align-items:flex-start;flex-direction:column}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
   </style>
+<style id="nahtive-brand-style">
+.nahtive-logo{display:block;width:clamp(132px,16vw,174px);height:auto;max-width:100%}
+a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:inline-flex;align-items:center;flex:none;line-height:0;text-decoration:none}
+.nahtive-brand{position:fixed;top:22px;left:24px;z-index:10}
+@media(max-width:520px){.nahtive-logo{width:132px}.nahtive-brand{top:16px;left:16px}}
+</style>
 </head>
 <body>
 <header class="shell site-header">
-  <a class="brand" href="index.html" aria-label="Nahtive home"><img src="nahtive-logo.svg" alt="Nahtive" width="124" height="27" style="display:block;width:124px;height:auto;max-width:100%"></a>
+  <a class="brand" href="index.html" aria-label="Nahtive home"><img src="nahtive-logo.svg" alt="Nahtive" class="nahtive-logo"></a>
   <nav class="nav" aria-label="Main navigation">
     <a class="nav-how" href="#method">How lessons work</a>
     <a href="#languages">Languages</a>
