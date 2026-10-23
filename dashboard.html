@@ -71,10 +71,15 @@
 
 <section class="language-switcher-section" style="margin-top:36px">
   <div class="section-title">Add another language</div>
-  <div class="card language-switcher-card"><div class="dashboard-language-grid">
-    <button class="dashboard-language-link add-language-choice" type="button" data-add-language="Spanish">Spanish</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="English">English</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Portuguese">Portuguese</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="French">French</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Italian">Italian</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="German">German</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Japanese">Japanese</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Korean">Korean</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Mandarin">Mandarin</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Arabic">Arabic</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Dutch">Dutch</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Swedish">Swedish</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Greek">Greek</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Turkish">Turkish</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Hindi">Hindi</button><button class="dashboard-language-link add-language-choice" type="button" data-add-language="Polish">Polish</button>
-  </div></div>
-</section>
+  <div class="card language-switcher-card">
+    <p style="color:var(--muted);margin:0 0 16px">Nahtive is currently focused on building the best learning experience for these three languages.</p>
+    <div class="dashboard-language-grid">
+      <button class="dashboard-language-link add-language-choice" type="button" data-add-language="English">English</button>
+      <button class="dashboard-language-link add-language-choice" type="button" data-add-language="Spanish">Spanish</button>
+      <button class="dashboard-language-link add-language-choice" type="button" data-add-language="French">French</button>
+    </div>
+  </div>
+
 
 <section class="language-switcher-section" style="margin-top:48px">
   <div class="section-title">Jump in</div>
@@ -378,9 +383,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         if (!user) { window.location.href = "login.html"; return; }
 
         const languageMap = {
-          Spanish:"es", English:"en", Portuguese:"pt", French:"fr", Italian:"it",
-          German:"de", Japanese:"ja", Korean:"ko", Mandarin:"zh", Arabic:"ar",
-          Dutch:"nl", Swedish:"sv", Greek:"el", Turkish:"tr", Hindi:"hi", Polish:"pl"
+          English:"en", Spanish:"es", French:"fr"
         };
         const code = languageMap[languageName];
         if (!code) throw new Error("Unsupported language.");
