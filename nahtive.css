@@ -1215,3 +1215,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .dashboard-language-link.current{background:#59a8ff!important;color:#101a0b!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
+
+
+/* Nahtive blue-violet identity: shared across every page using this stylesheet. */
+:root{
+  --accent:#55b8ff;--accent-2:#a78bfa;--sage:#55b8ff;--sageSoft:#172943;
+  --sageDeep:#55b8ff;--clay:#a78bfa;--claySoft:#29213f;--butter:#a78bfa;--butterSoft:#282044;
+}
+body:not(.dashboard-page){background:radial-gradient(ellipse at 10% 0%,rgba(37,160,255,.18),transparent 36%),radial-gradient(ellipse at 92% 8%,rgba(139,92,246,.19),transparent 34%),linear-gradient(145deg,#080c18 0%,#0a1020 52%,#100d22 100%)!important}
+.logo span,.eyebrow,.kicker,.accent,.section-title .accent{color:#70c7ff!important}
+.primary,.primary-button,.next,.submit-btn,.continue-btn,.continue-button,.start-btn,.button-primary{background:linear-gradient(115deg,#55b8ff 0%,#8b7bff 100%)!important;border-color:#7cbcff!important;color:#07101f!important}
+.primary:hover,.primary-button:hover,.next:hover,.submit-btn:hover,.continue-btn:hover,.continue-button:hover,.start-btn:hover,.button-primary:hover{filter:brightness(1.1)}
+a:hover{color:#a9b5ff}
