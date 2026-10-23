@@ -37,6 +37,19 @@
     .language-card{background:linear-gradient(145deg,#162743,#17172f);border-color:#354665}
 
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+  
+    .site-header .nahtive-logo{width:clamp(275px,31vw,365px)!important;max-width:365px!important}
+    .hero{gap:clamp(34px,5vw,76px);padding-top:74px}
+    .hero-copy h1{max-width:680px;font-size:clamp(3.2rem,6.2vw,5.5rem);line-height:.98}
+    .hero-copy h1 .accent{background:var(--nh-gradient);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+    .hero .lesson-demo{background:linear-gradient(145deg,rgba(12,27,63,.98),rgba(5,11,31,.98));border:1px solid rgba(68,150,255,.55);border-radius:26px;box-shadow:0 32px 100px rgba(0,0,0,.45),0 0 55px rgba(39,105,255,.12);padding:24px}
+    .hero .lesson-demo:after{content:"";position:absolute;z-index:-1;width:250px;height:250px;right:-70px;bottom:-100px;border-radius:50%;background:rgba(125,53,255,.22);filter:blur(45px)}
+    .hero .language-tab[aria-pressed="true"]{background:var(--nh-gradient)!important;color:#06112b!important;border-color:transparent!important}
+    .hero .level-pill{color:#8beaff;background:rgba(0,151,255,.12);border-color:rgba(0,190,255,.3)}
+    .hero .why{background:rgba(3,9,25,.75);border-color:rgba(110,153,255,.24)}
+    .hero .button:not(.secondary){background:var(--nh-gradient)!important;color:#06112b!important;border:0!important}
+    .hero .button.secondary{border-color:rgba(137,171,255,.5)!important}
+    @media(max-width:700px){.site-header .nahtive-logo{width:clamp(205px,58vw,250px)!important}.hero{padding-top:48px}}
   </style>
 <style id="nahtive-brand-style">
 .nahtive-logo{display:block;width:clamp(132px,16vw,174px);height:auto;max-width:100%}
@@ -44,6 +57,7 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
 .nahtive-brand{position:fixed;top:22px;left:24px;z-index:10}
 @media(max-width:520px){.nahtive-logo{width:132px}.nahtive-brand{top:16px;left:16px}}
 </style>
+  <link rel="stylesheet" href="nahtive-brand.css?v=20261023">
 </head>
 <body>
 <header class="shell site-header">
