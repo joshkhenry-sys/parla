@@ -140,7 +140,10 @@ TEACHING DESIGN:
 - Keep the challenge compact. The lesson screen already teaches the phrases; do not write the situation or prompt as a recap of all eight phrases. Do not require untaught grammar or vocabulary.
 - Write final_challenge.situation and final_challenge.prompt in ${nativeLanguage}; write the choices and correct_answer in the target language.
 - Before returning JSON, verify the situation and prompt are concise, non-repetitive, natural, and make the best response clearly distinguishable from the other three.
-- Spanish must be contemporary Latin American / broadly American Spanish, never Spain-specific Spanish.
+- ENGLISH QUALITY: use contemporary natural American English by default, including realistic contractions, collocations, and register. Do not teach stiff textbook lines when a native speaker would phrase it differently.
+- SPANISH QUALITY: use contemporary Latin American / broadly American Spanish, never Spain-specific Spanish. Prefer broadly understood expressions; label regional slang when it is genuinely useful.
+- FRENCH QUALITY: use contemporary, natural French as spoken in France by default. Preserve accents and punctuation; use natural contractions, pronouns, and register. Avoid word-for-word translations from English and avoid formal textbook phrasing in casual scenes.
+- LANGUAGE SEPARATION: every target-language field must use the selected target language; explanations must use ${nativeLanguage}. Do not mix languages inside target phrases, examples, dialogue, or answer choices.
 - Explanations and translations must be in ${nativeLanguage}. Target phrases and dialogue must remain in ${language}.
 
 Return JSON only.`;
