@@ -25,10 +25,16 @@
     .empty{padding:40px;background:#141d2e;border:1px solid rgba(226,235,255,.22);border-radius:22px;color:#c0cadb;line-height:1.6}
     @media(max-width:650px){.phrase-top{display:block}.listen{margin-top:16px}.phrase-target{font-size:27px}}
   </style>
+<style id="nahtive-brand-style">
+.nahtive-logo{display:block;width:clamp(132px,16vw,174px);height:auto;max-width:100%}
+a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:inline-flex;align-items:center;flex:none;line-height:0;text-decoration:none}
+.nahtive-brand{position:fixed;top:22px;left:24px;z-index:10}
+@media(max-width:520px){.nahtive-logo{width:132px}.nahtive-brand{top:16px;left:16px}}
+</style>
 </head>
 <body>
 <div class="phrases-page">
-  <nav><a class="logo" href="dashboard.html">Nahtive<i></i></a><a href="dashboard.html">Back to learning</a></nav>
+  <nav><a class="logo" href="dashboard.html"><img src="nahtive-logo.svg" alt="Nahtive" class="nahtive-logo"></a><a href="dashboard.html">Back to learning</a></nav>
   <header class="phrases-header">
     <div class="eyebrow">Your language</div>
     <h1>Phrases you'll actually use.</h1>
