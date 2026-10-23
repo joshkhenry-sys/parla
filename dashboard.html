@@ -1,9 +1,15 @@
 <!DOCTYPE html><html lang="en"><head>
-  <script src="site-config.js"></script><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Nahtive — Your Learning</title><link rel="stylesheet" href="dashboard.css"></head>
+  <script src="site-config.js"></script><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Nahtive — Your Learning</title><link rel="stylesheet" href="dashboard.css"><style id="nahtive-brand-style">
+.nahtive-logo{display:block;width:clamp(132px,16vw,174px);height:auto;max-width:100%}
+a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:inline-flex;align-items:center;flex:none;line-height:0;text-decoration:none}
+.nahtive-brand{position:fixed;top:22px;left:24px;z-index:10}
+@media(max-width:520px){.nahtive-logo{width:132px}.nahtive-brand{top:16px;left:16px}}
+</style>
+</head>
 <body class="dashboard-page">
 <div class="container">
 <nav>
-  <a href="dashboard.html" class="logo"><img src="nahtive-logo.svg" alt="Nahtive" width="124" height="27" style="display:block;width:124px;height:auto;max-width:100%"></a>
+  <a href="dashboard.html" class="logo"><img src="nahtive-logo.svg" alt="Nahtive" class="nahtive-logo"></a>
   <div class="nav-right">
     <div class="streak" id="streak"><span class="streak-dot"></span><span id="streakText">Start learning</span><span style="margin-left:6px;font-weight:800" id="xpText">0 XP</span></div>
     <button type="button" id="logoutButton">Log out</button>
