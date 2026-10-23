@@ -59,6 +59,37 @@
       .signup-page .nav-right{gap:6px;font-size:11px}
       .signup-page .signup-wrap>.card{padding:22px!important}
     }
+
+    /* Signup contrast redesign: bright type, visible form controls, blue-violet brand */
+    body.signup-page{background:radial-gradient(ellipse at 12% 12%,rgba(56,189,248,.2),transparent 34%),radial-gradient(ellipse at 88% 18%,rgba(139,92,246,.2),transparent 32%),linear-gradient(145deg,#070b16 0%,#0b1223 54%,#100d24 100%)!important;color:#f7f9ff!important}
+    .signup-page nav{border-color:#34445f}
+    .signup-page .logo{color:#fff!important}
+    .signup-page .logo span{color:#67e8f9!important}
+    .signup-page .nav-right{color:#d8e2f2!important}
+    .signup-page .nav-right a{color:#80d8ff!important}
+    .signup-page .eyebrow{border-color:#3b668b;background:#12243b;color:#c9efff!important}
+    .signup-page .eyebrow-dot{background:#67e8f9;box-shadow:0 0 12px rgba(103,232,249,.6)}
+    .signup-page h1{color:#fff!important}
+    .signup-page .intro p{color:#d1dced!important}
+    .signup-page .signup-points{color:#e0e8f5!important}
+    .signup-page .signup-point-mark{border-color:#4b78a5;background:#142943;color:#9de6ff}
+    .signup-page .signup-wrap>.card{background:linear-gradient(150deg,#17233a,#111a2d)!important;border:1px solid #405271!important;box-shadow:0 28px 90px rgba(0,0,0,.45)!important}
+    .signup-page .google-btn{background:#202d45!important;border:1px solid #50627f!important;color:#fff!important}
+    .signup-page .google-btn:hover{background:#293b59!important;border-color:#83d7ff!important}
+    .signup-page .divider{color:#c4cfe2!important}
+    .signup-page .field label{color:#f1f5ff!important}
+    .signup-page input{background:#090f1c!important;color:#fff!important;border:1px solid #52627e!important}
+    .signup-page input::placeholder{color:#aab8ce!important;opacity:1}
+    .signup-page input:focus{border-color:#67e8f9!important;box-shadow:0 0 0 3px rgba(103,232,249,.18)!important}
+    .signup-page .password-note{color:#c0cce0!important}
+    .signup-page .submit-btn{background:linear-gradient(100deg,#67e8f9,#60a5fa 55%,#a78bfa)!important;color:#07101f!important;box-shadow:0 4px 0 #4f6bbd!important}
+    .signup-page .terms{color:#c0cce0!important}
+    .signup-page .terms a{color:#8edcff!important}
+    .signup-page #signupMessage{color:#dce8f8!important}
+    .signup-page footer{color:#aab8ce!important}
+    .signup-page button:focus-visible,.signup-page a:focus-visible,.signup-page input:focus-visible{outline:3px solid #67e8f9!important;outline-offset:3px}
+    .signup-page button:disabled{opacity:.72;cursor:wait}
+
   </style></head>
 
 <body class="signup-page">
@@ -214,7 +245,7 @@
         message.style.lineHeight = "1.5";
         form.parentNode.insertBefore(message, form.nextSibling);
       }
-      message.style.color = isError ? "#b3261e" : "#444";
+      message.style.color = isError ? "#ffb4ab" : "#dce8f8";
       message.textContent = text;
     }
 
@@ -313,10 +344,10 @@
       notice.id = "existingSessionNotice";
       notice.style.marginTop = "15px";
       notice.style.padding = "14px 16px";
-      notice.style.border = "1px solid var(--border)";
+      notice.style.border = "1px solid #52627e";
       notice.style.borderRadius = "14px";
-      notice.style.background = "#f7f5ef";
-      notice.style.color = "#555";
+      notice.style.background = "#17233a";
+      notice.style.color = "#f7f9ff";
       notice.style.fontSize = "13px";
       notice.style.lineHeight = "1.5";
       notice.innerHTML = "<strong>Already signed in.</strong><br>Current account: " + escapeHtml(name) + ". Log out before creating another account on this device.";
@@ -325,8 +356,9 @@
       logout.type = "button";
       logout.textContent = "Log out";
       logout.style.marginTop = "10px";
-      logout.style.border = "1px solid var(--border)";
-      logout.style.background = "white";
+      logout.style.border = "1px solid #52627e";
+      logout.style.background = "#202d45";
+      logout.style.color = "#ffffff";
       logout.style.borderRadius = "999px";
       logout.style.padding = "9px 13px";
       logout.style.cursor = "pointer";
