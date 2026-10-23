@@ -43,13 +43,19 @@
       .login-page main{padding:34px 0 42px}
       .login-page .login-card{padding:24px!important}
     }
-  </style></head>
+  </style><style id="nahtive-brand-style">
+.nahtive-logo{display:block;width:clamp(132px,16vw,174px);height:auto;max-width:100%}
+a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:inline-flex;align-items:center;flex:none;line-height:0;text-decoration:none}
+.nahtive-brand{position:fixed;top:22px;left:24px;z-index:10}
+@media(max-width:520px){.nahtive-logo{width:132px}.nahtive-brand{top:16px;left:16px}}
+</style>
+</head>
 
 <body class="login-page" style="visibility:hidden">
   <div class="page">
 
     <nav>
-      <a href="index.html" class="logo"><img src="nahtive-logo.svg" alt="Nahtive" width="124" height="27" style="display:block;width:124px;height:auto;max-width:100%"></a>
+      <a href="index.html" class="logo"><img src="nahtive-logo.svg" alt="Nahtive" class="nahtive-logo"></a>
 
       <div class="nav-right">
         New to Nahtive?
