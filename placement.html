@@ -119,11 +119,12 @@ function showResult(){
    totals[q.level]++;
    if(answers[i]===q.correct_index)scores[q.level]++;
  });
- // Estimate the highest band where the learner answers at least two of
- // its three questions correctly. Do not hard-code the result to A1.
+ // Move upward through CEFR bands only while the learner demonstrates
+ // sufficient mastery at each earlier band.
  let level="A1";
  for(const band of levels){
-   if(totals[band]>0 && scores[band]/totals[band]>=2/3) level=band;
+   if(totals[band]===0 || scores[band]/totals[band]<2/3) break;
+   level=band;
  }
  const scoreRows=levels.map(band=>'<div style="display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);color:#d4d9e5"><span>'+band+'</span><strong>'+scores[band]+' / '+totals[band]+'</strong></div>').join("");
  const note=totals[level]===0
