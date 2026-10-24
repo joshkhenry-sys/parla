@@ -495,17 +495,13 @@ function buildCards(row){
     }
   }
   c.phrases.forEach(fallbackNormalize);
-  const p=c.phrases.slice(0,8);
+  // Keep lessons focused and natural: five useful phrases, no standalone grammar exams.
+  const p=c.phrases.slice(0,5);
   if(p.length<1)throw new Error("This lesson has no teachable phrases.");
-  const cards=[{type:"scene",stage:"Mission",scene:c.scene,topic:c.topic}];
+  const cards=[{type:"scene",stage:"Situation",scene:c.scene,topic:c.topic}];
   p.forEach((phrase,i)=>{
-    cards.push({type:"teach",stage:i===0?"Learn":"Add on",phrase});
-    (phrase.verb_focus||[]).forEach((verbFocus,verbIndex)=>{
-      if(verbFocus.check_question&&verbFocus.check_choices.length===4&&verbFocus.check_choices.includes(verbFocus.check_answer)){
-        cards.push({type:"verb",stage:"Verb + tense",phrase,verbFocus,verbIndex});
-      }
-    });
-    cards.push({type:"recall",stage:"Check understanding",phrase,choices:makeChoices(phrase,p)});
+    cards.push({type:"teach",stage:i===0?"Learn the phrase":"Keep going",phrase});
+    if(i===1||i===3)cards.push({type:"recall",stage:"Quick check",phrase,choices:makeChoices(phrase,p)});
   });
   const dialogue=c.dialogue.filter(x=>x&&x.text).slice(0,4);
   const last=p[p.length-1],challenge=c.finalChallenge||{};
@@ -569,11 +565,9 @@ function renderTeach(c){
   const p=c.phrase;
   const phraseMarkup='<div class="target">'+highlightVerbForms(p.target,p.verb_focus)+'</div><div class="translation">'+esc(p.meaning)+'</div>';
   shell('<span class="stage-chip">'+esc(c.stage)+'</span>'+phraseMarkup+
-    '<div class="explain-grid"><div class="explain"><div class="explain-label">When to use it</div><p>'+esc(p.usage||"Use it when this situation calls for it.")+'</p></div><div class="explain"><div class="explain-label">Say it naturally</div><p>'+esc(p.pronunciation||"Listen first, then say the phrase out loud on your own.")+'</p></div></div>'+
-    (p.breakdown?.length?'<div class="clarification"><div class="explain-label">Phrase breakdown</div>'+p.breakdown.map(x=>'<p style="margin-top:5px"><strong>'+esc(x.target)+'</strong> — '+esc(x.meaning)+'</p>').join("")+'</div>':"")+
-    (p.verb_focus?.length?'<div class="clarification"><div class="explain-label">Verb lab · meaning + tense</div><div class="verb-focus-list">'+p.verb_focus.map(v=>'<div class="verb-focus"><div class="verb-focus-head"><span class="verb-form">'+esc(v.form)+'</span><span class="verb-tense">'+esc(v.tense)+'</span></div><p><strong>Base verb:</strong> '+esc(v.lemma)+' — '+esc(v.meaning)+'</p><p><strong>Why this form:</strong> '+esc(v.why_this_form)+'</p></div>').join("")+'</div></div>':"")+
+    '<p style="color:var(--lesson-muted);line-height:1.65;margin-top:18px">'+esc(p.usage||"Notice how this phrase fits the situation.")+'</p>'+
     (p.example?'<div class="example"><strong>'+esc(p.example)+'</strong><span>'+esc(p.example_meaning||"")+'</span></div>':"")+
-    '<button class="audio-btn" id="listen">▶ Listen</button>',
+    '<button class="audio-btn" id="listen">▶ Listen and repeat</button>',
     '<button class="primary-lesson" id="go">I’ve got it →</button>');
   $("listen").onclick=()=>{sound("click");speak(p.target)};
   $("go").onclick=()=>{sound("click");addXP(5);next()};
