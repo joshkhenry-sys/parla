@@ -24,64 +24,28 @@
 const LEVELS=["A1","A2","B1","B2","C1","C2"];
 const BANK={
 English:[
-["A1","You ___ from Canada.","am","is","are","be",2],
-["A1","She ___ coffee every morning.","drink","drinks","drinking","drank",1],
-["A1","Where ___ the nearest station?","are","do","is","does",2],
-["A2","I ___ dinner when you called.","cook","was cooking","have cooked","am cooking",1],
-["A2","There isn't ___ milk left.","many","few","much","several",2],
-["A2","We've lived here ___ 2022.","for","since","during","from",1],
-["B1","If I ___ more time, I'd take a class.","have","had","will have","would have",1],
-["B1","He asked me where I ___.","live","did I live","lived","do I live",2],
-["B1","I'm not used to ___ up this early.","get","got","getting","have got",2],
-["B2","I wish I ___ what to say at the time.","know","have known","had known","would know",2],
-["B2","The proposal was rejected, ___ surprised everyone.","that","what","which","who",2],
-["B2","By the time we arrived, the meeting ___.","already starts","has already started","had already started","would already start",2],
-["C1","The findings are compelling, ___ not conclusive.","albeit","whereas","despite","nevertheless",0],
-["C1","Rarely ___ such a thorough analysis.","we have seen","have we seen","we saw","did we have seen",1],
-["C1","Her apology did little to ___ the tension.","alleviate","aggravate","allocate","allege",0],
-["C2","His remarks were deliberately ___, allowing either interpretation.","unequivocal","ambiguous","redundant","conspicuous",1],
-["C2","The conclusion does not ___ from the evidence presented.","ensue","elude","follow","refrain",2],
-["C2","Her account was so ___ that even close observers struggled to reconcile its details.","lucid","equivocal","cogent","succinct",1]
+["A1","I ___ from Brazil.","am","is","are","be",0],["A1","She ___ to work by bus.","go","goes","going","gone",1],
+["A2","Yesterday, we ___ a movie.","watch","watched","watching","watches",1],["A2","I've lived here ___ two years.","since","for","at","during",1],
+["B1","If it rains tomorrow, we ___ at home.","stayed","would stay","will stay","have stayed",2],["B1","He told me that he ___ busy.","is","was","will","be",1],
+["B2","By the time I arrived, they ___ dinner.","finished","have finished","had finished","are finishing",2],["B2","The plan sounds good, ___ it may be expensive.","although","because of","despite","unless",0],
+["C1","I would rather you ___ me before making a decision.","tell","told","have told","will tell",1],["C1","Her explanation was clear and ___ supported by evidence.","well","good","strongly","deep",0],
+["C2","The two reports seem to disagree, but they are actually ___.","compatible","complicated","comparable","competitive",0],["C2","His answer was vague, so its meaning remained ___.","obvious","uncertain","accurate","ordinary",1]
 ],
 Spanish:[
-["A1","Yo ___ estudiante.","soy","es","está","ser",0],
-["A1","Ella ___ café por la mañana.","bebo","bebe","bebes","beber",1],
-["A1","¿Dónde ___ el baño?","están","eres","está","tienes",2],
-["A2","Ayer ___ al supermercado.","voy","iba","fui","iré",2],
-["A2","No queda ___ agua.","muchos","muchas","mucho","muy",2],
-["A2","Vivo aquí ___ tres años.","desde","hace","durante","por",1],
-["B1","Si tuviera más tiempo, ___ otro idioma.","aprendo","aprenderé","aprendería","aprendí",2],
-["B1","Me preguntó dónde ___.","vivo","vivía","vivo yo","viviré",1],
-["B1","No estoy acostumbrado a ___ tan temprano.","levantarme","me levanto","levantar","levanté",0],
-["B2","Ojalá lo ___ antes.","sé","sabía","hubiera sabido","sabré",2],
-["B2","La propuesta, ___ sorprendió a todos, fue rechazada.","que","lo que","quien","cuyo",0],
-["B2","Cuando llegamos, la reunión ya ___.","empezó","ha empezado","había empezado","empezaría",2],
-["C1","El argumento resulta convincente, ___ no definitivo.","aunque","por ende","a fin de","en cuanto",0],
-["C1","Pocas veces ___ un análisis tan riguroso.","hemos visto","vimos","habíamos ver","veremos de",0],
-["C1","Su disculpa no logró ___ la tensión.","aliviar","agravar","asignar","alegar",0],
-["C2","Sus declaraciones fueron deliberadamente ___, para admitir varias interpretaciones.","inequívocas","ambiguas","redundantes","conspicuas",1],
-["C2","La conclusión no se ___ de las pruebas presentadas.","elude","desprende","reprime","recauda",1],
-["C2","Su relato era tan ___ que costaba conciliar los detalles.","claro","escueto","equívoco","coherente",2]
+["A1","Yo ___ de Brasil.","soy","es","estoy","ser",0],["A1","Ella ___ al trabajo en autobús.","voy","va","vas","ir",1],
+["A2","Ayer ___ una película.","veo","vi","veré","viendo",1],["A2","Vivo aquí ___ dos años.","desde","por","hace","durante",2],
+["B1","Si mañana llueve, ___ en casa.","nos quedamos","nos quedaremos","nos quedábamos","quedarnos",1],["B1","Me dijo que ___ ocupado.","está","estará","estaba","estar",2],
+["B2","Cuando llegué, ellos ya ___ la cena.","terminaron","han terminado","habían terminado","terminan",2],["B2","El plan parece bueno, ___ puede ser caro.","aunque","porque de","a pesar","salvo",0],
+["C1","Preferiría que me ___ antes de decidir.","avisas","avisaste","avisaras","avisarás",2],["C1","Su explicación fue clara y estuvo bien ___ con pruebas.","apoyada","apoyando","apoyar","apoya",0],
+["C2","Los dos informes parecen contradecirse, pero en realidad son ___.","compatibles","complicados","competentes","competitivos",0],["C2","Su respuesta fue ambigua, así que el significado quedó ___.","obvio","incierto","exacto","habitual",1]
 ],
 French:[
-["A1","Je ___ étudiant.","suis","es","est","être",0],
-["A1","Elle ___ du café le matin.","bois","boit","buvons","boire",1],
-["A1","Où ___ la gare ?","sont","est","as","fait",1],
-["A2","Hier, nous ___ au marché.","allons","irons","sommes allés","allions aller",2],
-["A2","Il ne reste pas ___ pain.","beaucoup","des","du","de",3],
-["A2","J'habite ici ___ trois ans.","depuis","pendant","dans","il y a",0],
-["B1","Si j'avais plus de temps, j'___ une autre langue.","apprends","apprendrai","apprendrais","ai appris",2],
-["B1","Elle m'a demandé où j'___.","habite","habitais","j'habite","habiterai",1],
-["B1","Je ne suis pas habitué à ___ si tôt.","me lever","je me lève","levé","lever",0],
-["B2","Si je l'avais su, je l'___ plus tôt.","mentionne","aurais mentionné","mentionnerai","avais mentionné",1],
-["B2","La proposition, ___ a surpris tout le monde, a été rejetée.","que","qui","dont","où",1],
-["B2","Quand nous sommes arrivés, la réunion ___.","commence déjà","a déjà commencé","avait déjà commencé","commencerait déjà",2],
-["C1","L'argument est convaincant, ___ pas définitif.","quoique","donc","afin de","d'autant",0],
-["C1","Rarement ___ une analyse aussi approfondie.","nous avons vu","avons-nous vu","nous voyions","avions voir",1],
-["C1","Ses excuses n'ont guère contribué à ___ la tension.","alléger","aggraver","attribuer","alléguer",0],
-["C2","Ses propos étaient délibérément ___, laissant place à plusieurs interprétations.","univoques","équivoques","redondants","ostensibles",1],
-["C2","La conclusion ne ___ pas des éléments présentés.","suit","s'évade","s'abstient","se retient",0],
-["C2","Son récit était si ___ qu'il était difficile d'en concilier les détails.","limpide","succinct","équivoque","concis",2]
+["A1","Je ___ du Brésil.","suis","est","es","être",0],["A1","Elle ___ au travail en bus.","vais","va","vas","aller",1],
+["A2","Hier, nous ___ un film.","regardons","avons regardé","regarder","regardons-nous",1],["A2","J'habite ici ___ deux ans.","depuis","pendant","à","dans",0],
+["B1","S'il pleut demain, nous ___ à la maison.","restions","resterons","sommes restés","rester",1],["B1","Il m'a dit qu'il ___ occupé.","est","sera","était","être",2],
+["B2","Quand je suis arrivé, ils ___ déjà le dîner.","finissent","ont fini","avaient fini","finiront",2],["B2","Le plan semble bon, ___ il peut coûter cher.","bien que","mais","malgré","à cause",1],
+["C1","Je préférerais que tu me ___ avant de décider.","préviens","prévenais","préviendras","prévenir",1],["C1","Son explication était claire et bien ___ par des preuves.","soutenu","soutenue","soutenir","soutenant",1],
+["C2","Les deux rapports semblent se contredire, mais ils sont en fait ___.","compatibles","compliqués","compétents","compétitifs",0],["C2","Sa réponse était vague, donc le sens restait ___.","évident","incertain","exact","ordinaire",1]
 ]};
 const TRANSLATIONS={
 Spanish:{English:"English",Spanish:"Español",Portuguese:"Português",French:"Français"},
@@ -108,7 +72,7 @@ function result(){
 const scores=Object.fromEntries(LEVELS.map(l=>[l,0])),totals=Object.fromEntries(LEVELS.map(l=>[l,0]));
 questions.forEach((q,i)=>{totals[q.level]++;if(answers[i]===q.correct)scores[q.level]++;});
 let level="A1";
-for(const l of LEVELS){if(scores[l]<2)break;level=l;}
+for(const l of LEVELS){if(scores[l]<1)break;level=l;}
 const rows=LEVELS.map(l=>'<div class="score-row"><span>'+l+'</span><strong>'+scores[l]+' / 3 correct</strong></div>').join("");
 const description={A1:"You are at the beginner stage. Build confidence with everyday words and simple sentences.",A2:"You can handle familiar, everyday communication and are building independence.",B1:"You can manage many everyday situations and communicate the main points clearly.",B2:"You can communicate with good independence and handle more complex ideas.",C1:"You show strong control of complex language, nuance, and varied situations.",C2:"Your answers suggest highly advanced control of the language."};
 app.innerHTML='<div class="result"><span class="eyebrow">Your result</span><h1>Your estimated level</h1><div class="level">'+level+'</div><p class="note">'+description[level]+' This is a short screening estimate; a fuller assessment can refine it.</p><div class="breakdown"><h3 style="font-size:1rem;margin:0 0 8px">Level breakdown</h3>'+rows+'</div><div class="result-actions"><a class="btn primary" style="text-decoration:none" href="signup.html?targetLanguage='+encodeURIComponent(language)+'&level='+encodeURIComponent(level)+'">Start at '+level+' →</a><button class="btn secondary" id="retake">Retake test</button></div></div>';
