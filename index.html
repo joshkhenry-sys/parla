@@ -58,10 +58,14 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
 @media(max-width:520px){.nahtive-logo{width:132px}.nahtive-brand{top:16px;left:16px}}
 </style>
   <link rel="stylesheet" href="nahtive-brand.css?v=20261023">
+<style id="nahtive-wordmark-style">
+.nahtive-wordmark{display:inline-block;font-family:Manrope,system-ui,sans-serif;font-size:clamp(1.55rem,2.2vw,2rem);font-weight:800;letter-spacing:-.065em;line-height:1.1;background:linear-gradient(105deg,#67e8f9 0%,#60a5fa 48%,#a78bfa 100%);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.nahtive-wordmark-footer{font-size:1.25rem}
+</style>
 </head>
 <body>
 <header class="shell site-header">
-  <a class="brand" href="index.html" aria-label="Nahtive home"><img src="Gradient%20Ribbon%20N%20Logo.jpg" alt="Nahtive" class="nahtive-logo"></a>
+  <a class="brand" href="index.html" aria-label="Nahtive home"><span class="nahtive-wordmark">Nahtive</span></a>
   <nav class="nav" aria-label="Main navigation">
     <a class="nav-how" href="#method">How lessons work</a>
     <a href="#languages">Languages</a>
@@ -168,7 +172,7 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
     </div>
   </section>
 </main>
-<footer class="shell footer"><a class="brand" href="index.html"><img src="Gradient%20Ribbon%20N%20Logo.jpg" alt="Nahtive" width="124" height="27" style="display:block;width:124px;height:auto;max-width:100%"></a><span>Real language. Real situations.</span><div class="footer-links"><a href="placement.html">Placement</a><a href="login.html">Log in</a><a href="signup.html">Get started</a></div></footer>
+<footer class="shell footer"><a class="brand" href="index.html"><span class="nahtive-wordmark nahtive-wordmark-footer">Nahtive</span></a><span>Real language. Real situations.</span><div class="footer-links"><a href="placement.html">Placement</a><a href="login.html">Log in</a><a href="signup.html">Get started</a></div></footer>
 <script>
 (function(){
   const samples={
