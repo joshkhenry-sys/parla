@@ -100,3 +100,26 @@ body.signup-page .google-btn:hover{border-color:#1685ff!important;background:#0c
 body.signup-page .submit-btn,body.signup-page button[type="submit"]{
   background:var(--nh-gradient)!important;color:#04102b!important;border:0!important
 }
+
+
+/* Gradient wordmark overrides for all pages using the shared brand stylesheet. */
+.nahtive-wordmark,
+.site-header .brand .nahtive-wordmark,
+.logo .nahtive-wordmark,
+a .nahtive-wordmark {
+  display:inline-block!important;
+  font-family:Manrope,system-ui,sans-serif!important;
+  font-size:clamp(1.55rem,2.2vw,2rem)!important;
+  font-weight:800!important;
+  letter-spacing:-.045em!important;
+  line-height:1.15!important;
+  background:linear-gradient(105deg,#67e8f9 0%,#60a5fa 48%,#a78bfa 100%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;
+  color:transparent!important;
+  white-space:nowrap!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+.nahtive-wordmark-footer{font-size:1.25rem!important}
