@@ -1,138 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0f1a">
 <link rel="icon" type="image/jpeg" href="Gradient%20Ribbon%20N%20Logo.jpg">
-  <script src="site-config.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Nahtive — Find your language level</title>
-  <meta name="description" content="Take a free CEFR language placement test and find your level in minutes.">
-  <link rel="stylesheet" href="nahtive.css">
-  <style>
-    body.placement-page .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-    body.placement-page .aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.28;animation:placementDrift 22s ease-in-out infinite alternate}
-    body.placement-page .aurora i:nth-child(1){width:520px;height:520px;background:#2f4b8f;top:-200px;left:-160px;opacity:.22}
-    body.placement-page .aurora i:nth-child(2){width:460px;height:460px;background:#ff9f5a;top:30%;right:-160px;animation-duration:28s;opacity:.18}
-    body.placement-page .aurora i:nth-child(3){width:400px;height:400px;background:#b6f36a;bottom:-180px;left:25%;animation-duration:25s;opacity:.10}
-    @keyframes placementDrift{to{transform:translate(70px,50px) scale(1.15)}}@keyframes nahtiveDotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.22);opacity:.72}}
-    body.placement-page .placement-wrap{position:relative;z-index:1;max-width:1080px;width:auto;margin:0 auto;padding:0 22px 70px}
-    body.placement-page .placement-nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;margin:0 0 54px;background:transparent!important;color:#f4f1ea!important;border:0!important;box-shadow:none!important}
-    body.placement-page .placement-nav .logo{font-family:Manrope,system-ui,sans-serif!important;color:#f4f1ea!important;font-weight:700;font-size:1.5rem;letter-spacing:-.02em;text-decoration:none;display:inline-flex!important;align-items:center!important;gap:0!important;white-space:nowrap!important;line-height:1!important}
-    body.placement-page .placement-nav .logo span{color:#b6f36a!important;display:inline!important;position:static!important;vertical-align:baseline!important;line-height:1!important;margin:0!important;padding:0!important;animation:nahtiveDotPulse 2.2s ease-in-out infinite;transform-origin:center}
-    body.placement-page .placement-nav-right{display:flex;gap:10px;align-items:center}
-    body.placement-page .placement-nav-right a{color:#9ba4ba!important;text-decoration:none;font-weight:500;padding:8px 12px;font-size:15px}
-    body.placement-page .placement-nav-right a:hover{color:#f4f1ea!important}
-    body.placement-page .placement-nav-right .nav-cta{color:#10200a!important;background:#b6f36a!important;padding:10px 18px;border-radius:14px;font-weight:700;box-shadow:0 4px 0 #7fbf3a}
-    body.placement-page .placement-nav-right .nav-cta:hover{color:#10200a!important;filter:brightness(1.06)}
-    body.placement-page .language-choice{color:#f4f1ea!important;background:#141a2b!important;border:1px solid rgba(255,255,255,.09)!important;text-shadow:none!important}
-    body.placement-page .language-choice:hover{color:#10200a!important;background:color-mix(in srgb,#b6f36a 16%,#141a2b)!important;border-color:#b6f36a!important}
-    body.placement-page .language-choice:focus-visible{outline:2px solid #b6f36a;outline-offset:2px}
-    body.placement-page{min-height:100vh;background:#0b0f1a!important;color:#f4f1ea;font-family:Manrope,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    .placement-card{max-width:760px;margin:0 auto;background:linear-gradient(160deg,#1b2238,#141a2b);border:1px solid rgba(255,255,255,.09);border-radius:26px;padding:34px;box-shadow:0 30px 70px -30px rgba(0,0,0,.6)}
-    .placement-progress{height:5px;background:#1b2238;border-radius:99px;overflow:hidden;margin:0 0 42px}
-    .placement-progress span{display:block;height:100%;width:0;background:#b6f36a;transition:width .25s}
-
-    .placement-card .eyebrow{display:inline-block;color:#b6f36a!important;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;background:transparent!important}
-    .placement-card h1{font-family:Manrope,system-ui,sans-serif!important;color:#f4f1ea!important;font-size:clamp(34px,6vw,56px);line-height:1.02;margin:0 0 16px;letter-spacing:-.04em;font-weight:700!important}
-    .placement-card h2{font-family:Manrope,system-ui,sans-serif!important;color:#f4f1ea!important;font-size:28px;margin:0 0 10px;font-weight:700!important}
-    .placement-card .muted{color:#d4d9e5!important;line-height:1.6}
-    .language-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:32px}
-    .language-choice,.answer{font:700 14px Manrope,system-ui,sans-serif;color:#f4f1ea;background:#1b2238;border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:17px 16px;text-align:left;cursor:pointer;transition:transform .16s ease,background .16s ease,border-color .16s ease}
-    .language-choice:hover,.answer:hover{background:#1b2a24;border-color:#b6f36a;transform:translateY(-2px)}
-    .answer-grid{display:grid;gap:11px;margin-top:26px}\n    .translate-question{margin-top:2px;background:transparent;border:0;color:#b6f36a;font:700 14px Manrope,system-ui,sans-serif;padding:0;cursor:pointer;text-align:left}.translate-question:hover{text-decoration:underline}.question-translation{margin-top:10px;padding:12px 14px;border-left:2px solid #b6f36a;background:#11182a;color:#d4d9e5;line-height:1.5;font-size:14px;border-radius:0 10px 10px 0}
-    .answer.selected{border-color:#b6f36a;background:#1b2a24}
-    .answer.correct{border-color:#b6f36a;background:#1b2a24}
-    .answer.wrong{border-color:#ff6b6b;background:#321e28}
-    .answer:disabled{cursor:default}
-    .topline{display:flex;justify-content:space-between;color:#9ba4ba;font-size:13px;margin-bottom:22px}
-    .level-pill{color:#b6f36a;font-weight:800}
-    .actions{display:flex;justify-content:space-between;gap:12px;margin-top:28px}
-    .btn{font:800 15px Manrope,system-ui,sans-serif;border:0;border-radius:13px;padding:13px 20px;cursor:pointer}
-    .primary{background:#b6f36a;color:#10200a}.secondary{background:#263554;color:#f4f1ea}
-    .result{text-align:center}
-    .result-level{font-size:86px;line-height:1;font-weight:800;color:#b6f36a;margin:22px 0 10px;letter-spacing:-.06em}
-    .result-note{max-width:520px;margin:0 auto;color:#9ba4ba;line-height:1.7}
-    .result-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:30px}
-    .error{margin-top:16px;color:#ff9b9b;font-size:14px}
-    @media(max-width:760px){.language-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:560px){.placement-wrap{width:calc(100% - 24px);padding-top:18px}.placement-card{padding:24px;border-radius:22px}.language-grid{grid-template-columns:1fr}.placement-nav{margin-bottom:38px}}
-  </style>
-<style id="nahtive-brand-style">.nahtive-logo{display:block;width:clamp(132px,16vw,174px);height:auto;max-width:100%}a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo){display:inline-flex;align-items:center;flex:none;line-height:0;text-decoration:none}@media(max-width:520px){.nahtive-logo{width:132px}}</style>
-  <link rel="stylesheet" href="nahtive-brand.css?v=20261023">
-<style id="nahtive-wordmark-style">.nahtive-wordmark{display:inline-block;font-family:Manrope,system-ui,sans-serif;font-size:clamp(1.55rem,2.2vw,2rem);font-weight:800;letter-spacing:-.065em;line-height:1.1;background:linear-gradient(105deg,#67e8f9 0%,#60a5fa 48%,#a78bfa 100%);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}</style></head>
-<body class="placement-page">
-<div class="aurora"><i></i><i></i><i></i></div>
-<div class="wrap placement-wrap">
-  <nav class="placement-nav">
-    <a class="logo" href="index.html"><span class="nahtive-wordmark">Nahtive</span></a>
-    <div class="placement-nav-right">
-      <a href="index.html">Home</a>
-      <a href="login.html">Log in</a>
-      <a class="nav-cta" href="signup.html">Start learning</a>
-    </div>
-  </nav>
-  <div id="app"></div>
+<title>Nahtive — Language placement test</title>
+<meta name="description" content="Take a practical language placement test and estimate your CEFR level from A1 to C2.">
+<link rel="stylesheet" href="nahtive-brand.css?v=20261024">
+<style>
+:root{color-scheme:dark;--bg:#0b0f1a;--card:#141b2d;--card2:#19233a;--line:#34435f;--text:#f4f7ff;--muted:#b8c4d9;--cyan:#67e8f9;--blue:#60a5fa;--violet:#a78bfa;--grad:linear-gradient(105deg,var(--cyan),var(--blue) 48%,var(--violet))}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 10% 0,rgba(56,189,248,.14),transparent 38%),radial-gradient(ellipse at 100% 15%,rgba(139,92,246,.15),transparent 35%),var(--bg);color:var(--text);font:16px/1.6 "Manrope",system-ui,sans-serif}.shell{width:min(900px,calc(100% - 32px));margin:auto}.nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0 42px}.wordmark{font-size:1.65rem;font-weight:800;letter-spacing:-.06em;background:var(--grad);background-clip:text;-webkit-background-clip:text;color:transparent;text-decoration:none}.nav-links{display:flex;gap:20px}.nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem}.nav-links a:hover{color:#fff}.card{max-width:740px;margin:0 auto 60px;padding:clamp(22px,5vw,42px);background:linear-gradient(145deg,rgba(25,35,58,.98),rgba(17,24,41,.98));border:1px solid var(--line);border-radius:24px;box-shadow:0 25px 80px #0005}.eyebrow{color:var(--cyan);font-size:.75rem;letter-spacing:.13em;font-weight:800;text-transform:uppercase}.card h1{font-size:clamp(2.1rem,6vw,3.5rem);letter-spacing:-.055em;line-height:1.08;margin:12px 0}.card h2{font-size:clamp(1.3rem,4vw,1.9rem);line-height:1.25;letter-spacing:-.035em;margin:12px 0}.muted{color:var(--muted)}.field{display:grid;gap:8px;margin-top:24px}.field label{font-size:.9rem;font-weight:700;color:#e0e8f7}.field select,.field input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #465674;background:#0d1425;color:var(--text);font:inherit}.language-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:26px}.choice,.answer{width:100%;text-align:left;border:1px solid #3a4967;border-radius:14px;background:#121b2d;color:var(--text);padding:16px;font:inherit;font-weight:700;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}.choice:hover,.answer:hover{border-color:#8ba8ff;background:#1b2943;transform:translateY(-1px)}.choice:focus-visible,.answer:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}.btn{border:0;border-radius:12px;padding:12px 18px;font:800 .95rem inherit;font-family:inherit;font-weight:800;cursor:pointer}.primary{background:var(--grad);color:#07101f}.secondary{background:#293650;color:#f3f6ff}.btn:disabled{opacity:.4;cursor:not-allowed}.progress{height:5px;background:#2b3650;border-radius:99px;overflow:hidden;margin-bottom:28px}.progress span{display:block;height:100%;background:var(--grad);transition:width .2s}.topline{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:.85rem}.pill{color:#c5d9ff;font-size:.78rem;font-weight:800}.question-translation{border-left:2px solid var(--cyan);background:#0e1627;padding:12px 14px;color:#cbd7eb;border-radius:0 10px 10px 0;margin:18px 0}.answers{display:grid;gap:10px;margin-top:22px}.answer{font-size:.97rem;font-weight:600}.answer.selected{border-color:var(--cyan);background:#183044;box-shadow:inset 0 0 0 1px var(--cyan)}.actions{display:flex;justify-content:space-between;gap:12px;margin-top:26px}.result{text-align:center}.level{font-size:clamp(5rem,17vw,7rem);font-weight:800;letter-spacing:-.08em;line-height:1.15;margin:18px 0;background:var(--grad);background-clip:text;-webkit-background-clip:text;color:transparent}.breakdown{max-width:420px;margin:28px auto;text-align:left}.score-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #ffffff18;color:#dbe5f5}.score-row strong{color:#fff}.result-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.note{font-size:.9rem;color:var(--muted);max-width:520px;margin:0 auto}.hidden{display:none!important}@media(max-width:600px){.nav{padding:18px 0 28px}.nav-links{gap:12px}.nav-links a{font-size:.82rem}.language-grid{grid-template-columns:1fr}.card{border-radius:19px}.actions .btn{padding:12px 14px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="nav"><a class="wordmark" href="index.html">Nahtive</a><div class="nav-links"><a href="index.html">Home</a><a href="login.html">Log in</a></div></nav>
+<main id="app" class="card" aria-live="polite"></main>
 </div>
 <script>
+(function(){
+"use strict";
+const LEVELS=["A1","A2","B1","B2","C1","C2"];
+const BANK={
+English:[
+["A1","You ___ from Canada.","am","is","are","be",2],
+["A1","She ___ coffee every morning.","drink","drinks","drinking","drank",1],
+["A1","Where ___ the nearest station?","are","do","is","does",2],
+["A2","I ___ dinner when you called.","cook","was cooking","have cooked","am cooking",1],
+["A2","There isn't ___ milk left.","many","few","much","several",2],
+["A2","We've lived here ___ 2022.","for","since","during","from",1],
+["B1","If I ___ more time, I'd take a class.","have","had","will have","would have",1],
+["B1","He asked me where I ___.","live","did I live","lived","do I live",2],
+["B1","I'm not used to ___ up this early.","get","got","getting","have got",2],
+["B2","I wish I ___ what to say at the time.","know","have known","had known","would know",2],
+["B2","The proposal was rejected, ___ surprised everyone.","that","what","which","who",2],
+["B2","By the time we arrived, the meeting ___.","already starts","has already started","had already started","would already start",2],
+["C1","The findings are compelling, ___ not conclusive.","albeit","whereas","despite","nevertheless",0],
+["C1","Rarely ___ such a thorough analysis.","we have seen","have we seen","we saw","did we have seen",1],
+["C1","Her apology did little to ___ the tension.","alleviate","aggravate","allocate","allege",0],
+["C2","His remarks were deliberately ___, allowing either interpretation.","unequivocal","ambiguous","redundant","conspicuous",1],
+["C2","The conclusion does not ___ from the evidence presented.","ensue","elude","follow","refrain",2],
+["C2","Her account was so ___ that even close observers struggled to reconcile its details.","lucid","equivocal","cogent","succinct",1]
+],
+Spanish:[
+["A1","Yo ___ estudiante.","soy","es","está","ser",0],
+["A1","Ella ___ café por la mañana.","bebo","bebe","bebes","beber",1],
+["A1","¿Dónde ___ el baño?","están","eres","está","tienes",2],
+["A2","Ayer ___ al supermercado.","voy","iba","fui","iré",2],
+["A2","No queda ___ agua.","muchos","muchas","mucho","muy",2],
+["A2","Vivo aquí ___ tres años.","desde","hace","durante","por",1],
+["B1","Si tuviera más tiempo, ___ otro idioma.","aprendo","aprenderé","aprendería","aprendí",2],
+["B1","Me preguntó dónde ___.","vivo","vivía","vivo yo","viviré",1],
+["B1","No estoy acostumbrado a ___ tan temprano.","levantarme","me levanto","levantar","levanté",0],
+["B2","Ojalá lo ___ antes.","sé","sabía","hubiera sabido","sabré",2],
+["B2","La propuesta, ___ sorprendió a todos, fue rechazada.","que","lo que","quien","cuyo",0],
+["B2","Cuando llegamos, la reunión ya ___.","empezó","ha empezado","había empezado","empezaría",2],
+["C1","El argumento resulta convincente, ___ no definitivo.","aunque","por ende","a fin de","en cuanto",0],
+["C1","Pocas veces ___ un análisis tan riguroso.","hemos visto","vimos","habíamos ver","veremos de",0],
+["C1","Su disculpa no logró ___ la tensión.","aliviar","agravar","asignar","alegar",0],
+["C2","Sus declaraciones fueron deliberadamente ___, para admitir varias interpretaciones.","inequívocas","ambiguas","redundantes","conspicuas",1],
+["C2","La conclusión no se ___ de las pruebas presentadas.","elude","desprende","reprime","recauda",1],
+["C2","Su relato era tan ___ que costaba conciliar los detalles.","claro","escueto","equívoco","coherente",2]
+],
+French:[
+["A1","Je ___ étudiant.","suis","es","est","être",0],
+["A1","Elle ___ du café le matin.","bois","boit","buvons","boire",1],
+["A1","Où ___ la gare ?","sont","est","as","fait",1],
+["A2","Hier, nous ___ au marché.","allons","irons","sommes allés","allions aller",2],
+["A2","Il ne reste pas ___ pain.","beaucoup","des","du","de",3],
+["A2","J'habite ici ___ trois ans.","depuis","pendant","dans","il y a",0],
+["B1","Si j'avais plus de temps, j'___ une autre langue.","apprends","apprendrai","apprendrais","ai appris",2],
+["B1","Elle m'a demandé où j'___.","habite","habitais","j'habite","habiterai",1],
+["B1","Je ne suis pas habitué à ___ si tôt.","me lever","je me lève","levé","lever",0],
+["B2","Si je l'avais su, je l'___ plus tôt.","mentionne","aurais mentionné","mentionnerai","avais mentionné",1],
+["B2","La proposition, ___ a surpris tout le monde, a été rejetée.","que","qui","dont","où",1],
+["B2","Quand nous sommes arrivés, la réunion ___.","commence déjà","a déjà commencé","avait déjà commencé","commencerait déjà",2],
+["C1","L'argument est convaincant, ___ pas définitif.","quoique","donc","afin de","d'autant",0],
+["C1","Rarement ___ une analyse aussi approfondie.","nous avons vu","avons-nous vu","nous voyions","avions voir",1],
+["C1","Ses excuses n'ont guère contribué à ___ la tension.","alléger","aggraver","attribuer","alléguer",0],
+["C2","Ses propos étaient délibérément ___, laissant place à plusieurs interprétations.","univoques","équivoques","redondants","ostensibles",1],
+["C2","La conclusion ne ___ pas des éléments présentés.","suit","s'évade","s'abstient","se retient",0],
+["C2","Son récit était si ___ qu'il était difficile d'en concilier les détails.","limpide","succinct","équivoque","concis",2]
+]};
+const TRANSLATIONS={
+Spanish:{English:"English",Spanish:"Español",Portuguese:"Português",French:"Français"},
+French:{English:"English",Spanish:"Español",Portuguese:"Português",French:"Français"},
+English:{English:"English",Spanish:"Español",Portuguese:"Português",French:"Français"}
+};
+let language="",questions=[],index=0,answers=[];
 const app=document.getElementById("app");
-const languages=["English","Spanish","French"];
-let questions=[],index=0,answers=[],language="",instructionLanguage="English";
-function escapeHtml(v){const d=document.createElement("div");d.textContent=String(v??"");return d.innerHTML}
-function renderLanguage(){
- app.innerHTML='<div class="placement-card"><span class="eyebrow">Free placement test</span><h1>Find your real level.</h1><p class="muted">Answer 18 practical questions across A1–C2. Your result is an estimate based on your answers at each level. No account required.</p><label for="instructionLanguage" style="display:block;margin-top:24px;color:#d4d9e5">Read questions in</label><select id="instructionLanguage" style="display:block;width:100%;margin-top:8px;padding:14px;border-radius:12px;background:#141a2b;color:#f4f1ea;border:1px solid #444"><option value="Spanish" >Spanish</option><option value="English" selected>English</option><option value="Portuguese" >Portuguese</option><option value="French" >French</option><option value="Italian" >Italian</option><option value="German" >German</option><option value="Japanese" >Japanese</option><option value="Korean" >Korean</option><option value="Mandarin" >Mandarin</option><option value="Arabic" >Arabic</option><option value="Dutch" >Dutch</option><option value="Swedish" >Swedish</option><option value="Greek" >Greek</option><option value="Turkish" >Turkish</option><option value="Hindi" >Hindi</option><option value="Polish" >Polish</option><option value="Russian">Russian</option><option value="Ukrainian">Ukrainian</option><option value="Bengali">Bengali</option><option value="Urdu">Urdu</option><option value="Punjabi">Punjabi</option><option value="Tamil">Tamil</option><option value="Telugu">Telugu</option><option value="Vietnamese">Vietnamese</option><option value="Thai">Thai</option><option value="Indonesian">Indonesian</option><option value="Malay">Malay</option><option value="Filipino">Filipino</option><option value="Swahili">Swahili</option><option value="Hebrew">Hebrew</option><option value="Persian">Persian</option><option value="Romanian">Romanian</option><option value="Czech">Czech</option><option value="Hungarian">Hungarian</option><option value="Danish">Danish</option><option value="Norwegian">Norwegian</option><option value="Finnish">Finnish</option><option value="Serbian">Serbian</option><option value="Croatian">Croatian</option><option value="Bulgarian">Bulgarian</option><option value="Amharic">Amharic</option><option value="Yoruba">Yoruba</option><option value="Other">Other / type my language</option></select><input id="otherInstructionLanguage" type="text" placeholder="Type your language" style="display:none;width:100%;margin-top:8px;padding:14px;border-radius:12px;background:#141a2b;color:#f4f1ea;border:1px solid #444"><div class="language-grid">'+languages.map(l=>'<button class="language-choice" data-language="'+escapeHtml(l)+'">'+escapeHtml(l)+'</button>').join("")+'</div><div id="error" class="error"></div></div>';
- document.getElementById("instructionLanguage").onchange=()=>{document.getElementById("otherInstructionLanguage").style.display=document.getElementById("instructionLanguage").value==="Other"?"block":"none"};
-document.querySelectorAll(".language-choice").forEach(b=>b.onclick=()=>{const selected=document.getElementById("instructionLanguage").value;instructionLanguage=selected==="Other"?(document.getElementById("otherInstructionLanguage").value.trim()||"English"):selected;start(b.dataset.language)});
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function intro(){
+app.innerHTML='<span class="eyebrow">Free placement test</span><h1>Find your real level.</h1><p class="muted">18 practical questions across A1–C2. This test runs instantly—no account or AI generation request required. Choose the language you want to assess.</p><div class="language-grid"><button class="choice" data-lang="English">English <span class="muted">· EN</span></button><button class="choice" data-lang="Spanish">Spanish <span class="muted">· ES</span></button><button class="choice" data-lang="French">French <span class="muted">· FR</span></button></div><p class="muted" style="font-size:.82rem;margin:20px 0 0">Choose the language you are learning, not your native language.</p>';
+app.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>start(b.dataset.lang)));
 }
-async function start(l){
- language=l;
- app.innerHTML='<div class="placement-card"><span class="eyebrow">Preparing your test</span><h2>Building your '+escapeHtml(l)+' level check…</h2><p class="muted">This usually takes a few seconds.</p><div id="error" class="error"></div></div>';
- try{
-   const res=await fetch("/api/generate-placement",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:l,instructionLanguage})});
-   const raw=await res.text();
-   let data={};
-   try{data=JSON.parse(raw)}catch(_){throw new Error("The placement test server returned an invalid response. Please try again.")}
-   if(!res.ok||!data.questions)throw new Error(data.error||"Could not load the test.");
-   questions=data.questions.slice().sort(()=>Math.random()-.5);
-   index=0;answers=[];renderQuestion();
- }catch(e){app.innerHTML='<div class="placement-card"><h2>We could not load the test.</h2><p class="muted">'+escapeHtml(e.message)+'</p><button class="btn secondary" onclick="renderLanguage()">Try again</button></div>'}
-}
+function start(lang){language=lang;questions=shuffle(BANK[lang].map(q=>({level:q[0],question:q[1],choices:q.slice(2,6),correct:q[6]})));index=0;answers=Array(questions.length).fill(null);renderQuestion();}
 function renderQuestion(){
- const q=questions[index];
-  app.innerHTML=`<div class="placement-progress"><span style="width:${((index+1)/questions.length)*100}%"></span></div>
-  <div class="placement-card">
-    <div class="topline"><span>Question ${index+1} of ${questions.length}</span><span class="level-pill">Adaptive assessment</span></div>
-    <h2>${escapeHtml(q.question_translation||q.question)}</h2>
-    ${q.question_translation ? `<p class="muted" style="margin-top:12px;padding:12px;border-left:2px solid #b6f36a;background:#11182a"><strong>Original question:</strong> ${escapeHtml(q.question)}</p>` : ""}
-    <div class="answer-grid">${q.choices.map((choice,i)=>`<button class="answer" data-index="${i}">${escapeHtml(choice)}</button>`).join("")}</div>
-    <div class="actions"><button class="btn secondary" onclick="goBack()" ${index===0?"disabled":""} style="${index===0?"opacity:.4":""}">Back</button><button class="btn primary" id="next" disabled>Next</button></div>
-  </div>`;
- document.querySelectorAll(".answer").forEach(b=>b.onclick=()=>{document.querySelectorAll(".answer").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");document.getElementById("next").disabled=false;answers[index]=Number(b.dataset.index)});
- document.getElementById("next").onclick=()=>{if(index<questions.length-1){index++;renderQuestion()}else showResult()};
+const q=questions[index];
+app.innerHTML='<div class="progress"><span style="width:'+((index+1)/questions.length*100)+'%"></span></div><div class="topline"><span>Question '+(index+1)+' of '+questions.length+'</span><span class="pill">'+esc(language)+' · CEFR placement</span></div><h2>'+esc(q.question)+'</h2><div class="answers">'+q.choices.map((c,i)=>'<button class="answer'+(answers[index]===i?' selected':'')+'" data-answer="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(c)+'</button>').join("")+'</div><div class="actions"><button class="btn secondary" id="back" '+(index===0?'disabled':'')+'>Back</button><button class="btn primary" id="next" '+(answers[index]===null?'disabled':'')+'>'+(index===questions.length-1?'See my result':'Next question')+' →</button></div>';
+app.querySelectorAll("[data-answer]").forEach(b=>b.addEventListener("click",()=>{answers[index]=Number(b.dataset.answer);renderQuestion();}));
+document.getElementById("back").addEventListener("click",()=>{if(index>0){index--;renderQuestion();}});
+document.getElementById("next").addEventListener("click",()=>{if(answers[index]===null)return;if(index<questions.length-1){index++;renderQuestion();}else result();});
 }
-function goBack(){if(index>0){index--;renderQuestion()}}
-function showResult(){
- const levels=["A1","A2","B1","B2","C1","C2"];
- const scores=Object.fromEntries(levels.map(level=>[level,0]));
- const totals=Object.fromEntries(levels.map(level=>[level,0]));
- questions.forEach((q,i)=>{
-   if(!scores.hasOwnProperty(q.level))return;
-   totals[q.level]++;
-   if(answers[i]===q.correct_index)scores[q.level]++;
- });
- // Move upward through CEFR bands only while the learner demonstrates
- // sufficient mastery at each earlier band.
- let level="A1";
- for(const band of levels){
-   if(totals[band]===0 || scores[band]/totals[band]<2/3) break;
-   level=band;
- }
- const scoreRows=levels.map(band=>'<div style="display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);color:#d4d9e5"><span>'+band+'</span><strong>'+scores[band]+' / '+totals[band]+'</strong></div>').join("");
- const note=totals[level]===0
-   ?"We couldn't score enough questions at this level. Retake the test for a more reliable estimate."
-   :"This is an approximate placement based on your answers across six CEFR levels. A longer assessment may refine your level.";
- app.innerHTML='<div class="placement-card result"><span class="eyebrow">Your result</span><h1>Your estimated level</h1><div class="result-level">'+level+'</div><p class="result-note">'+note+'</p><div style="max-width:420px;margin:24px auto;text-align:left"><h3 style="color:#f4f1ea;font-size:14px;margin:0 0 8px">Level breakdown</h3>'+scoreRows+'</div><div class="result-actions"><a class="btn primary" href="signup.html?targetLanguage='+encodeURIComponent(language)+'&level='+encodeURIComponent(level)+'">Start learning at '+level+' →</a><button class="btn secondary" onclick="renderLanguage()">Retake test</button></div></div>';
+function result(){
+const scores=Object.fromEntries(LEVELS.map(l=>[l,0])),totals=Object.fromEntries(LEVELS.map(l=>[l,0]));
+questions.forEach((q,i)=>{totals[q.level]++;if(answers[i]===q.correct)scores[q.level]++;});
+let level="A1";
+for(const l of LEVELS){if(scores[l]<2)break;level=l;}
+const rows=LEVELS.map(l=>'<div class="score-row"><span>'+l+'</span><strong>'+scores[l]+' / 3 correct</strong></div>').join("");
+const description={A1:"You are at the beginner stage. Build confidence with everyday words and simple sentences.",A2:"You can handle familiar, everyday communication and are building independence.",B1:"You can manage many everyday situations and communicate the main points clearly.",B2:"You can communicate with good independence and handle more complex ideas.",C1:"You show strong control of complex language, nuance, and varied situations.",C2:"Your answers suggest highly advanced control of the language."};
+app.innerHTML='<div class="result"><span class="eyebrow">Your result</span><h1>Your estimated level</h1><div class="level">'+level+'</div><p class="note">'+description[level]+' This is a short screening estimate; a fuller assessment can refine it.</p><div class="breakdown"><h3 style="font-size:1rem;margin:0 0 8px">Level breakdown</h3>'+rows+'</div><div class="result-actions"><a class="btn primary" style="text-decoration:none" href="signup.html?targetLanguage='+encodeURIComponent(language)+'&level='+encodeURIComponent(level)+'">Start at '+level+' →</a><button class="btn secondary" id="retake">Retake test</button></div></div>';
+document.getElementById("retake").addEventListener("click",intro);
 }
-renderLanguage();
+intro();
+})();
 </script>
 </body>
 </html>
