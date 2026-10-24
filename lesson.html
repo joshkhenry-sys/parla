@@ -633,41 +633,35 @@ function renderRecall(c){
 function renderChallenge(c){
   const fc=c.finalChallenge||{};
   let choices=cleanChallengeChoices(fc.choices);
-  if(!choices.length){choices.push(c.phrase.target);}
-  let correctAnswer=String(fc.correct_answer||"").replace(/^[A-D][.)\s]+/,"").trim();
-  if(!correctAnswer||/^(undefined|null)$/i.test(correctAnswer))correctAnswer=String(c.phrase?.target||choices[0]||"").trim();
-  if(!choices.some(choice=>normalizeBuildAnswer(choice)===normalizeBuildAnswer(correctAnswer))&&c.phrase?.target){
-    correctAnswer=String(c.phrase.target).trim();
-    if(!choices.some(choice=>normalizeBuildAnswer(choice)===normalizeBuildAnswer(correctAnswer))){
-      choices=[correctAnswer,...choices.filter(choice=>normalizeBuildAnswer(choice)!==normalizeBuildAnswer(correctAnswer))].slice(0,4);
-    }
-  }
-  const taskText=String(fc.prompt||"")+" "+String(fc.situation||"");
-  if(/preferenc|haz.{0,30}pregunta|ask.{0,30}question/i.test(taskText)){
+  let correctAnswer=String(fc.correct_answer||"").replace(/^[A-D][.)\\s]+/,"").trim();
+  const code=String(profile?.code||lesson?.language_code||"en").toLowerCase().split(/[-_]/)[0];
+  const isEnglish=code==="en";
+  // Older generated lessons can contain choices in the wrong target language even when
+  // their metadata says English. Never show Spanish choices in an English lesson.
+  const spanishChoicePattern=/[¿¡ñáéíóúü]|\\b(qué|dónde|vives|libros|gustan|tienes|mascota|haces|prefieres|cuáles|quieres)\\b/i;
+  const hasWrongLanguage=isEnglish&&choices.some(choice=>spanishChoicePattern.test(choice));
+  if(hasWrongLanguage){
     const phrases=lesson.phrases||[];
-    const preference=phrases.find(p=>/\bI (?:really )?like\b|\bI prefer\b|\bme gusta\b/i.test(p.target));
-    const followUp=phrases.find(p=>/\bwhat about you\b|\bhow about you\b|\by tú\b/i.test(p.target));
-    if(preference&&followUp){
-      correctAnswer=preference.target.replace(/[.!?]+$/,"")+". "+followUp.target.replace(/^[.!?\s]+/,"");
-      // Use four complete, readable responses that test the whole conversational turn.
-      const candidates=[
-        correctAnswer,
-        preference.target,
-        phrases.find(p=>/\bwhat book do you like\b|\bwhat .* do you like\b/i.test(p.target))?.target||"What book do you like?",
-        "I like romance books."
-      ];
-      choices=[];
-      candidates.forEach(value=>{
-        const cleaned=String(value||"").trim();
-        if(cleaned&&!choices.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(cleaned)))choices.push(cleaned);
-      });
-      // Guarantee four options without reintroducing concatenated legacy text.
-      ["I like mystery books.","What about you?","I prefer romance books.","That sounds interesting."].forEach(value=>{
-        if(choices.length<4&&!choices.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(value)))choices.push(value);
-      });
-      choices=choices.slice(0,4);
+    const relevant=phrases.filter(p=>/\\b(book|read|reading|like|love|prefer|into|favorite|favourite)\\b/i.test(String(p.target||"")));
+    const options=[...relevant.map(p=>String(p.target||"").trim()),"What kind of books are you into?","I’m really into mystery novels.","I’m not much of a reader, to be honest."];
+    choices=[];
+    for(const value of options){
+      const cleaned=String(value||"").trim();
+      if(cleaned&&!choices.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(cleaned)))choices.push(cleaned);
+      if(choices.length===4)break;
     }
+    if(!choices.length)choices=["What kind of books are you into?","I’m really into mystery novels.","I’m not much of a reader, to be honest.","I usually read before bed."];
+    correctAnswer=choices[0];
   }
+  if(!choices.length)choices=[String(c.phrase?.target||"Choose the most natural response.")];
+  if(!correctAnswer||/^(undefined|null)$/i.test(correctAnswer))correctAnswer=String(c.phrase?.target||choices[0]||"").trim();
+  if(!choices.some(choice=>normalizeBuildAnswer(choice)===normalizeBuildAnswer(correctAnswer))){
+    if(c.phrase?.target){
+      correctAnswer=String(c.phrase.target).trim();
+      if(!choices.some(choice=>normalizeBuildAnswer(choice)===normalizeBuildAnswer(correctAnswer)))choices=[correctAnswer,...choices.filter(choice=>normalizeBuildAnswer(choice)!==normalizeBuildAnswer(correctAnswer))].slice(0,4);
+    }else correctAnswer=choices[0];
+  }
+  choices=choices.slice(0,4);
   const options=choices.map((choice,i)=>'<button class="option" type="button" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span class="option-copy">'+esc(choice)+'</span></button>').join("");
   let selected=false;
   shell('<span class="stage-chip">Real-world practice</span><h2 style="margin:12px 0 8px">What would sound natural?</h2><p style="color:var(--lesson-muted);line-height:1.65;margin:0 0 18px">'+esc(fc.situation||lesson.scene?.situation||"Choose the most natural response for this moment.")+'</p><div class="question" style="margin-bottom:16px">'+esc(fc.prompt||"Choose the most natural response.")+'</div><div class="options" id="challengeOptions">'+options+'</div><div class="feedback" id="feedback" aria-live="polite"></div><div id="challengeCorrection" style="display:none;padding:14px 16px;border:1px solid var(--line);border-radius:12px;margin-top:12px"><strong>'+esc(correctAnswer)+'</strong><div style="color:var(--muted);margin-top:7px;line-height:1.6">This is the best fit for the situation. Compare what it communicates with the other options.</div></div>',
