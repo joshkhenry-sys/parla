@@ -1,1 +1,264 @@
-<PLACEHOLDER_WILL_REPLACE>
+<!DOCTYPE html><html lang="en"><head>
+<link rel="icon" type="image/jpeg" href="/Gradient%20Ribbon%20N%20Logo.jpg?v=20261024">
+  <script src="site-config.js"></script><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Nahtive — Your Learning</title><link rel="stylesheet" href="dashboard.css"><style id="nahtive-brand-style">
+.nahtive-logo{display:block;width:clamp(132px,16vw,174px);height:auto;max-width:100%}
+a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:inline-flex;align-items:center;flex:none;line-height:0;text-decoration:none}
+.nahtive-brand{position:fixed;top:22px;left:24px;z-index:10}
+@media(max-width:520px){.nahtive-logo{width:132px}.nahtive-brand{top:16px;left:16px}}
+</style>
+  <link rel="stylesheet" href="nahtive-brand.css?v=20261023">
+<style id="nahtive-wordmark-style">
+.nahtive-wordmark{display:inline-block;font-family:Manrope,system-ui,sans-serif;font-size:clamp(1.55rem,2.2vw,2rem);font-weight:800;letter-spacing:-.065em;line-height:1.1;background:linear-gradient(105deg,#67e8f9 0%,#60a5fa 48%,#a78bfa 100%);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.nahtive-wordmark-footer{font-size:1.25rem}
+</style>
+</head>
+<body class="dashboard-page">
+<div class="container">
+<nav>
+  <a href="dashboard.html" class="logo"><span class="nahtive-wordmark">Nahtive</span></a>
+  <div class="nav-right">
+    <div class="streak" id="streak"><span class="streak-dot"></span><span id="streakText">Start learning</span><span style="margin-left:6px;font-weight:800" id="xpText">0 XP</span></div>
+    <button type="button" id="logoutButton">Log out</button>
+    <div class="avatar" id="avatarInitial">J</div>
+  </div>
+</nav>
+
+<section class="dashboard-hero">
+  <div class="eyebrow">Your learning space</div>
+  <h1>Speak more.<br>Think less.</h1>
+  <p>Real situations. Real conversation. A learning path that remembers what you're working on.</p>
+</section>
+
+<main>
+<div class="dashboard-grid">
+<section class="card recommended">
+  <div class="recommended-top"><div class="recommended-label" id="recommendedLabel">Recommended for you</div><div class="recommended-time">~7 min</div></div>
+  <h2 id="recommendedTitle" data-Nahtive="true">Your next conversation is ready.</h2>
+  <p class="recommended-copy" id="recommendedCopy">Step into a real situation, hear the language naturally, then use it yourself.</p>
+  <div class="lesson-meta"><span id="recommendedLanguage">Spanish</span><span class="meta-dot"></span><span>Scene</span></div>
+  <button class="primary-button" id="startLessonButton" onclick="startLesson()">Start speaking <span>→</span></button>
+</section>
+<section class="card progress-card">
+  <div class="card-label">Current language</div>
+  <div class="language-row"><div class="language-name" id="dashboardLanguage">Spanish</div><div class="level" id="dashboardLevel">A1</div></div>
+  <div class="progress-number" id="progressPercent">Not started</div>
+  <div class="progress-description" id="progressDescription">Complete a lesson to start tracking your progress.</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-footer"><span>Progress</span><span id="progressFraction">0 completed</span></div>
+</section>
+</div>
+
+<section class="language-switcher-section" aria-labelledby="twentyHourTitle" style="margin-top:24px">
+  <div class="card" style="padding:24px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:18px;flex-wrap:wrap">
+      <div>
+        <div class="card-label">THE FIRST 20 HOURS</div>
+        <h2 id="twentyHourTitle" style="margin:8px 0;font-size:clamp(24px,3vw,34px)">Get good enough to use it.</h2>
+        <p style="max-width:640px;color:var(--muted);line-height:1.6;margin:0">Pick a meaningful real-world outcome. Break it into useful subskills, practice them in context, and correct mistakes as they happen. This is focused practice—not a promise of fluency.</p>
+      </div>
+      <div style="min-width:145px;text-align:right">
+        <div id="twentyHourCount" style="font-size:30px;font-weight:850;letter-spacing:-.04em">0.0 / 20 h</div>
+        <div style="font-size:12px;color:var(--muted)">Focused lesson time</div>
+      </div>
+    </div>
+    <div style="height:9px;background:var(--line,#293044);border-radius:99px;overflow:hidden;margin:20px 0 10px"><div id="twentyHourFill" style="height:100%;width:0;background:var(--accent,#59a8ff);border-radius:99px;transition:width .3s ease"></div></div>
+    <div id="twentyHourStatus" style="font-size:13px;color:var(--muted);margin-bottom:20px">Your 20-hour clock starts with your next lesson. Only time while the lesson page is visible is counted.</div>
+    <div id="twentyHourGoal" style="padding:14px 16px;border:1px solid var(--line,#293044);border-radius:14px;margin-bottom:18px">
+      <div style="font-size:10px;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Target performance</div>
+      <div style="font-weight:750">Handle a real conversation for your chosen goal with less hesitation.</div>
+    </div>
+    <div id="twentyHourStages" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+      <div style="padding:14px;border:1px solid var(--line,#293044);border-radius:14px"><strong>0–2 hours · Deconstruct</strong><p style="font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0">Define the outcome and learn the most useful building blocks.</p></div>
+      <div style="padding:14px;border:1px solid var(--line,#293044);border-radius:14px"><strong>2–5 hours · Build patterns</strong><p style="font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0">Practice high-value phrases and sentence patterns you can reuse.</p></div>
+      <div style="padding:14px;border:1px solid var(--line,#293044);border-radius:14px"><strong>5–15 hours · Use it</strong><p style="font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0">Have guided conversations, get feedback, and correct weak spots.</p></div>
+      <div style="padding:14px;border:1px solid var(--line,#293044);border-radius:14px"><strong>15–20 hours · Perform</strong><p style="font-size:13px;color:var(--muted);line-height:1.5;margin:8px 0 0">Handle realistic scenarios and retest the skills that still need work.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="language-switcher-section">
+  <div class="section-title">My languages</div>
+  <div class="card language-switcher-card"><div class="dashboard-language-grid" id="myLanguagesGrid"><div style="grid-column:1/-1;padding:14px;color:var(--muted);font-size:13px;">Loading your languages…</div></div><div id="languageHub" class="level-panel"></div></div>
+</section>
+
+<section class="language-switcher-section" style="margin-top:36px">
+  <div class="section-title">Add another language</div>
+  <div class="card language-switcher-card">
+    <p style="color:var(--muted);margin:0 0 16px">Nahtive is currently focused on building the best learning experience for these three languages.</p>
+    <div class="dashboard-language-grid">
+      <button class="dashboard-language-link add-language-choice" type="button" data-add-language="English">English</button>
+      <button class="dashboard-language-link add-language-choice" type="button" data-add-language="Spanish">Spanish</button>
+      <button class="dashboard-language-link add-language-choice" type="button" data-add-language="French">French</button>
+    </div>
+  </div>
+</section>
+
+<section class="language-switcher-section" style="margin-top:48px">
+  <div class="section-title">Jump in</div>
+  <div class="quick-grid">
+    <a href="assessment.html" class="card quick-card"><div class="quick-number">00 · PLACEMENT</div><h3>Check your level</h3><p>Retake your placement check and see your level-by-level scores.</p><div class="quick-arrow">→</div></a>
+    <a href="lesson.html" class="card quick-card"><div class="quick-number">01 · SCENE</div><h3>Learn in context</h3><p>Step into a real situation and speak from there.</p><div class="quick-arrow">→</div></a>
+    <a href="talk.html" class="card quick-card"><div class="quick-number">02 · VOICE</div><h3>Just talk</h3><p>Have a natural conversation without a worksheet.</p><div class="quick-arrow">→</div></a>
+    <a href="phrases.html" class="card quick-card"><div class="quick-number">03 · PHRASES</div><h3>Your phrases</h3><p>See the expressions you have learned and how to actually use them.</p><div class="quick-arrow">→</div></a>
+    <a href="review.html" class="card quick-card"><div class="quick-number">04 · MEMORY</div><h3>Review</h3><p>Bring back expressions that still need work.</p><div class="quick-arrow">→</div></a>
+    <a href="progress.html" class="card quick-card"><div class="quick-number">05 · GROWTH</div><h3>See progress</h3><p>See what you're improving and what to work on next.</p><div class="quick-arrow">→</div></a>
+  </div>
+</section>
+
+<section class="activity-section"><div class="section-title">Recent activity</div><div class="card activity-card"><div class="activity-list">
+  <div class="activity-item"><div class="activity-icon blue">A</div><div><div class="activity-title">Talking about your weekend</div><div class="activity-subtitle">Lesson · Yesterday</div></div><div class="activity-score">Completed</div></div>
+  <div class="activity-item"><div class="activity-icon green">T</div><div><div class="activity-title">Free conversation</div><div class="activity-subtitle">Just Talk · 2 days ago</div></div><div class="activity-score">8 min</div></div>
+  <div class="activity-item"><div class="activity-icon coral">R</div><div><div class="activity-title">Everyday expressions</div><div class="activity-subtitle">Review · 3 days ago</div></div><div class="activity-score">12 / 15</div></div>
+</div></div></section>
+</main>
+</div>
+<footer><div class="container"><div class="footer-inner"><div>© 2026 Nahtive</div><div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="dashboard.html">Home</a></div></div></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+
+  <script>
+    const supabaseClient = window.supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_ANON_KEY
+    );
+
+    async function requireSession() {
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error || !data.session) {
+          window.location.href = "login.html";
+          return false;
+        }
+        return true;
+      } catch (error) {
+        console.error("Session check failed:", error);
+        window.location.href = "login.html";
+        return false;
+      }
+    }
+
+    async function loadRealStreak(userId) {
+      const el = document.getElementById("streakText");
+      const xpEl = document.getElementById("xpText");
+      if (!el || !xpEl) return;
+
+      const { data, error } = await supabaseClient
+        .from("learner_events")
+        .select("event_type,event_data,created_at")
+        .eq("user_id", userId)
+        .eq("event_type", "lesson_completed")
+        .order("created_at", { ascending: false })
+        .limit(1000);
+
+      if (error) {
+        el.textContent = "0 day streak";
+        xpEl.textContent = "0 XP";
+        return;
+      }
+
+      const completedEvents = data || [];
+      const days = new Set(completedEvents.map(row => {
+        const d = new Date(row.created_at);
+        return Number.isNaN(d.getTime()) ? null : d.toLocaleDateString();
+      }).filter(Boolean));
+
+      let streak = 0;
+      const cursor = new Date();
+      cursor.setHours(0,0,0,0);
+      while (days.has(cursor.toLocaleDateString())) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+
+      const xpTotal = completedEvents.reduce((sum,row) => {
+        const earned = Number(row.event_data?.xp);
+        return sum + (Number.isFinite(earned) && earned > 0 ? earned : 0);
+      }, 0);
+
+      xpEl.textContent = Math.round(xpTotal) + " XP";
+      el.textContent = streak === 0 ? "0 day streak" : streak + (streak === 1 ? " day" : " days") + " streak";
+    }
+
+    async function generateNextCurriculumLesson(learnerLanguageId, languageName, level, existingLessons, afterSequence = 0) {
+  const { data: nodes, error: nodeError } = await supabaseClient
+    .from("curriculum_nodes")
+    .select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band")
+    .order("sequence_number", { ascending: true })
+    .limit(100);
+  if (nodeError) throw nodeError;
+
+  const allowedBands = (level === "C1" || level === "C2") ? [level, "C1/C2"] : [level];
+  // Never let another CEFR band fill a gap in the learner's selected path.
+  const levelMatches = node => allowedBands.includes(String(node.level_band || "").trim().toUpperCase());
+
+  const { data: attempts } = await supabaseClient
+    .from("lesson_attempts")
+    .select("lesson_id")
+    .in("lesson_id", (existingLessons || []).map(x => x.id));
+
+  const completed = new Set((attempts || []).map(x => x.lesson_id));
+  const usable = (nodes || []).filter(node => {
+    if (Number(node.sequence_number || 0) <= Number(afterSequence || 0)) return false;
+    const related = (existingLessons || []).filter(x => x.curriculum_node_id === node.id && x.level === level);
+    return related.length === 0 || related.some(x => !completed.has(x.id)) ? levelMatches(node) : false;
+  });
+
+  if (!usable.length) return null;
+
+  // Sort by curriculum order. Level filtering is already handled by levelMatches above.
+  usable.sort((a, b) => Number(a.sequence_number || 0) - Number(b.sequence_number || 0));
+
+  const node = usable[0];
+  const memoryAttempts = existingLessons.length
+    ? await supabaseClient
+        .from("lesson_attempts")
+        .select("lesson_id,score,responses,completed_at")
+        .in("lesson_id", existingLessons.map(x => x.id))
+        .order("completed_at", { ascending:false })
+        .limit(8)
+    : {data:[]};
+
+  const memory = (memoryAttempts.data || []).map(attempt => ({
+    lesson_id:attempt.lesson_id,
+    score:attempt.score,
+    responses:attempt.responses
+  }));
+
+  const response = await fetch("/api/generate-lesson", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      language:languageName,
+      code:window.Nahtive_language_code || undefined,
+      level,
+      node,
+      memory
+    })
+  });
+  const generated = await response.json().catch(() => ({}));
+  if (!response.ok || !generated.title || !generated.content) {
+    throw new Error(generated.error || "Could not generate the next lesson.");
+  }
+
+  const payload = generated.content;
+  const { data: saved, error: saveError } = await supabaseClient
+    .from("lessons")
+    .insert({
+      learner_language_id: learnerLanguageId,
+      curriculum_node_id: node.id,
+      title:generated.title,
+      topic:generated.topic || node.title,
+      level,
+      content:payload
+    })
+    .select("id,title,topic,level,content,created_at,curriculum_node_id,curriculum_nodes(sequence_number,stage_name,focus,level_band)")
+    .single();
+
+  if (saveError) throw saveError;
+  return saved;
+}
+
+/* NOTE: This upload is still incomplete - the full file continues with loadSavedLessons and more. */
+  </script>
+</body>
+</html>
