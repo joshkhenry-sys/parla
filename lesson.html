@@ -515,11 +515,6 @@ function buildCards(row){
     challenge.choices=shuffle([last.target,...distractors]).slice(0,4);
     challenge.correct_answer=last.target;
   }
-  if(c.readingComprehension?.passage&&Array.isArray(c.readingComprehension.questions)){
-    c.readingComprehension.questions.slice(0,4).forEach((question,i)=>{
-      if(question.question&&question.choices.length===4&&question.choices.some(x=>normalizeBuildAnswer(x)===normalizeBuildAnswer(question.correct_answer)))cards.push({type:"reading",stage:"Reading "+(i+1)+" of 4",reading:c.readingComprehension,question,questionIndex:i});
-    });
-  }
   cards.push({type:"challenge",stage:"Use it",phrase:last,dialogue,finalChallenge:challenge});
   return {...c,phrases:p,cards};
 }
