@@ -181,7 +181,15 @@ Return JSON only.`;
   }finally{clearTimeout(timeout)}
   if(!response.ok){const detail=await response.text();console.error("OpenAI lesson generation failed:",detail);if(["B1","B2","C1","C2"].includes(level))return jsonResponse(res,503,{error:"Could not generate a lesson at your selected level. Please try again; Nahtive will not replace it with beginner material."});return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true})}
   const data=await response.json();const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;if(!text)throw new Error("OpenAI returned no lesson text");
-  const parsed=JSON.parse(text);\n  // Model output must be plain text, not Markdown that leaks literal asterisks into the lesson UI.\n  const cleanPlainText=value=>{if(typeof value===\"string\")return value.replace(/\\*{1,2}/g,\"\").replace(/_{1,2}([^_]+)_{1,2}/g,\"$1\").trim();if(Array.isArray(value))return value.map(cleanPlainText);if(value&&typeof value===\"object\"){for(const key of Object.keys(value))value[key]=cleanPlainText(value[key]);}return value;};\n  cleanPlainText(parsed);
+  const parsed=JSON.parse(text);
+  // Model output must be plain text, not Markdown that leaks literal asterisks into the lesson UI.
+  const cleanPlainText=value=>{
+    if(typeof value==="string") return value.replace(/\*{1,2}/g,"").replace(/_{1,2}([^_]+)_{1,2}/g,"$1").trim();
+    if(Array.isArray(value)) return value.map(cleanPlainText);
+    if(value&&typeof value==="object"){for(const key of Object.keys(value))value[key]=cleanPlainText(value[key]);}
+    return value;
+  };
+  cleanPlainText(parsed);
   // Normalize answer/choice formatting before strict validation. Model answers can differ
   // from an otherwise identical choice only by capitalization or surrounding whitespace.
   if(Array.isArray(parsed.phrases)){
