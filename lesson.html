@@ -813,8 +813,10 @@ async function load(){
         } finally {
           clearTimeout(generationTimer);
         }
-        const generated=await gen.json().catch(()=>({}));
-        if(!gen.ok||!generated.content)throw new Error(generated.error||"Could not build your lesson.");
+        const rawResponse=await gen.text();
+        let generated={};
+        try{generated=JSON.parse(rawResponse||"{}");}catch(parseError){throw new Error("Lesson API returned a non-JSON response (HTTP "+gen.status+"). Check the Vercel function deployment and logs.");}
+        if(!gen.ok||!generated.content)throw new Error(generated.error||("Lesson API returned no lesson content (HTTP "+gen.status+"). Response: "+rawResponse.slice(0,220)));
         const savedLesson=await Promise.race([
           client.from("lessons").insert({learner_language_id:current.id,curriculum_node_id:node.id,title:generated.title||node.title,topic:generated.topic||node.focus,level:current.level,content:{...generated.content,level:current.level}}).select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").single(),
           new Promise((_,reject)=>setTimeout(()=>reject(new Error("Saving your lesson timed out. Please try again.")),12000))
