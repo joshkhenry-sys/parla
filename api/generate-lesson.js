@@ -158,7 +158,7 @@ Return JSON only.`;
       properties:{
        title:{type:"string"},topic:{type:"string"},
        scene:{type:"object",additionalProperties:false,properties:{time:{type:"string"},place:{type:"string"},mission:{type:"string"},situation:{type:"string"}},required:["time","place","mission","situation"]},
-       phrases:{type:"array",minItems:phraseCount,maxItems:phraseCount,items:{type:"object",additionalProperties:false,properties:{
+       phrases:{type:"array",items:{type:"object",additionalProperties:false,properties:{
         target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},
         breakdown:{type:"array",items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
         verb_focus:{type:"array",items:{type:"object",additionalProperties:false,properties:{
