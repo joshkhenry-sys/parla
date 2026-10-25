@@ -160,20 +160,20 @@ Return JSON only.`;
        scene:{type:"object",additionalProperties:false,properties:{time:{type:"string"},place:{type:"string"},mission:{type:"string"},situation:{type:"string"}},required:["time","place","mission","situation"]},
        phrases:{type:"array",minItems:phraseCount,maxItems:phraseCount,items:{type:"object",additionalProperties:false,properties:{
         target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},
-        breakdown:{type:"array",minItems:1,maxItems:6,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
-        verb_focus:{type:"array",minItems:1,maxItems:1,items:{type:"object",additionalProperties:false,properties:{
+        breakdown:{type:"array",items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
+        verb_focus:{type:"array",items:{type:"object",additionalProperties:false,properties:{
           form:{type:"string"},lemma:{type:"string"},meaning:{type:"string"},tense:{type:"string"},why_this_form:{type:"string"},
-          check_question:{type:"string"},check_choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},check_answer:{type:"string"},check_explanation:{type:"string"}
+          check_question:{type:"string"},check_choices:{type:"array",items:{type:"string"}},check_answer:{type:"string"},check_explanation:{type:"string"}
         },required:["form","lemma","meaning","tense","why_this_form","check_question","check_choices","check_answer","check_explanation"]}},
         example:{type:"string"},example_meaning:{type:"string"},pronunciation:{type:"string"},
-        distractors:{type:"array",minItems:4,maxItems:6,items:{type:"string"}}
+        distractors:{type:"array",items:{type:"string"}}
        },required:["target","meaning","usage","breakdown","verb_focus","example","example_meaning","pronunciation","distractors"]}},
-       dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}},
-       reading_comprehension:{type:"object",additionalProperties:false,properties:{passage:{type:"string"},questions:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{question:{type:"string"},choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},correct_answer:{type:"string"},explanation:{type:"string"}},required:["question","choices","correct_answer","explanation"]}}},required:["passage","questions"]},
+       dialogue:{type:"array",items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}},
+       reading_comprehension:{type:"object",additionalProperties:false,properties:{passage:{type:"string"},questions:{type:"array",items:{type:"object",additionalProperties:false,properties:{question:{type:"string"},choices:{type:"array",items:{type:"string"}},correct_answer:{type:"string"},explanation:{type:"string"}},required:["question","choices","correct_answer","explanation"]}}},required:["passage","questions"]},
        final_challenge:{type:"object",additionalProperties:false,properties:{
          situation:{type:"string"},
          prompt:{type:"string"},
-         choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},
+         choices:{type:"array",items:{type:"string"}},
          correct_answer:{type:"string"}
        },required:["situation","prompt","choices","correct_answer"]}
       },required:["title","topic","scene","phrases","dialogue","reading_comprehension","final_challenge"]
@@ -236,6 +236,6 @@ Return JSON only.`;
   return jsonResponse(res,200,{title:parsed.title,topic:parsed.topic,content:parsed});
  }catch(e){
   console.error("Lesson generation exception:",e);
-  if(["B1","B2","C1","C2"].includes(String(level).toUpperCase())){const reason=String(e?.message||"Unknown generation error").replace(/\\s+/g," ").trim().slice(0,220);return jsonResponse(res,503,{error:"Lesson generation failed during validation: "+reason})}return jsonResponse(res,200,{title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true,error:String(e?.message||"Generation failed")});
+  if(["B1","B2","C1","C2"].includes(String(level).toUpperCase())){const reason=String(e?.message||"Unknown generation error").replace(/\s+/g," ").trim().slice(0,220);return jsonResponse(res,503,{error:"Lesson generation failed during validation: "+reason})}return jsonResponse(res,200,{title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true,error:String(e?.message||"Generation failed")});
  }
 }
