@@ -69,6 +69,8 @@ const supabaseClient = window.supabase.createClient(
   if (nodeError) throw nodeError;
 
   const allowedBands = (level === "C1" || level === "C2") ? [level, "C1/C2"] : [level];
+  const levelRank = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6, "C1/C2": 6 };
+  const targetRank = levelRank[level] || 1;
   // Never let another CEFR band fill a gap in the learner's selected path.
   const levelMatches = node => allowedBands.includes(String(node.level_band || "").trim().toUpperCase());
 
@@ -175,11 +177,20 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     const dialogue = Array.isArray(row?.content?.dialogue) ? row.content.dialogue : [];
     const storedCode = String(row?.content?.language_code || "").toLowerCase();
     const wantedCode = String(learner?.languages?.code || window.Nahtive_language_code || "").toLowerCase();
-    const requiredPhraseCount = 5;
+    const requiredPhraseCount = 8;
     const challenge = row?.content?.final_challenge;
+    const reading = row?.content?.reading_comprehension;
     return !!row?.curriculum_node_id && storedCode === wantedCode && phrases.length >= requiredPhraseCount &&
-      phrases.slice(0,requiredPhraseCount).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && p.build_target && Array.isArray(p.build_words) && p.build_words.length && Array.isArray(p.distractors) && p.distractors.length >= 3) &&
-      dialogue.length >= 4 && !!challenge && typeof challenge.situation === "string" && challenge.situation.trim() &&
+      phrases.slice(0,requiredPhraseCount).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example &&
+        Array.isArray(p.breakdown) && p.breakdown.length > 0 &&
+        Array.isArray(p.verb_focus) && p.verb_focus.length > 0 &&
+        p.verb_focus.every(v => v.form && v.lemma && v.meaning && v.tense && v.why_this_form &&
+          v.check_question && Array.isArray(v.check_choices) && v.check_choices.length === 4 &&
+          v.check_choices.includes(v.check_answer) && v.check_explanation) &&
+        Array.isArray(p.distractors) && p.distractors.length >= 3) &&
+      dialogue.length === 4 && !!reading && typeof reading.passage === "string" && reading.passage.trim() &&
+      Array.isArray(reading.questions) && reading.questions.length === 4 &&
+      !!challenge && typeof challenge.situation === "string" && challenge.situation.trim() &&
       typeof challenge.prompt === "string" && challenge.prompt.trim() && Array.isArray(challenge.choices) &&
       challenge.choices.length === 4 && typeof challenge.correct_answer === "string" && challenge.choices.includes(challenge.correct_answer);
   };
