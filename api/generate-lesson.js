@@ -181,7 +181,17 @@ Return JSON only.`;
   }finally{clearTimeout(timeout)}
   if(!response.ok){const detail=await response.text();console.error("OpenAI lesson generation failed:",detail);if(["B1","B2","C1","C2"].includes(level))return jsonResponse(res,503,{error:"Could not generate a lesson at your selected level. Please try again; Nahtive will not replace it with beginner material."});return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true})}
   const data=await response.json();const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;if(!text)throw new Error("OpenAI returned no lesson text");
-  const parsed=JSON.parse(text);\n  // Model output must be plain text, not Markdown that leaks literal asterisks into the lesson UI.\n  const cleanPlainText=value=>{if(typeof value===\"string\")return value.replace(/\\*{1,2}/g,\"\").replace(/_{1,2}([^_]+)_{1,2}/g,\"$1\").trim();if(Array.isArray(value))return value.map(cleanPlainText);if(value&&typeof value===\"object\"){for(const key of Object.keys(value))value[key]=cleanPlainText(value[key]);}return value;};\n  cleanPlainText(parsed);
+  const parsed=JSON.parse(text);
+  // Strip Markdown emphasis so formatting characters do not leak into the lesson UI.
+  const cleanPlainText = value => {
+    if (typeof value === "string") return value.replace(/\*{1,2}/g, "").replace(/_{1,2}([^_]+)_{1,2}/g, "$1").trim();
+    if (Array.isArray(value)) return value.map(cleanPlainText);
+    if (value && typeof value === "object") {
+      for (const key of Object.keys(value)) value[key] = cleanPlainText(value[key]);
+    }
+    return value;
+  };
+  cleanPlainText(parsed);
   if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==phraseCount)throw new Error("Invalid phrase count");
   if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!Array.isArray(p.breakdown)||!p.breakdown.length||!Array.isArray(p.verb_focus)||p.verb_focus.length<1||p.verb_focus.some(v=>!v.form||!v.lemma||!v.meaning||!v.tense||!v.why_this_form||!v.check_question||!Array.isArray(v.check_choices)||v.check_choices.length!==4||!v.check_answer||!v.check_choices.includes(v.check_answer)||!v.check_explanation)||!p.pronunciation||!Array.isArray(p.distractors)||p.distractors.length<4))throw new Error("Incomplete phrase or verb-tense teaching data");
   // Enforce the CEFR floor after generation. Prompting alone is not enough.
