@@ -236,6 +236,6 @@ Return JSON only.`;
   return jsonResponse(res,200,{title:parsed.title,topic:parsed.topic,content:parsed});
  }catch(e){
   console.error("Lesson generation exception:",e);
-  if(["B1","B2","C1","C2"].includes(String(level).toUpperCase()))return jsonResponse(res,503,{error:"The lesson did not pass Nahtive’s level and quality checks. Please try again; no easier substitute was loaded."});return jsonResponse(res,200,{title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true,error:String(e?.message||"Generation failed")});
+  if(["B1","B2","C1","C2"].includes(String(level).toUpperCase())){const reason=String(e?.message||"Unknown generation error").replace(/\\s+/g," ").trim().slice(0,220);return jsonResponse(res,503,{error:"Lesson generation failed during validation: "+reason})}return jsonResponse(res,200,{title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true,error:String(e?.message||"Generation failed")});
  }
 }
