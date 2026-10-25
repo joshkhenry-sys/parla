@@ -182,8 +182,24 @@ Return JSON only.`;
   if(!response.ok){const detail=await response.text();console.error("OpenAI lesson generation failed:",detail);if(["B1","B2","C1","C2"].includes(level))return jsonResponse(res,503,{error:"Could not generate a lesson at your selected level. Please try again; Nahtive will not replace it with beginner material."});return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true})}
   const data=await response.json();const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;if(!text)throw new Error("OpenAI returned no lesson text");
   const parsed=JSON.parse(text);\n  // Model output must be plain text, not Markdown that leaks literal asterisks into the lesson UI.\n  const cleanPlainText=value=>{if(typeof value===\"string\")return value.replace(/\\*{1,2}/g,\"\").replace(/_{1,2}([^_]+)_{1,2}/g,\"$1\").trim();if(Array.isArray(value))return value.map(cleanPlainText);if(value&&typeof value===\"object\"){for(const key of Object.keys(value))value[key]=cleanPlainText(value[key]);}return value;};\n  cleanPlainText(parsed);
+  // Normalize answer/choice formatting before strict validation. Model answers can differ
+  // from an otherwise identical choice only by capitalization or surrounding whitespace.
+  if(Array.isArray(parsed.phrases)){
+    for(const p of parsed.phrases){
+      if(!Array.isArray(p.verb_focus)) continue;
+      for(const v of p.verb_focus){
+        if(!v || typeof v!=="object") continue;
+        if(Array.isArray(v.check_choices)){
+          v.check_choices=v.check_choices.map(x=>typeof x==="string"?x.trim():x);
+          const answer=typeof v.check_answer==="string"?v.check_answer.trim():"";
+          const matching=v.check_choices.find(x=>typeof x==="string"&&x.toLocaleLowerCase()===answer.toLocaleLowerCase());
+          if(matching) v.check_answer=matching;
+        }
+      }
+    }
+  }
   if(!Array.isArray(parsed.phrases)||parsed.phrases.length!==phraseCount)throw new Error("Invalid phrase count");
-  if(parsed.phrases.some(p=>!p.target||!p.meaning||!p.usage||!p.example||!Array.isArray(p.breakdown)||!p.breakdown.length||!Array.isArray(p.verb_focus)||p.verb_focus.length<1||p.verb_focus.some(v=>!v.form||!v.lemma||!v.meaning||!v.tense||!v.why_this_form||!v.check_question||!Array.isArray(v.check_choices)||v.check_choices.length!==4||!v.check_answer||!v.check_choices.includes(v.check_answer)||!v.check_explanation)||!p.pronunciation||!Array.isArray(p.distractors)||p.distractors.length<4))throw new Error("Incomplete phrase or verb-tense teaching data");
+  const incomplete=parsed.phrases.map((p,i)=>({phrase:i+1,target:p.target,missing:[...(!p.target?["target"]:[]),...(!p.meaning?["meaning"]:[]),...(!p.usage?["usage"]:[]),...(!p.example?["example"]:[]),...(!Array.isArray(p.breakdown)||!p.breakdown.length?["breakdown"]:[]),...(!Array.isArray(p.verb_focus)||p.verb_focus.length<1?["verb_focus"]:[]),...(!p.pronunciation?["pronunciation"]:[]),...(!Array.isArray(p.distractors)||p.distractors.length<4?["distractors"]:[]),...(Array.isArray(p.verb_focus)?p.verb_focus.flatMap((v,j)=>!v||!v.form||!v.lemma||!v.meaning||!v.tense||!v.why_this_form||!v.check_question||!Array.isArray(v.check_choices)||v.check_choices.length!==4||!v.check_answer||!v.check_choices.some(x=>String(x).toLocaleLowerCase()===String(v.check_answer).toLocaleLowerCase())||!v.check_explanation?["verb_focus["+j+"]"]:[]):[])]})).filter(p=>p.missing.length); if(incomplete.length)throw new Error("Incomplete phrase or verb-tense teaching data: "+JSON.stringify(incomplete));
   // Enforce the CEFR floor after generation. Prompting alone is not enough.
   if(L==="B1"||L==="B2"||L==="C1"||L==="C2"){
     const key=String(code||"").toLowerCase().split("-")[0];
