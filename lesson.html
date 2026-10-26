@@ -839,7 +839,7 @@ async function load(){
           }
           gen=await fetch("/api/generate-lesson",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({language:current.languages?.name||"English",code:current.languages?.code||"en",level:current.level,nativeLanguage,node,goal:current.goal||"",interests:current.interests||[],weakSkills}),signal:generationController.signal});
         } catch (generationError) {
-          if(generationError?.name==="AbortError") throw new Error("Lesson generation timed out after 35 seconds. Please try again.");
+          if(generationError?.name==="AbortError") throw new Error("Lesson generation took too long to finish. Please try again.");
           throw generationError;
         } finally {
           clearTimeout(generationTimer);
