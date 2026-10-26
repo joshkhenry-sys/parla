@@ -368,6 +368,7 @@ function speak(text,languageCode){
       const qualityScore=v=>{
         const name=String(v.name||"").toLowerCase();
         let score=0;
+        if(String(v.lang||"").toLowerCase()===locale.toLowerCase())score+=50;
         if(/enhanced|premium|natural|neural/.test(name))score+=100;
         if(/samantha|ava|allison|aria|jenny|google/.test(name))score+=25;
         if(v.default)score+=2;
@@ -385,6 +386,7 @@ function speak(text,languageCode){
       // On some browsers, voices load asynchronously. Wait briefly so we can select
       // a real language voice instead of falling back immediately to a generic robot voice.
       let finished=false;
+      let timer=null;
       const finish=()=>{
         if(finished)return;
         finished=true;
@@ -393,7 +395,7 @@ function speak(text,languageCode){
         speakWithAvailableVoice();
       };
       speechSynthesis.addEventListener?.("voiceschanged",finish,{once:true});
-      const timer=setTimeout(finish,700);
+      timer=setTimeout(finish,700);
     }
   }catch(e){}
 }
