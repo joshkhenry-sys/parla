@@ -839,14 +839,6 @@ async function finish(){
         else await client.from("review_items").insert(row);
       }
       await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,score,level:profile.level,practice_seconds:practiceSecondsTotal,practice_tracking:"visible_page_time"}});
-    }else if(curriculumLessonKey){
-      await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{curriculum_key:curriculumLessonKey,lesson_title:lesson.title,xp,score,level:profile.level,practice_seconds:practiceSecondsTotal,practice_tracking:"visible_page_time",answers}});
-      for(const phrase of lesson.phrases.slice(0,6)){
-        const row={learner_language_id:profile.id,item_type:"expression",source_text:phrase.meaning,target_text:phrase.target,explanation:phrase.usage||phrase.meaning,mastery:Math.min(100,15+xp/5),next_review_at:new Date(Date.now()+86400000).toISOString()};
-        const existing=await client.from("review_items").select("id,mastery").eq("learner_language_id",profile.id).eq("target_text",row.target_text).eq("item_type","expression").limit(1).maybeSingle();
-        if(existing.data?.id)await client.from("review_items").update({mastery:Math.min(100,Number(existing.data.mastery||0)+12),updated_at:new Date().toISOString(),next_review_at:row.next_review_at}).eq("id",existing.data.id);
-        else await client.from("review_items").insert(row);
-      }
     }
   }catch(e){console.warn("completion save",e)}
   sessionStorage.setItem("nahtive_lesson_completed","true");sessionStorage.setItem("nahtive_last_lesson_title",lesson.title);
