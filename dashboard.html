@@ -179,7 +179,7 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
       el.textContent = streak === 0 ? "0 day streak" : streak + (streak === 1 ? " day" : " days") + " streak";
     }
 
-    async function generateNextCurriculumLesson(learnerLanguageId, languageName, level, existingLessons, afterSequence = 0) {
+    async function generateNextCurriculumLesson(learnerLanguageId, languageName, level, existingLessons, afterSequence = 0, learnerGoal = "", learnerInterests = []) {
   const { data: nodes, error: nodeError } = await supabaseClient
     .from("curriculum_nodes")
     .select("id,sequence_number,stage_number,stage_name,title,situation,focus,level_band")
@@ -230,10 +230,10 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
       code:window.Nahtive_language_code || undefined,
       level,
       node,
-      memory,
+      weakSkills:memory.flatMap(attempt=>(attempt.responses?.answers||[]).filter(answer=>answer.correct===false).map(answer=>({skill:String(answer.type||"practice"),target:String(answer.target||"").slice(0,140),focus:String(answer.explanation||"").slice(0,180)}))).slice(-8),
       nativeLanguage:window.Nahtive_native_language||"English",
-      goal:"Handle a useful real-world interaction with more confidence.",
-      interests:[]
+      goal:learnerGoal||"Handle a useful real-world interaction with more confidence.",
+      interests:Array.isArray(learnerInterests)?learnerInterests:[]
     })
   });
   const generated = await response.json().catch(() => ({}));
@@ -267,7 +267,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
 
   const { data: learner } = await supabaseClient
     .from("learner_languages")
-    .select("level,languages(name,code)")
+    .select("level,goal,interests,languages(name,code)")
     .eq("id", learnerLanguageId)
     .maybeSingle();
 
@@ -339,7 +339,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     button.innerHTML = "Start lesson <span>→</span>";
     button.onclick = () => { window.location.href = "lesson.html"; };
 
-    generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons)
+    generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons, 0, learner?.goal||"", learner?.interests||[])
       .then(prepared => {
         if (!prepared) {
           copy.textContent = "No curriculum lesson was available to prepare. Start lesson to retry.";
@@ -383,7 +383,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     Number(row.curriculum_nodes?.sequence_number || 0) > currentSequence
   );
   if (currentSequence > 0 && !hasPreparedNext) {
-    generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons, currentSequence)
+    generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons, currentSequence, learner?.goal||"", learner?.interests||[])
       .catch(error => console.error("Could not prebuild following lesson:", error));
   }
 }
