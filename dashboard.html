@@ -235,7 +235,10 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
       code:window.Nahtive_language_code || undefined,
       level,
       node,
-      memory
+      memory,
+      nativeLanguage:window.Nahtive_native_language||"English",
+      goal:"Handle a useful real-world interaction with more confidence.",
+      interests:[]
     })
   });
   const generated = await response.json().catch(() => ({}));
@@ -275,6 +278,9 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
 
   const learnerLevel = String(learner?.level || "A1").toUpperCase();
   window.Nahtive_language_code = learner?.languages?.code || "en-US";
+  const nativeCodes={en:"English",es:"Spanish",fr:"French"};
+  const {data:nativeProfile}=await supabaseClient.from("profiles").select("Nahtive_language_code").eq("id",(await supabaseClient.auth.getUser()).data?.user?.id||"").maybeSingle();
+  window.Nahtive_native_language=nativeCodes[String(nativeProfile?.Nahtive_language_code||"en").toLowerCase().split("-")[0]]||"English";
 
   const { data: lessons, error } = await supabaseClient
     .from("lessons")
@@ -294,11 +300,14 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     const dialogue = Array.isArray(row?.content?.dialogue) ? row.content.dialogue : [];
     const storedCode = String(row?.content?.language_code || "").toLowerCase();
     const wantedCode = String(learner?.languages?.code || window.Nahtive_language_code || "").toLowerCase();
-    const requiredPhraseCount = 5;
+    const requiredPhraseCount = 8;
     const challenge = row?.content?.final_challenge;
     return !!row?.curriculum_node_id && storedCode === wantedCode && phrases.length >= requiredPhraseCount &&
       phrases.slice(0,requiredPhraseCount).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && p.build_target && Array.isArray(p.build_words) && p.build_words.length && Array.isArray(p.distractors) && p.distractors.length >= 3) &&
-      dialogue.length >= 4 && !!challenge && typeof challenge.situation === "string" && challenge.situation.trim() &&
+      dialogue.length === 4 && dialogue.every(line=>line&&line.text&&line.meaning) &&
+      !!row?.content?.grammar_lesson && Array.isArray(row.content.grammar_lesson.questions) && row.content.grammar_lesson.questions.length===2 &&
+      !!row?.content?.reading_comprehension && typeof row.content.reading_comprehension.passage==="string" && row.content.reading_comprehension.passage.trim() && Array.isArray(row.content.reading_comprehension.questions) && row.content.reading_comprehension.questions.length===4 &&
+      !!challenge && typeof challenge.situation === "string" && challenge.situation.trim() &&
       typeof challenge.prompt === "string" && challenge.prompt.trim() && Array.isArray(challenge.choices) &&
       challenge.choices.length === 4 && typeof challenge.correct_answer === "string" && challenge.choices.includes(challenge.correct_answer);
   };
@@ -705,11 +714,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         if (error || !langs?.length) { window.location.href = "onboarding.html"; return; }
         const current = langs.find(row => row.is_current) || langs.find(row => row.id === savedId) || langs[0];
         localStorage.setItem("Nahtive_current_learner_language", current.id);
-        const languageCode=String(current.languages?.code||"").toLowerCase();
-        const currentLevel=String(current.level||"A1").toUpperCase();
-        window.location.href = languageCode.startsWith("es") && currentLevel==="A1"
-          ? "lesson.html?curriculum=es-a1-u1"
-          : "lesson.html";
+        window.location.href = "lesson.html";
       } catch (error) {
         console.error("Could not start lesson:", error);
         window.location.href = "lesson.html";
