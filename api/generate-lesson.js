@@ -77,7 +77,7 @@ export default async function handler(req,res){
   level=String(level||"A1").toUpperCase();
   if(!["A1","A2","B1","B2","C1","C2"].includes(level))return jsonResponse(res,400,{error:"Unsupported CEFR level"});
   if(!language||!code||!node?.sequence_number||!node?.title||!node?.situation)return jsonResponse(res,400,{error:"Missing lesson generation inputs"});
-  if(!process.env.OPENAI_API_KEY){if(["B1","B2","C1","C2"].includes(level))return jsonResponse(res,503,{error:"Advanced lesson generation is temporarily unavailable. Please try again; Nahtive will not substitute a beginner lesson for your selected level."});return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true});}
+  if(!process.env.OPENAI_API_KEY)return jsonResponse(res,503,{error:"Lesson generation is temporarily unavailable. Please try again shortly. Nahtive will not substitute an incomplete or easier lesson for your selected level."});
   const L=level;
   const rules={
    A1:"TRUE A1. Focus on immediate personal needs: greetings, identity, very simple requests, basic descriptions, numbers, time, location and routine exchanges. Use short, predictable sentences and high-frequency vocabulary. Do not make the learner infer nuance. Do not artificially make A1 hard.",
@@ -134,9 +134,10 @@ TEACHING DESIGN:
 - All target-language learner content — target, example, dialogue, build_target, build_words, and distractors — must stay in the requested target language. The native language (${nativeLanguage}) is allowed only in meaning/usage/example_meaning/build_meaning and breakdown explanations.
 - Before returning the JSON, verify that the lesson is internally consistent with the requested language and CEFR level.
 - The lesson must be challenging without assuming knowledge above ${L}.
-- Dialogue must contain exactly 4 lines: native, learner, native, learner, and must reuse the taught language.
+- Dialogue must contain exactly 4 lines: native, learner, native, learner, and must reuse the taught language. Each line must include a concise meaning in ${nativeLanguage}.
+- REQUIRED DEDICATED GRAMMAR LESSON: create one focused grammar_lesson for the most useful reusable pattern at this level. Include title, explanation in ${nativeLanguage}, reusable pattern/formula in ${nativeLanguage}, exactly 3 target-language examples with ${nativeLanguage} meanings, exactly 2 common mistakes (incorrect target-language form, corrected target-language form, explanation in ${nativeLanguage}), and exactly 2 short grammar questions. Each grammar question and all four choices must be in the target language; correct_answer must exactly match one choice; explanation must be in ${nativeLanguage}. Choose grammar appropriate to the selected CEFR band. Never teach above-level grammar.
 - Create a short, natural reading_comprehension passage connected to the same situation, plus exactly 4 comprehension questions. The passage should feel like a real message, short story, or conversation snippet rather than a school essay. Keep it appropriate to ${L}: 35-90 words for A1, 80-160 for A2/B1, 120-220 for B2, and 160-300 for C1/C2. Reuse some taught phrases naturally. Do not turn the passage into a grammar worksheet or provide a full translation.
-- Reading questions should test meaning, intent, useful expression in context, main idea, or practical inference—not verb tense labels. Each question and its four answer choices must be in the learner's native language, with one exact correct_answer matching one choice and a concise explanation. All answers must be supported by the passage, with exactly one defensible correct answer.
+- Reading questions should test meaning, intent, useful expression in context, main idea, or practical inference—not verb tense labels. Each question and its four answer choices must be in the TARGET language, with one exact correct_answer matching one choice. The explanation must be in ${nativeLanguage}. All answers must be supported by the passage, with exactly one defensible correct answer.
 - Create a final_challenge that feels like a quick, useful real-world decision—not a scripted classroom role-play. Use a specific, natural moment connected to the lesson's learning goal.
 - Keep final_challenge.situation to one concise sentence and final_challenge.prompt to one direct instruction. Do not repeat the same information in both fields.
 - Avoid canned scenes such as introducing yourself to a coworker unless that is genuinely the learner's goal. Do not ask the learner to share background information or ask generic follow-up questions just to fill a scenario.
@@ -156,11 +157,12 @@ Return JSON only.`;
   const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);let response;
   try{
    response=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
-    body:JSON.stringify({model:MODEL,input:prompt,max_output_tokens:9500,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
+    body:JSON.stringify({model:MODEL,input:prompt,max_output_tokens:11500,text:{format:{type:"json_schema",name:"nahtive_lesson",strict:true,schema:{
       type:"object",additionalProperties:false,
       properties:{
        title:{type:"string"},topic:{type:"string"},
        scene:{type:"object",additionalProperties:false,properties:{time:{type:"string"},place:{type:"string"},mission:{type:"string"},situation:{type:"string"}},required:["time","place","mission","situation"]},
+       grammar_lesson:{type:"object",additionalProperties:false,properties:{title:{type:"string"},explanation:{type:"string"},pattern:{type:"string"},examples:{type:"array",minItems:3,maxItems:3,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},common_mistakes:{type:"array",minItems:2,maxItems:2,items:{type:"object",additionalProperties:false,properties:{incorrect:{type:"string"},correct:{type:"string"},explanation:{type:"string"}},required:["incorrect","correct","explanation"]}},questions:{type:"array",minItems:2,maxItems:2,items:{type:"object",additionalProperties:false,properties:{question:{type:"string"},choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},correct_answer:{type:"string"},explanation:{type:"string"}},required:["question","choices","correct_answer","explanation"]}}},required:["title","explanation","pattern","examples","common_mistakes","questions"]},
        phrases:{type:"array",minItems:phraseCount,maxItems:phraseCount,items:{type:"object",additionalProperties:false,properties:{
         target:{type:"string"},meaning:{type:"string"},usage:{type:"string"},
         breakdown:{type:"array",minItems:1,maxItems:6,items:{type:"object",additionalProperties:false,properties:{target:{type:"string"},meaning:{type:"string"}},required:["target","meaning"]}},
@@ -171,7 +173,7 @@ Return JSON only.`;
         example:{type:"string"},example_meaning:{type:"string"},pronunciation:{type:"string"},
         distractors:{type:"array",minItems:4,maxItems:6,items:{type:"string"}}
        },required:["target","meaning","usage","breakdown","verb_focus","example","example_meaning","pronunciation","distractors"]}},
-       dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"}},required:["speaker","text"]}},
+       dialogue:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{speaker:{type:"string",enum:["native","learner"]},text:{type:"string"},meaning:{type:"string"}},required:["speaker","text","meaning"]}},
        reading_comprehension:{type:"object",additionalProperties:false,properties:{passage:{type:"string"},questions:{type:"array",minItems:4,maxItems:4,items:{type:"object",additionalProperties:false,properties:{question:{type:"string"},choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},correct_answer:{type:"string"},explanation:{type:"string"}},required:["question","choices","correct_answer","explanation"]}}},required:["passage","questions"]},
        final_challenge:{type:"object",additionalProperties:false,properties:{
          situation:{type:"string"},
@@ -179,10 +181,10 @@ Return JSON only.`;
          choices:{type:"array",minItems:4,maxItems:4,items:{type:"string"}},
          correct_answer:{type:"string"}
        },required:["situation","prompt","choices","correct_answer"]}
-      },required:["title","topic","scene","phrases","dialogue","reading_comprehension","final_challenge"]
+      },required:["title","topic","scene","grammar_lesson","phrases","dialogue","reading_comprehension","final_challenge"]
     }}}}),signal:controller.signal});
   }finally{clearTimeout(timeout)}
-  if(!response.ok){const detail=await response.text();console.error("OpenAI lesson generation failed:",detail);if(["B1","B2","C1","C2"].includes(level))return jsonResponse(res,503,{error:"Could not generate a lesson at your selected level. Please try again; Nahtive will not replace it with beginner material."});return jsonResponse(res,200,{title:String(node.title),topic:String(node.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true})}
+  if(!response.ok){const detail=await response.text();console.error("OpenAI lesson generation failed:",detail);return jsonResponse(res,503,{error:"Could not generate a complete lesson at your selected level. Please try again; Nahtive will not replace it with incomplete or beginner material."})}
   const data=await response.json();const text=data.output_text||data.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;if(!text)throw new Error("OpenAI returned no lesson text");
   const parsed=JSON.parse(text);
   // Model output must be plain text, not Markdown that leaks literal asterisks into the lesson UI.
@@ -225,13 +227,20 @@ Return JSON only.`;
       const length=Array.from(t).length;
       return (compact ? length>=8 : words.length>=4)||punctuation>0||/[?？]$/.test(t);
     }).length;
-    if(meaningful<3)throw new Error("Generated lesson does not meet the "+L+" communication floor");
+    if(meaningful<6)throw new Error("Generated lesson does not meet the "+L+" communication floor: at least six of eight phrases must demonstrate independent communication at this level.");
   }
   if(!Array.isArray(parsed.dialogue)||parsed.dialogue.length!==4)throw new Error("Invalid dialogue count");
-  const expected=["native","learner","native","learner"];if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]))throw new Error("Invalid dialogue order");
+  const expected=["native","learner","native","learner"];if(parsed.dialogue.some((line,i)=>line.speaker!==expected[i]||!String(line.text||"").trim()||!String(line.meaning||"").trim()))throw new Error("Invalid dialogue order or missing line meaning");
+  const grammar=parsed.grammar_lesson;
+  if(!grammar||!String(grammar.title||"").trim()||!String(grammar.explanation||"").trim()||!String(grammar.pattern||"").trim()||!Array.isArray(grammar.examples)||grammar.examples.length!==3||grammar.examples.some(x=>!String(x.target||"").trim()||!String(x.meaning||"").trim())||!Array.isArray(grammar.common_mistakes)||grammar.common_mistakes.length!==2||grammar.common_mistakes.some(x=>!String(x.incorrect||"").trim()||!String(x.correct||"").trim()||!String(x.explanation||"").trim())||!Array.isArray(grammar.questions)||grammar.questions.length!==2)throw new Error("Incomplete dedicated grammar lesson");
+  grammar.questions=grammar.questions.map(q=>{if(!String(q.question||"").trim()||!Array.isArray(q.choices)||q.choices.length!==4||new Set(q.choices.map(x=>String(x).trim())).size!==4||!q.choices.includes(q.correct_answer)||!String(q.explanation||"").trim())throw new Error("Incomplete grammar question or answer");return q;});
+  parsed.grammar_lesson=grammar;
   const reading=parsed.reading_comprehension;
   if(!reading||!String(reading.passage||"").trim()||!Array.isArray(reading.questions)||reading.questions.length!==4)throw new Error("Invalid reading comprehension section");
   reading.passage=String(reading.passage).trim();
+  const passageWords=reading.passage.split(/\s+/).filter(Boolean).length;
+  const readingBounds={A1:[35,100],A2:[70,160],B1:[80,180],B2:[120,240],C1:[160,320],C2:[160,350]}[L]||[35,350];
+  if(passageWords<readingBounds[0]||passageWords>readingBounds[1])throw new Error("Reading passage length does not match "+L+" ("+passageWords+" words; expected "+readingBounds[0]+"–"+readingBounds[1]+").");
   const taughtVerbForms=parsed.phrases.flatMap(p=>p.verb_focus.map(v=>String(v.form||"").trim().toLocaleLowerCase())).filter(Boolean);
   if(!taughtVerbForms.some(form=>reading.passage.toLocaleLowerCase().includes(form)))throw new Error("Reading passage does not reuse any taught verb forms");
   reading.questions=reading.questions.map((q)=>{
@@ -253,6 +262,6 @@ Return JSON only.`;
   return jsonResponse(res,200,{title:parsed.title,topic:parsed.topic,content:parsed});
  }catch(e){
   console.error("Lesson generation exception:",e);
-  if(["B1","B2","C1","C2"].includes(String(level).toUpperCase()))return jsonResponse(res,503,{error:"The lesson did not pass Nahtive’s level and quality checks: "+String(e?.message||"Generation failed")+". Please try again; no easier substitute was loaded."});return jsonResponse(res,200,{title:String(node?.title||"Your first conversation"),topic:String(node?.focus||"real conversation"),content:fallbackLesson(language,code,level,node),fallback:true,error:String(e?.message||"Generation failed")});
+  return jsonResponse(res,503,{error:"The lesson did not pass Nahtive’s level and quality checks: "+String(e?.message||"Generation failed")+". Please try again; no incomplete or easier substitute was loaded."});
  }
 }
