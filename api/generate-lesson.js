@@ -173,7 +173,7 @@ Return JSON only.`;
   if(!reading||!String(reading.passage||"").trim()||!Array.isArray(reading.questions)||reading.questions.length!==4)throw new Error("Invalid reading comprehension section");
   reading.passage=String(reading.passage).trim();
   const passageWords=reading.passage.split(/\s+/).filter(Boolean).length;
-  const readingBounds={A1:[35,100],A2:[70,160],B1:[80,180],B2:[120,240],C1:[160,320],C2:[160,350]}[L]||[35,350];
+  const readingBounds={A1:[45,75],A2:[90,120],B1:[100,140],B2:[140,190],C1:[180,250],C2:[180,250]}[L]||[45,250];
   if(passageWords<readingBounds[0]||passageWords>readingBounds[1])throw new Error("Reading passage length does not match "+L+" ("+passageWords+" words; expected "+readingBounds[0]+"–"+readingBounds[1]+").");
   const taughtVerbForms=parsed.phrases.flatMap(p=>p.verb_focus.map(v=>String(v.form||"").trim().toLocaleLowerCase())).filter(Boolean);
   if(!taughtVerbForms.some(form=>reading.passage.toLocaleLowerCase().includes(form)))throw new Error("Reading passage does not reuse any taught verb forms");
