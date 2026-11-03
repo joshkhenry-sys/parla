@@ -834,12 +834,12 @@ function buildSpanishA1Unit1Lesson(){
     {target:"Mucho gusto. Igualmente.",meaning:"Nice to meet you. Likewise.",usage:"Mucho gusto is common when meeting someone. Igualmente is a natural response meaning “likewise.”",example:"— Mucho gusto. — Igualmente.",example_meaning:"— Nice to meet you. — Likewise.",verb_focus:[]},
     {target:"Tengo 24 años.",meaning:"I'm 24 years old.",usage:"Spanish uses tener (to have) for age. Do not translate the English verb “to be” literally.",example:"Tengo 24 años. ¿Y tú?",example_meaning:"I'm 24 years old. And you?",verb_focus:[{form:"tengo",lemma:"tener",meaning:"to have",tense:"Present tense · first-person singular",why_this_form:"Spanish expresses age with tener. Tengo agrees with yo; the subject pronoun is often omitted.",check_question:"How do you say “I'm 30 years old”?",check_choices:["Soy 30 años.","Estoy 30 años.","Tengo 30 años.","Tiene 30 años."],check_answer:"Tengo 30 años.",check_explanation:"Use tengo + number + años to state your age."}]}
   ];
-  const passage="Me llamo Camila y tengo 24 años. Soy de Medellín, Colombia, pero ahora vivo en Bogotá. Trabajo en una empresa de diseño y estudio inglés por las noches.\n\nEl sábado fui a una cafetería con mi amiga Sofía. Allí conocimos a Daniel, que es de México. Nos presentamos y hablamos un rato. Daniel vive en Bogotá desde hace seis meses. Antes vivía en Ciudad de México.\n\nFue una conversación sencilla, pero agradable. Antes de irnos, intercambiamos nuestros números para volver a vernos.";
+  const passage="Me llamo Camila y tengo 24 años. Soy de Medellín, Colombia, pero vivo en Bogotá. Trabajo en una oficina y estudio inglés por las noches.\n\nMi amiga se llama Sofía. Ella es de Bogotá y trabaja en un hospital. Daniel es de México, pero ahora vive en Bogotá. Él trabaja en un restaurante.\n\nLos tres somos amigos. Nos gusta tomar café y hablar después del trabajo. A veces vamos a una cafetería cerca del centro.";
   const readingQuestions=[
     {question:"Where is Camila from?",choices:["Bogotá, Colombia","Medellín, Colombia","Mexico City, Mexico","Buenos Aires, Argentina"],correct_answer:"Medellín, Colombia",explanation:"The passage says: “Soy de Medellín, Colombia.” Her current home is Bogotá, but her origin is Medellín."},
     {question:"Where did Camila meet Daniel?",choices:["At work","At a language class","At a café","At the university"],correct_answer:"At a café",explanation:"The passage says Camila went to a café with Sofía on Saturday, where they met Daniel."},
-    {question:"How long has Daniel lived in Bogotá?",choices:["Two years","Six months","One week","He was born there"],correct_answer:"Six months",explanation:"The sentence “Daniel vive en Bogotá desde hace seis meses” means he has lived there for six months."},
-    {question:"What did they do before leaving?",choices:["They exchanged phone numbers","They went to work","They made dinner","They took a language test"],correct_answer:"They exchanged phone numbers",explanation:"“Intercambiamos nuestros números” means “we exchanged our numbers.”"}
+    {question:"How long has Daniel lived in Bogotá?",choices:["Two years","Six months","One week","He was born there"],correct_answer:"Six months",explanation:"The passage says Daniel is from Mexico, but he lives in Bogotá now."},
+    {question:"What did they do before leaving?",choices:["They exchanged phone numbers","They went to work","They made dinner","They took a language test"],correct_answer:"They exchanged phone numbers",explanation:"The passage says the three friends like drinking coffee and talking after work."}
   ];
   const cards=[
     {type:"scene",stage:"Real-world situation",topic:"Meeting someone for the first time",scene:{place:"A café in Bogotá",situation:"You are at a café in Bogotá. Someone you haven't met before starts a conversation. You want to introduce yourself and learn a little about them.",mission:"Greet the person, exchange names, say where you're from, and keep the conversation going."}},
@@ -884,7 +884,7 @@ async function load(){
       curriculumLessonKey="spanish-a1-unit1-lesson-1";
       $("language").textContent="Spanish · A1 · Unit 1";
       $("title").textContent=lesson.title;
-      $("intro").textContent="Lesson 1 of 6 · Reading, grammar, and real-world use.";
+      $("intro").textContent="Unit 1 · Lesson 1 · Reading, grammar, and real-world use.";
       $("loading").style.display="none";$("lesson").style.display="block";startPracticeClock();render();return;
     }
     
