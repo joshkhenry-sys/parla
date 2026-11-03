@@ -303,6 +303,7 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
 .reading-passage{background:rgba(7,16,38,.55);color:#f1f5ff;font-size:15px}
 .lesson-card textarea:focus{outline:2px solid #8bd7ff;outline-offset:2px}
 .lesson-card .clarification{background:linear-gradient(135deg,rgba(38,88,160,.22),rgba(82,57,154,.2))!important;border-color:rgba(139,180,255,.55)!important}
+.phrase-breakdown{display:grid;gap:8px;margin:16px 0}.breakdown-item{display:flex;justify-content:space-between;gap:14px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:rgba(65,105,180,.09)}.breakdown-item strong{color:#a9d7ff}.breakdown-item span{color:var(--lesson-muted);text-align:right}.pronunciation-note{display:flex;justify-content:space-between;gap:12px;padding:11px 13px;margin-top:12px;border-radius:11px;background:rgba(75,88,160,.16);font-size:13px}.pronunciation-note strong{color:#a9d7ff}.dialogue-stack{display:grid;gap:12px;margin-top:16px}.dialogue-line{padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:rgba(37,70,130,.12)}.dialogue-line.learner-line{margin-left:8%;background:rgba(93,71,160,.14)}.dialogue-speaker{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9bbcff;font-weight:850;margin-bottom:7px}.dialogue-target{font-size:17px;font-weight:750;line-height:1.55}.dialogue-meaning{font-size:13px;color:var(--lesson-muted);margin-top:5px}.dialogue-audio{margin-top:9px!important}.pronunciation-note span{color:var(--lesson-muted)}
 </style>
 </head>
 <body class="lesson-page">
@@ -331,7 +332,7 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
 "use strict";
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let client=null,user=null,profile=null,baseLesson=null,lesson=null,index=0,finished=false,xp=0,answers=[],audioCtx=null,curriculumLessonKey=null;
+let client=null,user=null,profile=null,baseLesson=null,lesson=null,index=0,finished=false,xp=0,answers=[],audioCtx=null;
 let practiceSeconds=0,practiceStartedAt=null,practiceClockStarted=false;
 function startPracticeClock(){if(practiceClockStarted)return;practiceClockStarted=true;if(document.visibilityState==="visible")practiceStartedAt=Date.now();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(practiceStartedAt!==null){practiceSeconds+=Math.max(0,Date.now()-practiceStartedAt);practiceStartedAt=null;}}else if(practiceStartedAt===null){practiceStartedAt=Date.now();}});}
 function stopPracticeClock(){if(practiceStartedAt!==null){practiceSeconds+=Math.max(0,Date.now()-practiceStartedAt);practiceStartedAt=null;}return Math.floor(practiceSeconds/1000);}
@@ -442,6 +443,7 @@ function normalizeLesson(row){
   return {language_code:String(d.language_code||"").toLowerCase(),language_name:String(d.language_name||""),level:String(d.level||row?.level||"").toUpperCase(),title:String(row?.title||d.title||"Lesson"),topic:String(row?.topic||d.topic||"Real life"),
     scene:d.scene&&typeof d.scene==="object"?d.scene:{},phrases:(Array.isArray(d.phrases)?d.phrases:[]).map(normalizePhrase).filter(p=>p.target),
     dialogue:Array.isArray(d.dialogue)?d.dialogue:[],
+    grammarLesson:d.grammar_lesson&&typeof d.grammar_lesson==="object"?d.grammar_lesson:null,
     readingComprehension:d.reading_comprehension&&typeof d.reading_comprehension==="object"?{passage:String(d.reading_comprehension.passage||"").trim(),questions:Array.isArray(d.reading_comprehension.questions)?d.reading_comprehension.questions.map(q=>({question:String(q?.question||"").trim(),choices:Array.isArray(q?.choices)?q.choices.map(String):[],correct_answer:String(q?.correct_answer||"").trim(),explanation:String(q?.explanation||"").trim()})):[]}:null,
     finalChallenge:d.final_challenge&&typeof d.final_challenge==="object"?{
       situation:String(d.final_challenge.situation||"").trim(),
@@ -535,15 +537,21 @@ function buildCards(row){
     }
   }
   c.phrases.forEach(fallbackNormalize);
-  // Keep lessons focused and natural: five useful phrases, no standalone grammar exams.
-  const p=c.phrases.slice(0,5);
-  if(p.length<1)throw new Error("This lesson has no teachable phrases.");
+  const p=c.phrases.slice(0,8);
+  if(p.length!==8)throw new Error("This lesson needs all eight core phrases.");
+  if(!c.grammarLesson)throw new Error("This lesson is missing its dedicated grammar lesson.");
+  if(!c.readingComprehension||c.readingComprehension.questions.length!==4)throw new Error("This lesson is missing reading comprehension.");
   const cards=[{type:"scene",stage:"Situation",scene:c.scene,topic:c.topic}];
   p.forEach((phrase,i)=>{
-    cards.push({type:"teach",stage:i===0?"Learn the phrase":"Keep going",phrase});
-    if(i===1||i===3)cards.push({type:"recall",stage:"Quick check",phrase,choices:makeChoices(phrase,p)});
+    cards.push({type:"teach",stage:"Core language · "+(i+1)+"/8",phrase});
+    if([1,3,5,7].includes(i)&&phrase.verb_focus[0])cards.push({type:"verb",stage:"Grammar in context",phrase,verbFocus:phrase.verb_focus[0]});
   });
+  cards.push({type:"grammar",stage:"Grammar lesson",grammar:c.grammarLesson});
+  c.grammarLesson.questions.forEach((question,questionIndex)=>cards.push({type:"grammarQuestion",stage:"Grammar practice",question,questionIndex}));
   const dialogue=c.dialogue.filter(x=>x&&x.text).slice(0,4);
+  cards.push({type:"dialogue",stage:"Hear it in conversation",dialogue});
+  cards.push({type:"readingIntro",stage:"Reading comprehension",reading:{title:"Read it in context",passage:c.readingComprehension.passage}});
+  c.readingComprehension.questions.forEach((question,questionIndex)=>cards.push({type:"reading",stage:"Reading comprehension",reading:{passage:c.readingComprehension.passage},question,questionIndex}));
   const last=p[p.length-1],challenge=c.finalChallenge||{};
   challenge.choices=cleanChallengeChoices(challenge.choices);
   challenge.correct_answer=String(challenge.correct_answer||"").trim().replace(/^[A-D](?:[.)]\s*|\s*)/,"").trim();
@@ -590,6 +598,7 @@ function render(){
   else if(c.type==="reading")renderReading(c);
   else if(c.type==="verb")renderVerbCheck(c);
   else if(c.type==="grammar")renderGrammar(c);
+  else if(c.type==="dialogue")renderDialogue(c);
   else if(c.type==="grammarQuestion")renderGrammarQuestion(c);
   else if(c.type==="readingIntro")renderReadingIntro(c);
   else if(c.type==="application")renderApplication(c);
@@ -598,11 +607,16 @@ function render(){
 
 function renderGrammar(c){
   const g=c.grammar||{};
-  const rows=(g.rows||[]).map(row=>"<tr>"+row.map(cell=>"<td>"+esc(cell)+"</td>").join("")+"</tr>").join("");
-  const examples=(g.examples||[]).map(row=>'<div class="example"><strong>'+esc(row[0])+'</strong><span>'+esc(row[1])+'</span></div>').join("");
-  const mistakes=(g.mistakes||[]).map(row=>'<div class="mistake-row"><span class="mistake-icon">↗</span><p><strong>'+esc(row[0])+'</strong><br>Correct: <strong>'+esc(row[1])+'</strong></p></div>').join("");
-  shell('<span class="stage-chip">Grammar lesson</span><h2 style="margin:14px 0 8px">'+esc(g.title||"Grammar focus")+'</h2><p style="color:var(--lesson-muted);line-height:1.7">'+esc(g.intro||"")+'</p><div style="overflow-x:auto;margin:20px 0"><table style="width:100%;border-collapse:collapse;text-align:left"><tbody>'+rows+'</tbody></table></div><h3 style="margin:20px 0 8px">Examples in context</h3>'+examples+'<div class="clarification"><div class="explain-label">Remember</div><p>'+esc(g.note||"")+'</p></div><h3 style="margin:22px 0 8px">Common mistakes</h3>'+mistakes,'<button class="primary-lesson" id="go">Practice this →</button>');
-  $("go").onclick=()=>{addXP(5);next()};
+  const examples=(g.examples||[]).map(row=>'<div class="example"><strong>'+esc(row.target)+'</strong><span>'+esc(row.meaning)+'</span></div>').join("");
+  const mistakes=(g.common_mistakes||[]).map(row=>'<div class="mistake-row"><p><strong style="color:#ff9b9b">'+esc(row.incorrect)+'</strong><br><strong style="color:#9bd3ff">'+esc(row.correct)+'</strong><br><span>'+esc(row.explanation)+'</span></p></div>').join("");
+  shell('<span class="stage-chip">Grammar lesson · '+esc(profile.level)+'</span><h2 style="margin:14px 0 8px">'+esc(g.title||"Grammar focus")+'</h2><p style="color:var(--lesson-muted);line-height:1.75">'+esc(g.explanation||"")+'</p><div class="clarification"><div class="explain-label">Reusable pattern</div><p style="font-weight:750">'+esc(g.pattern||"")+'</p></div><h3 style="margin:20px 0 8px">Examples in context</h3>'+examples+'<h3 style="margin:22px 0 8px">Common mistakes</h3>'+mistakes,'<button class="primary-lesson" id="go">Practice the pattern →</button>');
+  $("go").onclick=()=>{addXP(8);next()};
+}
+function renderDialogue(c){
+  const lines=(c.dialogue||[]).map((line,i)=>'<div class="dialogue-line '+(line.speaker==="learner"?"learner-line":"native-line")+'"><div class="dialogue-speaker">'+(line.speaker==="learner"?"You":"Native speaker")+'</div><div class="dialogue-target">'+esc(line.text)+'</div><div class="dialogue-meaning">'+esc(line.meaning||"")+'</div><button class="audio-btn dialogue-audio" type="button" data-line="'+i+'">▶ Listen</button></div>').join("");
+  shell('<span class="stage-chip">Natural conversation</span><h2 style="margin:14px 0 8px">Hear the language working together</h2><div class="dialogue-stack">'+lines+'</div>','<button class="primary-lesson" id="go">Read the passage →</button>');
+  document.querySelectorAll(".dialogue-audio").forEach(button=>button.onclick=()=>speak(c.dialogue[Number(button.dataset.line)].text));
+  $("go").onclick=()=>next();
 }
 function renderGrammarQuestion(c){
   let selected=false;
@@ -614,7 +628,7 @@ function renderGrammarQuestion(c){
     document.querySelectorAll("#grammarOptions .option").forEach(option=>{option.disabled=true;if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(c.correct_answer))option.classList.add("correct")});
     if(correct){button.classList.add("correct");addXP(10);sound("good");$("grammarFeedback").textContent="Correct. You matched the verb to the subject.";$("grammarFeedback").className="feedback good";}
     else{button.classList.add("wrong");sound("bad");$("grammarFeedback").textContent="Not quite. Review the correct form and why it agrees with the subject.";$("grammarFeedback").className="feedback bad";}
-    answers.push({type:"understanding",target:c.correct_answer,attempt:button.dataset.choice,correct,explanation:c.explanation});
+    answers.push({type:"grammar",target:c.correct_answer,attempt:button.dataset.choice,correct,explanation:c.explanation});
     $("grammarExplanation").style.display="block";$("next").disabled=false;
   });
   $("next").onclick=next;
@@ -643,9 +657,14 @@ function renderScene(c){
 function renderTeach(c){
   const p=c.phrase;
   const phraseMarkup='<div class="target">'+highlightVerbForms(p.target,p.verb_focus)+'</div><div class="translation">'+esc(p.meaning)+'</div>';
+  const breakdown=(p.breakdown||[]).map(part=>'<div class="breakdown-item"><strong>'+esc(part.target||"")+'</strong><span>'+esc(part.meaning||"")+'</span></div>').join("");
+  const v=p.verb_focus?.[0];
   shell('<span class="stage-chip">'+esc(c.stage)+'</span>'+phraseMarkup+
     '<p style="color:var(--lesson-muted);line-height:1.65;margin-top:18px">'+esc(p.usage||"Notice how this phrase fits the situation.")+'</p>'+
+    (breakdown?'<div class="phrase-breakdown">'+breakdown+'</div>':"")+
+    (v?'<div class="verb-focus"><div class="verb-focus-head"><span class="verb-form">'+esc(v.form)+'</span><span class="verb-tense">'+esc(v.tense)+'</span></div><p><strong>Base form:</strong> '+esc(v.lemma)+' — '+esc(v.meaning)+'</p><p>'+esc(v.why_this_form)+'</p></div>':"")+
     (p.example?'<div class="example"><strong>'+esc(p.example)+'</strong><span>'+esc(p.example_meaning||"")+'</span></div>':"")+
+    (p.pronunciation?'<div class="pronunciation-note"><strong>Pronunciation</strong><span>'+esc(p.pronunciation)+'</span></div>':"")+
     '<button class="audio-btn" id="listen">▶ Listen and repeat</button>',
     '<button class="primary-lesson" id="go">I’ve got it →</button>');
   $("listen").onclick=()=>{sound("click");speak(p.target)};
@@ -785,6 +804,7 @@ function renderVerbCheck(c){
     document.querySelectorAll("#verbOptions .option").forEach(option=>{option.disabled=true;if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(v.check_answer))option.classList.add("correct")});
     if(correct){button.classList.add("correct");sound("good");addXP(8);$("verbFeedback").textContent="Correct — you understand the form, not just the translation.";$("verbFeedback").className="feedback good";}
     else{button.classList.add("wrong");sound("bad");$("verbFeedback").textContent="Not quite. Review why this form is used here.";$("verbFeedback").className="feedback bad";}
+    answers.push({type:"verb",target:v.check_answer,attempt:button.dataset.choice,correct,explanation:v.check_explanation});
     $("verbExplanation").style.display="block";$("next").disabled=false;
   });
   $("next").onclick=()=>{sound("click");next()};
@@ -806,13 +826,13 @@ function renderReading(c){
 }
 async function finish(){
   if(finished)return;finished=true;const practiceSecondsTotal=stopPracticeClock();sound("complete");addXP(40);confetti();
-  const scored=answers.filter(x=>["build","recall","understanding","challenge","production","reading"].includes(x.type));
+  const scored=answers.filter(x=>["build","recall","understanding","challenge","production","reading","grammar","verb"].includes(x.type));
   const correct=scored.filter(x=>x.correct).length,total=scored.length;
   const score=total?Math.round(correct/total*100):0;
   try{
     if(baseLesson?.id){
       await client.from("lesson_attempts").insert({lesson_id:baseLesson.id,score,responses:{answers,xp,completed:true}});
-      const reviewRows=lesson.phrases.slice(0,5).map(p=>({learner_language_id:profile.id,item_type:"expression",source_text:p.meaning,target_text:p.target,explanation:p.usage||p.meaning,mastery:Math.min(100,15+xp/5),next_review_at:new Date(Date.now()+86400000).toISOString()}));
+      const reviewRows=lesson.phrases.slice(0,8).map(p=>({learner_language_id:profile.id,item_type:"expression",source_text:p.meaning,target_text:p.target,explanation:p.usage||p.meaning,mastery:Math.min(100,15+xp/5),next_review_at:new Date(Date.now()+86400000).toISOString()}));
       for(const row of reviewRows){
         const existing=await client.from("review_items").select("id,mastery").eq("learner_language_id",profile.id).eq("target_text",row.target_text).eq("item_type","expression").limit(1).maybeSingle();
         if(existing.data?.id)await client.from("review_items").update({mastery:Math.min(100,Number(existing.data.mastery||0)+12),updated_at:new Date().toISOString(),next_review_at:row.next_review_at}).eq("id",existing.data.id);
@@ -834,42 +854,6 @@ async function finish(){
   $("card").innerHTML='<section class="lesson-card final-card pop"><div class="finish-badge">★</div><div class="stage-chip">Lesson complete</div><h2>You built it.</h2><p>You learned useful phrases, checked your understanding, and chose how to use them in a real situation.</p><div class="xp-total">+'+xp+'</div><div class="xp-label">XP earned</div><div class="learned">'+lesson.phrases.map(p=>'<div class="learned-item"><strong>'+esc(p.target)+'</strong><span>'+esc(p.meaning)+'</span></div>').join("")+'</div><a class="primary-lesson" href="dashboard.html" style="display:inline-flex;text-decoration:none">Keep going →</a></section>';
 }
 
-function buildSpanishA1Unit1Lesson(){
-  const phrases=[
-    {target:"Hola, ¿cómo te llamas?",meaning:"Hi, what's your name?",usage:"A natural, informal way to start a conversation and ask someone's name.",example:"Hola, ¿cómo te llamas? — Me llamo Ana.",example_meaning:"Hi, what's your name? — My name is Ana.",verb_focus:[]},
-    {target:"Me llamo Daniel.",meaning:"My name is Daniel.",usage:"Literally, “I call myself Daniel.” Spanish uses llamarse to say what someone is called.",example:"Me llamo Daniel. Mucho gusto.",example_meaning:"My name is Daniel. Nice to meet you.",verb_focus:[{form:"me llamo",lemma:"llamarse",meaning:"to be called",tense:"Present tense · first-person singular",why_this_form:"The reflexive pronoun me matches yo. The verb form llamo identifies the speaker.",check_question:"Which sentence correctly introduces yourself?",check_choices:["Me llamo Daniel.","Se llamo Daniel.","Me llama Daniel.","Yo llamas Daniel."],check_answer:"Me llamo Daniel.",check_explanation:"Me llamo is the first-person form of llamarse. Se llamo does not match the speaker."}]},
-    {target:"Soy de Colombia.",meaning:"I'm from Colombia.",usage:"Use ser + de to describe where someone is from. This is about origin, not where someone is temporarily located.",example:"Soy de Medellín, pero vivo en Bogotá.",example_meaning:"I'm from Medellín, but I live in Bogotá.",verb_focus:[{form:"soy",lemma:"ser",meaning:"to be",tense:"Present tense · first-person singular",why_this_form:"Ser is used for origin. Soy is the form that agrees with yo, even when the pronoun is omitted.",check_question:"Choose the correct way to say “I'm from Peru.”",check_choices:["Estoy de Perú.","Soy de Perú.","Es de Perú.","Somos de Perú."],check_answer:"Soy de Perú.",check_explanation:"Use soy de for personal origin. Estoy is not used to state where someone is from."}]},
-    {target:"¿Y tú?",meaning:"And you?",usage:"A short, natural way to return a question and keep the conversation moving.",example:"Soy de Cali. ¿Y tú?",example_meaning:"I'm from Cali. And you?",verb_focus:[]},
-    {target:"Mucho gusto. Igualmente.",meaning:"Nice to meet you. Likewise.",usage:"Mucho gusto is common when meeting someone. Igualmente is a natural response meaning “likewise.”",example:"— Mucho gusto. — Igualmente.",example_meaning:"— Nice to meet you. — Likewise.",verb_focus:[]},
-    {target:"Tengo 24 años.",meaning:"I'm 24 years old.",usage:"Spanish uses tener (to have) for age. Do not translate the English verb “to be” literally.",example:"Tengo 24 años. ¿Y tú?",example_meaning:"I'm 24 years old. And you?",verb_focus:[{form:"tengo",lemma:"tener",meaning:"to have",tense:"Present tense · first-person singular",why_this_form:"Spanish expresses age with tener. Tengo agrees with yo; the subject pronoun is often omitted.",check_question:"How do you say “I'm 30 years old”?",check_choices:["Soy 30 años.","Estoy 30 años.","Tengo 30 años.","Tiene 30 años."],check_answer:"Tengo 30 años.",check_explanation:"Use tengo + number + años to state your age."}]}
-  ];
-  const passage="Me llamo Camila y tengo 24 años. Soy de Medellín, Colombia, pero vivo en Bogotá. Trabajo en una oficina y estudio inglés por las noches.\n\nMi amiga se llama Sofía. Ella es de Bogotá y trabaja en un hospital. Daniel es de México, pero ahora vive en Bogotá. Él trabaja en un restaurante.\n\nLos tres somos amigos. Nos gusta tomar café y hablar después del trabajo. A veces vamos a una cafetería cerca del centro.";
-  const readingQuestions=[
-    {question:"Where is Camila from?",choices:["Bogotá, Colombia","Medellín, Colombia","Mexico City, Mexico","Buenos Aires, Argentina"],correct_answer:"Medellín, Colombia",explanation:"The passage says: “Soy de Medellín, Colombia.” Her current home is Bogotá, but her origin is Medellín."},
-    {question:"Where did Camila meet Daniel?",choices:["At work","At a language class","At a café","At the university"],correct_answer:"At a café",explanation:"The passage says Camila went to a café with Sofía on Saturday, where they met Daniel."},
-    {question:"Where does Sofía work?",choices:["At a hospital","At a restaurant","At a school","At a design company"],correct_answer:"At a hospital",explanation:"The passage says: “Ella es de Bogotá y trabaja en un hospital.” This means she is from Bogotá and works at a hospital."},
-    {question:"What do the three friends like to do?",choices:["Drink coffee and talk","Play soccer after work","Study English together","Cook dinner"],correct_answer:"Drink coffee and talk",explanation:"The passage says: “Nos gusta tomar café y hablar después del trabajo.” This means they like drinking coffee and talking after work."}
-  ];
-  const cards=[
-    {type:"scene",stage:"Real-world situation",topic:"Meeting someone for the first time",scene:{place:"A café in Bogotá",situation:"You are at a café in Bogotá. Someone you haven't met before starts a conversation. You want to introduce yourself and learn a little about them.",mission:"Greet the person, exchange names, say where you're from, and keep the conversation going."}},
-    {type:"teach",stage:"Useful expression",phrase:phrases[0]},
-    {type:"teach",stage:"Introduce yourself",phrase:phrases[1]},
-    {type:"grammar",stage:"Grammar lesson",grammar:{title:"Subject pronouns and SER",intro:"Spanish verbs change to match the subject. The verb ser is used for identity, origin, nationality, and identifying characteristics.",rows:[["yo","soy","I am"],["tú","eres","you are (informal)"],["él / ella / usted","es","he / she / you (formal) are"],["nosotros / nosotras","somos","we are"],["ellos / ellas / ustedes","son","they / you all are"]],examples:[["Soy de Colombia.","I'm from Colombia."],["Ella es estudiante.","She is a student."],["Somos amigos.","We are friends."]],note:"Spanish often leaves out the subject pronoun because the verb ending already tells you who is speaking. “Yo soy de Colombia” and “Soy de Colombia” both mean “I'm from Colombia.”",mistakes:[["Yo es de Colombia.","Yo soy de Colombia."],["Ella eres estudiante.","Ella es estudiante."]]}},
-    {type:"grammarQuestion",stage:"Grammar practice",question:"Choose the correct sentence.",choices:["Ella soy de Perú.","Ella es de Perú.","Ella somos de Perú.","Ella eres de Perú."],correct_answer:"Ella es de Perú.",explanation:"Ella takes the third-person singular form es. Soy matches yo, eres matches tú, and somos matches nosotros."},
-    {type:"grammarQuestion",stage:"Grammar practice",question:"Complete the sentence: Nosotros ___ estudiantes.",choices:["son","eres","somos","soy"],correct_answer:"somos",explanation:"Nosotros uses somos. The subject and verb must agree."},
-    {type:"teach",stage:"Talk about your origin",phrase:phrases[2]},
-    {type:"verb",stage:"Check the grammar",phrase:phrases[2],verbFocus:phrases[2].verb_focus[0]},
-    {type:"readingIntro",stage:"Reading comprehension",reading:{title:"Una conversación en la cafetería",translation:"A conversation at the café",passage}},
-    ...readingQuestions.map((question,questionIndex)=>({type:"reading",stage:"Reading comprehension",reading:{passage},question,questionIndex})),
-    {type:"teach",stage:"Keep the conversation going",phrase:phrases[3]},
-    {type:"teach",stage:"Talk about your age",phrase:phrases[5]},
-    {type:"verb",stage:"Check the grammar",phrase:phrases[5],verbFocus:phrases[5].verb_focus[0]},
-    {type:"application",stage:"Your turn",title:"Introduce yourself",prompt:"Write 3–5 sentences in Spanish. Include your name, where you're from, where you live, and one question for the other person.",starter:"Hola, me llamo…",criteria:["I introduced myself.","I used soy de to say where I'm from.","I asked the other person a question."]},
-    {type:"challenge",stage:"Real-world application",phrase:phrases[4],finalChallenge:{situation:"You meet someone at a social gathering. They say: “Hola, ¿cómo te llamas?”",prompt:"Which response is the most natural way to introduce yourself and keep the conversation going?",choices:["Me llamo Ana. Soy de Colombia. ¿Y tú?","Tengo Ana. Estoy Colombia.","Soy llamo Ana. ¿Dónde años?","Me gusta Colombia. Hasta luego."],correct_answer:"Me llamo Ana. Soy de Colombia. ¿Y tú?"}}
-  ];
-  return {title:"Introductions & Personal Information",topic:"Spanish A1 · Unit 1 · Lesson 1",language_code:"es",level:"A1",phrases,cards};
-}
-
 async function load(){
   try{
     if(!window.supabase)throw new Error("Supabase client did not load.");
@@ -883,19 +867,6 @@ async function load(){
     if(langResult.error)throw langResult.error;
     const langs=langResult.data||[];if(!langs.length){location.href="onboarding.html";return}
     const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];current.level=["A1","A2","B1","B2","C1","C2"].includes(String(current.level||"").toUpperCase())?String(current.level).toUpperCase():"A1";localStorage.setItem("Nahtive_current_learner_language",current.id);
-    
-    const curriculumRequest=new URLSearchParams(location.search).get("curriculum");
-    if(curriculumRequest==="es-a1-u1"){
-      const code=String(current.languages?.code||"").toLowerCase();
-      if(!code.startsWith("es")||current.level!=="A1")throw new Error("This curriculum lesson is currently available for Spanish A1 learners.");
-      profile={id:current.id,name:current.languages?.name||"Spanish",code:current.languages?.code||"es",level:"A1",goal:current.goal||"",interests:current.interests||[]};
-      lesson=buildSpanishA1Unit1Lesson();
-      curriculumLessonKey="spanish-a1-unit1-lesson-1";
-      $("language").textContent="Spanish · A1 · Unit 1";
-      $("title").textContent=lesson.title;
-      $("intro").textContent="Unit 1 · Lesson 1 · Reading, grammar, and real-world use.";
-      $("loading").style.display="none";$("lesson").style.display="block";startPracticeClock();render();return;
-    }
     
     const requested=new URLSearchParams(location.search).get("id");
     if(requested){
