@@ -843,7 +843,7 @@ async function finish(){
   }catch(e){console.warn("completion save",e)}
   sessionStorage.setItem("nahtive_lesson_completed","true");sessionStorage.setItem("nahtive_last_lesson_title",lesson.title);
   $("stage").textContent="Complete";$("count").textContent="";$("fill").style.width="100%";
-  $("card").innerHTML='<section class="lesson-card final-card pop"><div class="finish-badge">★</div><div class="stage-chip">Lesson complete</div><h2>You built it.</h2><p>You learned useful phrases, checked your understanding, and chose how to use them in a real situation.</p><div class="xp-total">+'+xp+'</div><div class="xp-label">XP earned</div><div class="learned">'+lesson.phrases.map(p=>'<div class="learned-item"><strong>'+esc(p.target)+'</strong><span>'+esc(p.meaning)+'</span></div>').join("")+'</div><a class="primary-lesson" href="dashboard.html" style="display:inline-flex;text-decoration:none">Keep going →</a></section>';
+  $("card").innerHTML='<section class="lesson-card final-card pop"><div class="finish-badge">★</div><div class="stage-chip">Lesson complete</div><h2>You built it.</h2><p>You learned useful language, studied a grammar pattern, read in context, and applied it to a real-world situation.</p><div class="xp-total">+'+xp+'</div><div class="xp-label">XP earned</div><div class="learned">'+lesson.phrases.map(p=>'<div class="learned-item"><strong>'+esc(p.target)+'</strong><span>'+esc(p.meaning)+'</span></div>').join("")+'</div><a class="primary-lesson" href="dashboard.html" style="display:inline-flex;text-decoration:none">Keep going →</a></section>';
 }
 
 async function load(){
