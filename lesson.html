@@ -15,7 +15,7 @@
       --lesson-surface2:#202c43;
       --lesson-white:#f8faff;
       --lesson-muted:#c0cadb;
-      --lesson-lime:#c2ff70;
+      --lesson-lime:#9bbcff;
       --lesson-coral:#ff6b6b;
     }
 
@@ -39,11 +39,11 @@
     .progress-fill{height:100%;width:0;background:var(--lesson-lime);border-radius:99px;transition:width .35s cubic-bezier(.2,.8,.2,1)}
 
     .lesson-card{position:relative;max-width:900px;margin:16px auto 0;padding:clamp(24px,5vw,48px);border-radius:30px;background:var(--lesson-surface);border:1px solid #2b3653;box-shadow:0 24px 70px rgba(0,0,0,.24);overflow:hidden}
-    .lesson-card:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-100px;top:-100px;background:rgba(182,243,106,.10);pointer-events:none}
+    .lesson-card:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-100px;top:-100px;background:rgba(103,232,249,.10);pointer-events:none}
     .stage-chip{display:inline-flex;padding:7px 10px;border-radius:10px;background:#222d49;color:var(--lesson-lime);font-size:10px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}
 
     .scene-card{min-height:410px;display:flex;flex-direction:column;justify-content:center}
-    .scene-icon{width:68px;height:68px;display:grid;place-items:center;border-radius:22px;background:var(--lesson-lime);color:#12182a;font-size:30px;font-weight:900;box-shadow:8px 8px 0 rgba(182,243,106,.18);margin-bottom:25px}
+    .scene-icon{width:68px;height:68px;display:grid;place-items:center;border-radius:22px;background:var(--lesson-lime);color:#12182a;font-size:30px;font-weight:900;box-shadow:8px 8px 0 rgba(103,232,249,.18);margin-bottom:25px}
     .scene-card h2{font-size:clamp(34px,6vw,66px);line-height:.94;letter-spacing:-.06em;color:#fff;max-width:700px;margin:17px 0}
     .scene-card p{max-width:650px;color:var(--lesson-muted);font-size:17px;line-height:1.65}
     .mission{display:inline-flex;align-items:center;gap:9px;margin-top:25px;padding:12px 15px;border-radius:14px;background:#17213a;border:1px solid #2c3958;color:#fff;font-size:13px;font-weight:750;width:max-content;max-width:100%}
@@ -54,13 +54,13 @@
     .translation{font-size:20px;color:#dbe5f6;line-height:1.5}
     .explain-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:28px}
     .explain{padding:18px;border-radius:17px;background:#202b46!important;border:1px solid #3b4a6d!important;color:var(--lesson-white)!important}
-    .explain-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#b6f36a!important;font-weight:900;margin-bottom:8px}
+    .explain-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8bd7ff!important;font-weight:900;margin-bottom:8px}
     .explain p{color:#f4f1ea!important;font-size:13px;line-height:1.55}
     .explain strong{color:#fff!important}
-    .clarification{margin-top:18px;padding:18px 20px;border-radius:18px;background:#172b24!important;border:1px solid var(--lesson-lime)!important;box-shadow:0 0 0 1px rgba(182,243,106,.08),0 12px 30px rgba(0,0,0,.18)}
-    .clarification .explain-label{color:#b6f36a!important;margin-bottom:7px}
+    .clarification{margin-top:18px;padding:18px 20px;border-radius:18px;background:#172746!important;border:1px solid var(--lesson-lime)!important;box-shadow:0 0 0 1px rgba(103,232,249,.08),0 12px 30px rgba(0,0,0,.18)}
+    .clarification .explain-label{color:#8bd7ff!important;margin-bottom:7px}
     .clarification p{color:var(--lesson-white)!important;font-size:14px;line-height:1.65}
-    .clarification strong{color:#ffffff!important;font-weight:900;text-decoration:underline;text-decoration-color:rgba(182,243,106,.7);text-underline-offset:3px}
+    .clarification strong{color:#ffffff!important;font-weight:900;text-decoration:underline;text-decoration-color:rgba(103,232,249,.7);text-underline-offset:3px}
     .verb-highlight{color:#101729;background:var(--lesson-lime);padding:0 .08em;border-radius:4px;box-decoration-break:clone;-webkit-box-decoration-break:clone;font-weight:950}
     .verb-focus-list{display:grid;gap:12px;margin-top:18px}
     .verb-focus{padding:18px;border:1px solid #3b4a6d;border-radius:17px;background:#19233a}
@@ -84,10 +84,10 @@
     .arabic-build .word,.arabic-build .built-word{direction:rtl;unicode-bidi:plaintext;text-align:center;font-size:17px!important;line-height:1.5}
     .word{border:1px solid #3a4867!important;background:#263554!important;color:#f4f1ea!important;border-radius:13px!important;padding:12px 14px!important;font-size:14px!important;font-weight:800!important;transition:.14s!important}
     .word:hover{transform:translateY(-2px);border-color:var(--lesson-lime)!important;background:#263554!important}
-    .word.used{opacity:1!important;transform:none!important;border:2px solid #b6f36a!important;background:#263554!important;color:#f4f1ea!important;box-shadow:0 0 0 3px rgba(182,243,106,.2),0 5px 16px rgba(182,243,106,.12)!important;position:relative}
-    .word.used::after{content:" ✓";color:#b6f36a!important;font-weight:950}
-    .built-word{border:1px solid #b6f36a!important;background:#263554!important;color:#f4f1ea!important;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:850;cursor:pointer;box-shadow:0 3px 10px rgba(182,243,106,.12)}
-    .built-word:hover{background:#314267!important;border-color:#b6f36a!important;transform:translateY(-1px)}
+    .word.used{opacity:1!important;transform:none!important;border:2px solid #8bd7ff!important;background:#263554!important;color:#f4f1ea!important;box-shadow:0 0 0 3px rgba(103,232,249,.2),0 5px 16px rgba(103,232,249,.12)!important;position:relative}
+    .word.used::after{content:" ✓";color:#8bd7ff!important;font-weight:950}
+    .built-word{border:1px solid #8bd7ff!important;background:#263554!important;color:#f4f1ea!important;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:850;cursor:pointer;box-shadow:0 3px 10px rgba(103,232,249,.12)}
+    .built-word:hover{background:#314267!important;border-color:#8bd7ff!important;transform:translateY(-1px)}
     .built-word:focus-visible,.word:focus-visible{outline:3px solid #fff!important;outline-offset:3px}
     .build-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}
     .primary-lesson,.secondary-lesson{border-radius:14px!important;padding:13px 18px!important;font-weight:900!important;border:0!important}
@@ -111,7 +111,7 @@
     .streak-note{margin-top:17px;color:var(--lesson-lime);font-size:12px;font-weight:850}
 
     .final-card{text-align:center}
-    .finish-badge{width:82px;height:82px;display:grid;place-items:center;margin:0 auto 18px;border-radius:28px;background:var(--lesson-lime);font-size:38px;box-shadow:8px 8px 0 rgba(182,243,106,.22)}
+    .finish-badge{width:82px;height:82px;display:grid;place-items:center;margin:0 auto 18px;border-radius:28px;background:var(--lesson-lime);font-size:38px;box-shadow:8px 8px 0 rgba(103,232,249,.22)}
     .final-card h2{font-size:clamp(38px,6vw,64px);line-height:.95;letter-spacing:-.06em;color:#fff}
     .final-card p{max-width:560px;margin:14px auto;color:var(--lesson-muted);line-height:1.65}
     .xp-total{font-size:54px;line-height:1;color:var(--lesson-lime);font-weight:950;letter-spacing:-.05em;margin-top:16px}
@@ -322,7 +322,7 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
 "use strict";
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
-let client=null,user=null,profile=null,baseLesson=null,lesson=null,index=0,finished=false,xp=0,answers=[],audioCtx=null;
+let client=null,user=null,profile=null,baseLesson=null,lesson=null,index=0,finished=false,xp=0,answers=[],audioCtx=null,curriculumLessonKey=null;
 let practiceSeconds=0,practiceStartedAt=null,practiceClockStarted=false;
 function startPracticeClock(){if(practiceClockStarted)return;practiceClockStarted=true;if(document.visibilityState==="visible")practiceStartedAt=Date.now();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(practiceStartedAt!==null){practiceSeconds+=Math.max(0,Date.now()-practiceStartedAt);practiceStartedAt=null;}}else if(practiceStartedAt===null){practiceStartedAt=Date.now();}});}
 function stopPracticeClock(){if(practiceStartedAt!==null){practiceSeconds+=Math.max(0,Date.now()-practiceStartedAt);practiceStartedAt=null;}return Math.floor(practiceSeconds/1000);}
@@ -580,8 +580,52 @@ function render(){
   else if(c.type==="recall")renderRecall(c);
   else if(c.type==="reading")renderReading(c);
   else if(c.type==="verb")renderVerbCheck(c);
+  else if(c.type==="grammar")renderGrammar(c);
+  else if(c.type==="grammarQuestion")renderGrammarQuestion(c);
+  else if(c.type==="readingIntro")renderReadingIntro(c);
+  else if(c.type==="application")renderApplication(c);
   else renderChallenge(c);
 }
+
+function renderGrammar(c){
+  const g=c.grammar||{};
+  const rows=(g.rows||[]).map(row=>"<tr>"+row.map(cell=>"<td>"+esc(cell)+"</td>").join("")+"</tr>").join("");
+  const examples=(g.examples||[]).map(row=>'<div class="example"><strong>'+esc(row[0])+'</strong><span>'+esc(row[1])+'</span></div>').join("");
+  const mistakes=(g.mistakes||[]).map(row=>'<div class="mistake-row"><span class="mistake-icon">↗</span><p><strong>'+esc(row[0])+'</strong><br>Correct: <strong>'+esc(row[1])+'</strong></p></div>').join("");
+  shell('<span class="stage-chip">Grammar lesson</span><h2 style="margin:14px 0 8px">'+esc(g.title||"Grammar focus")+'</h2><p style="color:var(--lesson-muted);line-height:1.7">'+esc(g.intro||"")+'</p><div style="overflow-x:auto;margin:20px 0"><table style="width:100%;border-collapse:collapse;text-align:left"><tbody>'+rows+'</tbody></table></div><h3 style="margin:20px 0 8px">Examples in context</h3>'+examples+'<div class="clarification"><div class="explain-label">Remember</div><p>'+esc(g.note||"")+'</p></div><h3 style="margin:22px 0 8px">Common mistakes</h3>'+mistakes,'<button class="primary-lesson" id="go">Practice this →</button>');
+  $("go").onclick=()=>{addXP(5);next()};
+}
+function renderGrammarQuestion(c){
+  let selected=false;
+  const options=(c.choices||[]).map((choice,i)=>'<button class="option" type="button" data-choice="'+esc(choice)+'"><span class="letter">'+String.fromCharCode(65+i)+'</span><span class="option-copy">'+esc(choice)+'</span></button>').join("");
+  shell('<span class="stage-chip">Grammar check</span><div class="question">'+esc(c.question)+'</div><div class="options" id="grammarOptions">'+options+'</div><div class="feedback" id="grammarFeedback" aria-live="polite"></div><div id="grammarExplanation" style="display:none;padding:13px 15px;border:1px solid var(--line);border-radius:13px;margin-top:12px;line-height:1.65">'+esc(c.explanation)+'</div>','<button class="primary-lesson" id="next" disabled>Continue →</button>');
+  document.querySelectorAll("#grammarOptions .option").forEach(button=>button.onclick=()=>{
+    if(selected)return;selected=true;
+    const correct=normalizeBuildAnswer(button.dataset.choice)===normalizeBuildAnswer(c.correct_answer);
+    document.querySelectorAll("#grammarOptions .option").forEach(option=>{option.disabled=true;if(normalizeBuildAnswer(option.dataset.choice)===normalizeBuildAnswer(c.correct_answer))option.classList.add("correct")});
+    if(correct){button.classList.add("correct");addXP(10);sound("good");$("grammarFeedback").textContent="Correct. You matched the verb to the subject.";$("grammarFeedback").className="feedback good";}
+    else{button.classList.add("wrong");sound("bad");$("grammarFeedback").textContent="Not quite. Review the correct form and why it agrees with the subject.";$("grammarFeedback").className="feedback bad";}
+    answers.push({type:"understanding",target:c.correct_answer,attempt:button.dataset.choice,correct,explanation:c.explanation});
+    $("grammarExplanation").style.display="block";$("next").disabled=false;
+  });
+  $("next").onclick=next;
+}
+function renderReadingIntro(c){
+  const r=c.reading||{};
+  shell('<span class="stage-chip">Reading · Before you begin</span><h2 style="margin:14px 0 6px">'+esc(r.title||"Read the passage")+'</h2><p style="color:var(--lesson-muted)">'+esc(r.translation||"Read carefully. You will answer questions about details and meaning.")+'</p><div class="reading-passage" style="padding:18px;border:1px solid var(--line);border-radius:16px;line-height:1.9;margin:18px 0;white-space:pre-wrap">'+esc(r.passage||"")+'</div><p style="color:var(--lesson-muted);font-size:13px">Read once for the overall meaning, then again to notice names, places, and time expressions.</p>','<button class="primary-lesson" id="go">Answer questions →</button>');
+  $("go").onclick=()=>{addXP(5);next()};
+}
+function renderApplication(c){
+  shell('<span class="stage-chip">Your turn · Written production</span><h2 style="margin:14px 0 8px">'+esc(c.title||"Use what you learned")+'</h2><p style="color:var(--lesson-muted);line-height:1.7">'+esc(c.prompt||"Write your own response using the lesson language.")+'</p><div class="example"><strong>Possible starting point</strong><span>'+esc(c.starter||"Start with a greeting.")+'</span></div><textarea id="productionAnswer" rows="5" maxlength="1000" placeholder="Write your response in Spanish…" style="width:100%;margin-top:16px;padding:15px;border-radius:14px;border:1px solid var(--line);background:#101a30;color:#fff;font:inherit;resize:vertical"></textarea><div class="feedback" id="productionFeedback" aria-live="polite"></div><div class="clarification"><div class="explain-label">Self-check</div><p>'+(c.criteria||[]).map(x=>"• "+esc(x)).join("<br>")+'</p></div>','<button class="primary-lesson" id="submitProduction">Save response & continue →</button>');
+  $("submitProduction").onclick=()=>{
+    const value=$("productionAnswer").value.trim();
+    if(value.split(/\s+/).filter(Boolean).length<8){$("productionFeedback").textContent="Write at least 8 words so you can practice a complete introduction.";$("productionFeedback").className="feedback bad";return;}
+    answers.push({type:"production",target:c.prompt,attempt:value,correct:true,nextFocus:"Review your use of ser, llamarse, and question formation."});
+    addXP(15);$("productionFeedback").textContent="Response saved for this lesson. Review the self-check before continuing.";$("productionFeedback").className="feedback good";
+    $("submitProduction").disabled=true;$("submitProduction").textContent="Saved";setTimeout(next,450);
+  };
+}
+
 function renderScene(c){
   const s=c.scene||{};
   shell('<div class="scene-card"><div class="scene-icon">✦</div><span class="stage-chip">Your mission</span><h2>'+esc(c.topic||s.place||"Everyday life")+'</h2><p>'+esc(s.situation||"You’re about to handle a real everyday situation.")+'</p><div class="mission"><b>GOAL</b> '+esc(s.mission||"Use the language naturally.")+'</div></div>','<button class="primary-lesson" id="go">Let’s go →</button>');
@@ -719,7 +763,7 @@ function renderChallenge(c){
   $("next").onclick=next;
 }
 function confetti(){
-  const pieces=["#4da3ff","#ffd84d","#9df06b","#ff6b6b","#9b7cff"];
+  const pieces=["#4da3ff","#ffd84d","#67e8f9","#ff6b6b","#9b7cff"];
   for(let i=0;i<55;i++){const el=document.createElement("i");el.className="confetti";el.style.left=(35+Math.random()*30)+"vw";el.style.top="42vh";el.style.background=pieces[i%pieces.length];el.style.setProperty("--dx",(Math.random()*600-300)+"px");el.style.setProperty("--dy",(Math.random()*500+150)+"px");document.body.appendChild(el);setTimeout(()=>el.remove(),1400)}
 }
 function renderVerbCheck(c){
@@ -766,12 +810,57 @@ async function finish(){
         else await client.from("review_items").insert(row);
       }
       await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{lesson_id:baseLesson.id,xp,score,level:profile.level,practice_seconds:practiceSecondsTotal,practice_tracking:"visible_page_time"}});
+    }else if(curriculumLessonKey){
+      await client.from("learner_events").insert({user_id:user.id,learner_language_id:profile.id,event_type:"lesson_completed",event_data:{curriculum_key:curriculumLessonKey,lesson_title:lesson.title,xp,score,level:profile.level,practice_seconds:practiceSecondsTotal,practice_tracking:"visible_page_time",answers}});
+      for(const phrase of lesson.phrases.slice(0,6)){
+        const row={learner_language_id:profile.id,item_type:"expression",source_text:phrase.meaning,target_text:phrase.target,explanation:phrase.usage||phrase.meaning,mastery:Math.min(100,15+xp/5),next_review_at:new Date(Date.now()+86400000).toISOString()};
+        const existing=await client.from("review_items").select("id,mastery").eq("learner_language_id",profile.id).eq("target_text",row.target_text).eq("item_type","expression").limit(1).maybeSingle();
+        if(existing.data?.id)await client.from("review_items").update({mastery:Math.min(100,Number(existing.data.mastery||0)+12),updated_at:new Date().toISOString(),next_review_at:row.next_review_at}).eq("id",existing.data.id);
+        else await client.from("review_items").insert(row);
+      }
     }
   }catch(e){console.warn("completion save",e)}
   sessionStorage.setItem("nahtive_lesson_completed","true");sessionStorage.setItem("nahtive_last_lesson_title",lesson.title);
   $("stage").textContent="Complete";$("count").textContent="";$("fill").style.width="100%";
   $("card").innerHTML='<section class="lesson-card final-card pop"><div class="finish-badge">★</div><div class="stage-chip">Lesson complete</div><h2>You built it.</h2><p>You learned useful phrases, checked your understanding, and chose how to use them in a real situation.</p><div class="xp-total">+'+xp+'</div><div class="xp-label">XP earned</div><div class="learned">'+lesson.phrases.map(p=>'<div class="learned-item"><strong>'+esc(p.target)+'</strong><span>'+esc(p.meaning)+'</span></div>').join("")+'</div><a class="primary-lesson" href="dashboard.html" style="display:inline-flex;text-decoration:none">Keep going →</a></section>';
 }
+
+function buildSpanishA1Unit1Lesson(){
+  const phrases=[
+    {target:"Hola, ¿cómo te llamas?",meaning:"Hi, what's your name?",usage:"A natural, informal way to start a conversation and ask someone's name.",example:"Hola, ¿cómo te llamas? — Me llamo Ana.",example_meaning:"Hi, what's your name? — My name is Ana.",verb_focus:[]},
+    {target:"Me llamo Daniel.",meaning:"My name is Daniel.",usage:"Literally, “I call myself Daniel.” Spanish uses llamarse to say what someone is called.",example:"Me llamo Daniel. Mucho gusto.",example_meaning:"My name is Daniel. Nice to meet you.",verb_focus:[{form:"me llamo",lemma:"llamarse",meaning:"to be called",tense:"Present tense · first-person singular",why_this_form:"The reflexive pronoun me matches yo. The verb form llamo identifies the speaker.",check_question:"Which sentence correctly introduces yourself?",check_choices:["Me llamo Daniel.","Se llamo Daniel.","Me llama Daniel.","Yo llamas Daniel."],check_answer:"Me llamo Daniel.",check_explanation:"Me llamo is the first-person form of llamarse. Se llamo does not match the speaker."}]},
+    {target:"Soy de Colombia.",meaning:"I'm from Colombia.",usage:"Use ser + de to describe where someone is from. This is about origin, not where someone is temporarily located.",example:"Soy de Medellín, pero vivo en Bogotá.",example_meaning:"I'm from Medellín, but I live in Bogotá.",verb_focus:[{form:"soy",lemma:"ser",meaning:"to be",tense:"Present tense · first-person singular",why_this_form:"Ser is used for origin. Soy is the form that agrees with yo, even when the pronoun is omitted.",check_question:"Choose the correct way to say “I'm from Peru.”",check_choices:["Estoy de Perú.","Soy de Perú.","Es de Perú.","Somos de Perú."],check_answer:"Soy de Perú.",check_explanation:"Use soy de for personal origin. Estoy is not used to state where someone is from."}]},
+    {target:"¿Y tú?",meaning:"And you?",usage:"A short, natural way to return a question and keep the conversation moving.",example:"Soy de Cali. ¿Y tú?",example_meaning:"I'm from Cali. And you?",verb_focus:[]},
+    {target:"Mucho gusto. Igualmente.",meaning:"Nice to meet you. Likewise.",usage:"Mucho gusto is common when meeting someone. Igualmente is a natural response meaning “likewise.”",example:"— Mucho gusto. — Igualmente.",example_meaning:"— Nice to meet you. — Likewise.",verb_focus:[]},
+    {target:"Tengo 24 años.",meaning:"I'm 24 years old.",usage:"Spanish uses tener (to have) for age. Do not translate the English verb “to be” literally.",example:"Tengo 24 años. ¿Y tú?",example_meaning:"I'm 24 years old. And you?",verb_focus:[{form:"tengo",lemma:"tener",meaning:"to have",tense:"Present tense · first-person singular",why_this_form:"Spanish expresses age with tener. Tengo agrees with yo; the subject pronoun is often omitted.",check_question:"How do you say “I'm 30 years old”?",check_choices:["Soy 30 años.","Estoy 30 años.","Tengo 30 años.","Tiene 30 años."],check_answer:"Tengo 30 años.",check_explanation:"Use tengo + number + años to state your age."}]}
+  ];
+  const passage="Me llamo Camila y tengo 24 años. Soy de Medellín, Colombia, pero ahora vivo en Bogotá. Trabajo en una empresa de diseño y estudio inglés por las noches.\n\nEl sábado fui a una cafetería con mi amiga Sofía. Allí conocimos a Daniel, que es de México. Nos presentamos y hablamos un rato. Daniel vive en Bogotá desde hace seis meses. Antes vivía en Ciudad de México.\n\nFue una conversación sencilla, pero agradable. Antes de irnos, intercambiamos nuestros números para volver a vernos.";
+  const readingQuestions=[
+    {question:"Where is Camila from?",choices:["Bogotá, Colombia","Medellín, Colombia","Mexico City, Mexico","Buenos Aires, Argentina"],correct_answer:"Medellín, Colombia",explanation:"The passage says: “Soy de Medellín, Colombia.” Her current home is Bogotá, but her origin is Medellín."},
+    {question:"Where did Camila meet Daniel?",choices:["At work","At a language class","At a café","At the university"],correct_answer:"At a café",explanation:"The passage says Camila went to a café with Sofía on Saturday, where they met Daniel."},
+    {question:"How long has Daniel lived in Bogotá?",choices:["Two years","Six months","One week","He was born there"],correct_answer:"Six months",explanation:"The sentence “Daniel vive en Bogotá desde hace seis meses” means he has lived there for six months."},
+    {question:"What did they do before leaving?",choices:["They exchanged phone numbers","They went to work","They made dinner","They took a language test"],correct_answer:"They exchanged phone numbers",explanation:"“Intercambiamos nuestros números” means “we exchanged our numbers.”"}
+  ];
+  const cards=[
+    {type:"scene",stage:"Real-world situation",topic:"Meeting someone for the first time",scene:{place:"A café in Bogotá",situation:"You are at a café in Bogotá. Someone you haven't met before starts a conversation. You want to introduce yourself and learn a little about them.",mission:"Greet the person, exchange names, say where you're from, and keep the conversation going."}},
+    {type:"teach",stage:"Useful expression",phrase:phrases[0]},
+    {type:"teach",stage:"Introduce yourself",phrase:phrases[1]},
+    {type:"grammar",stage:"Grammar lesson",grammar:{title:"Subject pronouns and SER",intro:"Spanish verbs change to match the subject. The verb ser is used for identity, origin, nationality, and identifying characteristics.",rows:[["yo","soy","I am"],["tú","eres","you are (informal)"],["él / ella / usted","es","he / she / you (formal) are"],["nosotros / nosotras","somos","we are"],["ellos / ellas / ustedes","son","they / you all are"]],examples:[["Soy de Colombia.","I'm from Colombia."],["Ella es estudiante.","She is a student."],["Somos amigos.","We are friends."]],note:"Spanish often leaves out the subject pronoun because the verb ending already tells you who is speaking. “Yo soy de Colombia” and “Soy de Colombia” both mean “I'm from Colombia.”",mistakes:[["Yo es de Colombia.","Yo soy de Colombia."],["Ella eres estudiante.","Ella es estudiante."]]}},
+    {type:"grammarQuestion",stage:"Grammar practice",question:"Choose the correct sentence.",choices:["Ella soy de Perú.","Ella es de Perú.","Ella somos de Perú.","Ella eres de Perú."],correct_answer:"Ella es de Perú.",explanation:"Ella takes the third-person singular form es. Soy matches yo, eres matches tú, and somos matches nosotros."},
+    {type:"grammarQuestion",stage:"Grammar practice",question:"Complete the sentence: Nosotros ___ estudiantes.",choices:["son","eres","somos","soy"],correct_answer:"somos",explanation:"Nosotros uses somos. The subject and verb must agree."},
+    {type:"teach",stage:"Talk about your origin",phrase:phrases[2]},
+    {type:"verb",stage:"Check the grammar",phrase:phrases[2],verbFocus:phrases[2].verb_focus[0]},
+    {type:"readingIntro",stage:"Reading comprehension",reading:{title:"Una conversación en la cafetería",translation:"A conversation at the café",passage}},
+    ...readingQuestions.map((question,questionIndex)=>({type:"reading",stage:"Reading comprehension",reading:{passage},question,questionIndex})),
+    {type:"teach",stage:"Keep the conversation going",phrase:phrases[3]},
+    {type:"teach",stage:"Talk about your age",phrase:phrases[5]},
+    {type:"verb",stage:"Check the grammar",phrase:phrases[5],verbFocus:phrases[5].verb_focus[0]},
+    {type:"application",stage:"Your turn",title:"Introduce yourself",prompt:"Write 3–5 sentences in Spanish. Include your name, where you're from, where you live, and one question for the other person.",starter:"Hola, me llamo…",criteria:["I introduced myself.","I used soy de to say where I'm from.","I asked the other person a question."]},
+    {type:"challenge",stage:"Real-world application",phrase:phrases[4],finalChallenge:{situation:"You meet someone at a social gathering. They say: “Hola, ¿cómo te llamas?”",prompt:"Which response is the most natural way to introduce yourself and keep the conversation going?",choices:["Me llamo Ana. Soy de Colombia. ¿Y tú?","Tengo Ana. Estoy Colombia.","Soy llamo Ana. ¿Dónde años?","Me gusta Colombia. Hasta luego."],correct_answer:"Me llamo Ana. Soy de Colombia. ¿Y tú?"}}
+  ];
+  return {title:"Introductions & Personal Information",topic:"Spanish A1 · Unit 1 · Lesson 1",language_code:"es",level:"A1",phrases,cards};
+}
+
 async function load(){
   try{
     if(!window.supabase)throw new Error("Supabase client did not load.");
@@ -785,6 +874,20 @@ async function load(){
     if(langResult.error)throw langResult.error;
     const langs=langResult.data||[];if(!langs.length){location.href="onboarding.html";return}
     const current=langs.find(x=>x.id===saved)||langs.find(x=>x.is_current)||langs[0];current.level=["A1","A2","B1","B2","C1","C2"].includes(String(current.level||"").toUpperCase())?String(current.level).toUpperCase():"A1";localStorage.setItem("Nahtive_current_learner_language",current.id);
+    
+    const curriculumRequest=new URLSearchParams(location.search).get("curriculum");
+    if(curriculumRequest==="es-a1-u1"){
+      const code=String(current.languages?.code||"").toLowerCase();
+      if(!code.startsWith("es")||current.level!=="A1")throw new Error("This curriculum lesson is currently available for Spanish A1 learners.");
+      profile={id:current.id,name:current.languages?.name||"Spanish",code:current.languages?.code||"es",level:"A1",goal:current.goal||"",interests:current.interests||[]};
+      lesson=buildSpanishA1Unit1Lesson();
+      curriculumLessonKey="spanish-a1-unit1-lesson-1";
+      $("language").textContent="Spanish · A1 · Unit 1";
+      $("title").textContent=lesson.title;
+      $("intro").textContent="Lesson 1 of 6 · Reading, grammar, and real-world use.";
+      $("loading").style.display="none";$("lesson").style.display="block";startPracticeClock();render();return;
+    }
+    
     const requested=new URLSearchParams(location.search).get("id");
     if(requested){
       const r=await client.from("lessons").select("id,title,topic,level,content,learner_language_id,curriculum_node_id,created_at,learner_languages(id,user_id,level,languages(name,code)),curriculum_nodes(sequence_number,stage_name,title,situation,focus)").eq("id",requested).maybeSingle();
