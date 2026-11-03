@@ -736,7 +736,7 @@ function renderRecall(c){
 function renderChallenge(c){
   const fc=c.finalChallenge||{};
   let choices=cleanChallengeChoices(fc.choices);
-  let correctAnswer=String(fc.correct_answer||"").replace(/^[A-D][.) :]\\s*/,"").trim();
+  let correctAnswer=String(fc.correct_answer||"").replace(/^[A-D][.):]\s*/,"").trim();
   const code=String(profile?.code||lesson?.language_code||"en").toLowerCase().split(/[-_]/)[0];
   const isEnglish=code==="en";
   // Older generated lessons can contain choices in the wrong target language even when
