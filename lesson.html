@@ -295,6 +295,15 @@ a.logo:has(>.nahtive-logo),a.brand:has(>.nahtive-logo),.nahtive-brand{display:in
 .nahtive-wordmark{display:inline-block;font-family:Manrope,system-ui,sans-serif;font-size:clamp(1.55rem,2.2vw,2rem);font-weight:800;letter-spacing:-.065em;line-height:1.1;background:linear-gradient(105deg,#67e8f9 0%,#60a5fa 48%,#a78bfa 100%);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
 .nahtive-wordmark-footer{font-size:1.25rem}
 </style>
+<style id="nahtive-curriculum-style">
+.lesson-card table td{padding:12px 14px;border-bottom:1px solid rgba(139,170,230,.18);vertical-align:top}
+.lesson-card table tr:first-child td{color:#a9dfff;font-weight:850;background:rgba(64,112,190,.13)}
+.lesson-card table tr td:first-child{font-weight:800;color:#dce8ff}
+.lesson-card table tr td:nth-child(2){font-weight:900;color:#9bbcff}
+.reading-passage{background:rgba(7,16,38,.55);color:#f1f5ff;font-size:15px}
+.lesson-card textarea:focus{outline:2px solid #8bd7ff;outline-offset:2px}
+.lesson-card .clarification{background:linear-gradient(135deg,rgba(38,88,160,.22),rgba(82,57,154,.2))!important;border-color:rgba(139,180,255,.55)!important}
+</style>
 </head>
 <body class="lesson-page">
 <div class="shell">
@@ -838,8 +847,8 @@ function buildSpanishA1Unit1Lesson(){
   const readingQuestions=[
     {question:"Where is Camila from?",choices:["Bogotá, Colombia","Medellín, Colombia","Mexico City, Mexico","Buenos Aires, Argentina"],correct_answer:"Medellín, Colombia",explanation:"The passage says: “Soy de Medellín, Colombia.” Her current home is Bogotá, but her origin is Medellín."},
     {question:"Where did Camila meet Daniel?",choices:["At work","At a language class","At a café","At the university"],correct_answer:"At a café",explanation:"The passage says Camila went to a café with Sofía on Saturday, where they met Daniel."},
-    {question:"How long has Daniel lived in Bogotá?",choices:["Two years","Six months","One week","He was born there"],correct_answer:"Six months",explanation:"The passage says Daniel is from Mexico, but he lives in Bogotá now."},
-    {question:"What did they do before leaving?",choices:["They exchanged phone numbers","They went to work","They made dinner","They took a language test"],correct_answer:"They exchanged phone numbers",explanation:"The passage says the three friends like drinking coffee and talking after work."}
+    {question:"Where does Sofía work?",choices:["At a hospital","At a restaurant","At a school","At a design company"],correct_answer:"At a hospital",explanation:"The passage says: “Ella es de Bogotá y trabaja en un hospital.” This means she is from Bogotá and works at a hospital."},
+    {question:"What do the three friends like to do?",choices:["Drink coffee and talk","Play soccer after work","Study English together","Cook dinner"],correct_answer:"Drink coffee and talk",explanation:"The passage says: “Nos gusta tomar café y hablar después del trabajo.” This means they like drinking coffee and talking after work."}
   ];
   const cards=[
     {type:"scene",stage:"Real-world situation",topic:"Meeting someone for the first time",scene:{place:"A café in Bogotá",situation:"You are at a café in Bogotá. Someone you haven't met before starts a conversation. You want to introduce yourself and learn a little about them.",mission:"Greet the person, exchange names, say where you're from, and keep the conversation going."}},
