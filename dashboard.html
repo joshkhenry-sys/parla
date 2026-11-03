@@ -538,7 +538,18 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
 
         if (attemptsError) throw attemptsError;
 
-        const completedCount = (attempts || []).filter(a => a.lessons?.learner_language_id === learnerLanguage.id).length;
+        const { data: curriculumEvents, error: curriculumEventsError } = await supabaseClient
+          .from("learner_events")
+          .select("event_data,created_at")
+          .eq("user_id", user.id)
+          .eq("learner_language_id", learnerLanguage.id)
+          .eq("event_type", "lesson_completed")
+          .limit(1000);
+        if (curriculumEventsError) console.warn("Could not load curriculum progress:", curriculumEventsError);
+        const curatedCompletions = (curriculumEvents || []).filter(event =>
+          String(event.event_data?.curriculum_key || "").startsWith("spanish-a1-unit1-")
+        );
+        const completedCount = (attempts || []).filter(a => a.lessons?.learner_language_id === learnerLanguage.id).length + curatedCompletions.length;
         const progressPercent = document.getElementById("progressPercent");
         const progressDescription = document.getElementById("progressDescription");
         const progressFill = document.getElementById("progressFill");
@@ -688,13 +699,17 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         const savedId = localStorage.getItem("Nahtive_current_learner_language") || localStorage.getItem("native_current_learner_language");
         const { data: langs, error } = await supabaseClient
           .from("learner_languages")
-          .select("id,is_current")
+          .select("id,is_current,level,languages(name,code)")
           .eq("user_id", user.id)
           .order("is_current", { ascending:false });
         if (error || !langs?.length) { window.location.href = "onboarding.html"; return; }
         const current = langs.find(row => row.is_current) || langs.find(row => row.id === savedId) || langs[0];
         localStorage.setItem("Nahtive_current_learner_language", current.id);
-        window.location.href = "lesson.html";
+        const languageCode=String(current.languages?.code||"").toLowerCase();
+        const currentLevel=String(current.level||"A1").toUpperCase();
+        window.location.href = languageCode.startsWith("es") && currentLevel==="A1"
+          ? "lesson.html?curriculum=es-a1-u1"
+          : "lesson.html";
       } catch (error) {
         console.error("Could not start lesson:", error);
         window.location.href = "lesson.html";
