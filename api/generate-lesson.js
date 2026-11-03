@@ -172,8 +172,41 @@ Return JSON only.`;
   const reading=parsed.reading_comprehension;
   if(!reading||!String(reading.passage||"").trim()||!Array.isArray(reading.questions)||reading.questions.length!==4)throw new Error("Invalid reading comprehension section");
   reading.passage=String(reading.passage).trim();
-  const passageWords=reading.passage.split(/\s+/).filter(Boolean).length;
   const readingBounds={A1:[45,75],A2:[90,120],B1:[100,140],B2:[140,190],C1:[180,250],C2:[180,250]}[L]||[45,250];
+  const countPassageWords=value=>String(value||"").trim().split(/\s+/).filter(Boolean).length;
+  let passageWords=countPassageWords(reading.passage);
+  // Models sometimes ignore the requested passage length. Repair only this field once,
+  // preserving the scenario and the selected CEFR level; never pad with repetition.
+  if(passageWords<readingBounds[0]||passageWords>readingBounds[1]){
+    const repairController=new AbortController();
+    const repairTimeout=setTimeout(()=>repairController.abort(),12000);
+    try{
+      const repairPrompt=\`Revise this \${L} \${language} reading passage so it is between \${readingBounds[0]} and \${readingBounds[1]} words inclusive. Write entirely in \${language}. Keep the same scenario, people, events, facts, and communicative purpose. Expand or tighten naturally using meaningful context, specific details, reactions, and connected ideas. Do not pad with repetition, lists, or questions. Keep vocabulary, grammar, and nuance appropriate to CEFR \${L}. Do not add a translation, title, questions, or commentary. Count the words before responding and ensure the final passage is inside the required range. Current passage:\\n\${reading.passage}\`;
+      const repairResponse=await fetch("https://api.openai.com/v1/responses",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+process.env.OPENAI_API_KEY},
+        body:JSON.stringify({model:MODEL,input:repairPrompt,max_output_tokens:900,text:{format:{type:"json_schema",name:"nahtive_reading_repair",strict:true,schema:{type:"object",additionalProperties:false,properties:{passage:{type:"string"}},required:["passage"]}}}}),
+        signal:repairController.signal
+      });
+      if(repairResponse.ok){
+        const repairData=await repairResponse.json();
+        const repairText=repairData.output_text||repairData.output?.flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text;
+        if(repairText){
+          const repaired=JSON.parse(repairText);
+          const candidate=String(repaired.passage||"").trim();
+          const candidateWords=countPassageWords(candidate);
+          if(candidateWords>=readingBounds[0]&&candidateWords<=readingBounds[1]){
+            reading.passage=candidate;
+            passageWords=candidateWords;
+          }
+        }
+      }else{
+        console.warn("Reading passage repair request failed:",await repairResponse.text());
+      }
+    }catch(repairError){
+      console.warn("Reading passage repair failed:",repairError?.message||repairError);
+    }finally{clearTimeout(repairTimeout);}
+  }
   if(passageWords<readingBounds[0]||passageWords>readingBounds[1])throw new Error("Reading passage length does not match "+L+" ("+passageWords+" words; expected "+readingBounds[0]+"–"+readingBounds[1]+").");
   const taughtVerbForms=parsed.phrases.flatMap(p=>p.verb_focus.map(v=>String(v.form||"").trim().toLocaleLowerCase())).filter(Boolean);
   if(!taughtVerbForms.some(form=>reading.passage.toLocaleLowerCase().includes(form)))throw new Error("Reading passage does not reuse any taught verb forms");
