@@ -298,7 +298,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     const requiredPhraseCount = 8;
     const challenge = row?.content?.final_challenge;
     return !!row?.curriculum_node_id && storedCode === wantedCode && phrases.length >= requiredPhraseCount &&
-      phrases.slice(0,requiredPhraseCount).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && p.build_target && Array.isArray(p.build_words) && p.build_words.length && Array.isArray(p.distractors) && p.distractors.length >= 3) &&
+      phrases.slice(0,requiredPhraseCount).every(p => p && typeof p === "object" && p.target && p.meaning && p.usage && p.example && Array.isArray(p.breakdown) && p.breakdown.length > 0 && Array.isArray(p.verb_focus) && p.verb_focus.length === 1 && p.verb_focus.every(v=>v.form&&v.lemma&&v.meaning&&v.tense&&v.why_this_form&&v.check_question&&Array.isArray(v.check_choices)&&v.check_choices.length===4&&v.check_choices.includes(v.check_answer)&&v.check_explanation) && Array.isArray(p.distractors) && p.distractors.length >= 4) &&
       dialogue.length === 4 && dialogue.every(line=>line&&line.text&&line.meaning) &&
       !!row?.content?.grammar_lesson && Array.isArray(row.content.grammar_lesson.questions) && row.content.grammar_lesson.questions.length===2 &&
       !!row?.content?.reading_comprehension && typeof row.content.reading_comprehension.passage==="string" && row.content.reading_comprehension.passage.trim() && Array.isArray(row.content.reading_comprehension.questions) && row.content.reading_comprehension.questions.length===4 &&
