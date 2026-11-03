@@ -335,20 +335,25 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
     title.textContent = "Your next lesson is being prepared.";
     copy.textContent = "Nahtive is preparing the next language-specific lesson in the background.";
     if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>Preparing</span>";
-    button.disabled = false;
-    button.innerHTML = "Start lesson <span>→</span>";
-    button.onclick = () => { window.location.href = "lesson.html"; };
+    // Prevent a second request while the background lesson is generating.
+    button.disabled = true;
+    button.innerHTML = "Preparing lesson…";
+    button.onclick = null;
 
     generateNextCurriculumLesson(learnerLanguageId, languageName, learnerLevel, allLessons, 0, learner?.goal||"", learner?.interests||[])
       .then(prepared => {
         if (!prepared) {
-          copy.textContent = "No curriculum lesson was available to prepare. Start lesson to retry.";
+          copy.textContent = "No curriculum lesson was available to prepare. Try again.";
+          button.disabled = false;
+          button.innerHTML = "Try again <span>→</span>";
+          button.onclick = () => { window.location.href = "lesson.html"; };
           return;
         }
         allLessons.push(prepared);
         title.textContent = prepared.title || "Continue learning";
         copy.textContent = (prepared.curriculum_nodes?.focus || "Real conversation") + " — then use it in a real interaction.";
         if (meta) meta.innerHTML = "<span>"+escapeHtml(languageName)+"</span><span class='meta-dot'></span><span>"+escapeHtml(prepared.curriculum_nodes?.stage_name || "Core path")+"</span>";
+        button.disabled = false;
         button.innerHTML = "Continue <span>→</span>";
         button.onclick = () => {
           sessionStorage.setItem("Nahtive_lesson_id", prepared.id);
@@ -359,6 +364,7 @@ async function loadSavedLessons(learnerLanguageId, languageName) {
         console.error("Could not prebuild next lesson:", generationError);
         title.textContent = "Your lesson isn't ready yet.";
         copy.textContent = "We couldn't prepare this lesson. Select Start lesson to retry.";
+        button.disabled = false;
         button.innerHTML = "Try again <span>→</span>";
         button.onclick = () => { window.location.href = "lesson.html"; };
       });
